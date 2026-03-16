@@ -27,7 +27,10 @@ const topLinkLabel = isPrivacyPage ? "Home" : "Privacy";
       <div class="shell site-header__inner">
         <a class="brand" href="/">Running Coach</a>
         <nav aria-label="Primary">
-          <a class="top-link" href={topLinkHref}>{topLinkLabel}</a>
+          <div class="site-nav">
+            <a class="top-link" href={topLinkHref}>{topLinkLabel}</a>
+            <a class="top-link top-link--button" href="/login">Portal</a>
+          </div>
         </nav>
       </div>
     </header>
@@ -37,7 +40,10 @@ const topLinkLabel = isPrivacyPage ? "Home" : "Privacy";
     <footer class="site-footer">
       <div class="shell site-footer__inner">
         <p>Running Coach</p>
-        <a href={topLinkHref}>{topLinkLabel}</a>
+        <div class="site-nav">
+          <a href={topLinkHref}>{topLinkLabel}</a>
+          <a href="/login">Portal</a>
+        </div>
       </div>
     </footer>
   </body>

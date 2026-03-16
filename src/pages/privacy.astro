@@ -4,92 +4,105 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
 <BaseLayout
   title="Privacy Policy | Running Coach"
-  description="Privacy policy for Running Coach."
+  description="A short, plain-language privacy page for Running Coach."
   pathname="/privacy"
 >
-  <article class="shell page page--privacy">
-    <section class="hero-card">
-      <h1>Privacy Policy</h1>
-      <p class="lede">
-        This page explains what data Running Coach uses, why it uses it, and how you can
-        ask questions, disconnect a provider, or request deletion.
-      </p>
-    </section>
-
-    <div class="policy-grid">
-      <section class="policy-card">
-        <h2>Who this applies to</h2>
-        <p>
-          This policy applies to people who connect their training data to Running Coach
-          or use its website and connected services.
+  <article class="shell privacy-page">
+    <header class="privacy-hero">
+      <div class="privacy-hero__intro privacy-motion privacy-motion--1">
+        <p class="eyebrow">Privacy</p>
+        <h1>Privacy, explained without the legal maze.</h1>
+        <p class="lede privacy-hero__lede">
+          A plain-language view of what Running Coach uses, why it uses it, and how
+          early-access requests are handled.
         </p>
-      </section>
+      </div>
 
-      <section class="policy-card">
-        <h2>What data Running Coach collects</h2>
-        <p>
-          Running Coach collects the account and training data needed to provide its
-          service. This may include basic account details, activity history, training
-          metrics, and connection details needed to keep linked services working.
-        </p>
-      </section>
+      <aside class="privacy-summary privacy-motion privacy-motion--2" aria-labelledby="privacy-summary-title">
+        <p class="eyebrow">In short</p>
+        <h2 id="privacy-summary-title">What users should expect right now.</h2>
+        <div class="privacy-summary__stack">
+          <section class="privacy-summary__item" aria-labelledby="privacy-summary-data">
+            <h3 id="privacy-summary-data">Only relevant data</h3>
+            <p>Used to keep the service working and weekly planning believable.</p>
+          </section>
 
-      <section class="policy-card">
-        <h2>Why this data is used</h2>
-        <p>
-          Running Coach uses this data to review recent training, generate planning
-          guidance, maintain connected integrations, and support basic troubleshooting.
-        </p>
-      </section>
+          <section class="privacy-summary__item" aria-labelledby="privacy-summary-provider">
+            <h3 id="privacy-summary-provider">Intervals provider</h3>
+            <p>Intervals is the current source for athlete-specific data ingestion.</p>
+          </section>
 
-      <section class="policy-card">
-        <h2>Connected providers</h2>
-        <p>
-          Running Coach may connect to third-party services such as Intervals to access
-          training data you choose to share. Those services also have their own terms and
-          privacy policies.
-        </p>
-      </section>
+          <section class="privacy-summary__item" aria-labelledby="privacy-summary-requests">
+            <h3 id="privacy-summary-requests">Deletion or disconnect</h3>
+            <p>The same support route is used for privacy-related requests during early access.</p>
+          </section>
+        </div>
+      </aside>
+    </header>
 
-      <section class="policy-card policy-card--wide card--status">
-        <h2>Storage and retention</h2>
-        <p>
-          Running Coach stores the data needed to operate the service and maintain
-          connected integrations. Data is kept only for as long as it is needed for
-          product operation, account continuity, legal obligations, or user-requested
-          support.
-        </p>
-      </section>
+    <div class="privacy-layout">
+      <div class="privacy-content">
+        <section class="privacy-section privacy-section--lead privacy-motion privacy-motion--2">
+          <p class="eyebrow">Scope</p>
+          <h2>Who this applies to</h2>
+          <p>
+            This policy applies to people who use the Running Coach website, connect a
+            training account, or receive weekly planning through the portal.
+          </p>
+        </section>
 
-      <section class="policy-card policy-card--wide card--info">
-        <h2>How data is shared</h2>
-        <p>
-          Running Coach does not sell personal data. Data may be processed by service
-          providers that are needed to host, secure, and operate the service.
-        </p>
-      </section>
+        <section class="privacy-duo privacy-motion privacy-motion--3" aria-label="Data use details">
+          <article class="privacy-card">
+            <p class="eyebrow">Data use</p>
+            <h2>What data may be used</h2>
+            <p>
+              Running Coach may use account details, recent activity history, training
+              metrics, and connection details needed to keep linked services working and to
+              generate weekly guidance.
+            </p>
+          </article>
 
-      <section class="policy-card">
-        <h2>Your choices</h2>
-        <p>
-          You can ask to disconnect a provider, request deletion of your data, or ask
-          privacy questions using the contact information below.
-        </p>
-      </section>
+          <article class="privacy-card privacy-card--soft">
+            <p class="eyebrow">Reason</p>
+            <h2>Why it is used</h2>
+            <p>
+              The point is to understand recent training, generate a more believable
+              weekly plan, maintain connected integrations, and support early users when
+              something goes wrong.
+            </p>
+          </article>
+        </section>
 
-      <section class="policy-card">
-        <h2>Contact</h2>
-        <p>
-          For privacy questions, deletion requests, or provider disconnection requests,
-          contact:
-        </p>
-        <p><strong>[contact email]</strong></p>
-      </section>
+        <section class="privacy-callout privacy-motion privacy-motion--3">
+          <p class="eyebrow">Providers and retention</p>
+          <h2>Connected services should only support the product, not complicate it.</h2>
+          <p>
+            Running Coach currently relies on Intervals for athlete-specific data
+            ingestion. Data should only be kept for as long as it is needed to operate the
+            service, support users, and meet legal obligations.
+          </p>
+        </section>
 
-      <section class="policy-card footer-spacer">
-        <h2>Effective date</h2>
-        <p>Effective date: [publish date]</p>
-      </section>
+        <footer class="privacy-footer privacy-motion privacy-motion--4">
+          <div class="privacy-support">
+            <p class="eyebrow">Support</p>
+            <h2>Need a deletion or disconnection request?</h2>
+            <p>
+              During early access, onboarding, support, deletion, and disconnection
+              requests all use the same simple route.
+            </p>
+          </div>
+          <aside class="privacy-meta" aria-label="Privacy page notes">
+            <div class="privacy-meta__item">
+              <p class="eyebrow">Current release</p>
+              <p>Early-access web release.</p>
+            </div>
+            <p class="privacy-meta__note">
+              Written in plain language instead of acting like legal filler.
+            </p>
+          </aside>
+        </footer>
+      </div>
     </div>
   </article>
 </BaseLayout>
