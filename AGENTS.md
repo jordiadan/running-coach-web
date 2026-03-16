@@ -1,502 +1,168 @@
 # AGENTS.md
 
-Operational guide for AI coding agents and contributors working on the Running Coach web app.
+Rules for AI coding agents working in this repo.
 
-This repository exists to build the user-facing web application for Running Coach.
-The web app is not the backend.
-Keep it lightweight, clear, accessible, and easy to evolve.
+## Product
 
----
+This repo is the user-facing web app for Running Coach.
+It is not the backend.
 
-## 1. Repo purpose
+Right now, the shipped scope is small:
+- homepage
+- privacy page
+- clean frontend foundation
 
-The first shipped slice is a small public-facing website, but this repository is intended to grow into the main user portal over time.
+Later, this repo should grow into the user portal for:
+- sign up
+- connect Intervals
+- onboarding and goals
+- weekly plan
+- calendar
+- session detail
 
-Primary goals:
-- provide a trustworthy public-facing website URL
-- provide a privacy policy URL
-- explain what Running Coach is in simple language
-- support credibility for Intervals OAuth app approval
-- establish a clean frontend foundation for the future user portal
+Do not build the future portal speculatively.
+Build only the smallest slice that is clearly in scope.
 
-Non-goals for v1:
-- no complex auth flows
-- no client-heavy architecture by default
-- no unnecessary animations, CMS, or design systems
-- no generic “platform” abstractions
-- no backend logic in this repo
+## Core Rules
 
-If a proposed change pushes the repo toward “mini SaaS frontend” territory before the product actually needs it, stop and simplify.
+- Keep everything clear, simple, and trustworthy.
+- Prefer small, reviewable changes.
+- No overengineering.
+- No speculative features.
+- No abstractions until repetition is real.
+- No heavy UI libraries unless explicitly required.
+- No placeholder junk in user-facing pages.
+- Preserve clarity and trust over visual complexity.
 
-### Scope model
+If something feels like “mini SaaS frontend” before the product needs it, stop and simplify.
 
-Use this distinction when planning work:
+## Source Of Truth
 
-- `Now`: public marketing and trust pages, privacy, and the minimum frontend foundation needed to support the first user flows later
-- `Next`: authenticated user flows such as connect, onboarding, weekly plan, calendar, and session detail
+- Product design source of truth: `design/running-coach.pen`
+- Frontend source of truth: `src/`
+- Design tokens source of truth: `src/styles/tokens.css`
 
-Do not mix `Now` and `Next` in the same implementation slice unless the task explicitly requires both.
+Do not implement a meaningful new screen without a corresponding frame in `design/running-coach.pen`.
+Do not use temporary Pencil files, demo files, or old design files as product source of truth.
 
----
+## Design First
 
-## 2. Decision hierarchy
-
-When in doubt, choose:
-1. the simpler scope
-2. the simpler layout
-3. the more semantic markup
-4. the lower-JS option
-5. the more readable copy
-6. the more trustworthy UX
-7. the smaller PR
-
-Prefer deletion and simplification over adding more layers.
-
----
-
-## 3. Working mode
-
-Use one focused coding session per task whenever possible.
-
-For small changes:
-- state the intended outcome briefly
-- implement directly
-- verify the result
-
-For non-trivial changes such as a new page, a new section, or a meaningful layout change:
-1. define the page or feature goal
+For any non-trivial feature, page, or structural UI change:
+1. define the goal
 2. define the target user
-3. define the primary user action
+3. define the primary action
 4. define the minimum content needed
-5. propose the smallest safe implementation slice
-6. implement only that slice
-7. verify before moving on
+5. create or update the mobile-first frame in `design/running-coach.pen`
+6. validate hierarchy and states
+7. implement the smallest FE slice
+8. compare design and code before closing
 
-Do not jump into implementation if the problem is still structurally ambiguous.
+If the frame does not exist yet, do not implement the feature yet.
 
-Keep changes small, localized, and reviewable.
+## UX Rules
 
----
+- Mobile first always.
+- One primary CTA per screen.
+- Keep flows super intuitive, simple, clean, and calm.
+- Use strong hierarchy and obvious next steps.
+- Keep first screens light; push secondary detail lower.
+- Prefer single-column layouts unless a second column clearly helps.
+- Use plain language.
+- Avoid marketing fluff.
+- Avoid competing focal points.
+- Accessibility is default, not polish.
 
-## 4. Default stack
+Every screen should answer quickly:
+- what is this
+- why does it matter
+- what should the user do next
 
-Unless requirements clearly justify otherwise, use:
+## FE Rules
 
+Default stack:
 - Astro
 - TypeScript
-- static output
-- minimal or no client-side JavaScript
-- plain CSS with tokens
-- simple deployment
-
-Default priorities:
-1. static-first
-2. semantic HTML
-3. maintainable CSS
-4. minimal JS
-5. simple deployment
-6. room to scale later
-
-Do not choose a stack because it is trendy.
-Choose it because it fits the current product scope.
-
----
-
-## 5. Design workflow
-
-Pencil is the default design tool for non-trivial UI work.
-
-Keep the design structure simple:
-
-- `design/running-coach.pen` → product sitemap, IA, wireframes, ready-for-dev screens
-- `design/pencil-lunaris.pen` → optional reference kit, only if the current feature actively uses it
-
-`design/running-coach.pen` is the only product design source of truth.
-Do not keep a second product `.pen` file with overlapping screens.
-
-### Default design flow
-
-For any new page, major section, or meaningful structural UI change:
-1. define the page goal
-2. define the primary user action
-3. define the minimum content needed
-4. create or update one mobile-first frame in `design/running-coach.pen`
-5. reuse an existing visual baseline only if it still matches the approved product direction
-6. implement the smallest viable slice
-7. compare implementation against the relevant frame or screenshot
-8. fix meaningful mismatches before closing the task
-
-For very small changes such as copy edits, spacing tweaks, or minor visual fixes:
-- a formal wireframe is not required
-- state the intended result briefly and implement directly
-
-Do not block progress waiting for polished design.
-
-### What Pencil is for in this repo
-
-Use Pencil to decide:
-- page structure
-- section order
-- content hierarchy
-- CTA placement
-- mobile-first layout
-- trust and credibility signals
-
-Do not use Pencil to over-design polish too early.
-
-Wireframes should answer:
-- what is this page for
-- what should users understand in 5 seconds
-- what should they do next
-- what should they trust
-
-### Feature workflow
-
-Every non-trivial feature must follow this order:
-
-1. `Feature brief`
-   - goal
-   - target user
-   - primary action
-   - required states
-2. `Design frame`
-   - add or update the mobile-first frame in `design/running-coach.pen`
-3. `UX validation`
-   - check hierarchy
-   - check primary CTA
-   - check empty, loading, success, and error states if relevant
-4. `Implementation slice`
-   - implement the smallest useful frontend slice only
-5. `Design-to-code review`
-   - compare the implemented result with the approved frame
-6. `Verification`
-   - format
-   - lint
-   - build
-   - responsive check
-   - keyboard check
-
-If a feature has not gone through `Feature brief` and `Design frame`, do not implement it yet.
-
----
-
-## 6. Pencil kit usage
-
-Design kits are optional accelerators, not mandatory baselines.
-
-Use `design/pencil-lunaris.pen` only when:
-- the active feature clearly benefits from it
-- it matches the approved product direction
-- it simplifies the work instead of expanding the scope
-
-Do not force the current screen to inherit from a kit if the approved design direction has moved elsewhere.
-
-The screen is defined by the product’s content and hierarchy first.
-The kit exists only to speed up execution when it genuinely fits.
-
----
-
-## 7. UX rules
-
-### Clarity first
-Every page must answer quickly:
-- what this product is
-- who it is for
-- what benefit it provides
-- what users should do next
-
-The hero must communicate product purpose in plain language.
-Do not assume prior knowledge.
-
-### Credibility matters
-This site exists partly to make the project feel legitimate and understandable.
-
-Use trust-building elements where appropriate:
-- clear product name
-- concise explanation of what the product does
-- plain language
-- privacy and data-use transparency
-- working links
-- contact or owner information if appropriate
-- no placeholder junk
-- no fake corporate tone
-
-### Strong hierarchy
-Use obvious hierarchy:
-- one main message per page
-- one primary CTA per screen
-- supporting content below the fold
-- no competing focal points
+- plain CSS
+- minimal JavaScript
 
 Prefer:
-- short sections
-- strong headings
-- scannable paragraphs
-- single-column layouts for content-heavy pages
-- consistent spacing and rhythm
+- semantic HTML
+- CSS variables and tokens
+- composition over abstraction
+- native elements over ARIA workarounds
 
-### Progressive disclosure
-Keep the first screen simple.
-Push secondary details lower on the page.
-Do not front-load every detail.
+Do not:
+- add client state without a real need
+- add dependencies for simple UI
+- create reusable components before repetition is real
+- hardcode new visual values if an existing token fits
 
-### Mobile-first always
-Design and implement from the narrowest viewport first.
-Desktop is an enhancement, not the default mental model.
+## Scope Rules
 
-### Simple copy beats marketing fluff
-Use short, direct, human language.
+Keep `public site now` and `authenticated app next` mentally separate.
 
-Bad:
-- Revolutionize your training journey with AI-powered optimization
+Do not mix both in one implementation slice unless the task explicitly requires it.
 
-Better:
-- Connect your training data and get a clear weekly running plan
+Do not implement app flows directly from backend assumptions alone.
+Design them first.
 
----
+## Working Style
 
-## 8. Frontend implementation rules
+For simple changes:
+- state the intended outcome briefly
+- implement directly
+- verify
 
-Prefer semantic HTML and CSS over JavaScript-heavy UI.
+For non-trivial changes:
+- plan first
+- keep the slice small
+- keep the app runnable
+- verify before moving on
 
-Use native elements whenever possible:
-- `header`
-- `main`
-- `nav`
-- `section`
-- `footer`
-- `form`
-- `button`
-- `label`
-- `input`
-- `picture`
-- `img`
+If implementation starts going sideways, stop and re-plan.
 
-Use ARIA only when native HTML is insufficient.
+## Verification
 
-Do not replace native elements with `div` unless there is a strong reason.
+Agents must verify their work.
 
-### Styling rules
-- keep a small token foundation
-- use CSS variables for colors, spacing, radius, typography, and shadows if needed
-- avoid arbitrary hardcoded values when an existing token fits
-- prefer consistency over novelty
-- prefer composition over deeply configurable abstractions
-
-CSS design tokens must live in:
-- `src/styles/tokens.css`
-
-### Component rules
-Do not create a reusable UI component until repetition is real.
-
-Create a component only when:
-- the same structure appears in multiple places
-- the semantics are the same
-- the styling is intended to stay aligned
-
-Prefer simple composition over generic abstractions.
-
-### Repo boundaries
-- keep this repo focused on the web app only
-- do not pull backend logic into this repository
-- do not duplicate backend domain logic here
-- use static or mock content unless integration is explicitly required
-- keep environment variables minimal
-- document setup and commands in the README
-
----
-
-## 9. Accessibility rules
-
-Accessibility is a default, not a later pass.
-
-Requirements:
-- every interactive element must be keyboard reachable
-- every form field must have a visible label
-- every image must have meaningful `alt` text or be explicitly decorative
-- headings must form a sensible outline
-- link text must make sense out of context
-- focus states must be visible
-- color contrast must be sufficient
-- motion must be subtle and respect reduced-motion preferences
-
-Prefer native semantics over ARIA workarounds.
-
----
-
-## 10. Performance rules
-
-Performance is a product feature.
-
-Requirements:
-- prioritize a fast first render
-- keep the initial page lightweight
-- ship as little JavaScript as possible
-- avoid unnecessary third-party scripts
-- make key hero content visible quickly
-- ensure important images are discoverable in HTML
-- use responsive images
-- lazy-load non-critical media
-- avoid layout shifts
-- prefer system fonts or a minimal font strategy
-
-Audit every dependency and third-party script before adding it.
-
-If a dependency does not clearly improve user value, do not add it.
-
----
-
-## 11. Default v1 page strategy
-
-The first pages should usually be:
-
-- `/`
-  - hero
-  - what it does
-  - how it works
-  - privacy/data note
-  - contact or owner note
-- `/privacy`
-  - what data is collected
-  - why it is used
-  - what providers are involved
-  - how users can request deletion or disconnection
-
-Optional later pages:
-- `/about`
-- `/integrations`
-- `/connect`
-- authenticated app routes once they are designed and explicitly in scope
-
-Do not add extra pages unless they serve a clear purpose.
-
----
-
-## 12. What agents must provide before coding
-
-For non-trivial tasks, provide a short plan with:
-- page or feature goal
-- target user
-- primary user action
-- minimum content or structure
-- simplest viable stack choice
-- files likely to change
-- smallest safe implementation slice
-- key risk or open question if any
-
-For UI tasks, also state:
-- which Pencil frame is being implemented
-- mobile-first layout concept
-- which states are included in the slice
-- whether an existing kit or baseline is being reused
-
-Keep the plan short and executable.
-
----
-
-## 13. What agents must do while implementing
-
-- keep changes small and localized
-- preserve repository clarity
-- leave the app runnable at every step
-- avoid mixing refactors with new UI behavior unless necessary
-- keep copy, layout, and architecture decisions explicit in the diff
-- prefer one concern per commit-worthy change
-
-Do not silently improvise major layout changes if a relevant design frame already exists.
-
-If design and implementation diverge, say so explicitly.
-
----
-
-## 14. Verification
-
-Agents must verify their work, not just claim it is done.
-
-Verification should be proportional to the change.
-
-### For all meaningful changes
-- run formatting if configured
-- run linting if configured
+For meaningful changes:
+- run formatting
+- run linting
 - run tests if present and relevant
-- build the site successfully
+- build successfully
 
-### For UI changes
-- preview the changed page
+For UI changes:
+- preview the page
 - check mobile and desktop
-- check keyboard navigation
+- check keyboard access
 - check obvious accessibility issues
-- check that links and navigation work
-- check there are no broken assets
-- compare implementation against the relevant Pencil frame or screenshot
-- call out any intentional deviation explicitly
+- compare against the Pencil frame
+- call out any intentional deviation
 
-Do not mark UI work done without visual verification.
+## Definition Of Done
 
----
+Work is not done until:
+- the goal is clear
+- the hierarchy is clear
+- the result is simple for the current scope
+- the page works on mobile and desktop
+- accessibility is acceptable at baseline
+- build passes
+- design and code have been compared
+- any deviation has been stated clearly
 
-## 15. Definition of done
+## Repo Boundaries
 
-A task is not done until:
-- the page or feature goal is clear
-- the hierarchy is obvious
-- the content is understandable
-- the layout works on mobile and desktop
-- accessibility is acceptable at a sensible baseline
-- the site builds successfully
-- the implementation remains simple for the current scope
-- verification has been summarized honestly
+- Keep this repo focused on the frontend.
+- Do not move backend logic here.
+- Do not duplicate domain logic here.
+- Keep environment setup minimal.
+- Keep README short and practical.
 
-For UI work, also require:
-- the implemented result matches the intended design direction
-- any design/code deviation is stated explicitly
+## Default First Move
 
----
-
-## 16. Anti-patterns
-
-Avoid:
-- starting with a full custom design system
-- adding React state everywhere with no need
-- overusing animations
-- unclear CTAs
-- inaccessible custom controls
-- marketing copy that says little
-- heavy dependency chains for simple UI
-- page-builder style complexity
-- abstractions for future pages that do not exist yet
-- coding without first defining page purpose and hierarchy
-- treating the kit canvas as the product source of truth
-- expanding the feature scope just because a reference kit already has more components
-- implementing authenticated product flows directly from backend assumptions without a Pencil frame
-
----
-
-## 17. Expected agent output style
-
-Be concise, structured, and explicit.
-
-When proposing work, include:
-- plan
-- rationale
-- implementation steps
-- verification steps
-- tradeoffs if any
-
-Do not hide tradeoffs.
-Do not claim certainty when something has not been verified.
-Do not over-explain simple decisions.
-
----
-
-## 18. Default first task
-
-If no other task is given, start with:
-1. confirm the v1 stack
-2. define the v1 sitemap
-3. define the homepage information architecture
-4. define the privacy page structure
-5. create or update the relevant Pencil frames
-6. only then scaffold or implement
-
-Start with the smallest credible version.
+If the task is broad or unclear:
+1. inspect the repo
+2. inspect `design/running-coach.pen`
+3. propose the smallest safe next slice
+4. only then implement
