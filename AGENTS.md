@@ -2,32 +2,40 @@
 
 Operational guide for AI coding agents and contributors working on the Running Coach web app.
 
-This repository exists to build a small, credible, fast, accessible web presence for the product.
+This repository exists to build the user-facing web application for Running Coach.
 The web app is not the backend.
-Keep it lightweight, content-first, and easy to evolve.
+Keep it lightweight, clear, accessible, and easy to evolve.
 
 ---
 
 ## 1. Repo purpose
 
-The first release is a small public website, not a large frontend application.
+The first shipped slice is a small public-facing website, but this repository is intended to grow into the main user portal over time.
 
 Primary goals:
 - provide a trustworthy public-facing website URL
 - provide a privacy policy URL
 - explain what Running Coach is in simple language
 - support credibility for Intervals OAuth app approval
-- leave room to grow later without overbuilding now
+- establish a clean frontend foundation for the future user portal
 
 Non-goals for v1:
-- no user dashboard
 - no complex auth flows
 - no client-heavy architecture by default
 - no unnecessary animations, CMS, or design systems
 - no generic “platform” abstractions
 - no backend logic in this repo
 
-If a proposed change pushes the repo toward “mini SaaS frontend” territory, stop and simplify.
+If a proposed change pushes the repo toward “mini SaaS frontend” territory before the product actually needs it, stop and simplify.
+
+### Scope model
+
+Use this distinction when planning work:
+
+- `Now`: public marketing and trust pages, privacy, and the minimum frontend foundation needed to support the first user flows later
+- `Next`: authenticated user flows such as connect, onboarding, weekly plan, calendar, and session detail
+
+Do not mix `Now` and `Next` in the same implementation slice unless the task explicitly requires both.
 
 ---
 
@@ -101,9 +109,10 @@ Pencil is the default design tool for non-trivial UI work.
 Keep the design structure simple:
 
 - `design/running-coach.pen` → product sitemap, IA, wireframes, ready-for-dev screens
-- `design/pencil-lunaris.pen` → reference kit / reusable component library
+- `design/pencil-lunaris.pen` → optional reference kit, only if the current feature actively uses it
 
-Do not split product work into separate UX and UI files unless the project becomes significantly larger.
+`design/running-coach.pen` is the only product design source of truth.
+Do not keep a second product `.pen` file with overlapping screens.
 
 ### Default design flow
 
@@ -112,7 +121,7 @@ For any new page, major section, or meaningful structural UI change:
 2. define the primary user action
 3. define the minimum content needed
 4. create or update one mobile-first frame in `design/running-coach.pen`
-5. reuse kit variables and kit components before inventing new UI
+5. reuse an existing visual baseline only if it still matches the approved product direction
 6. implement the smallest viable slice
 7. compare implementation against the relevant frame or screenshot
 8. fix meaningful mismatches before closing the task
@@ -141,40 +150,49 @@ Wireframes should answer:
 - what should they do next
 - what should they trust
 
+### Feature workflow
+
+Every non-trivial feature must follow this order:
+
+1. `Feature brief`
+   - goal
+   - target user
+   - primary action
+   - required states
+2. `Design frame`
+   - add or update the mobile-first frame in `design/running-coach.pen`
+3. `UX validation`
+   - check hierarchy
+   - check primary CTA
+   - check empty, loading, success, and error states if relevant
+4. `Implementation slice`
+   - implement the smallest useful frontend slice only
+5. `Design-to-code review`
+   - compare the implemented result with the approved frame
+6. `Verification`
+   - format
+   - lint
+   - build
+   - responsive check
+   - keyboard check
+
+If a feature has not gone through `Feature brief` and `Design frame`, do not implement it yet.
+
 ---
 
 ## 6. Pencil kit usage
 
-Use `design/pencil-lunaris.pen` as the default visual and component baseline.
+Design kits are optional accelerators, not mandatory baselines.
 
-Do not recreate a local design system from scratch if the kit already provides a suitable base.
+Use `design/pencil-lunaris.pen` only when:
+- the active feature clearly benefits from it
+- it matches the approved product direction
+- it simplifies the work instead of expanding the scope
 
-Default rule:
-- reuse kit variables first
-- reuse kit components second
-- create new product-specific components only if the kit clearly does not fit and repetition is real
-
-For v1, prefer a small subset of kit patterns:
-- top navigation
-- primary button
-- secondary button
-- card
-- info block
-- simple footer
-
-Do not introduce complex kit patterns unless the product truly needs them.
-
-Avoid by default:
-- sidebars
-- dashboard layouts
-- tables
-- charts
-- tabs
-- modal-heavy flows
-- settings-like UI on the main path
+Do not force the current screen to inherit from a kit if the approved design direction has moved elsewhere.
 
 The screen is defined by the product’s content and hierarchy first.
-The kit exists to speed up execution and keep the UI coherent.
+The kit exists only to speed up execution when it genuinely fits.
 
 ---
 
@@ -348,6 +366,7 @@ Optional later pages:
 - `/about`
 - `/integrations`
 - `/connect`
+- authenticated app routes once they are designed and explicitly in scope
 
 Do not add extra pages unless they serve a clear purpose.
 
@@ -368,7 +387,8 @@ For non-trivial tasks, provide a short plan with:
 For UI tasks, also state:
 - which Pencil frame is being implemented
 - mobile-first layout concept
-- whether the kit already covers the required UI
+- which states are included in the slice
+- whether an existing kit or baseline is being reused
 
 Keep the plan short and executable.
 
@@ -447,7 +467,8 @@ Avoid:
 - abstractions for future pages that do not exist yet
 - coding without first defining page purpose and hierarchy
 - treating the kit canvas as the product source of truth
-- expanding v1 scope just because the kit already has more components
+- expanding the feature scope just because a reference kit already has more components
+- implementing authenticated product flows directly from backend assumptions without a Pencil frame
 
 ---
 
