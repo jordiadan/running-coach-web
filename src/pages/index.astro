@@ -1,0 +1,79 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="Running Coach"
+  description="Running Coach turns training data into a clear weekly running plan."
+  pathname="/"
+>
+  <div class="shell page page--home">
+    <section class="hero-card">
+      <p class="eyebrow">Running Coach</p>
+      <h1>Turn your training data into a clear weekly running plan.</h1>
+      <p class="lede">
+        Connect your training data and get practical guidance you can review and follow
+        week by week.
+      </p>
+      <div class="button-group">
+        <a class="button button--primary" href="/privacy">Read privacy policy</a>
+        <a class="button button--secondary" href="#how-it-works">How it works</a>
+      </div>
+    </section>
+
+    <section class="summary-grid" aria-label="Product summary">
+      <div class="card">
+        <h2>What Running Coach does</h2>
+        <p>It looks at your recent training data and turns it into a simpler plan for the week ahead.</p>
+      </div>
+      <div class="card">
+        <h2>Who it is for</h2>
+        <p>
+          For runners who already track their training and want clearer guidance without
+          piecing everything together by hand.
+        </p>
+      </div>
+    </section>
+
+    <section id="how-it-works" class="home-flow" aria-labelledby="how-it-works-title">
+      <h2 id="how-it-works-title">How it works</h2>
+      <div class="card card--muted">
+        <h3>Connect your training data</h3>
+        <p>Authorize Running Coach to read the training data it needs from connected services.</p>
+      </div>
+      <div class="card card--muted">
+        <h3>Review recent training</h3>
+        <p>Use recent activity and training context to understand what you have been doing.</p>
+      </div>
+      <div class="card card--muted">
+        <h3>Get a clearer weekly plan</h3>
+        <p>Turn that context into guidance that is easier to review and act on.</p>
+      </div>
+    </section>
+
+    <section class="card card--info">
+      <h2>Clear about data use</h2>
+      <p>
+        The privacy policy explains what data is used, why it is used, and how to
+        request disconnection or deletion.
+      </p>
+    </section>
+
+    <section class="card card--status">
+      <h2>Current status</h2>
+      <p>
+        Running Coach is in an early stage. This site explains what it does, how
+        connected data is used, and how to get in touch about privacy or account
+        questions.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>Contact</h2>
+      <p>
+        For privacy questions, deletion requests, or account disconnection, use the
+        details on the privacy page.
+      </p>
+    </section>
+  </div>
+</BaseLayout>

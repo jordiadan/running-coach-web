@@ -1,0 +1,2184 @@
+{
+  "version": "2.8",
+  "children": [
+    {
+      "type": "frame",
+      "id": "L82GR",
+      "x": 0,
+      "y": 0,
+      "name": "Running Coach UI",
+      "fill": "#F7F4EE",
+      "cornerRadius": 16,
+      "stroke": {
+        "align": "inside",
+        "thickness": 1,
+        "fill": "#D9D0C0"
+      },
+      "layout": "vertical",
+      "gap": 24,
+      "padding": 24,
+      "children": [
+        {
+          "type": "text",
+          "id": "tzOJk",
+          "name": "uiTitle",
+          "fill": "#111111",
+          "content": "Running Coach UI",
+          "fontFamily": "Inter",
+          "fontSize": 36,
+          "fontWeight": "600"
+        },
+        {
+          "type": "text",
+          "id": "Kq7dn",
+          "name": "uiNote",
+          "fill": "#666666",
+          "textGrowth": "fixed-width",
+          "width": 820,
+          "content": "Implementation-ready screens, visual refinement, and ready-for-dev frames live here.",
+          "lineHeight": 1.5,
+          "fontFamily": "Inter",
+          "fontSize": 16,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "frame",
+          "id": "oKpZB",
+          "name": "Foundation - Running Coach",
+          "width": "fill_container",
+          "fill": "#FFFDF9",
+          "cornerRadius": 16,
+          "stroke": {
+            "align": "inside",
+            "thickness": 1,
+            "fill": "#D9D0C0"
+          },
+          "layout": "vertical",
+          "gap": 14,
+          "padding": 20,
+          "children": [
+            {
+              "type": "text",
+              "id": "YuTfP",
+              "name": "foundationTitle",
+              "fill": "#111111",
+              "content": "Running Coach foundation",
+              "fontFamily": "Geist",
+              "fontSize": 24,
+              "fontWeight": "600"
+            },
+            {
+              "type": "text",
+              "id": "TUOGk",
+              "name": "foundationNote",
+              "fill": "#666666",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Minimal visual base derived from pencil-lunaris.pen for all new screens in this project.",
+              "lineHeight": 1.5,
+              "fontFamily": "Geist",
+              "fontSize": 14,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "Hnpjj",
+              "name": "colorsHeading",
+              "fill": "#111111",
+              "content": "Core tokens",
+              "fontFamily": "Geist",
+              "fontSize": 18,
+              "fontWeight": "600"
+            },
+            {
+              "type": "frame",
+              "id": "ydLYO",
+              "name": "Foundation Swatches",
+              "width": "fill_container",
+              "gap": 12,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "Gxvhw",
+                  "name": "Background",
+                  "width": 150,
+                  "height": 96,
+                  "fill": "#F2F3F0",
+                  "cornerRadius": 16,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#CBCCC9"
+                  },
+                  "layout": "vertical",
+                  "gap": 8,
+                  "padding": 12,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "stEbx",
+                      "name": "bgText",
+                      "fill": "#111111",
+                      "content": "Background\n#F2F3F0",
+                      "lineHeight": 1.5,
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 12,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "ZLUbk",
+                  "name": "Card",
+                  "width": 150,
+                  "height": 96,
+                  "fill": "#FFFFFF",
+                  "cornerRadius": 16,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#CBCCC9"
+                  },
+                  "layout": "vertical",
+                  "gap": 8,
+                  "padding": 12,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "A2qBr",
+                      "name": "cardText",
+                      "fill": "#111111",
+                      "content": "Card\n#FFFFFF",
+                      "lineHeight": 1.5,
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 12,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "ET4ZC",
+                  "name": "Accent",
+                  "width": 150,
+                  "height": 96,
+                  "fill": "#FF8400",
+                  "cornerRadius": 16,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#CBCCC9"
+                  },
+                  "layout": "vertical",
+                  "gap": 8,
+                  "padding": 12,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "3SHOD",
+                      "name": "accentText",
+                      "fill": "#111111",
+                      "content": "Accent\n#FF8400",
+                      "lineHeight": 1.5,
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 12,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "S3kPU",
+                  "name": "Info",
+                  "width": 150,
+                  "height": 96,
+                  "fill": "#DFDFE6",
+                  "cornerRadius": 16,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#CBCCC9"
+                  },
+                  "layout": "vertical",
+                  "gap": 8,
+                  "padding": 12,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "xns5G",
+                      "name": "infoText",
+                      "fill": "#000066",
+                      "content": "Info\n#DFDFE6",
+                      "lineHeight": 1.5,
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 12,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "UizX1",
+                  "name": "Warning",
+                  "width": 150,
+                  "height": 96,
+                  "fill": "#E9E3D8",
+                  "cornerRadius": 16,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#CBCCC9"
+                  },
+                  "layout": "vertical",
+                  "gap": 8,
+                  "padding": 12,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "qbRtU",
+                      "name": "warningText",
+                      "fill": "#804200",
+                      "content": "Status\n#E9E3D8",
+                      "lineHeight": 1.5,
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 12,
+                      "fontWeight": "500"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "90ODv",
+              "name": "typeHeading",
+              "fill": "#111111",
+              "content": "Type",
+              "fontFamily": "Geist",
+              "fontSize": 18,
+              "fontWeight": "600"
+            },
+            {
+              "type": "text",
+              "id": "2lrjD",
+              "name": "displayText",
+              "fill": "#111111",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Geist for headings and readable UI copy.",
+              "lineHeight": 1.2,
+              "fontFamily": "Geist",
+              "fontSize": 28,
+              "fontWeight": "600"
+            },
+            {
+              "type": "text",
+              "id": "bIhav",
+              "name": "bodyText",
+              "fill": "#666666",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Use Geist for most body copy and interface text. Keep paragraphs short, calm, and direct.",
+              "lineHeight": 1.5,
+              "fontFamily": "Geist",
+              "fontSize": 15,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "dvELc",
+              "name": "monoText",
+              "fill": "#111111",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "JetBrains Mono only for labels, token names, or small technical accents.",
+              "lineHeight": 1.5,
+              "fontFamily": "JetBrains Mono",
+              "fontSize": 13,
+              "fontWeight": "500"
+            },
+            {
+              "type": "text",
+              "id": "dvkOz",
+              "name": "componentsHeading",
+              "fill": "#111111",
+              "content": "Selected base components",
+              "fontFamily": "Geist",
+              "fontSize": 18,
+              "fontWeight": "600"
+            },
+            {
+              "type": "text",
+              "id": "Ye7S4",
+              "name": "componentsText",
+              "fill": "#111111",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Top nav, primary button, secondary button, content card, info block, status block, and simple footer.",
+              "lineHeight": 1.5,
+              "fontFamily": "Geist",
+              "fontSize": 14,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "bAvd2",
+              "name": "usageHeading",
+              "fill": "#111111",
+              "content": "Use and avoid",
+              "fontFamily": "Geist",
+              "fontSize": 18,
+              "fontWeight": "600"
+            },
+            {
+              "type": "text",
+              "id": "8LYO4",
+              "name": "usageText",
+              "fill": "#666666",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Start new screens from this base. Avoid sidebars, tabs, modals, tables, charts, dashboards, and complex forms in v1.",
+              "lineHeight": 1.5,
+              "fontFamily": "Geist",
+              "fontSize": 14,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "0pWmv",
+          "name": "App screens",
+          "width": "fill_container",
+          "fill": "#FFFDF9",
+          "cornerRadius": 16,
+          "stroke": {
+            "align": "inside",
+            "thickness": 1,
+            "fill": "#D9D0C0"
+          },
+          "layout": "vertical",
+          "gap": 14,
+          "padding": 20,
+          "children": [
+            {
+              "type": "text",
+              "id": "80UQd",
+              "name": "appTitle",
+              "fill": "#111111",
+              "content": "App screens",
+              "fontFamily": "Geist",
+              "fontSize": 24,
+              "fontWeight": "600"
+            },
+            {
+              "type": "text",
+              "id": "9aSVL",
+              "name": "appNote",
+              "fill": "#666666",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Connected product screens built from the lunaris subset adopted for Running Coach.",
+              "lineHeight": 1.5,
+              "fontFamily": "Geist",
+              "fontSize": 14,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "4NbRc",
+              "name": "appScreensRow",
+              "width": "fill_container",
+              "gap": 40,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "laC91",
+                  "name": "Screen - Connect Intervals - Mobile",
+                  "width": 390,
+                  "fill": "#FFFDF9",
+                  "cornerRadius": 16,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#D9D0C0"
+                  },
+                  "layout": "vertical",
+                  "gap": 12,
+                  "padding": 20,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "yDurc",
+                      "name": "connectTop",
+                      "width": "fill_container",
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "82YAl",
+                          "name": "connectBrand",
+                          "fill": "#111111",
+                          "content": "Running Coach",
+                          "fontFamily": "Geist",
+                          "fontSize": 14,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "17x21",
+                          "name": "connectStep",
+                          "fill": "#666666",
+                          "content": "Secure sign-in",
+                          "fontFamily": "Geist",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "bIAfH",
+                      "name": "connectHero",
+                      "width": "fill_container",
+                      "fill": "#F7F4EE",
+                      "cornerRadius": 18,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#D9D0C0"
+                      },
+                      "layout": "vertical",
+                      "gap": 8,
+                      "padding": 18,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "UF1u2",
+                          "name": "connectHeroTitle",
+                          "fill": "#111111",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Connect with Intervals.icu",
+                          "lineHeight": 1.15,
+                          "fontFamily": "Geist",
+                          "fontSize": 28,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "me6ge",
+                          "name": "connectHeroBody",
+                          "fill": "#666666",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Sign in with your Intervals account so Running Coach can build your weekly plan from recent training data.",
+                          "lineHeight": 1.5,
+                          "fontFamily": "Geist",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "vuSsd",
+                      "name": "connectInfo",
+                      "width": "fill_container",
+                      "fill": "#DFDFE6",
+                      "cornerRadius": 16,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#D9D0C0"
+                      },
+                      "layout": "vertical",
+                      "gap": 6,
+                      "padding": 16,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "bJj2h",
+                          "name": "connectInfoTitle",
+                          "fill": "#111111",
+                          "content": "What you are allowing",
+                          "fontFamily": "Geist",
+                          "fontSize": 18,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "cY1wi",
+                          "name": "connectInfoBody",
+                          "fill": "#111111",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Running Coach will read the training history and wellness needed for planning, then take you to goal setup.",
+                          "lineHeight": 1.5,
+                          "fontFamily": "Geist",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "BIGxq",
+                      "name": "connectPrimary",
+                      "width": "fill_container",
+                      "fill": "#FF8400",
+                      "cornerRadius": 999,
+                      "layout": "vertical",
+                      "gap": 8,
+                      "padding": 10,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "Tngge",
+                          "name": "connectPrimaryLabel",
+                          "fill": "#111111",
+                          "content": "Connect with Intervals.icu",
+                          "fontFamily": "JetBrains Mono",
+                          "fontSize": 14,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "iEeOH",
+                      "name": "connectSecondary",
+                      "width": "fill_container",
+                      "fill": "#FFFFFF",
+                      "cornerRadius": 999,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#D9D0C0"
+                      },
+                      "layout": "vertical",
+                      "gap": 8,
+                      "padding": 10,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "NqtXq",
+                          "name": "connectSecondaryLabel",
+                          "fill": "#111111",
+                          "content": "Privacy",
+                          "fontFamily": "JetBrains Mono",
+                          "fontSize": 14,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "K3UFF",
+                  "name": "Screen - Goal Setup - Mobile",
+                  "width": 390,
+                  "fill": "#FFFDF9",
+                  "cornerRadius": 16,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#D9D0C0"
+                  },
+                  "layout": "vertical",
+                  "gap": 12,
+                  "padding": 20,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "Wljzl",
+                      "name": "goalTop",
+                      "width": "fill_container",
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "aoo7b",
+                          "name": "goalBrand",
+                          "fill": "#111111",
+                          "content": "Running Coach",
+                          "fontFamily": "Geist",
+                          "fontSize": 14,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "aGgPj",
+                          "name": "goalStep",
+                          "fill": "#666666",
+                          "content": "Goal setup",
+                          "fontFamily": "Geist",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "0txYK",
+                      "name": "goalHero",
+                      "width": "fill_container",
+                      "fill": "#F7F4EE",
+                      "cornerRadius": 18,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#D9D0C0"
+                      },
+                      "layout": "vertical",
+                      "gap": 8,
+                      "padding": 18,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "eM7bF",
+                          "name": "goalHeroTitle",
+                          "fill": "#111111",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Set your goal and training days",
+                          "lineHeight": 1.15,
+                          "fontFamily": "Geist",
+                          "fontSize": 28,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "67Fto",
+                          "name": "goalHeroBody",
+                          "fill": "#666666",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Keep it simple: tell Running Coach what you are training for and when it happens.",
+                          "lineHeight": 1.5,
+                          "fontFamily": "Geist",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "kJVAh",
+                      "name": "goalFields",
+                      "width": "fill_container",
+                      "fill": "#FFFFFF",
+                      "cornerRadius": 16,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#D9D0C0"
+                      },
+                      "layout": "vertical",
+                      "gap": 6,
+                      "padding": 16,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "EXQhX",
+                          "name": "goalFieldsTitle",
+                          "fill": "#111111",
+                          "content": "Essential inputs",
+                          "fontFamily": "Geist",
+                          "fontSize": 18,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "Y6qeM",
+                          "name": "goalFieldsBody",
+                          "fill": "#111111",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Goal name\nGoal date\nDistance\nPreferred training days",
+                          "lineHeight": 1.6,
+                          "fontFamily": "JetBrains Mono",
+                          "fontSize": 13,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "QkaOw",
+                      "name": "goalPrimary",
+                      "width": "fill_container",
+                      "fill": "#FF8400",
+                      "cornerRadius": 999,
+                      "layout": "vertical",
+                      "gap": 8,
+                      "padding": 10,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "OE0Bd",
+                          "name": "goalPrimaryLabel",
+                          "fill": "#111111",
+                          "content": "Save and continue",
+                          "fontFamily": "JetBrains Mono",
+                          "fontSize": 14,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "0Rgd1",
+                      "name": "goalOptional",
+                      "width": "fill_container",
+                      "fill": "#DFDFE6",
+                      "cornerRadius": 16,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#D9D0C0"
+                      },
+                      "layout": "vertical",
+                      "gap": 6,
+                      "padding": 16,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "h0qFl",
+                          "name": "goalOptionalTitle",
+                          "fill": "#111111",
+                          "content": "Optional later",
+                          "fontFamily": "Geist",
+                          "fontSize": 18,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "HYR0K",
+                          "name": "goalOptionalBody",
+                          "fill": "#111111",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Secondary goals can be added, but they should stay out of the way on the first pass.",
+                          "lineHeight": 1.5,
+                          "fontFamily": "Geist",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "gil0i",
+                  "name": "Screen - Weekly Plan Home - Mobile",
+                  "width": 390,
+                  "fill": "#FFFDF9",
+                  "cornerRadius": 16,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#D9D0C0"
+                  },
+                  "layout": "vertical",
+                  "gap": 12,
+                  "padding": 20,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "GwyPf",
+                      "name": "planTop",
+                      "width": "fill_container",
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "n8FZ9",
+                          "name": "planBrand",
+                          "fill": "#111111",
+                          "content": "Running Coach",
+                          "fontFamily": "Geist",
+                          "fontSize": 14,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "rR3ZQ",
+                          "name": "planStep",
+                          "fill": "#666666",
+                          "content": "Your week",
+                          "fontFamily": "Geist",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ODaA7",
+                      "name": "planHero",
+                      "width": "fill_container",
+                      "fill": "#F7F4EE",
+                      "cornerRadius": 18,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#D9D0C0"
+                      },
+                      "layout": "vertical",
+                      "gap": 8,
+                      "padding": 18,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "8HNWq",
+                          "name": "planHeroTitle",
+                          "fill": "#111111",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "This week at a glance",
+                          "lineHeight": 1.15,
+                          "fontFamily": "Geist",
+                          "fontSize": 28,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "mxdCr",
+                          "name": "planHeroBody",
+                          "fill": "#666666",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Base-building week with one long run, two easy runs, one quality session, and strength work.",
+                          "lineHeight": 1.5,
+                          "fontFamily": "Geist",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "81Xrc",
+                      "name": "planNext",
+                      "width": "fill_container",
+                      "fill": "#FFFFFF",
+                      "cornerRadius": 16,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#D9D0C0"
+                      },
+                      "layout": "vertical",
+                      "gap": 6,
+                      "padding": 16,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "hT5KW",
+                          "name": "planNextTitle",
+                          "fill": "#111111",
+                          "content": "Next sessions",
+                          "fontFamily": "Geist",
+                          "fontSize": 18,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "YVVER",
+                          "name": "sessionOne",
+                          "width": "fill_container",
+                          "fill": "#F7F4EE",
+                          "cornerRadius": 12,
+                          "stroke": {
+                            "align": "inside",
+                            "thickness": 1,
+                            "fill": "#D9D0C0"
+                          },
+                          "layout": "vertical",
+                          "gap": 4,
+                          "padding": 12,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "vPC5P",
+                              "name": "sessionOneDay",
+                              "fill": "#666666",
+                              "content": "Tuesday",
+                              "fontFamily": "JetBrains Mono",
+                              "fontSize": 12,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "text",
+                              "id": "ED6gW",
+                              "name": "sessionOneTitle",
+                              "fill": "#111111",
+                              "content": "Easy run · 45 min",
+                              "fontFamily": "Geist",
+                              "fontSize": 16,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "S2lJl",
+                              "name": "sessionOneBody",
+                              "fill": "#666666",
+                              "content": "Keep it relaxed and conversational.",
+                              "lineHeight": 1.45,
+                              "fontFamily": "Geist",
+                              "fontSize": 13,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "2LrE0",
+                          "name": "sessionTwo",
+                          "width": "fill_container",
+                          "fill": "#F7F4EE",
+                          "cornerRadius": 12,
+                          "stroke": {
+                            "align": "inside",
+                            "thickness": 1,
+                            "fill": "#D9D0C0"
+                          },
+                          "layout": "vertical",
+                          "gap": 4,
+                          "padding": 12,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "WnQxe",
+                              "name": "sessionTwoDay",
+                              "fill": "#666666",
+                              "content": "Thursday",
+                              "fontFamily": "JetBrains Mono",
+                              "fontSize": 12,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "text",
+                              "id": "p5l6n",
+                              "name": "sessionTwoTitle",
+                              "fill": "#111111",
+                              "content": "Quality session · 6 x 3 min",
+                              "fontFamily": "Geist",
+                              "fontSize": 16,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "oTe6f",
+                              "name": "sessionTwoBody",
+                              "fill": "#666666",
+                              "content": "Controlled effort with full recovery between reps.",
+                              "lineHeight": 1.45,
+                              "fontFamily": "Geist",
+                              "fontSize": 13,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "2fdbc",
+                          "name": "sessionThree",
+                          "width": "fill_container",
+                          "fill": "#F7F4EE",
+                          "cornerRadius": 12,
+                          "stroke": {
+                            "align": "inside",
+                            "thickness": 1,
+                            "fill": "#D9D0C0"
+                          },
+                          "layout": "vertical",
+                          "gap": 4,
+                          "padding": 12,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "8eVHD",
+                              "name": "sessionThreeDay",
+                              "fill": "#666666",
+                              "content": "Sunday",
+                              "fontFamily": "JetBrains Mono",
+                              "fontSize": 12,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "text",
+                              "id": "2CmoT",
+                              "name": "sessionThreeTitle",
+                              "fill": "#111111",
+                              "content": "Long run · 80 min",
+                              "fontFamily": "Geist",
+                              "fontSize": 16,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "xecss",
+                              "name": "sessionThreeBody",
+                              "fill": "#666666",
+                              "content": "Steady effort to build volume without overreaching.",
+                              "lineHeight": 1.45,
+                              "fontFamily": "Geist",
+                              "fontSize": 13,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "MteKF",
+                      "name": "planWhy",
+                      "width": "fill_container",
+                      "fill": "#DFDFE6",
+                      "cornerRadius": 16,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#D9D0C0"
+                      },
+                      "layout": "vertical",
+                      "gap": 6,
+                      "padding": 16,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "6ZFoY",
+                          "name": "planWhyTitle",
+                          "fill": "#111111",
+                          "content": "Why this week looks like this",
+                          "fontFamily": "Geist",
+                          "fontSize": 18,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "NbmOA",
+                          "name": "planWhyBody",
+                          "fill": "#666666",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "The week stays light enough to absorb recent training while keeping one quality session and one longer run.",
+                          "lineHeight": 1.45,
+                          "fontFamily": "Geist",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "khY40",
+                      "name": "planCalendar",
+                      "width": "fill_container",
+                      "fill": "#FF8400",
+                      "cornerRadius": 999,
+                      "layout": "vertical",
+                      "padding": 10,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "cLsOd",
+                          "name": "planCalendarLabel",
+                          "fill": "#111111",
+                          "content": "Open calendar",
+                          "fontFamily": "Geist",
+                          "fontSize": 15,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "AZ8gO",
+          "name": "uiRow",
+          "gap": 40,
+          "children": [
+            {
+              "type": "frame",
+              "id": "Ppv4w",
+              "name": "Ready for Dev - Home",
+              "width": 390,
+              "fill": "#FFFDF9",
+              "cornerRadius": 16,
+              "stroke": {
+                "align": "inside",
+                "thickness": 1,
+                "fill": "#D9D0C0"
+              },
+              "layout": "vertical",
+              "gap": 14,
+              "padding": 20,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "1g6Tn",
+                  "name": "homeTop",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "g19J0",
+                      "fill": "#111111",
+                      "content": "Running Coach",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "EhZi5",
+                      "fill": "#666666",
+                      "content": "Privacy",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "JfsTM",
+                  "name": "homeHero",
+                  "width": "fill_container",
+                  "fill": "#F7F4EE",
+                  "cornerRadius": 18,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#D9D0C0"
+                  },
+                  "layout": "vertical",
+                  "gap": 10,
+                  "padding": 18,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "MxGr2",
+                      "fill": "#666666",
+                      "content": "Running Coach",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "KqqJ0",
+                      "fill": "#111111",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Turn your training data into a clear weekly running plan.",
+                      "lineHeight": 1.12,
+                      "fontFamily": "Inter",
+                      "fontSize": 30,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "XdKld",
+                      "fill": "#666666",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Connect your training data and get practical guidance you can review and follow week by week.",
+                      "lineHeight": 1.5,
+                      "fontFamily": "Inter",
+                      "fontSize": 15,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "iGblL",
+                      "name": "actionRow",
+                      "width": "fill_container",
+                      "gap": 10,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "6V60S",
+                          "name": "primaryBtn",
+                          "width": "fill_container",
+                          "fill": "#FF8400",
+                          "cornerRadius": 999,
+                          "padding": [
+                            10,
+                            14
+                          ],
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "RBUXO",
+                              "fill": "#111111",
+                              "content": "Read privacy policy",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "JCCz0",
+                          "name": "secondaryBtn",
+                          "width": "fill_container",
+                          "fill": "#FFFFFF",
+                          "cornerRadius": 999,
+                          "stroke": {
+                            "align": "inside",
+                            "thickness": 1,
+                            "fill": "#D9D0C0"
+                          },
+                          "padding": [
+                            10,
+                            14
+                          ],
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "OIIH9",
+                              "fill": "#111111",
+                              "content": "How it works",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "PfaOm",
+                  "name": "summaryBlock",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 10,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "REJZJ",
+                      "name": "whatCard",
+                      "width": "fill_container",
+                      "fill": "#FFFFFF",
+                      "cornerRadius": 16,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#D9D0C0"
+                      },
+                      "layout": "vertical",
+                      "gap": 6,
+                      "padding": 16,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "ZRXnT",
+                          "fill": "#111111",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "What Running Coach does",
+                          "fontFamily": "Inter",
+                          "fontSize": 18,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "Dhkr3",
+                          "fill": "#666666",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "It looks at your recent training data and turns it into a simpler plan for the week ahead.",
+                          "lineHeight": 1.5,
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "sIwy4",
+                      "name": "whoCard",
+                      "width": "fill_container",
+                      "fill": "#FFFFFF",
+                      "cornerRadius": 16,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#D9D0C0"
+                      },
+                      "layout": "vertical",
+                      "gap": 6,
+                      "padding": 16,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "38QrG",
+                          "fill": "#111111",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Who it is for",
+                          "fontFamily": "Inter",
+                          "fontSize": 18,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "pL60s",
+                          "fill": "#666666",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "For runners who already track their training and want clearer guidance without piecing everything together by hand.",
+                          "lineHeight": 1.5,
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "1Hqn2",
+                  "name": "howBlock",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 10,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "7AMY2",
+                      "fill": "#111111",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "How it works",
+                      "fontFamily": "Inter",
+                      "fontSize": 20,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "UpYE2",
+                      "name": "step1",
+                      "width": "fill_container",
+                      "fill": "#F2F3F0",
+                      "cornerRadius": 16,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#D9D0C0"
+                      },
+                      "layout": "vertical",
+                      "gap": 4,
+                      "padding": 16,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "iE4jo",
+                          "fill": "#111111",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Connect your training data",
+                          "fontFamily": "Inter",
+                          "fontSize": 16,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "RQ70p",
+                          "fill": "#666666",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Authorize Running Coach to read the training data it needs from connected services.",
+                          "lineHeight": 1.5,
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "MsweO",
+                      "name": "step2",
+                      "width": "fill_container",
+                      "fill": "#F2F3F0",
+                      "cornerRadius": 16,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#D9D0C0"
+                      },
+                      "layout": "vertical",
+                      "gap": 4,
+                      "padding": 16,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "56wjK",
+                          "fill": "#111111",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Review recent training",
+                          "fontFamily": "Inter",
+                          "fontSize": 16,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "aVJcX",
+                          "fill": "#666666",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Use recent activity and training context to understand what you have been doing.",
+                          "lineHeight": 1.5,
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ZVBbK",
+                      "name": "step3",
+                      "width": "fill_container",
+                      "fill": "#F2F3F0",
+                      "cornerRadius": 16,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#D9D0C0"
+                      },
+                      "layout": "vertical",
+                      "gap": 4,
+                      "padding": 16,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "Kfzgq",
+                          "fill": "#111111",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Get a clearer weekly plan",
+                          "fontFamily": "Inter",
+                          "fontSize": 16,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "Kr5Pj",
+                          "fill": "#666666",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Turn that context into guidance that is easier to review and act on.",
+                          "lineHeight": 1.5,
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "yuYs9",
+                  "name": "privacyNote",
+                  "width": "fill_container",
+                  "fill": "#DFDFE6",
+                  "cornerRadius": 16,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#D9D0C0"
+                  },
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": 16,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "FtzJp",
+                      "fill": "#111111",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Clear about data use",
+                      "fontFamily": "Inter",
+                      "fontSize": 18,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "5M4lN",
+                      "fill": "#111111",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "The privacy policy explains what data is used, why it is used, and how to request disconnection or deletion.",
+                      "lineHeight": 1.5,
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "agvRu",
+                  "name": "statusCard",
+                  "width": "fill_container",
+                  "fill": "#E9E3D8",
+                  "cornerRadius": 16,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#D9D0C0"
+                  },
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": 16,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "MbXd4",
+                      "fill": "#111111",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Current status",
+                      "fontFamily": "Inter",
+                      "fontSize": 18,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "uIxH7",
+                      "fill": "#111111",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Running Coach is in an early stage. This site explains what it does, how connected data is used, and how to get in touch about privacy or account questions.",
+                      "lineHeight": 1.5,
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "LHlYY",
+                  "name": "contactCard",
+                  "width": "fill_container",
+                  "fill": "#FFFFFF",
+                  "cornerRadius": 16,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#D9D0C0"
+                  },
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": 16,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "MHWwp",
+                      "fill": "#111111",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Contact",
+                      "fontFamily": "Inter",
+                      "fontSize": 18,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "VH5SI",
+                      "fill": "#666666",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "For privacy questions, deletion requests, or account disconnection, use the details on the privacy page.",
+                      "lineHeight": 1.5,
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "2yQXJ",
+                  "name": "footer",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "1Trnm",
+                      "fill": "#111111",
+                      "content": "Running Coach",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "Ic2bM",
+                      "fill": "#666666",
+                      "content": "Privacy",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "K4Ezb",
+              "name": "Ready for Dev - Privacy",
+              "width": 390,
+              "fill": "#FFFDF9",
+              "cornerRadius": 16,
+              "stroke": {
+                "align": "inside",
+                "thickness": 1,
+                "fill": "#D9D0C0"
+              },
+              "layout": "vertical",
+              "gap": 12,
+              "padding": 20,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "Ixr80",
+                  "name": "privacyTop",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "gr69z",
+                      "fill": "#111111",
+                      "content": "Running Coach",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "ZdK41",
+                      "fill": "#666666",
+                      "content": "Home",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "tlaNc",
+                  "name": "privacyHero",
+                  "width": "fill_container",
+                  "fill": "#F7F4EE",
+                  "cornerRadius": 18,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#D9D0C0"
+                  },
+                  "layout": "vertical",
+                  "gap": 8,
+                  "padding": 18,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "y5Qju",
+                      "fill": "#111111",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Privacy Policy",
+                      "lineHeight": 1.15,
+                      "fontFamily": "Inter",
+                      "fontSize": 28,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "YjpCw",
+                      "fill": "#666666",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "This page explains what data Running Coach uses, why it uses it, and how you can ask questions, disconnect a provider, or request deletion.",
+                      "lineHeight": 1.5,
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Eylk7",
+                  "name": "whoCard",
+                  "width": "fill_container",
+                  "fill": "#FFFFFF",
+                  "cornerRadius": 16,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#D9D0C0"
+                  },
+                  "layout": "vertical",
+                  "gap": 5,
+                  "padding": 16,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "bzM7I",
+                      "fill": "#111111",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Who this applies to",
+                      "fontFamily": "Inter",
+                      "fontSize": 17,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "rlbY1",
+                      "fill": "#666666",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "This policy applies to people who connect their training data to Running Coach or use its website and connected services.",
+                      "lineHeight": 1.5,
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "QKKiq",
+                  "name": "dataCard",
+                  "width": "fill_container",
+                  "fill": "#FFFFFF",
+                  "cornerRadius": 16,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#D9D0C0"
+                  },
+                  "layout": "vertical",
+                  "gap": 5,
+                  "padding": 16,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "UFvQ0",
+                      "fill": "#111111",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "What data Running Coach collects",
+                      "fontFamily": "Inter",
+                      "fontSize": 17,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "LWf77",
+                      "fill": "#666666",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Running Coach collects the account and training data needed to provide its service. This may include basic account details, activity history, training metrics, and connection details needed to keep linked services working.",
+                      "lineHeight": 1.5,
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "rDHW3",
+                  "name": "whyCard",
+                  "width": "fill_container",
+                  "fill": "#FFFFFF",
+                  "cornerRadius": 16,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#D9D0C0"
+                  },
+                  "layout": "vertical",
+                  "gap": 5,
+                  "padding": 16,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "7gJBr",
+                      "fill": "#111111",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Why this data is used",
+                      "fontFamily": "Inter",
+                      "fontSize": 17,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "SWd2S",
+                      "fill": "#666666",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Running Coach uses this data to review recent training, generate planning guidance, maintain connected integrations, and support basic troubleshooting.",
+                      "lineHeight": 1.5,
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "uOgPi",
+                  "name": "providersCard",
+                  "width": "fill_container",
+                  "fill": "#FFFFFF",
+                  "cornerRadius": 16,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#D9D0C0"
+                  },
+                  "layout": "vertical",
+                  "gap": 5,
+                  "padding": 16,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "HiTRk",
+                      "fill": "#111111",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Connected providers",
+                      "fontFamily": "Inter",
+                      "fontSize": 17,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "El2N2",
+                      "fill": "#666666",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Running Coach may connect to third-party services such as Intervals to access training data you choose to share. Those services also have their own terms and privacy policies.",
+                      "lineHeight": 1.5,
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "lfJzp",
+                  "name": "retentionCard",
+                  "width": "fill_container",
+                  "fill": "#E9E3D8",
+                  "cornerRadius": 16,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#D9D0C0"
+                  },
+                  "layout": "vertical",
+                  "gap": 5,
+                  "padding": 16,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "s6Z4J",
+                      "fill": "#111111",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Storage and retention",
+                      "fontFamily": "Inter",
+                      "fontSize": 17,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "DDwZ9",
+                      "fill": "#111111",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Running Coach stores the data needed to operate the service and maintain connected integrations. Data is kept only for as long as it is needed for product operation, account continuity, legal obligations, or user-requested support.",
+                      "lineHeight": 1.5,
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "C1jJ4",
+                  "name": "sharingCard",
+                  "width": "fill_container",
+                  "fill": "#DFDFE6",
+                  "cornerRadius": 16,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#D9D0C0"
+                  },
+                  "layout": "vertical",
+                  "gap": 5,
+                  "padding": 16,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "8hLap",
+                      "fill": "#111111",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "How data is shared",
+                      "fontFamily": "Inter",
+                      "fontSize": 17,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "97LZT",
+                      "fill": "#111111",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Running Coach does not sell personal data. Data may be processed by service providers that are needed to host, secure, and operate the service.",
+                      "lineHeight": 1.5,
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "m8jkn",
+                  "name": "choicesCard",
+                  "width": "fill_container",
+                  "fill": "#FFFFFF",
+                  "cornerRadius": 16,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#D9D0C0"
+                  },
+                  "layout": "vertical",
+                  "gap": 5,
+                  "padding": 16,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "JGV9f",
+                      "fill": "#111111",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Your choices",
+                      "fontFamily": "Inter",
+                      "fontSize": 17,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "tqDqK",
+                      "fill": "#666666",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "You can ask to disconnect a provider, request deletion of your data, or ask privacy questions using the contact information below.",
+                      "lineHeight": 1.5,
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "AbhZJ",
+                  "name": "contactCard",
+                  "width": "fill_container",
+                  "fill": "#FFFFFF",
+                  "cornerRadius": 16,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#D9D0C0"
+                  },
+                  "layout": "vertical",
+                  "gap": 5,
+                  "padding": 16,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "RuqD9",
+                      "fill": "#111111",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Contact",
+                      "fontFamily": "Inter",
+                      "fontSize": 17,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "rpJXI",
+                      "fill": "#666666",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "For privacy questions, deletion requests, or provider disconnection requests, contact:",
+                      "lineHeight": 1.5,
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "vitg9",
+                      "fill": "#111111",
+                      "content": "[contact email]",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "WCl22",
+                  "name": "dateCard",
+                  "width": "fill_container",
+                  "fill": "#FFFFFF",
+                  "cornerRadius": 16,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#D9D0C0"
+                  },
+                  "layout": "vertical",
+                  "gap": 5,
+                  "padding": 16,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "XBspa",
+                      "fill": "#111111",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Effective date",
+                      "fontFamily": "Inter",
+                      "fontSize": 17,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "W2Yxo",
+                      "fill": "#666666",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Effective date: [publish date]",
+                      "lineHeight": 1.5,
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "cXCMB",
+                  "name": "footer",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Nnqkk",
+                      "fill": "#111111",
+                      "content": "Running Coach",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "d3tPB",
+                      "fill": "#666666",
+                      "content": "Home",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "BDJje",
+          "name": "uiFoot",
+          "fill": "#666666",
+          "textGrowth": "fixed-width",
+          "width": 820,
+          "content": "Only move screens here once content, hierarchy, and mobile layout are approved in the UX file.",
+          "lineHeight": 1.5,
+          "fontFamily": "Inter",
+          "fontSize": 14,
+          "fontWeight": "normal"
+        }
+      ]
+    }
+  ]
+}

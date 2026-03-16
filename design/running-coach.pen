@@ -1,0 +1,2741 @@
+{
+  "version": "2.8",
+  "children": [
+    {
+      "type": "frame",
+      "id": "runningCoachRoot",
+      "name": "Running Coach",
+      "x": 0,
+      "y": 0,
+      "fill": "#F5F4F1",
+      "cornerRadius": 16,
+      "stroke": {
+        "align": "inside",
+        "thickness": 1,
+        "fill": "#E5E4E1"
+      },
+      "layout": "vertical",
+      "gap": 24,
+      "padding": 24,
+      "children": [
+        {
+          "type": "text",
+          "id": "rcTitle",
+          "name": "rcTitle",
+          "fill": "#1A1918",
+          "content": "Running Coach",
+          "fontFamily": "Outfit",
+          "fontSize": 36,
+          "fontWeight": "600"
+        },
+        {
+          "type": "text",
+          "id": "rcNote",
+          "name": "rcNote",
+          "fill": "#6D6C6A",
+          "content": "Restarted from scratch with style guide `mobile-02-cleanminimal_light`. Warm minimal mobile-first direction, no Lunaris dependency.",
+          "fontFamily": "Outfit",
+          "fontSize": 15,
+          "fontWeight": "400",
+          "textGrowth": "fixed-width",
+          "width": 960,
+          "lineHeight": 1.5
+        },
+        {
+          "type": "frame",
+          "id": "flowSection",
+          "name": "Product flow",
+          "width": "fill_container",
+          "fill": "#FFFFFF",
+          "cornerRadius": 16,
+          "stroke": {
+            "align": "inside",
+            "thickness": 1,
+            "fill": "#E5E4E1"
+          },
+          "layout": "vertical",
+          "gap": 16,
+          "padding": 20,
+          "children": [
+            {
+              "type": "text",
+              "id": "flowSectionTitle",
+              "name": "flowSectionTitle",
+              "fill": "#1A1918",
+              "content": "Product flow",
+              "fontFamily": "Outfit",
+              "fontSize": 24,
+              "fontWeight": "600"
+            },
+            {
+              "type": "text",
+              "id": "flowSectionNote",
+              "name": "flowSectionNote",
+              "fill": "#6D6C6A",
+              "content": "The first user journey is simple: connect, set the goal, review the week, open the calendar, and inspect a session.",
+              "fontFamily": "Outfit",
+              "fontSize": 14,
+              "fontWeight": "400",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "lineHeight": 1.5
+            },
+            {
+              "type": "frame",
+              "id": "flowRowA",
+              "name": "flowRowA",
+              "width": "fill_container",
+              "gap": 16,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "flowCard1",
+                  "name": "Flow card 1",
+                  "width": 280,
+                  "fill": "#FFFFFF",
+                  "cornerRadius": 16,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#E5E4E1"
+                  },
+                  "layout": "vertical",
+                  "gap": 8,
+                  "padding": 16,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "flowStep1",
+                      "name": "flowStep1",
+                      "fill": "#3D8A5A",
+                      "content": "Step 1",
+                      "fontFamily": "Outfit",
+                      "fontSize": 11,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "flowTitle1",
+                      "name": "flowTitle1",
+                      "fill": "#1A1918",
+                      "content": "Connect Intervals",
+                      "fontFamily": "Outfit",
+                      "fontSize": 18,
+                      "fontWeight": "600",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "lineHeight": 1.2
+                    },
+                    {
+                      "type": "text",
+                      "id": "flowBody1",
+                      "name": "flowBody1",
+                      "fill": "#6D6C6A",
+                      "content": "Explain the OAuth value clearly and make sign-in the only obvious next step.",
+                      "fontFamily": "Outfit",
+                      "fontSize": 13,
+                      "fontWeight": "400",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "lineHeight": 1.5
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "flowCard2",
+                  "name": "Flow card 2",
+                  "width": 280,
+                  "fill": "#FFFFFF",
+                  "cornerRadius": 16,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#E5E4E1"
+                  },
+                  "layout": "vertical",
+                  "gap": 8,
+                  "padding": 16,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "flowStep2",
+                      "name": "flowStep2",
+                      "fill": "#D89575",
+                      "content": "Step 2",
+                      "fontFamily": "Outfit",
+                      "fontSize": 11,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "flowTitle2",
+                      "name": "flowTitle2",
+                      "fill": "#1A1918",
+                      "content": "Goal setup",
+                      "fontFamily": "Outfit",
+                      "fontSize": 18,
+                      "fontWeight": "600",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "lineHeight": 1.2
+                    },
+                    {
+                      "type": "text",
+                      "id": "flowBody2",
+                      "name": "flowBody2",
+                      "fill": "#6D6C6A",
+                      "content": "Ask only for event, date, distance, and preferred training days.",
+                      "fontFamily": "Outfit",
+                      "fontSize": 13,
+                      "fontWeight": "400",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "lineHeight": 1.5
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "flowCard3",
+                  "name": "Flow card 3",
+                  "width": 280,
+                  "fill": "#FFFFFF",
+                  "cornerRadius": 16,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#E5E4E1"
+                  },
+                  "layout": "vertical",
+                  "gap": 8,
+                  "padding": 16,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "flowStep3",
+                      "name": "flowStep3",
+                      "fill": "#3D8A5A",
+                      "content": "Step 3",
+                      "fontFamily": "Outfit",
+                      "fontSize": 11,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "flowTitle3",
+                      "name": "flowTitle3",
+                      "fill": "#1A1918",
+                      "content": "Weekly plan",
+                      "fontFamily": "Outfit",
+                      "fontSize": 18,
+                      "fontWeight": "600",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "lineHeight": 1.2
+                    },
+                    {
+                      "type": "text",
+                      "id": "flowBody3",
+                      "name": "flowBody3",
+                      "fill": "#6D6C6A",
+                      "content": "Show the week summary and the next sessions without dashboard noise.",
+                      "fontFamily": "Outfit",
+                      "fontSize": 13,
+                      "fontWeight": "400",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "lineHeight": 1.5
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "flowRowB",
+              "name": "flowRowB",
+              "width": "fill_container",
+              "gap": 16,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "flowCard4",
+                  "name": "Flow card 4",
+                  "width": 280,
+                  "fill": "#FFFFFF",
+                  "cornerRadius": 16,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#E5E4E1"
+                  },
+                  "layout": "vertical",
+                  "gap": 8,
+                  "padding": 16,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "flowStep4",
+                      "name": "flowStep4",
+                      "fill": "#D89575",
+                      "content": "Step 4",
+                      "fontFamily": "Outfit",
+                      "fontSize": 11,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "flowTitle4",
+                      "name": "flowTitle4",
+                      "fill": "#1A1918",
+                      "content": "Calendar",
+                      "fontFamily": "Outfit",
+                      "fontSize": 18,
+                      "fontWeight": "600",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "lineHeight": 1.2
+                    },
+                    {
+                      "type": "text",
+                      "id": "flowBody4",
+                      "name": "flowBody4",
+                      "fill": "#6D6C6A",
+                      "content": "Let the user scan the whole week by day in one calm view.",
+                      "fontFamily": "Outfit",
+                      "fontSize": 13,
+                      "fontWeight": "400",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "lineHeight": 1.5
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "flowCard5",
+                  "name": "Flow card 5",
+                  "width": 280,
+                  "fill": "#FFFFFF",
+                  "cornerRadius": 16,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#E5E4E1"
+                  },
+                  "layout": "vertical",
+                  "gap": 8,
+                  "padding": 16,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "flowStep5",
+                      "name": "flowStep5",
+                      "fill": "#D4A64A",
+                      "content": "Step 5",
+                      "fontFamily": "Outfit",
+                      "fontSize": 11,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "flowTitle5",
+                      "name": "flowTitle5",
+                      "fill": "#1A1918",
+                      "content": "Session detail",
+                      "fontFamily": "Outfit",
+                      "fontSize": 18,
+                      "fontWeight": "600",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "lineHeight": 1.2
+                    },
+                    {
+                      "type": "text",
+                      "id": "flowBody5",
+                      "name": "flowBody5",
+                      "fill": "#6D6C6A",
+                      "content": "Explain the workout, the effort, and why it sits there.",
+                      "fontFamily": "Outfit",
+                      "fontSize": 13,
+                      "fontWeight": "400",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "lineHeight": 1.5
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "screensSection",
+          "name": "Core screens",
+          "width": "fill_container",
+          "fill": "#FFFFFF",
+          "cornerRadius": 16,
+          "stroke": {
+            "align": "inside",
+            "thickness": 1,
+            "fill": "#E5E4E1"
+          },
+          "layout": "vertical",
+          "gap": 16,
+          "padding": 20,
+          "children": [
+            {
+              "type": "text",
+              "id": "screensSectionTitle",
+              "name": "screensSectionTitle",
+              "fill": "#1A1918",
+              "content": "Core screens",
+              "fontFamily": "Outfit",
+              "fontSize": 24,
+              "fontWeight": "600"
+            },
+            {
+              "type": "text",
+              "id": "screensSectionNote",
+              "name": "screensSectionNote",
+              "fill": "#6D6C6A",
+              "content": "Core first flow: Connect, Goal setup, Weekly plan, Calendar, and Session detail.",
+              "fontFamily": "Outfit",
+              "fontSize": 14,
+              "fontWeight": "400",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "lineHeight": 1.5
+            },
+            {
+              "type": "frame",
+              "id": "screensRow",
+              "name": "screensRow",
+              "width": "fill_container",
+              "gap": 24,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "connectScreen",
+                  "name": "Screen - Connect Intervals - Mobile",
+                  "width": 402,
+                  "fill": "#F5F4F1",
+                  "cornerRadius": 20,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#E5E4E1"
+                  },
+                  "layout": "vertical",
+                  "gap": 0,
+                  "padding": 0,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "connectStatus",
+                      "name": "connectStatus",
+                      "width": "fill_container",
+                      "height": 62,
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "connectStatusTime",
+                          "name": "connectStatusTime",
+                          "fill": "#1A1918",
+                          "content": "9:41",
+                          "fontFamily": "Outfit",
+                          "fontSize": 12,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "connectContent",
+                      "name": "connectContent",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 24,
+                      "padding": [
+                        0,
+                        24,
+                        24,
+                        24
+                      ],
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "connectHeader",
+                          "name": "connectHeader",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 12,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "connectEyebrow",
+                              "name": "connectEyebrow",
+                              "fill": "#6D6C6A",
+                              "content": "Running Coach",
+                              "fontFamily": "Outfit",
+                              "fontSize": 13,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "connectTitle",
+                              "name": "connectTitle",
+                              "fill": "#1A1918",
+                              "content": "Connect your Intervals account",
+                              "fontFamily": "Outfit",
+                              "fontSize": 26,
+                              "fontWeight": "600",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "lineHeight": 1.2
+                            },
+                            {
+                              "type": "text",
+                              "id": "connectBody",
+                              "name": "connectBody",
+                              "fill": "#6D6C6A",
+                              "content": "Sign in once so Running Coach can use your recent training data to build a clearer weekly plan.",
+                              "fontFamily": "Outfit",
+                              "fontSize": 15,
+                              "fontWeight": "400",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "lineHeight": 1.5
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "connectCard",
+                          "name": "connectCard",
+                          "width": "fill_container",
+                          "fill": "#FFFFFF",
+                          "cornerRadius": 16,
+                          "stroke": {
+                            "align": "inside",
+                            "thickness": 1,
+                            "fill": "#E5E4E1"
+                          },
+                          "layout": "vertical",
+                          "gap": 8,
+                          "padding": 18,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "connectCardTitle",
+                              "name": "connectCardTitle",
+                              "fill": "#1A1918",
+                              "content": "What this gives you",
+                              "fontFamily": "Outfit",
+                              "fontSize": 18,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "connectCardBody",
+                              "name": "connectCardBody",
+                              "fill": "#6D6C6A",
+                              "content": "A connected account lets the app read the training context it needs, then guide you through goal setup and your first plan.",
+                              "fontFamily": "Outfit",
+                              "fontSize": 14,
+                              "fontWeight": "400",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "lineHeight": 1.5
+                            },
+                            {
+                              "type": "frame",
+                              "id": "connectBadge",
+                              "name": "connectBadge",
+                              "fill": "#C8F0D8",
+                              "cornerRadius": 100,
+                              "layout": "vertical",
+                              "padding": [
+                                4,
+                                10
+                              ],
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "connectBadgeText",
+                                  "name": "connectBadgeText",
+                                  "fill": "#3D8A5A",
+                                  "content": "OAuth via Intervals.icu",
+                                  "fontFamily": "Outfit",
+                                  "fontSize": 11,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "connectPrimary",
+                          "name": "connectPrimary",
+                          "width": "fill_container",
+                          "fill": "#3D8A5A",
+                          "cornerRadius": 100,
+                          "layout": "vertical",
+                          "padding": [
+                            14,
+                            18
+                          ],
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "connectPrimaryText",
+                              "name": "connectPrimaryText",
+                              "fill": "#FFFFFF",
+                              "content": "Connect Intervals",
+                              "fontFamily": "Outfit",
+                              "fontSize": 15,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "connectSecondary",
+                          "name": "connectSecondary",
+                          "width": "fill_container",
+                          "fill": "#FAFAF8",
+                          "cornerRadius": 100,
+                          "stroke": {
+                            "align": "inside",
+                            "thickness": 1,
+                            "fill": "#D1D0CD"
+                          },
+                          "layout": "vertical",
+                          "padding": [
+                            14,
+                            18
+                          ],
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "connectSecondaryText",
+                              "name": "connectSecondaryText",
+                              "fill": "#1A1918",
+                              "content": "Read privacy policy",
+                              "fontFamily": "Outfit",
+                              "fontSize": 14,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "goalScreen",
+                  "name": "Screen - Goal Setup - Mobile",
+                  "width": 402,
+                  "fill": "#F5F4F1",
+                  "cornerRadius": 20,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#E5E4E1"
+                  },
+                  "layout": "vertical",
+                  "gap": 0,
+                  "padding": 0,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "goalStatus",
+                      "name": "goalStatus",
+                      "width": "fill_container",
+                      "height": 62,
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "goalStatusTime",
+                          "name": "goalStatusTime",
+                          "fill": "#1A1918",
+                          "content": "9:41",
+                          "fontFamily": "Outfit",
+                          "fontSize": 12,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "goalContent",
+                      "name": "goalContent",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 24,
+                      "padding": [
+                        0,
+                        24,
+                        24,
+                        24
+                      ],
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "goalHeader",
+                          "name": "goalHeader",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 12,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "goalEyebrow",
+                              "name": "goalEyebrow",
+                              "fill": "#6D6C6A",
+                              "content": "Goal setup",
+                              "fontFamily": "Outfit",
+                              "fontSize": 13,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "goalTitle",
+                              "name": "goalTitle",
+                              "fill": "#1A1918",
+                              "content": "Tell us what you are training for",
+                              "fontFamily": "Outfit",
+                              "fontSize": 26,
+                              "fontWeight": "600",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "lineHeight": 1.2
+                            },
+                            {
+                              "type": "text",
+                              "id": "goalBody",
+                              "name": "goalBody",
+                              "fill": "#6D6C6A",
+                              "content": "Keep it light. The first pass only needs the event, the date, the distance, and the days you prefer to train.",
+                              "fontFamily": "Outfit",
+                              "fontSize": 15,
+                              "fontWeight": "400",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "lineHeight": 1.5
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "goalCard",
+                          "name": "goalCard",
+                          "width": "fill_container",
+                          "fill": "#FFFFFF",
+                          "cornerRadius": 16,
+                          "stroke": {
+                            "align": "inside",
+                            "thickness": 1,
+                            "fill": "#E5E4E1"
+                          },
+                          "layout": "vertical",
+                          "gap": 12,
+                          "padding": 18,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "goalCardTitle",
+                              "name": "goalCardTitle",
+                              "fill": "#1A1918",
+                              "content": "Essential inputs",
+                              "fontFamily": "Outfit",
+                              "fontSize": 18,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "goalField1",
+                              "name": "goalField1",
+                              "width": "fill_container",
+                              "fill": "#FAFAF8",
+                              "cornerRadius": 12,
+                              "stroke": {
+                                "align": "inside",
+                                "thickness": 1,
+                                "fill": "#E5E4E1"
+                              },
+                              "layout": "vertical",
+                              "gap": 4,
+                              "padding": 14,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "goalFieldLabel1",
+                                  "name": "goalFieldLabel1",
+                                  "fill": "#9C9B99",
+                                  "content": "Goal name",
+                                  "fontFamily": "Outfit",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "goalFieldValue1",
+                                  "name": "goalFieldValue1",
+                                  "fill": "#1A1918",
+                                  "content": "Tap to set",
+                                  "fontFamily": "Outfit",
+                                  "fontSize": 15,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "goalField2",
+                              "name": "goalField2",
+                              "width": "fill_container",
+                              "fill": "#FAFAF8",
+                              "cornerRadius": 12,
+                              "stroke": {
+                                "align": "inside",
+                                "thickness": 1,
+                                "fill": "#E5E4E1"
+                              },
+                              "layout": "vertical",
+                              "gap": 4,
+                              "padding": 14,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "goalFieldLabel2",
+                                  "name": "goalFieldLabel2",
+                                  "fill": "#9C9B99",
+                                  "content": "Event date",
+                                  "fontFamily": "Outfit",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "goalFieldValue2",
+                                  "name": "goalFieldValue2",
+                                  "fill": "#1A1918",
+                                  "content": "Tap to set",
+                                  "fontFamily": "Outfit",
+                                  "fontSize": 15,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "goalField3",
+                              "name": "goalField3",
+                              "width": "fill_container",
+                              "fill": "#FAFAF8",
+                              "cornerRadius": 12,
+                              "stroke": {
+                                "align": "inside",
+                                "thickness": 1,
+                                "fill": "#E5E4E1"
+                              },
+                              "layout": "vertical",
+                              "gap": 4,
+                              "padding": 14,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "goalFieldLabel3",
+                                  "name": "goalFieldLabel3",
+                                  "fill": "#9C9B99",
+                                  "content": "Distance",
+                                  "fontFamily": "Outfit",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "goalFieldValue3",
+                                  "name": "goalFieldValue3",
+                                  "fill": "#1A1918",
+                                  "content": "Tap to set",
+                                  "fontFamily": "Outfit",
+                                  "fontSize": 15,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "goalField4",
+                              "name": "goalField4",
+                              "width": "fill_container",
+                              "fill": "#FAFAF8",
+                              "cornerRadius": 12,
+                              "stroke": {
+                                "align": "inside",
+                                "thickness": 1,
+                                "fill": "#E5E4E1"
+                              },
+                              "layout": "vertical",
+                              "gap": 4,
+                              "padding": 14,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "goalFieldLabel4",
+                                  "name": "goalFieldLabel4",
+                                  "fill": "#9C9B99",
+                                  "content": "Preferred training days",
+                                  "fontFamily": "Outfit",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "goalFieldValue4",
+                                  "name": "goalFieldValue4",
+                                  "fill": "#1A1918",
+                                  "content": "Tap to set",
+                                  "fontFamily": "Outfit",
+                                  "fontSize": 15,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "goalPrimary",
+                          "name": "goalPrimary",
+                          "width": "fill_container",
+                          "fill": "#3D8A5A",
+                          "cornerRadius": 100,
+                          "layout": "vertical",
+                          "padding": [
+                            14,
+                            18
+                          ],
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "goalPrimaryText",
+                              "name": "goalPrimaryText",
+                              "fill": "#FFFFFF",
+                              "content": "Save and continue",
+                              "fontFamily": "Outfit",
+                              "fontSize": 15,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "planScreen",
+                  "name": "Screen - Weekly Plan - Mobile",
+                  "width": 402,
+                  "fill": "#F5F4F1",
+                  "cornerRadius": 20,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#E5E4E1"
+                  },
+                  "layout": "vertical",
+                  "gap": 0,
+                  "padding": 0,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "planStatus",
+                      "name": "planStatus",
+                      "width": "fill_container",
+                      "height": 62,
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "planStatusTime",
+                          "name": "planStatusTime",
+                          "fill": "#1A1918",
+                          "content": "9:41",
+                          "fontFamily": "Outfit",
+                          "fontSize": 12,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "planContent",
+                      "name": "planContent",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 24,
+                      "padding": [
+                        0,
+                        24,
+                        24,
+                        24
+                      ],
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "planHeader",
+                          "name": "planHeader",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 8,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "planEyebrow",
+                              "name": "planEyebrow",
+                              "fill": "#6D6C6A",
+                              "content": "Your week",
+                              "fontFamily": "Outfit",
+                              "fontSize": 13,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "planTitle",
+                              "name": "planTitle",
+                              "fill": "#1A1918",
+                              "content": "Base week, kept calm and clear",
+                              "fontFamily": "Outfit",
+                              "fontSize": 26,
+                              "fontWeight": "600",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "lineHeight": 1.2
+                            },
+                            {
+                              "type": "text",
+                              "id": "planBody",
+                              "name": "planBody",
+                              "fill": "#6D6C6A",
+                              "content": "Three key sessions, enough recovery, and one place to see what comes next.",
+                              "fontFamily": "Outfit",
+                              "fontSize": 15,
+                              "fontWeight": "400",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "lineHeight": 1.5
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "planHeroCard",
+                          "name": "planHeroCard",
+                          "width": "fill_container",
+                          "fill": "#FFFFFF",
+                          "cornerRadius": 20,
+                          "stroke": {
+                            "align": "inside",
+                            "thickness": 1,
+                            "fill": "#E5E4E1"
+                          },
+                          "layout": "vertical",
+                          "gap": 12,
+                          "padding": 20,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "planHeroTop",
+                              "name": "planHeroTop",
+                              "width": "fill_container",
+                              "justifyContent": "space_between",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "planHeroLabel",
+                                  "name": "planHeroLabel",
+                                  "fill": "#9C9B99",
+                                  "content": "This week",
+                                  "fontFamily": "Outfit",
+                                  "fontSize": 12,
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "planHeroChip",
+                                  "name": "planHeroChip",
+                                  "fill": "#C8F0D8",
+                                  "cornerRadius": 100,
+                                  "layout": "vertical",
+                                  "padding": [
+                                    4,
+                                    10
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "planHeroChipText",
+                                      "name": "planHeroChipText",
+                                      "fill": "#3D8A5A",
+                                      "content": "On track",
+                                      "fontFamily": "Outfit",
+                                      "fontSize": 11,
+                                      "fontWeight": "600"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "id": "planHeroMetric",
+                              "name": "planHeroMetric",
+                              "fill": "#1A1918",
+                              "content": "3 key sessions",
+                              "fontFamily": "Outfit",
+                              "fontSize": 32,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "planHeroCaption",
+                              "name": "planHeroCaption",
+                              "fill": "#6D6C6A",
+                              "content": "Easy run, quality session, and long run. Open the calendar for the full week.",
+                              "fontFamily": "Outfit",
+                              "fontSize": 14,
+                              "fontWeight": "400",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "lineHeight": 1.5
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "planSessionList",
+                          "name": "planSessionList",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 12,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "planSessionListTitle",
+                              "name": "planSessionListTitle",
+                              "fill": "#1A1918",
+                              "content": "Next sessions",
+                              "fontFamily": "Outfit",
+                              "fontSize": 18,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "planSession1",
+                              "name": "planSession1",
+                              "width": "fill_container",
+                              "fill": "#FFFFFF",
+                              "cornerRadius": 16,
+                              "stroke": {
+                                "align": "inside",
+                                "thickness": 1,
+                                "fill": "#E5E4E1"
+                              },
+                              "layout": "vertical",
+                              "gap": 6,
+                              "padding": 16,
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "planSessionTop1",
+                                  "name": "planSessionTop1",
+                                  "width": "fill_container",
+                                  "justifyContent": "space_between",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "planSessionDay1",
+                                      "name": "planSessionDay1",
+                                      "fill": "#9C9B99",
+                                      "content": "Tue",
+                                      "fontFamily": "Outfit",
+                                      "fontSize": 12,
+                                      "fontWeight": "600"
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "planSessionDotWrap1",
+                                      "name": "planSessionDotWrap1",
+                                      "width": 10,
+                                      "height": 10,
+                                      "fill": "#3D8A5A",
+                                      "cornerRadius": 100
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "planSessionTitle1",
+                                  "name": "planSessionTitle1",
+                                  "fill": "#1A1918",
+                                  "content": "Easy run \u00b7 45 min",
+                                  "fontFamily": "Outfit",
+                                  "fontSize": 15,
+                                  "fontWeight": "600",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "lineHeight": 1.3
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "planSession2",
+                              "name": "planSession2",
+                              "width": "fill_container",
+                              "fill": "#FFFFFF",
+                              "cornerRadius": 16,
+                              "stroke": {
+                                "align": "inside",
+                                "thickness": 1,
+                                "fill": "#E5E4E1"
+                              },
+                              "layout": "vertical",
+                              "gap": 6,
+                              "padding": 16,
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "planSessionTop2",
+                                  "name": "planSessionTop2",
+                                  "width": "fill_container",
+                                  "justifyContent": "space_between",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "planSessionDay2",
+                                      "name": "planSessionDay2",
+                                      "fill": "#9C9B99",
+                                      "content": "Thu",
+                                      "fontFamily": "Outfit",
+                                      "fontSize": 12,
+                                      "fontWeight": "600"
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "planSessionDotWrap2",
+                                      "name": "planSessionDotWrap2",
+                                      "width": 10,
+                                      "height": 10,
+                                      "fill": "#D89575",
+                                      "cornerRadius": 100
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "planSessionTitle2",
+                                  "name": "planSessionTitle2",
+                                  "fill": "#1A1918",
+                                  "content": "Quality session \u00b7 6 \u00d7 3 min",
+                                  "fontFamily": "Outfit",
+                                  "fontSize": 15,
+                                  "fontWeight": "600",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "lineHeight": 1.3
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "planSession3",
+                              "name": "planSession3",
+                              "width": "fill_container",
+                              "fill": "#FFFFFF",
+                              "cornerRadius": 16,
+                              "stroke": {
+                                "align": "inside",
+                                "thickness": 1,
+                                "fill": "#E5E4E1"
+                              },
+                              "layout": "vertical",
+                              "gap": 6,
+                              "padding": 16,
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "planSessionTop3",
+                                  "name": "planSessionTop3",
+                                  "width": "fill_container",
+                                  "justifyContent": "space_between",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "planSessionDay3",
+                                      "name": "planSessionDay3",
+                                      "fill": "#9C9B99",
+                                      "content": "Sun",
+                                      "fontFamily": "Outfit",
+                                      "fontSize": 12,
+                                      "fontWeight": "600"
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "planSessionDotWrap3",
+                                      "name": "planSessionDotWrap3",
+                                      "width": 10,
+                                      "height": 10,
+                                      "fill": "#3D8A5A",
+                                      "cornerRadius": 100
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "planSessionTitle3",
+                                  "name": "planSessionTitle3",
+                                  "fill": "#1A1918",
+                                  "content": "Long run \u00b7 80 min",
+                                  "fontFamily": "Outfit",
+                                  "fontSize": 15,
+                                  "fontWeight": "600",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "lineHeight": 1.3
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "planCalendarCta",
+                          "name": "planCalendarCta",
+                          "width": "fill_container",
+                          "fill": "#3D8A5A",
+                          "cornerRadius": 100,
+                          "layout": "vertical",
+                          "padding": [
+                            14,
+                            18
+                          ],
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "planCalendarCtaText",
+                              "name": "planCalendarCtaText",
+                              "fill": "#FFFFFF",
+                              "content": "Open calendar",
+                              "fontFamily": "Outfit",
+                              "fontSize": 15,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "planBottomWrap",
+                      "name": "planBottomWrap",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "padding": [
+                        16,
+                        24,
+                        24,
+                        24
+                      ],
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "planTabBar",
+                          "name": "planTabBar",
+                          "width": "fill_container",
+                          "height": 72,
+                          "fill": "#FFFFFF",
+                          "cornerRadius": 32,
+                          "stroke": {
+                            "align": "inside",
+                            "thickness": 1,
+                            "fill": "#D1D0CD"
+                          },
+                          "layout": "vertical",
+                          "padding": [
+                            6,
+                            6
+                          ],
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "planTabs",
+                              "name": "planTabs",
+                              "width": "fill_container",
+                              "height": 60,
+                              "gap": 6,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "tabPlan",
+                                  "name": "tabPlan",
+                                  "width": "fill_container",
+                                  "height": 60,
+                                  "fill": "#3D8A5A",
+                                  "cornerRadius": 24,
+                                  "layout": "vertical",
+                                  "gap": 4,
+                                  "padding": [
+                                    8,
+                                    12
+                                  ],
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "frame",
+                                      "id": "tabPlanDot",
+                                      "name": "tabPlanDot",
+                                      "width": 6,
+                                      "height": 6,
+                                      "fill": "#FFFFFF",
+                                      "cornerRadius": 100
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "tabPlanLabel",
+                                      "name": "tabPlanLabel",
+                                      "fill": "#FFFFFF",
+                                      "content": "Plan",
+                                      "fontFamily": "Outfit",
+                                      "fontSize": 12,
+                                      "fontWeight": "600"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "tabCalendar",
+                                  "name": "tabCalendar",
+                                  "width": "fill_container",
+                                  "height": 60,
+                                  "fill": "#FAFAF8",
+                                  "cornerRadius": 24,
+                                  "stroke": {
+                                    "align": "inside",
+                                    "thickness": 1,
+                                    "fill": "#E5E4E1"
+                                  },
+                                  "layout": "vertical",
+                                  "gap": 4,
+                                  "padding": [
+                                    8,
+                                    12
+                                  ],
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "frame",
+                                      "id": "tabCalendarDot",
+                                      "name": "tabCalendarDot",
+                                      "width": 6,
+                                      "height": 6,
+                                      "fill": "#9C9B99",
+                                      "cornerRadius": 100
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "tabCalendarLabel",
+                                      "name": "tabCalendarLabel",
+                                      "fill": "#6D6C6A",
+                                      "content": "Calendar",
+                                      "fontFamily": "Outfit",
+                                      "fontSize": 12,
+                                      "fontWeight": "600"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "tabProfile",
+                                  "name": "tabProfile",
+                                  "width": "fill_container",
+                                  "height": 60,
+                                  "fill": "#FAFAF8",
+                                  "cornerRadius": 24,
+                                  "stroke": {
+                                    "align": "inside",
+                                    "thickness": 1,
+                                    "fill": "#E5E4E1"
+                                  },
+                                  "layout": "vertical",
+                                  "gap": 4,
+                                  "padding": [
+                                    8,
+                                    12
+                                  ],
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "frame",
+                                      "id": "tabProfileDot",
+                                      "name": "tabProfileDot",
+                                      "width": 6,
+                                      "height": 6,
+                                      "fill": "#9C9B99",
+                                      "cornerRadius": 100
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "tabProfileLabel",
+                                      "name": "tabProfileLabel",
+                                      "fill": "#6D6C6A",
+                                      "content": "Me",
+                                      "fontFamily": "Outfit",
+                                      "fontSize": 12,
+                                      "fontWeight": "600"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "screensRowB",
+              "name": "screensRowB",
+              "width": "fill_container",
+              "gap": 24,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "calendarScreen",
+                  "name": "Screen - Calendar - Mobile",
+                  "width": 402,
+                  "fill": "#F5F4F1",
+                  "cornerRadius": 20,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#E5E4E1"
+                  },
+                  "layout": "vertical",
+                  "gap": 0,
+                  "padding": 0,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "calendarStatus",
+                      "name": "calendarStatus",
+                      "width": "fill_container",
+                      "height": 62,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "calendarStatusTime",
+                          "name": "calendarStatusTime",
+                          "fill": "#1A1918",
+                          "content": "9:41",
+                          "fontFamily": "Outfit",
+                          "fontSize": 12,
+                          "fontWeight": "600"
+                        }
+                      ],
+                      "justifyContent": "space_between",
+                      "alignItems": "center"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "calendarContent",
+                      "name": "calendarContent",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 24,
+                      "padding": [
+                        0,
+                        24,
+                        24,
+                        24
+                      ],
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "calendarHeader",
+                          "name": "calendarHeader",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 8,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "calendarEyebrow",
+                              "name": "calendarEyebrow",
+                              "fill": "#6D6C6A",
+                              "content": "Calendar",
+                              "fontFamily": "Outfit",
+                              "fontSize": 13,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "calendarTitle",
+                              "name": "calendarTitle",
+                              "fill": "#1A1918",
+                              "content": "Your week, day by day",
+                              "fontFamily": "Outfit",
+                              "fontSize": 26,
+                              "fontWeight": "600",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "lineHeight": 1.2
+                            },
+                            {
+                              "type": "text",
+                              "id": "calendarBody",
+                              "name": "calendarBody",
+                              "fill": "#6D6C6A",
+                              "content": "A simple weekly view so you can scan what is coming without losing the big picture.",
+                              "fontFamily": "Outfit",
+                              "fontSize": 15,
+                              "fontWeight": "400",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "lineHeight": 1.5
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "calendarWeekCard",
+                          "name": "calendarWeekCard",
+                          "width": "fill_container",
+                          "fill": "#FFFFFF",
+                          "cornerRadius": 20,
+                          "stroke": {
+                            "align": "inside",
+                            "thickness": 1,
+                            "fill": "#E5E4E1"
+                          },
+                          "layout": "vertical",
+                          "gap": 12,
+                          "padding": 20,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "calendarWeekTop",
+                              "name": "calendarWeekTop",
+                              "width": "fill_container",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "calendarWeekLabel",
+                                  "name": "calendarWeekLabel",
+                                  "fill": "#9C9B99",
+                                  "content": "This week",
+                                  "fontFamily": "Outfit",
+                                  "fontSize": 12,
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "calendarWeekChip",
+                                  "name": "calendarWeekChip",
+                                  "fill": "#F3E0D7",
+                                  "cornerRadius": 100,
+                                  "layout": "vertical",
+                                  "padding": [
+                                    4,
+                                    10
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "calendarWeekChipText",
+                                      "name": "calendarWeekChipText",
+                                      "fill": "#D89575",
+                                      "content": "Race build",
+                                      "fontFamily": "Outfit",
+                                      "fontSize": 11,
+                                      "fontWeight": "600"
+                                    }
+                                  ]
+                                }
+                              ],
+                              "justifyContent": "space_between",
+                              "alignItems": "center"
+                            },
+                            {
+                              "type": "text",
+                              "id": "calendarWeekMetric",
+                              "name": "calendarWeekMetric",
+                              "fill": "#1A1918",
+                              "content": "7 days planned",
+                              "fontFamily": "Outfit",
+                              "fontSize": 32,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "calendarWeekCaption",
+                              "name": "calendarWeekCaption",
+                              "fill": "#6D6C6A",
+                              "content": "Only the key label for each day. Open a day to inspect the workout.",
+                              "fontFamily": "Outfit",
+                              "fontSize": 14,
+                              "fontWeight": "400",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "lineHeight": 1.5
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "calendarList",
+                          "name": "calendarList",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 12,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "calendarDay1",
+                              "name": "calendarDay1",
+                              "width": "fill_container",
+                              "fill": "#FFFFFF",
+                              "cornerRadius": 16,
+                              "stroke": {
+                                "align": "inside",
+                                "thickness": 1,
+                                "fill": "#E5E4E1"
+                              },
+                              "layout": "vertical",
+                              "gap": 6,
+                              "padding": 16,
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "calendarDayTop1",
+                                  "name": "calendarDayTop1",
+                                  "width": "fill_container",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "calendarDayLabel1",
+                                      "name": "calendarDayLabel1",
+                                      "fill": "#9C9B99",
+                                      "content": "Mon",
+                                      "fontFamily": "Outfit",
+                                      "fontSize": 12,
+                                      "fontWeight": "600"
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "calendarDayChip1",
+                                      "name": "calendarDayChip1",
+                                      "fill": "#FAFAF8",
+                                      "cornerRadius": 100,
+                                      "layout": "vertical",
+                                      "padding": [
+                                        4,
+                                        8
+                                      ],
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "id": "calendarDayChipText1",
+                                          "name": "calendarDayChipText1",
+                                          "fill": "#6D6C6A",
+                                          "content": "Planned",
+                                          "fontFamily": "Outfit",
+                                          "fontSize": 11,
+                                          "fontWeight": "600"
+                                        }
+                                      ]
+                                    }
+                                  ],
+                                  "justifyContent": "space_between",
+                                  "alignItems": "center"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "calendarDayTitle1",
+                                  "name": "calendarDayTitle1",
+                                  "fill": "#1A1918",
+                                  "content": "Rest / mobility",
+                                  "fontFamily": "Outfit",
+                                  "fontSize": 15,
+                                  "fontWeight": "600",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "lineHeight": 1.3
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "calendarDay2",
+                              "name": "calendarDay2",
+                              "width": "fill_container",
+                              "fill": "#FFFFFF",
+                              "cornerRadius": 16,
+                              "stroke": {
+                                "align": "inside",
+                                "thickness": 1,
+                                "fill": "#E5E4E1"
+                              },
+                              "layout": "vertical",
+                              "gap": 6,
+                              "padding": 16,
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "calendarDayTop2",
+                                  "name": "calendarDayTop2",
+                                  "width": "fill_container",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "calendarDayLabel2",
+                                      "name": "calendarDayLabel2",
+                                      "fill": "#9C9B99",
+                                      "content": "Tue",
+                                      "fontFamily": "Outfit",
+                                      "fontSize": 12,
+                                      "fontWeight": "600"
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "calendarDayChip2",
+                                      "name": "calendarDayChip2",
+                                      "fill": "#C8F0D8",
+                                      "cornerRadius": 100,
+                                      "layout": "vertical",
+                                      "padding": [
+                                        4,
+                                        8
+                                      ],
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "id": "calendarDayChipText2",
+                                          "name": "calendarDayChipText2",
+                                          "fill": "#3D8A5A",
+                                          "content": "Planned",
+                                          "fontFamily": "Outfit",
+                                          "fontSize": 11,
+                                          "fontWeight": "600"
+                                        }
+                                      ]
+                                    }
+                                  ],
+                                  "justifyContent": "space_between",
+                                  "alignItems": "center"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "calendarDayTitle2",
+                                  "name": "calendarDayTitle2",
+                                  "fill": "#1A1918",
+                                  "content": "Easy run \u00b7 45 min",
+                                  "fontFamily": "Outfit",
+                                  "fontSize": 15,
+                                  "fontWeight": "600",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "lineHeight": 1.3
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "calendarDay3",
+                              "name": "calendarDay3",
+                              "width": "fill_container",
+                              "fill": "#FFFFFF",
+                              "cornerRadius": 16,
+                              "stroke": {
+                                "align": "inside",
+                                "thickness": 1,
+                                "fill": "#E5E4E1"
+                              },
+                              "layout": "vertical",
+                              "gap": 6,
+                              "padding": 16,
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "calendarDayTop3",
+                                  "name": "calendarDayTop3",
+                                  "width": "fill_container",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "calendarDayLabel3",
+                                      "name": "calendarDayLabel3",
+                                      "fill": "#9C9B99",
+                                      "content": "Wed",
+                                      "fontFamily": "Outfit",
+                                      "fontSize": 12,
+                                      "fontWeight": "600"
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "calendarDayChip3",
+                                      "name": "calendarDayChip3",
+                                      "fill": "#FAFAF8",
+                                      "cornerRadius": 100,
+                                      "layout": "vertical",
+                                      "padding": [
+                                        4,
+                                        8
+                                      ],
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "id": "calendarDayChipText3",
+                                          "name": "calendarDayChipText3",
+                                          "fill": "#6D6C6A",
+                                          "content": "Planned",
+                                          "fontFamily": "Outfit",
+                                          "fontSize": 11,
+                                          "fontWeight": "600"
+                                        }
+                                      ]
+                                    }
+                                  ],
+                                  "justifyContent": "space_between",
+                                  "alignItems": "center"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "calendarDayTitle3",
+                                  "name": "calendarDayTitle3",
+                                  "fill": "#1A1918",
+                                  "content": "Strength \u00b7 30 min",
+                                  "fontFamily": "Outfit",
+                                  "fontSize": 15,
+                                  "fontWeight": "600",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "lineHeight": 1.3
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "calendarDay4",
+                              "name": "calendarDay4",
+                              "width": "fill_container",
+                              "fill": "#FFFFFF",
+                              "cornerRadius": 16,
+                              "stroke": {
+                                "align": "inside",
+                                "thickness": 1,
+                                "fill": "#E5E4E1"
+                              },
+                              "layout": "vertical",
+                              "gap": 6,
+                              "padding": 16,
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "calendarDayTop4",
+                                  "name": "calendarDayTop4",
+                                  "width": "fill_container",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "calendarDayLabel4",
+                                      "name": "calendarDayLabel4",
+                                      "fill": "#9C9B99",
+                                      "content": "Thu",
+                                      "fontFamily": "Outfit",
+                                      "fontSize": 12,
+                                      "fontWeight": "600"
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "calendarDayChip4",
+                                      "name": "calendarDayChip4",
+                                      "fill": "#F3E0D7",
+                                      "cornerRadius": 100,
+                                      "layout": "vertical",
+                                      "padding": [
+                                        4,
+                                        8
+                                      ],
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "id": "calendarDayChipText4",
+                                          "name": "calendarDayChipText4",
+                                          "fill": "#D89575",
+                                          "content": "Planned",
+                                          "fontFamily": "Outfit",
+                                          "fontSize": 11,
+                                          "fontWeight": "600"
+                                        }
+                                      ]
+                                    }
+                                  ],
+                                  "justifyContent": "space_between",
+                                  "alignItems": "center"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "calendarDayTitle4",
+                                  "name": "calendarDayTitle4",
+                                  "fill": "#1A1918",
+                                  "content": "Quality \u00b7 6 \u00d7 3 min",
+                                  "fontFamily": "Outfit",
+                                  "fontSize": 15,
+                                  "fontWeight": "600",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "lineHeight": 1.3
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "calendarDay5",
+                              "name": "calendarDay5",
+                              "width": "fill_container",
+                              "fill": "#FFFFFF",
+                              "cornerRadius": 16,
+                              "stroke": {
+                                "align": "inside",
+                                "thickness": 1,
+                                "fill": "#E5E4E1"
+                              },
+                              "layout": "vertical",
+                              "gap": 6,
+                              "padding": 16,
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "calendarDayTop5",
+                                  "name": "calendarDayTop5",
+                                  "width": "fill_container",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "calendarDayLabel5",
+                                      "name": "calendarDayLabel5",
+                                      "fill": "#9C9B99",
+                                      "content": "Fri",
+                                      "fontFamily": "Outfit",
+                                      "fontSize": 12,
+                                      "fontWeight": "600"
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "calendarDayChip5",
+                                      "name": "calendarDayChip5",
+                                      "fill": "#FAFAF8",
+                                      "cornerRadius": 100,
+                                      "layout": "vertical",
+                                      "padding": [
+                                        4,
+                                        8
+                                      ],
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "id": "calendarDayChipText5",
+                                          "name": "calendarDayChipText5",
+                                          "fill": "#6D6C6A",
+                                          "content": "Planned",
+                                          "fontFamily": "Outfit",
+                                          "fontSize": 11,
+                                          "fontWeight": "600"
+                                        }
+                                      ]
+                                    }
+                                  ],
+                                  "justifyContent": "space_between",
+                                  "alignItems": "center"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "calendarDayTitle5",
+                                  "name": "calendarDayTitle5",
+                                  "fill": "#1A1918",
+                                  "content": "Rest",
+                                  "fontFamily": "Outfit",
+                                  "fontSize": 15,
+                                  "fontWeight": "600",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "lineHeight": 1.3
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "calendarDay6",
+                              "name": "calendarDay6",
+                              "width": "fill_container",
+                              "fill": "#FFFFFF",
+                              "cornerRadius": 16,
+                              "stroke": {
+                                "align": "inside",
+                                "thickness": 1,
+                                "fill": "#E5E4E1"
+                              },
+                              "layout": "vertical",
+                              "gap": 6,
+                              "padding": 16,
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "calendarDayTop6",
+                                  "name": "calendarDayTop6",
+                                  "width": "fill_container",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "calendarDayLabel6",
+                                      "name": "calendarDayLabel6",
+                                      "fill": "#9C9B99",
+                                      "content": "Sat",
+                                      "fontFamily": "Outfit",
+                                      "fontSize": 12,
+                                      "fontWeight": "600"
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "calendarDayChip6",
+                                      "name": "calendarDayChip6",
+                                      "fill": "#C8F0D8",
+                                      "cornerRadius": 100,
+                                      "layout": "vertical",
+                                      "padding": [
+                                        4,
+                                        8
+                                      ],
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "id": "calendarDayChipText6",
+                                          "name": "calendarDayChipText6",
+                                          "fill": "#3D8A5A",
+                                          "content": "Planned",
+                                          "fontFamily": "Outfit",
+                                          "fontSize": 11,
+                                          "fontWeight": "600"
+                                        }
+                                      ]
+                                    }
+                                  ],
+                                  "justifyContent": "space_between",
+                                  "alignItems": "center"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "calendarDayTitle6",
+                                  "name": "calendarDayTitle6",
+                                  "fill": "#1A1918",
+                                  "content": "Easy run \u00b7 35 min",
+                                  "fontFamily": "Outfit",
+                                  "fontSize": 15,
+                                  "fontWeight": "600",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "lineHeight": 1.3
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "calendarDay7",
+                              "name": "calendarDay7",
+                              "width": "fill_container",
+                              "fill": "#FFFFFF",
+                              "cornerRadius": 16,
+                              "stroke": {
+                                "align": "inside",
+                                "thickness": 1,
+                                "fill": "#E5E4E1"
+                              },
+                              "layout": "vertical",
+                              "gap": 6,
+                              "padding": 16,
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "calendarDayTop7",
+                                  "name": "calendarDayTop7",
+                                  "width": "fill_container",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "calendarDayLabel7",
+                                      "name": "calendarDayLabel7",
+                                      "fill": "#9C9B99",
+                                      "content": "Sun",
+                                      "fontFamily": "Outfit",
+                                      "fontSize": 12,
+                                      "fontWeight": "600"
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "calendarDayChip7",
+                                      "name": "calendarDayChip7",
+                                      "fill": "#C8F0D8",
+                                      "cornerRadius": 100,
+                                      "layout": "vertical",
+                                      "padding": [
+                                        4,
+                                        8
+                                      ],
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "id": "calendarDayChipText7",
+                                          "name": "calendarDayChipText7",
+                                          "fill": "#3D8A5A",
+                                          "content": "Planned",
+                                          "fontFamily": "Outfit",
+                                          "fontSize": 11,
+                                          "fontWeight": "600"
+                                        }
+                                      ]
+                                    }
+                                  ],
+                                  "justifyContent": "space_between",
+                                  "alignItems": "center"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "calendarDayTitle7",
+                                  "name": "calendarDayTitle7",
+                                  "fill": "#1A1918",
+                                  "content": "Long run \u00b7 80 min",
+                                  "fontFamily": "Outfit",
+                                  "fontSize": 15,
+                                  "fontWeight": "600",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "lineHeight": 1.3
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "calendarBottomWrap",
+                      "name": "calendarBottomWrap",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "padding": [
+                        16,
+                        24,
+                        24,
+                        24
+                      ],
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "calendarTabBar",
+                          "name": "calendarTabBar",
+                          "width": "fill_container",
+                          "height": 72,
+                          "fill": "#FFFFFF",
+                          "cornerRadius": 32,
+                          "stroke": {
+                            "align": "inside",
+                            "thickness": 1,
+                            "fill": "#D1D0CD"
+                          },
+                          "layout": "vertical",
+                          "padding": [
+                            6,
+                            6
+                          ],
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "calendarTabs",
+                              "name": "calendarTabs",
+                              "width": "fill_container",
+                              "height": 60,
+                              "gap": 6,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "tabCALENDARPLAN",
+                                  "name": "tabCALENDARPLAN",
+                                  "width": "fill_container",
+                                  "height": 60,
+                                  "fill": "#FAFAF8",
+                                  "cornerRadius": 24,
+                                  "stroke": {
+                                    "align": "inside",
+                                    "thickness": 1,
+                                    "fill": "#E5E4E1"
+                                  },
+                                  "layout": "vertical",
+                                  "gap": 4,
+                                  "padding": [
+                                    8,
+                                    12
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "frame",
+                                      "id": "tabCALENDARPLANDot",
+                                      "name": "tabCALENDARPLANDot",
+                                      "width": 6,
+                                      "height": 6,
+                                      "fill": "#9C9B99",
+                                      "cornerRadius": 100
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "tabCALENDARPLANLabel",
+                                      "name": "tabCALENDARPLANLabel",
+                                      "fill": "#6D6C6A",
+                                      "content": "Plan",
+                                      "fontFamily": "Outfit",
+                                      "fontSize": 12,
+                                      "fontWeight": "600"
+                                    }
+                                  ],
+                                  "justifyContent": "center",
+                                  "alignItems": "center"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "tabCALENDARCALENDAR",
+                                  "name": "tabCALENDARCALENDAR",
+                                  "width": "fill_container",
+                                  "height": 60,
+                                  "fill": "#3D8A5A",
+                                  "cornerRadius": 24,
+                                  "layout": "vertical",
+                                  "gap": 4,
+                                  "padding": [
+                                    8,
+                                    12
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "frame",
+                                      "id": "tabCALENDARCALENDARDot",
+                                      "name": "tabCALENDARCALENDARDot",
+                                      "width": 6,
+                                      "height": 6,
+                                      "fill": "#FFFFFF",
+                                      "cornerRadius": 100
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "tabCALENDARCALENDARLabel",
+                                      "name": "tabCALENDARCALENDARLabel",
+                                      "fill": "#FFFFFF",
+                                      "content": "Calendar",
+                                      "fontFamily": "Outfit",
+                                      "fontSize": 12,
+                                      "fontWeight": "600"
+                                    }
+                                  ],
+                                  "justifyContent": "center",
+                                  "alignItems": "center"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "tabCALENDARPROFILE",
+                                  "name": "tabCALENDARPROFILE",
+                                  "width": "fill_container",
+                                  "height": 60,
+                                  "fill": "#FAFAF8",
+                                  "cornerRadius": 24,
+                                  "stroke": {
+                                    "align": "inside",
+                                    "thickness": 1,
+                                    "fill": "#E5E4E1"
+                                  },
+                                  "layout": "vertical",
+                                  "gap": 4,
+                                  "padding": [
+                                    8,
+                                    12
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "frame",
+                                      "id": "tabCALENDARPROFILEDot",
+                                      "name": "tabCALENDARPROFILEDot",
+                                      "width": 6,
+                                      "height": 6,
+                                      "fill": "#9C9B99",
+                                      "cornerRadius": 100
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "tabCALENDARPROFILELabel",
+                                      "name": "tabCALENDARPROFILELabel",
+                                      "fill": "#6D6C6A",
+                                      "content": "Me",
+                                      "fontFamily": "Outfit",
+                                      "fontSize": 12,
+                                      "fontWeight": "600"
+                                    }
+                                  ],
+                                  "justifyContent": "center",
+                                  "alignItems": "center"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "sessionDetailScreen",
+                  "name": "Screen - Session Detail - Mobile",
+                  "width": 402,
+                  "fill": "#F5F4F1",
+                  "cornerRadius": 20,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#E5E4E1"
+                  },
+                  "layout": "vertical",
+                  "gap": 0,
+                  "padding": 0,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "sessionStatus",
+                      "name": "sessionStatus",
+                      "width": "fill_container",
+                      "height": 62,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "sessionStatusTime",
+                          "name": "sessionStatusTime",
+                          "fill": "#1A1918",
+                          "content": "9:41",
+                          "fontFamily": "Outfit",
+                          "fontSize": 12,
+                          "fontWeight": "600"
+                        }
+                      ],
+                      "justifyContent": "space_between",
+                      "alignItems": "center"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "sessionContent",
+                      "name": "sessionContent",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 24,
+                      "padding": [
+                        0,
+                        24,
+                        24,
+                        24
+                      ],
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "sessionTopBar",
+                          "name": "sessionTopBar",
+                          "width": "fill_container",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "sessionBack",
+                              "name": "sessionBack",
+                              "fill": "#6D6C6A",
+                              "content": "Back",
+                              "fontFamily": "Outfit",
+                              "fontSize": 13,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "sessionTopLabel",
+                              "name": "sessionTopLabel",
+                              "fill": "#6D6C6A",
+                              "content": "Session detail",
+                              "fontFamily": "Outfit",
+                              "fontSize": 13,
+                              "fontWeight": "600"
+                            }
+                          ],
+                          "justifyContent": "space_between",
+                          "alignItems": "center"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "sessionHeader",
+                          "name": "sessionHeader",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 8,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "sessionTitle",
+                              "name": "sessionTitle",
+                              "fill": "#1A1918",
+                              "content": "Quality session \u00b7 6 \u00d7 3 min",
+                              "fontFamily": "Outfit",
+                              "fontSize": 26,
+                              "fontWeight": "600",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "lineHeight": 1.2
+                            },
+                            {
+                              "type": "text",
+                              "id": "sessionBody",
+                              "name": "sessionBody",
+                              "fill": "#6D6C6A",
+                              "content": "Controlled effort, full recovery between reps, and enough space around the session to absorb the work.",
+                              "fontFamily": "Outfit",
+                              "fontSize": 15,
+                              "fontWeight": "400",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "lineHeight": 1.5
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "sessionSummaryCard",
+                          "name": "sessionSummaryCard",
+                          "width": "fill_container",
+                          "fill": "#FFFFFF",
+                          "cornerRadius": 20,
+                          "stroke": {
+                            "align": "inside",
+                            "thickness": 1,
+                            "fill": "#E5E4E1"
+                          },
+                          "layout": "vertical",
+                          "gap": 12,
+                          "padding": 20,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "sessionSummaryTop",
+                              "name": "sessionSummaryTop",
+                              "width": "fill_container",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "sessionSummaryDay",
+                                  "name": "sessionSummaryDay",
+                                  "fill": "#9C9B99",
+                                  "content": "Thursday",
+                                  "fontFamily": "Outfit",
+                                  "fontSize": 12,
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "sessionSummaryChip",
+                                  "name": "sessionSummaryChip",
+                                  "fill": "#F3E0D7",
+                                  "cornerRadius": 100,
+                                  "layout": "vertical",
+                                  "padding": [
+                                    4,
+                                    10
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "sessionSummaryChipText",
+                                      "name": "sessionSummaryChipText",
+                                      "fill": "#D89575",
+                                      "content": "Key session",
+                                      "fontFamily": "Outfit",
+                                      "fontSize": 11,
+                                      "fontWeight": "600"
+                                    }
+                                  ]
+                                }
+                              ],
+                              "justifyContent": "space_between",
+                              "alignItems": "center"
+                            },
+                            {
+                              "type": "text",
+                              "id": "sessionSummaryMetric",
+                              "name": "sessionSummaryMetric",
+                              "fill": "#1A1918",
+                              "content": "45 min total",
+                              "fontFamily": "Outfit",
+                              "fontSize": 32,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "sessionSummaryCaption",
+                              "name": "sessionSummaryCaption",
+                              "fill": "#6D6C6A",
+                              "content": "Warm up, 6 repeats, recover well, then cool down.",
+                              "fontFamily": "Outfit",
+                              "fontSize": 14,
+                              "fontWeight": "400",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "lineHeight": 1.5
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "sessionDetailsCard",
+                          "name": "sessionDetailsCard",
+                          "width": "fill_container",
+                          "fill": "#FFFFFF",
+                          "cornerRadius": 16,
+                          "stroke": {
+                            "align": "inside",
+                            "thickness": 1,
+                            "fill": "#E5E4E1"
+                          },
+                          "layout": "vertical",
+                          "gap": 12,
+                          "padding": 18,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "sessionDetailsTitle",
+                              "name": "sessionDetailsTitle",
+                              "fill": "#1A1918",
+                              "content": "What to do",
+                              "fontFamily": "Outfit",
+                              "fontSize": 18,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "sessionDetailsBody",
+                              "name": "sessionDetailsBody",
+                              "fill": "#6D6C6A",
+                              "content": "Run the repeats at a controlled hard effort. You should finish feeling worked, but not cooked.",
+                              "fontFamily": "Outfit",
+                              "fontSize": 14,
+                              "fontWeight": "400",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "lineHeight": 1.5
+                            },
+                            {
+                              "type": "text",
+                              "id": "sessionWhyTitle",
+                              "name": "sessionWhyTitle",
+                              "fill": "#1A1918",
+                              "content": "Why it is here",
+                              "fontFamily": "Outfit",
+                              "fontSize": 18,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "sessionWhyBody",
+                              "name": "sessionWhyBody",
+                              "fill": "#6D6C6A",
+                              "content": "This is the main quality stimulus of the week, placed far enough from the long run to keep the load balanced.",
+                              "fontFamily": "Outfit",
+                              "fontSize": 14,
+                              "fontWeight": "400",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "lineHeight": 1.5
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "sessionPrimary",
+                          "name": "sessionPrimary",
+                          "width": "fill_container",
+                          "fill": "#3D8A5A",
+                          "cornerRadius": 100,
+                          "layout": "vertical",
+                          "padding": [
+                            14,
+                            18
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "sessionPrimaryText",
+                              "name": "sessionPrimaryText",
+                              "fill": "#FFFFFF",
+                              "content": "Back to calendar",
+                              "fontFamily": "Outfit",
+                              "fontSize": 15,
+                              "fontWeight": "600"
+                            }
+                          ],
+                          "justifyContent": "center",
+                          "alignItems": "center"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
