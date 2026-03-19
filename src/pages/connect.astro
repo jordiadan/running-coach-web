@@ -1,0 +1,53 @@
+---
+import PortalLayout from "../layouts/PortalLayout.astro";
+---
+
+<PortalLayout
+  title="Connect Intervals | Running Coach"
+  description="Connect Intervals to start planning in Running Coach."
+  pathname="/connect"
+>
+  <div class="portal-page">
+    <section class="portal-screen portal-screen--auth" aria-labelledby="connect-title">
+      <div class="portal-stage portal-stage--auth">
+        <div class="portal-stage__lead">
+          <p class="portal-eyebrow">Connection</p>
+          <h1 id="connect-title" class="portal-title">
+            Connect Intervals once and keep the rest inside the portal.
+          </h1>
+          <p class="portal-lede">
+            One connection is enough. After that, setup and the current week stay
+            inside the product.
+          </p>
+        </div>
+
+        <div class="portal-stage__panel portal-panel-stack">
+          <div class="portal-card portal-card--auth portal-state-card">
+            <p class="portal-card-label">Not connected</p>
+            <h2 class="portal-subtitle">Connect Intervals</h2>
+            <p class="portal-note">Connect once to unlock setup and the current week.</p>
+            <div class="portal-button-row">
+              <a class="portal-button portal-button--primary" href="/profile">
+                Connect Intervals
+              </a>
+              <a class="portal-button portal-button--secondary" href="/privacy">
+                Read privacy
+              </a>
+            </div>
+          </div>
+
+          <div class="portal-card portal-card--success portal-state-card">
+            <p class="portal-card-label portal-card-label--success">Connected</p>
+            <h2 class="portal-subtitle">Intervals is connected</h2>
+            <p class="portal-note">Recent training context is available.</p>
+            <div class="portal-button-row">
+              <button class="portal-button portal-button--secondary" type="button">
+                Disconnect
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</PortalLayout>

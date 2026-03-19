@@ -1,0 +1,108 @@
+---
+import PortalLayout from "../layouts/PortalLayout.astro";
+---
+
+<PortalLayout
+  title="Profile | Running Coach"
+  description="Set the details that shape the week in Running Coach."
+  pathname="/profile"
+  navTab="profile"
+>
+  <div class="portal-page">
+    <section class="portal-screen" aria-labelledby="profile-title">
+      <div class="portal-stage">
+        <div class="portal-stage__lead">
+          <p class="portal-eyebrow">Setup</p>
+          <h1 id="profile-title" class="portal-title">
+            Set the few details that actually shape the week.
+          </h1>
+          <p class="portal-lede">
+            Keep this screen short. Goal first, rhythm second, identity last.
+          </p>
+        </div>
+
+        <div class="portal-stage__panel portal-panel-stack">
+          <div class="portal-card portal-card--auth portal-card--profile">
+            <form class="portal-form" action="/plan" method="get">
+              <fieldset class="portal-fieldset">
+                <legend>Primary target</legend>
+                <div class="portal-field-stack">
+                  <div class="portal-field portal-field--strong">
+                    <label for="primary-goal">Primary goal</label>
+                    <input
+                      id="primary-goal"
+                      name="primary-goal"
+                      type="text"
+                      value="Barcelona Marathon"
+                    />
+                  </div>
+
+                  <div class="portal-field portal-field--date">
+                    <label for="target-date">Target date</label>
+                    <input id="target-date" name="target-date" type="date" value="2026-11-15" />
+                  </div>
+                </div>
+              </fieldset>
+
+              <fieldset class="portal-fieldset">
+                <legend>Weekly rhythm</legend>
+                <div class="portal-choice-grid">
+                  <label class="portal-choice">
+                    <input type="checkbox" name="training-days" value="Mon" />
+                    <span>Mon</span>
+                  </label>
+                  <label class="portal-choice">
+                    <input type="checkbox" name="training-days" value="Tue" checked />
+                    <span>Tue</span>
+                  </label>
+                  <label class="portal-choice">
+                    <input type="checkbox" name="training-days" value="Wed" />
+                    <span>Wed</span>
+                  </label>
+                  <label class="portal-choice">
+                    <input type="checkbox" name="training-days" value="Thu" checked />
+                    <span>Thu</span>
+                  </label>
+                  <label class="portal-choice">
+                    <input type="checkbox" name="training-days" value="Fri" />
+                    <span>Fri</span>
+                  </label>
+                  <label class="portal-choice">
+                    <input type="checkbox" name="training-days" value="Sat" checked />
+                    <span>Sat</span>
+                  </label>
+                  <label class="portal-choice">
+                    <input type="checkbox" name="training-days" value="Sun" checked />
+                    <span>Sun</span>
+                  </label>
+                </div>
+              </fieldset>
+
+              <fieldset class="portal-fieldset">
+                <legend>Portal identity</legend>
+                <div class="portal-field">
+                  <label for="display-name">Name in the portal</label>
+                  <input id="display-name" name="display-name" type="text" value="Jordi" />
+                </div>
+              </fieldset>
+
+              <div class="portal-button-row">
+                <button class="portal-button portal-button--primary" type="submit">
+                  Save preferences
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <aside class="portal-card portal-card--success" aria-labelledby="profile-connection-title">
+            <p class="portal-card-label portal-card-label--success">Connected to Intervals</p>
+            <h2 id="profile-connection-title" class="portal-subtitle">Connection is healthy.</h2>
+            <p class="portal-note portal-note--tight">
+              Recent training context is already available for planning.
+            </p>
+          </aside>
+        </div>
+      </div>
+    </section>
+  </div>
+</PortalLayout>
