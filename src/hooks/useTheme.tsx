@@ -9,6 +9,8 @@ export const themes: { id: ThemeId; label: string }[] = [
   { id: "forest", label: "Forest & Deep" },
 ];
 
+const themeIds = themes.map((item) => item.id);
+
 interface ThemeContextType {
   theme: ThemeId;
   setTheme: (t: ThemeId) => void;
@@ -18,7 +20,8 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<ThemeId>(() => {
-    return (localStorage.getItem("rc-theme") as ThemeId) || "warm";
+    const stored = localStorage.getItem("rc-theme") as ThemeId | null;
+    return stored && themeIds.includes(stored) ? stored : "warm";
   });
 
   const setTheme = (t: ThemeId) => {
@@ -27,7 +30,18 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    document.documentElement.className = `theme-${theme}`;
+    const root = document.documentElement;
+
+    root.classList.remove("dark");
+    themeIds.forEach((themeId) => root.classList.remove(`theme-${themeId}`));
+    root.classList.add(`theme-${theme}`);
+
+    if (theme === "dark") {
+      root.classList.add("dark");
+      root.style.colorScheme = "dark";
+    } else {
+      root.style.colorScheme = "light";
+    }
   }, [theme]);
 
   return (

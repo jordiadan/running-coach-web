@@ -3,7 +3,8 @@ import { themes, useTheme } from "@/hooks/useTheme";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
@@ -27,17 +28,19 @@ export default function ThemeSwitcher() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
-        {themes.map((t) => (
-          <DropdownMenuItem
-            key={t.id}
-            onClick={() => setTheme(t.id)}
-            className={cn("flex items-center gap-3 cursor-pointer", theme === t.id && "font-medium")}
-          >
-            <span className={cn("w-3 h-3 rounded-full shrink-0", themePreviewColors[t.id])} />
-            {t.label}
-            {theme === t.id && <span className="ml-auto text-xs text-primary">✓</span>}
-          </DropdownMenuItem>
-        ))}
+        <DropdownMenuRadioGroup value={theme} onValueChange={(value) => setTheme(value as typeof theme)}>
+          {themes.map((t) => (
+            <DropdownMenuRadioItem
+              key={t.id}
+              value={t.id}
+              className={cn("flex items-center gap-3 cursor-pointer", theme === t.id && "font-medium")}
+            >
+              <span className={cn("w-3 h-3 rounded-full shrink-0", themePreviewColors[t.id])} />
+              {t.label}
+              {theme === t.id && <span className="ml-auto text-xs text-primary">✓</span>}
+            </DropdownMenuRadioItem>
+          ))}
+        </DropdownMenuRadioGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   );

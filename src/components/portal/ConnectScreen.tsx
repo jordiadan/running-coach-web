@@ -3,11 +3,17 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
 const sources = [
-  { id: "strava", name: "Strava", description: "Import runs, pace, and distance data", connected: false },
-  { id: "garmin", name: "Garmin Connect", description: "Sync heart rate and training load", connected: false },
-  { id: "intervals", name: "Intervals.icu", description: "Sync structured workouts, fitness and fatigue data", connected: false },
-  { id: "apple", name: "Apple Health", description: "Pull activity and workout data", connected: false },
-  { id: "manual", name: "Manual Input", description: "Enter your recent training history by hand", connected: true },
+  { id: "strava", name: "Strava", description: "Import runs, pace, and distance data", connected: false, disabled: true },
+  { id: "garmin", name: "Garmin Connect", description: "Sync heart rate and training load", connected: false, disabled: true },
+  {
+    id: "intervals",
+    name: "Intervals.icu",
+    description: "Sync structured workouts, fitness and fatigue data",
+    connected: false,
+    disabled: false,
+  },
+  { id: "apple", name: "Apple Health", description: "Pull activity and workout data", connected: false, disabled: true },
+  { id: "manual", name: "Manual Input", description: "Enter your recent training history by hand", connected: true, disabled: false },
 ];
 
 export default function ConnectScreen() {
@@ -30,17 +36,20 @@ export default function ConnectScreen() {
         {connections.map((source) => (
           <div
             key={source.id}
-            className="flex items-center justify-between p-5 rounded-xl border border-divider bg-card"
+            className={`flex items-center justify-between p-5 rounded-xl border border-divider bg-card ${
+              source.disabled ? "opacity-50" : ""
+            }`}
           >
             <div>
               <p className="font-medium text-foreground">{source.name}</p>
-              <p className="text-sm text-muted-foreground">{source.description}</p>
+              <p className="text-sm text-muted-foreground">{source.disabled ? "Coming soon" : source.description}</p>
             </div>
             <Button
               variant={source.connected ? "secondary" : "outline"}
               size="sm"
-              onClick={() => toggle(source.id)}
+              onClick={() => !source.disabled && toggle(source.id)}
               className="min-w-[110px]"
+              disabled={source.disabled}
             >
               {source.connected ? (
                 <><Check className="w-3.5 h-3.5 mr-1" /> Connected</>
