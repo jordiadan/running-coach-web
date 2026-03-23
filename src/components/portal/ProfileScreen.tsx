@@ -1,28 +1,126 @@
-import { useState } from "react";
-import { format } from "date-fns";
-import { CalendarIcon, MessageSquareMore } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { format, parseISO } from "date-fns";
+import { CalendarIcon, MessageSquareMore, RefreshCcw } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import {
+  getAthleteProfile,
+  updateAthleteProfile,
+  type AthleteProfileUpdate,
+} from "@/lib/portal-api";
 
-const allDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const allDays = [
+  { value: "MON", label: "Mon" },
+  { value: "TUE", label: "Tue" },
+  { value: "WED", label: "Wed" },
+  { value: "THU", label: "Thu" },
+  { value: "FRI", label: "Fri" },
+  { value: "SAT", label: "Sat" },
+  { value: "SUN", label: "Sun" },
+] as const;
 
-export default function ProfileScreen() {
-  const [selectedDays, setSelectedDays] = useState<string[]>(["Mon", "Wed", "Thu", "Sat"]);
-  const [raceDate, setRaceDate] = useState<Date | undefined>(new Date(2026, 9, 18));
+type ProfileScreenProps = {
+  athleteId: string;
+};
+
+const emptyForm: AthleteProfileUpdate = {
+  displayName: "",
+  trainingGoal: "",
+  preferredTrainingDays: ["TUE", "THU", "SAT", "SUN"],
+  goalRaceEventName: "",
+  goalRaceEventDate: "",
+  goalRaceEventDistanceKm: "",
+};
+
+export default function ProfileScreen({ athleteId }: ProfileScreenProps) {
+  const queryClient = useQueryClient();
+  const profileQuery = useQuery({
+    queryKey: ["portal", "athlete", athleteId],
+    queryFn: () => getAthleteProfile(athleteId),
+    enabled: Boolean(athleteId),
+  });
+
+  const [form, setForm] = useState<AthleteProfileUpdate>(emptyForm);
+
+  useEffect(() => {
+    if (!profileQuery.data) return;
+
+    setForm({
+      displayName: profileQuery.data.displayName,
+      trainingGoal: profileQuery.data.trainingGoal,
+      preferredTrainingDays:
+        profileQuery.data.preferredTrainingDays.length > 0
+          ? profileQuery.data.preferredTrainingDays
+          : emptyForm.preferredTrainingDays,
+      goalRaceEventName: profileQuery.data.goalRaceEventName,
+      goalRaceEventDate: profileQuery.data.goalRaceEventDate,
+      goalRaceEventDistanceKm: profileQuery.data.goalRaceEventDistanceKm,
+    });
+  }, [profileQuery.data]);
+
+  const saveMutation = useMutation({
+    mutationFn: (values: AthleteProfileUpdate) => updateAthleteProfile(athleteId, values),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["portal", "athlete", athleteId] });
+    },
+  });
+
+  const raceDate = useMemo(() => {
+    if (!form.goalRaceEventDate) return undefined;
+
+    try {
+      return parseISO(form.goalRaceEventDate);
+    } catch {
+      return undefined;
+    }
+  }, [form.goalRaceEventDate]);
 
   const toggleDay = (day: string) => {
-    setSelectedDays((prev) => {
-      if (prev.includes(day)) {
-        return prev.length > 4 ? prev.filter((d) => d !== day) : prev;
+    setForm((prev) => {
+      if (prev.preferredTrainingDays.includes(day)) {
+        return prev.preferredTrainingDays.length > 4
+          ? {
+              ...prev,
+              preferredTrainingDays: prev.preferredTrainingDays.filter((item) => item !== day),
+            }
+          : prev;
       }
 
-      return [...prev, day];
+      return {
+        ...prev,
+        preferredTrainingDays: [...prev.preferredTrainingDays, day],
+      };
     });
   };
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    saveMutation.mutate(form);
+  };
+
+  if (profileQuery.isLoading) {
+    return (
+      <div className="max-w-lg rounded-2xl border border-divider bg-card p-6 shadow-card">
+        <p className="text-sm text-muted-foreground">Loading your profile…</p>
+      </div>
+    );
+  }
+
+  if (profileQuery.isError) {
+    return (
+      <div className="max-w-lg rounded-2xl border border-divider bg-card p-6 shadow-card">
+        <h2 className="font-serif text-2xl text-foreground">We couldn't load your profile</h2>
+        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+          Refresh the page or try again in a moment. The portal still needs your athlete context before the plan can stay in sync.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-lg">
@@ -31,60 +129,79 @@ export default function ProfileScreen() {
         Update your running context to keep your plan relevant.
       </p>
 
-      <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+      <form className="space-y-6" onSubmit={handleSubmit}>
         <div className="space-y-2">
           <Label htmlFor="display-name">Display name</Label>
-          <Input id="display-name" defaultValue="Jordi" />
+          <Input
+            id="display-name"
+            value={form.displayName}
+            onChange={(event) => setForm((prev) => ({ ...prev, displayName: event.target.value }))}
+          />
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="training-goal">Training goal</Label>
-          <Input id="training-goal" defaultValue="Build toward a half marathon in October" />
+          <Input
+            id="training-goal"
+            value={form.trainingGoal}
+            onChange={(event) => setForm((prev) => ({ ...prev, trainingGoal: event.target.value }))}
+          />
         </div>
 
         <div className="space-y-2">
           <Label>Training days</Label>
           <div className="grid grid-cols-7 gap-2">
             {allDays.map((day) => {
-              const active = selectedDays.includes(day);
-              const locked = active && selectedDays.length === 4;
+              const active = form.preferredTrainingDays.includes(day.value);
+              const locked = active && form.preferredTrainingDays.length === 4;
+
               return (
                 <button
-                  key={day}
+                  key={day.value}
                   type="button"
-                  onClick={() => toggleDay(day)}
+                  onClick={() => toggleDay(day.value)}
                   className={cn(
-                    "w-full px-0 py-2.5 rounded-lg text-sm font-medium border transition-colors",
+                    "w-full rounded-lg border px-0 py-2.5 text-sm font-medium transition-colors",
                     active
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "border-divider text-muted-foreground hover:text-foreground hover:border-foreground/20",
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-divider text-muted-foreground hover:border-foreground/20 hover:text-foreground",
                     locked && "cursor-default"
                   )}
                 >
-                  {day}
+                  {day.label}
                 </button>
               );
             })}
           </div>
-          <p className="text-xs text-muted-foreground">
-            Choose the days you usually train. Minimum 4 days.
-          </p>
+          <p className="text-xs text-muted-foreground">Choose the days you usually train. Minimum 4 days.</p>
         </div>
 
         <div className="space-y-3">
           <Label>Goal race / event</Label>
           <div className="space-y-3">
-            <Input defaultValue="Half marathon" placeholder="Event name" />
+            <Input
+              value={form.goalRaceEventName}
+              placeholder="Event name"
+              onChange={(event) => setForm((prev) => ({ ...prev, goalRaceEventName: event.target.value }))}
+            />
             <div className="grid gap-3 sm:grid-cols-[minmax(8rem,0.75fr)_minmax(0,1.25fr)]">
-              <Input type="number" min="1" defaultValue="21" placeholder="Distance (km)" />
+              <Input
+                type="number"
+                min="1"
+                value={form.goalRaceEventDistanceKm}
+                placeholder="Distance (km)"
+                onChange={(event) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    goalRaceEventDistanceKm: event.target.value === "" ? "" : Number(event.target.value),
+                  }))
+                }
+              />
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !raceDate && "text-muted-foreground"
-                    )}
+                    className={cn("w-full justify-start text-left font-normal", !raceDate && "text-muted-foreground")}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {raceDate ? format(raceDate, "PPP") : "Pick a date"}
@@ -94,9 +211,14 @@ export default function ProfileScreen() {
                   <Calendar
                     mode="single"
                     selected={raceDate}
-                    onSelect={setRaceDate}
+                    onSelect={(value) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        goalRaceEventDate: value ? format(value, "yyyy-MM-dd") : "",
+                      }))
+                    }
                     initialFocus
-                    className={cn("p-3 pointer-events-auto")}
+                    className={cn("pointer-events-auto p-3")}
                   />
                 </PopoverContent>
               </Popover>
@@ -121,7 +243,21 @@ export default function ProfileScreen() {
           </div>
         </div>
 
-        <Button variant="hero" className="mt-2">Save changes</Button>
+        {saveMutation.isError && (
+          <p className="text-sm text-destructive">We couldn't save your profile. Try again.</p>
+        )}
+
+        {saveMutation.isSuccess && (
+          <p className="text-sm text-primary">Profile saved.</p>
+        )}
+
+        <Button variant="hero" className="mt-2" disabled={saveMutation.isPending}>
+          {saveMutation.isPending ? (
+            <><RefreshCcw className="mr-2 h-4 w-4 animate-spin" /> Saving</>
+          ) : (
+            "Save changes"
+          )}
+        </Button>
       </form>
     </div>
   );
