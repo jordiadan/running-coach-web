@@ -8,8 +8,7 @@ import ConnectScreen from "@/components/portal/ConnectScreen";
 import ProfileScreen from "@/components/portal/ProfileScreen";
 import WeeklyPlanScreen from "@/components/portal/WeeklyPlanScreen";
 import { Button } from "@/components/ui/button";
-import { ApiError } from "@/lib/api";
-import { getAthleteProfile, getIntervalsIntegrationStatus, getMe, isProfileComplete } from "@/lib/portal-api";
+import { bootstrapPortal } from "@/lib/portal-api";
 import { supabase } from "@/integrations/supabase/client";
 
 type Tab = "plan" | "connect" | "profile";
@@ -45,43 +44,33 @@ export default function PortalPage() {
     };
   }, []);
 
-  const meQuery = useQuery({
-    queryKey: ["portal", "me"],
-    queryFn: getMe,
+  const bootstrapQuery = useQuery({
+    queryKey: ["portal", "bootstrap"],
+    queryFn: bootstrapPortal,
     enabled: hasSession === true,
     retry: false,
+    refetchInterval: (query) =>
+      query.state.data?.nextStep === "prepare_weekly_plan" ? 5000 : false,
   });
-  const athleteId = meQuery.data?.athleteId;
-
-  const intervalsQuery = useQuery({
-    queryKey: ["portal", "intervals", athleteId],
-    queryFn: () => getIntervalsIntegrationStatus(athleteId!),
-    enabled: Boolean(athleteId),
-    retry: false,
-  });
-
-  const profileQuery = useQuery({
-    queryKey: ["portal", "athlete", athleteId],
-    queryFn: () => getAthleteProfile(athleteId!),
-    enabled: Boolean(athleteId),
-    retry: false,
-  });
+  const athleteId = bootstrapQuery.data?.athleteId;
 
   useEffect(() => {
-    if (!athleteId || intervalsQuery.isLoading || profileQuery.isLoading) return;
+    if (!bootstrapQuery.data) return;
 
-    if (!intervalsQuery.data?.connected) {
-      setActiveTab("connect");
-      return;
+    switch (bootstrapQuery.data.nextStep) {
+      case "connect_intervals":
+        setActiveTab("connect");
+        break;
+      case "complete_profile":
+        setActiveTab("profile");
+        break;
+      case "prepare_weekly_plan":
+      case "view_weekly_plan":
+      default:
+        setActiveTab("plan");
+        break;
     }
-
-    if (!isProfileComplete(profileQuery.data)) {
-      setActiveTab("profile");
-      return;
-    }
-
-    setActiveTab("plan");
-  }, [athleteId, intervalsQuery.data, intervalsQuery.isLoading, profileQuery.data, profileQuery.isLoading]);
+  }, [bootstrapQuery.data]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -114,7 +103,7 @@ export default function PortalPage() {
     );
   }
 
-  if (meQuery.isLoading) {
+  if (bootstrapQuery.isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center px-6">
         <div className="rounded-2xl border border-divider bg-card px-6 py-5 shadow-card">
@@ -124,36 +113,17 @@ export default function PortalPage() {
     );
   }
 
-  if (meQuery.isError || !athleteId) {
-    const error = meQuery.error;
-    const athleteAccessNotConfigured =
-      error instanceof ApiError &&
-      error.status === 403 &&
-      typeof error.payload === "object" &&
-      error.payload !== null &&
-      "code" in error.payload &&
-      error.payload.code === "ATHLETE_ACCESS_NOT_CONFIGURED";
-
+  if (bootstrapQuery.isError || !athleteId) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center px-6">
         <div className="w-full max-w-md rounded-2xl border border-divider bg-card p-6 shadow-card">
-          <h1 className="font-serif text-2xl text-foreground">
-            {athleteAccessNotConfigured ? "Your account is not linked yet" : "You need to sign in first"}
-          </h1>
+          <h1 className="font-serif text-2xl text-foreground">We couldn't open your portal</h1>
           <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-            {athleteAccessNotConfigured
-              ? "Google sign-in worked, but this user is not linked to an athlete in the backend yet. Once athlete access is configured, the portal can continue."
-              : "We couldn't load your athlete context. Sign in again and we'll reopen the portal from there."}
+            Sign in again and we'll retry your portal bootstrap. If the problem persists, the account may still be provisioning in the backend.
           </p>
-          {athleteAccessNotConfigured ? (
-            <Button className="mt-6" variant="hero" onClick={handleLogout}>
-              Sign out
-            </Button>
-          ) : (
-            <Button className="mt-6" variant="hero" onClick={() => navigate("/login")}>
-              Back to login
-            </Button>
-          )}
+          <Button className="mt-6" variant="hero" onClick={handleLogout}>
+            Sign out
+          </Button>
         </div>
       </div>
     );
@@ -214,7 +184,14 @@ export default function PortalPage() {
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.25 }}
           >
-            {activeTab === "plan" && <WeeklyPlanScreen />}
+            {activeTab === "plan" && (
+              <WeeklyPlanScreen
+                athleteId={athleteId}
+                targetWeekStartDate={bootstrapQuery.data.weeklyPlan.targetWeekStartDate}
+                isPreparing={bootstrapQuery.data.nextStep === "prepare_weekly_plan"}
+                onRefresh={() => bootstrapQuery.refetch()}
+              />
+            )}
             {activeTab === "connect" && <ConnectScreen athleteId={athleteId} />}
             {activeTab === "profile" && <ProfileScreen athleteId={athleteId} />}
           </motion.div>

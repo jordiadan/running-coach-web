@@ -69,6 +69,7 @@ export default function ConnectScreen({ athleteId }: ConnectScreenProps) {
         return;
       }
 
+      await queryClient.invalidateQueries({ queryKey: ["portal", "bootstrap"] });
       await queryClient.invalidateQueries({ queryKey: ["portal", "intervals", athleteId] });
     },
   });
@@ -76,6 +77,7 @@ export default function ConnectScreen({ athleteId }: ConnectScreenProps) {
   const disconnectMutation = useMutation({
     mutationFn: () => disconnectIntervals(athleteId),
     onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["portal", "bootstrap"] });
       await queryClient.invalidateQueries({ queryKey: ["portal", "intervals", athleteId] });
     },
   });

@@ -1,9 +1,25 @@
 import { ApiError, apiRequest } from "@/lib/api";
 
-export type MeResponse = {
-  userId: string;
+export type PortalBootstrapResponse = {
   athleteId: string;
-  email?: string;
+  user: {
+    userId: string;
+    displayName: string;
+    email?: string;
+  };
+  profile: {
+    isComplete: boolean;
+  };
+  intervals: {
+    status: string;
+    connected: boolean;
+    providerAccountRef?: string;
+  };
+  weeklyPlan: {
+    targetWeekStartDate: string;
+    hasPlan: boolean;
+  };
+  nextStep: "connect_intervals" | "complete_profile" | "prepare_weekly_plan" | "view_weekly_plan";
 };
 
 export type IntervalsIntegrationStatus = {
@@ -25,6 +41,39 @@ export type AthleteProfile = {
 
 export type AthleteProfileUpdate = Omit<AthleteProfile, "athleteId">;
 
+export type WeeklyCoachSession = {
+  day: string;
+  modality: string;
+  type: string;
+  title: string;
+  durationMinutes: number;
+  intensityCategory: string;
+  placementReason: string;
+  notes?: string;
+  strengthFocus?: string[] | null;
+};
+
+export type WeeklyCoachPlan = {
+  athleteId: string;
+  weekStartDate: string;
+  planId: string;
+  createdAt: string;
+  updatedAt: string;
+  plan: {
+    schemaVersion: string;
+    weekType: string;
+    weekObjective: string;
+    progressionNote: string;
+    sessions: WeeklyCoachSession[];
+    justification: string[];
+  };
+  llmMeta: {
+    provider: string;
+    model: string;
+    promptVersion: string;
+  };
+};
+
 type UnknownRecord = Record<string, unknown>;
 
 function asRecord(value: unknown): UnknownRecord {
@@ -43,21 +92,68 @@ function asNumberOrBlank(value: unknown): number | "" {
   return typeof value === "number" && Number.isFinite(value) ? value : "";
 }
 
-export async function getMe() {
-  const payload = await apiRequest<unknown>("/api/v1/me");
-  const record = asRecord(payload);
-  const athleteId = asString(record.athleteId);
-  const userId = asString(record.userId);
+function getApiErrorCode(error: unknown): string | undefined {
+  if (!(error instanceof ApiError)) return undefined;
 
-  if (!athleteId || !userId) {
-    throw new Error("Missing user access metadata in /api/v1/me");
+  const payload = asRecord(error.payload);
+  return asString(payload.code) || asString(payload.errorCode) || undefined;
+}
+
+export function isWeeklyCoachPlanNotFoundError(error: unknown) {
+  return (
+    error instanceof ApiError &&
+    error.status === 404 &&
+    getApiErrorCode(error) === "WEEKLY_COACH_PLAN_NOT_FOUND"
+  );
+}
+
+export async function bootstrapPortal() {
+  const payload = await apiRequest<unknown>("/api/v1/me/bootstrap", {
+    method: "POST",
+  });
+  const record = asRecord(payload);
+  const user = asRecord(record.user);
+  const profile = asRecord(record.profile);
+  const intervals = asRecord(record.intervals);
+  const weeklyPlan = asRecord(record.weeklyPlan);
+  const athleteId = asString(record.athleteId);
+  const userId = asString(user.userId);
+  const nextStep = asString(record.nextStep);
+  const targetWeekStartDate = asString(weeklyPlan.targetWeekStartDate);
+
+  if (
+    !athleteId ||
+    !userId ||
+    !targetWeekStartDate ||
+    (nextStep !== "connect_intervals" &&
+      nextStep !== "complete_profile" &&
+      nextStep !== "prepare_weekly_plan" &&
+      nextStep !== "view_weekly_plan")
+  ) {
+    throw new Error("Missing bootstrap metadata in /api/v1/me/bootstrap");
   }
 
   return {
-    userId,
     athleteId,
-    email: asString(record.email),
-  } satisfies MeResponse;
+    user: {
+      userId,
+      displayName: asString(user.displayName),
+      email: asString(user.email) || undefined,
+    },
+    profile: {
+      isComplete: Boolean(profile.isComplete),
+    },
+    intervals: {
+      status: asString(intervals.status),
+      connected: Boolean(intervals.connected),
+      providerAccountRef: asString(intervals.providerAccountRef) || undefined,
+    },
+    weeklyPlan: {
+      targetWeekStartDate,
+      hasPlan: Boolean(weeklyPlan.hasPlan),
+    },
+    nextStep,
+  } satisfies PortalBootstrapResponse;
 }
 
 export async function getIntervalsIntegrationStatus(athleteId: string) {
@@ -136,6 +232,61 @@ export async function updateAthleteProfile(athleteId: string, input: AthleteProf
       },
     },
   });
+}
+
+export async function getWeeklyCoachPlan(athleteId: string, weekStartDate: string) {
+  let payload: unknown;
+
+  try {
+    payload = await apiRequest<unknown>(`/api/v1/weekly-coach/plans/${athleteId}/${weekStartDate}`);
+  } catch (error) {
+    if (isWeeklyCoachPlanNotFoundError(error)) {
+      return undefined;
+    }
+
+    throw error;
+  }
+
+  const record = asRecord(payload);
+  const plan = asRecord(record.plan);
+  const llmMeta = asRecord(record.llmMeta);
+  const sessions = Array.isArray(plan.sessions) ? plan.sessions.map((item) => asRecord(item)) : [];
+  const justification = Array.isArray(plan.justification)
+    ? plan.justification.filter((item): item is string => typeof item === "string")
+    : [];
+
+  return {
+    athleteId: asString(record.athleteId),
+    weekStartDate: asString(record.weekStartDate),
+    planId: asString(record.planId),
+    createdAt: asString(record.createdAt),
+    updatedAt: asString(record.updatedAt),
+    plan: {
+      schemaVersion: asString(plan.schemaVersion),
+      weekType: asString(plan.weekType),
+      weekObjective: asString(plan.weekObjective),
+      progressionNote: asString(plan.progressionNote),
+      sessions: sessions.map((session) => ({
+        day: asString(session.day),
+        modality: asString(session.modality),
+        type: asString(session.type),
+        title: asString(session.title),
+        durationMinutes: typeof session.durationMinutes === "number" ? session.durationMinutes : 0,
+        intensityCategory: asString(session.intensityCategory),
+        placementReason: asString(session.placementReason),
+        notes: asString(session.notes) || undefined,
+        strengthFocus: Array.isArray(session.strengthFocus)
+          ? session.strengthFocus.filter((item): item is string => typeof item === "string")
+          : undefined,
+      })),
+      justification,
+    },
+    llmMeta: {
+      provider: asString(llmMeta.provider),
+      model: asString(llmMeta.model),
+      promptVersion: asString(llmMeta.promptVersion),
+    },
+  } satisfies WeeklyCoachPlan;
 }
 
 export function isProfileComplete(profile: AthleteProfile | undefined) {

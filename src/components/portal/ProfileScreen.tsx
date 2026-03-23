@@ -66,6 +66,7 @@ export default function ProfileScreen({ athleteId }: ProfileScreenProps) {
   const saveMutation = useMutation({
     mutationFn: (values: AthleteProfileUpdate) => updateAthleteProfile(athleteId, values),
     onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["portal", "bootstrap"] });
       await queryClient.invalidateQueries({ queryKey: ["portal", "athlete", athleteId] });
     },
   });
