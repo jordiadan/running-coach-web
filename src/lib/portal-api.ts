@@ -1,9 +1,21 @@
 import { ApiError, apiRequest } from "@/lib/api";
 
-export type MeResponse = {
-  userId: string;
+export type PortalBootstrapResponse = {
   athleteId: string;
-  email?: string;
+  user: {
+    userId: string;
+    displayName: string;
+    email?: string;
+  };
+  profile: {
+    isComplete: boolean;
+  };
+  intervals: {
+    status: string;
+    connected: boolean;
+    providerAccountRef?: string;
+  };
+  nextStep: "connect_intervals" | "complete_profile" | "view_weekly_plan";
 };
 
 export type IntervalsIntegrationStatus = {
@@ -43,21 +55,45 @@ function asNumberOrBlank(value: unknown): number | "" {
   return typeof value === "number" && Number.isFinite(value) ? value : "";
 }
 
-export async function getMe() {
-  const payload = await apiRequest<unknown>("/api/v1/me");
+export async function bootstrapPortal() {
+  const payload = await apiRequest<unknown>("/api/v1/me/bootstrap", {
+    method: "POST",
+  });
   const record = asRecord(payload);
+  const user = asRecord(record.user);
+  const profile = asRecord(record.profile);
+  const intervals = asRecord(record.intervals);
   const athleteId = asString(record.athleteId);
-  const userId = asString(record.userId);
+  const userId = asString(user.userId);
+  const nextStep = asString(record.nextStep);
 
-  if (!athleteId || !userId) {
-    throw new Error("Missing user access metadata in /api/v1/me");
+  if (
+    !athleteId ||
+    !userId ||
+    (nextStep !== "connect_intervals" &&
+      nextStep !== "complete_profile" &&
+      nextStep !== "view_weekly_plan")
+  ) {
+    throw new Error("Missing bootstrap metadata in /api/v1/me/bootstrap");
   }
 
   return {
-    userId,
     athleteId,
-    email: asString(record.email),
-  } satisfies MeResponse;
+    user: {
+      userId,
+      displayName: asString(user.displayName),
+      email: asString(user.email) || undefined,
+    },
+    profile: {
+      isComplete: Boolean(profile.isComplete),
+    },
+    intervals: {
+      status: asString(intervals.status),
+      connected: Boolean(intervals.connected),
+      providerAccountRef: asString(intervals.providerAccountRef) || undefined,
+    },
+    nextStep,
+  } satisfies PortalBootstrapResponse;
 }
 
 export async function getIntervalsIntegrationStatus(athleteId: string) {
