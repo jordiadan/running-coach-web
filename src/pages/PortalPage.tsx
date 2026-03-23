@@ -49,6 +49,8 @@ export default function PortalPage() {
     queryFn: bootstrapPortal,
     enabled: hasSession === true,
     retry: false,
+    refetchInterval: (query) =>
+      query.state.data?.nextStep === "prepare_weekly_plan" ? 5000 : false,
   });
   const athleteId = bootstrapQuery.data?.athleteId;
 
@@ -62,6 +64,7 @@ export default function PortalPage() {
       case "complete_profile":
         setActiveTab("profile");
         break;
+      case "prepare_weekly_plan":
       case "view_weekly_plan":
       default:
         setActiveTab("plan");
@@ -181,7 +184,14 @@ export default function PortalPage() {
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.25 }}
           >
-            {activeTab === "plan" && <WeeklyPlanScreen />}
+            {activeTab === "plan" && (
+              <WeeklyPlanScreen
+                athleteId={athleteId}
+                targetWeekStartDate={bootstrapQuery.data.weeklyPlan.targetWeekStartDate}
+                isPreparing={bootstrapQuery.data.nextStep === "prepare_weekly_plan"}
+                onRefresh={() => bootstrapQuery.refetch()}
+              />
+            )}
             {activeTab === "connect" && <ConnectScreen athleteId={athleteId} />}
             {activeTab === "profile" && <ProfileScreen athleteId={athleteId} />}
           </motion.div>
