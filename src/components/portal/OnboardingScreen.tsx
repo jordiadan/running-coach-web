@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, Check, Sparkles, Zap } from "lucide-react";
-import type { PortalBootstrapResponse } from "@/lib/portal-api";
+import { useMutation } from "@tanstack/react-query";
+import { retryCurrentUserWeeklyPlanGeneration, type PortalBootstrapResponse } from "@/lib/portal-api";
 import { deriveOnboardingState } from "@/lib/portal-onboarding";
 import ConnectScreen from "@/components/portal/ConnectScreen";
 import ProfileScreen from "@/components/portal/ProfileScreen";
@@ -13,7 +14,58 @@ type OnboardingScreenProps = {
   onRefresh: () => Promise<PortalBootstrapResponse | undefined>;
 };
 
-function PreparingPlanStep({ onRefresh }: { onRefresh: () => void | Promise<unknown> }) {
+function PreparingPlanStep({
+  status,
+  failureCode,
+  onRefresh,
+  onRetry,
+  isRetrying,
+}: {
+  status: PortalBootstrapResponse["weeklyPlan"]["status"];
+  failureCode?: string;
+  onRefresh: () => void | Promise<unknown>;
+  onRetry: () => void | Promise<unknown>;
+  isRetrying: boolean;
+}) {
+  if (status === "failed") {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        className="space-y-6 py-4 text-center"
+      >
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-destructive/10 text-destructive shadow-[0_0_0_8px_rgba(220,38,38,0.08)]"
+        >
+          <Zap className="h-8 w-8" />
+        </motion.div>
+        <div className="space-y-2">
+          <h3 className="font-serif text-xl text-foreground">We hit a problem preparing your plan</h3>
+          <p className="text-sm text-muted-foreground">
+            Your onboarding is complete, but the first weekly plan needs another try from the backend.
+          </p>
+          {failureCode ? (
+            <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+              {failureCode.replaceAll("_", " ")}
+            </p>
+          ) : null}
+        </div>
+        <div className="flex flex-col justify-center gap-3 sm:flex-row">
+          <Button onClick={onRetry} className="gap-2" variant="hero" disabled={isRetrying}>
+            {isRetrying ? "Retrying…" : "Retry plan generation"}
+          </Button>
+          <Button onClick={onRefresh} className="gap-2" variant="hero-outline" disabled={isRetrying}>
+            Refresh
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+        </div>
+      </motion.div>
+    );
+  }
+
   const progressItems = [
     "Syncing your latest training context",
     "Balancing fatigue and recovery",
@@ -38,7 +90,9 @@ function PreparingPlanStep({ onRefresh }: { onRefresh: () => void | Promise<unkn
         <div>
           <h3 className="mb-2 font-serif text-xl text-foreground">Preparing your weekly plan…</h3>
           <p className="text-sm text-muted-foreground">
-            Your onboarding is complete. We're building the first weekly plan in the coach backend now.
+            {status === "missing"
+              ? "Your onboarding is complete. We're queuing your first weekly plan now."
+              : "Your onboarding is complete. We're building the first weekly plan in the coach backend now."}
           </p>
         </div>
         <div className="mx-auto max-w-sm space-y-4">
@@ -93,7 +147,20 @@ export default function OnboardingScreen({
   bootstrap,
   onRefresh,
 }: OnboardingScreenProps) {
+  const [optimisticConnected, setOptimisticConnected] = useState(false);
   const [optimisticReady, setOptimisticReady] = useState(false);
+  const retryMutation = useMutation({
+    mutationFn: retryCurrentUserWeeklyPlanGeneration,
+    onSuccess: async () => {
+      await onRefresh();
+    },
+  });
+
+  useEffect(() => {
+    if (bootstrap.nextStep !== "connect_intervals" || bootstrap.intervals.connected) {
+      setOptimisticConnected(false);
+    }
+  }, [bootstrap.nextStep, bootstrap.intervals.connected]);
 
   useEffect(() => {
     if (bootstrap.nextStep !== "complete_profile") {
@@ -102,19 +169,33 @@ export default function OnboardingScreen({
   }, [bootstrap.nextStep]);
 
   const effectiveBootstrap = useMemo(() => {
-    if (!optimisticReady || bootstrap.nextStep !== "complete_profile") {
-      return bootstrap;
+    let nextBootstrap = bootstrap;
+
+    if (optimisticConnected && bootstrap.nextStep === "connect_intervals") {
+      nextBootstrap = {
+        ...nextBootstrap,
+        intervals: {
+          ...nextBootstrap.intervals,
+          connected: true,
+          status: "connected",
+        },
+        nextStep: "complete_profile",
+      } satisfies PortalBootstrapResponse;
+    }
+
+    if (!optimisticReady || nextBootstrap.nextStep !== "complete_profile") {
+      return nextBootstrap;
     }
 
     return {
-      ...bootstrap,
+      ...nextBootstrap,
       profile: {
-        ...bootstrap.profile,
+        ...nextBootstrap.profile,
         isComplete: true,
       },
       nextStep: "prepare_weekly_plan",
     } satisfies PortalBootstrapResponse;
-  }, [bootstrap, optimisticReady]);
+  }, [bootstrap, optimisticConnected, optimisticReady]);
 
   const onboarding = deriveOnboardingState(effectiveBootstrap);
   const currentStep = onboarding.steps.find((step) => step.current) ?? onboarding.steps[0];
@@ -125,6 +206,15 @@ export default function OnboardingScreen({
 
     if (next?.nextStep === "complete_profile") {
       setOptimisticReady(false);
+    }
+  };
+
+  const handleConnectComplete = async () => {
+    setOptimisticConnected(true);
+    const next = await onRefresh();
+
+    if (next?.nextStep === "connect_intervals" && next.intervals.connected !== true) {
+      setOptimisticConnected(false);
     }
   };
 
@@ -212,9 +302,7 @@ export default function OnboardingScreen({
           <ConnectScreen
             athleteId={effectiveBootstrap.athleteId}
             variant="onboarding"
-            onComplete={async () => {
-              await onRefresh();
-            }}
+            onComplete={handleConnectComplete}
           />
         ) : null}
         {effectiveBootstrap.nextStep === "complete_profile" ? (
@@ -225,7 +313,13 @@ export default function OnboardingScreen({
           />
         ) : null}
         {effectiveBootstrap.nextStep === "prepare_weekly_plan" ? (
-          <PreparingPlanStep onRefresh={onRefresh} />
+          <PreparingPlanStep
+            status={effectiveBootstrap.weeklyPlan.status}
+            failureCode={effectiveBootstrap.weeklyPlan.failureCode}
+            onRefresh={onRefresh}
+            onRetry={() => retryMutation.mutateAsync()}
+            isRetrying={retryMutation.isPending}
+          />
         ) : null}
         {effectiveBootstrap.nextStep === "view_weekly_plan" ? (
           <motion.div

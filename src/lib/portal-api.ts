@@ -18,6 +18,8 @@ export type PortalBootstrapResponse = {
   weeklyPlan: {
     targetWeekStartDate: string;
     hasPlan: boolean;
+    status: "missing" | "preparing" | "failed" | "ready";
+    failureCode?: string;
   };
   nextStep: "connect_intervals" | "complete_profile" | "prepare_weekly_plan" | "view_weekly_plan";
 };
@@ -32,7 +34,7 @@ export type IntervalsIntegrationStatus = {
 export type AthleteProfile = {
   athleteId: string;
   displayName: string;
-  trainingGoal: string;
+  trainingGoal: TrainingGoalCode | "";
   preferredTrainingDays: string[];
   goalRaceEventName: string;
   goalRaceEventDate: string;
@@ -40,6 +42,21 @@ export type AthleteProfile = {
 };
 
 export type AthleteProfileUpdate = Omit<AthleteProfile, "athleteId">;
+
+export type TrainingGoalCode =
+  | "build_consistency"
+  | "improve_fitness"
+  | "complete_goal_race"
+  | "race_personal_best"
+  | "return_to_running";
+
+export const trainingGoalOptions: { code: TrainingGoalCode; label: string }[] = [
+  { code: "build_consistency", label: "Build consistency" },
+  { code: "improve_fitness", label: "Improve fitness" },
+  { code: "complete_goal_race", label: "Complete my goal race" },
+  { code: "race_personal_best", label: "Race a personal best" },
+  { code: "return_to_running", label: "Return to running" },
+];
 
 export type WeeklyCoachSession = {
   day: string;
@@ -104,6 +121,14 @@ function asOptionalNumber(value: unknown): number | undefined {
   return typeof value === "number" && Number.isFinite(value) ? value : undefined;
 }
 
+function asTrainingGoalCode(value: unknown): TrainingGoalCode | undefined {
+  const code = asString(value);
+
+  return trainingGoalOptions.some((option) => option.code === code)
+    ? (code as TrainingGoalCode)
+    : undefined;
+}
+
 function getApiErrorCode(error: unknown): string | undefined {
   if (!(error instanceof ApiError)) return undefined;
 
@@ -132,11 +157,16 @@ export async function bootstrapPortal() {
   const userId = asString(user.userId);
   const nextStep = asString(record.nextStep);
   const targetWeekStartDate = asString(weeklyPlan.targetWeekStartDate);
+  const weeklyPlanStatus = asString(weeklyPlan.status);
 
   if (
     !athleteId ||
     !userId ||
     !targetWeekStartDate ||
+    (weeklyPlanStatus !== "missing" &&
+      weeklyPlanStatus !== "preparing" &&
+      weeklyPlanStatus !== "failed" &&
+      weeklyPlanStatus !== "ready") ||
     (nextStep !== "connect_intervals" &&
       nextStep !== "complete_profile" &&
       nextStep !== "prepare_weekly_plan" &&
@@ -163,9 +193,17 @@ export async function bootstrapPortal() {
     weeklyPlan: {
       targetWeekStartDate,
       hasPlan: Boolean(weeklyPlan.hasPlan),
+      status: weeklyPlanStatus,
+      failureCode: asString(weeklyPlan.failureCode) || undefined,
     },
     nextStep,
   } satisfies PortalBootstrapResponse;
+}
+
+export async function retryCurrentUserWeeklyPlanGeneration() {
+  await apiRequest<void>("/api/v1/me/onboarding/weekly-plan:retry", {
+    method: "POST",
+  });
 }
 
 export async function getIntervalsIntegrationStatus(athleteId: string) {
@@ -215,11 +253,14 @@ export async function getAthleteProfile(athleteId: string) {
   const record = asRecord(payload);
   const preparation = asRecord(record.preparation);
   const primaryGoal = asRecord(preparation.primaryGoal);
+  const trainingGoalCode =
+    asTrainingGoalCode(record.trainingGoalCode) ??
+    trainingGoalOptions.find((option) => option.label.toLowerCase() === asString(record.trainingGoal).trim().toLowerCase())?.code;
 
   return {
     athleteId,
     displayName: asString(record.displayName),
-    trainingGoal: asString(record.trainingGoal),
+    trainingGoal: trainingGoalCode ?? "",
     preferredTrainingDays: asStringArray(record.preferredTrainingDays),
     goalRaceEventName: asString(primaryGoal.name),
     goalRaceEventDate: asString(primaryGoal.eventDate),
@@ -314,7 +355,7 @@ export function isProfileComplete(profile: AthleteProfile | undefined) {
   if (!profile) return false;
 
   return Boolean(
-    profile.displayName &&
+      profile.displayName &&
       profile.trainingGoal &&
       profile.preferredTrainingDays.length >= 4 &&
       profile.goalRaceEventName &&

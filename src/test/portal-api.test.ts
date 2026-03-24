@@ -1,6 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiError, apiRequest } from "@/lib/api";
-import { bootstrapPortal, getWeeklyCoachPlan } from "@/lib/portal-api";
+import {
+  bootstrapPortal,
+  getAthleteProfile,
+  getWeeklyCoachPlan,
+  retryCurrentUserWeeklyPlanGeneration,
+  updateAthleteProfile,
+} from "@/lib/portal-api";
 
 vi.mock("@/lib/api", async () => {
   const actual = await vi.importActual<typeof import("@/lib/api")>("@/lib/api");
@@ -52,6 +58,8 @@ describe("portal-api weekly coach helpers", () => {
       weeklyPlan: {
         targetWeekStartDate: "2026-03-23",
         hasPlan: false,
+        status: "preparing",
+        failureCode: null,
       },
       nextStep: "prepare_weekly_plan",
     });
@@ -74,6 +82,8 @@ describe("portal-api weekly coach helpers", () => {
       weeklyPlan: {
         targetWeekStartDate: "2026-03-23",
         hasPlan: false,
+        status: "preparing",
+        failureCode: undefined,
       },
       nextStep: "prepare_weekly_plan",
     });
@@ -123,6 +133,59 @@ describe("portal-api weekly coach helpers", () => {
       plan: {
         weekType: "DELOAD",
       },
+    });
+  });
+
+  it("maps trainingGoalCode from athlete profile GET", async () => {
+    apiRequestMock.mockResolvedValueOnce({
+      athleteId: "athlete-1",
+      displayName: "Jordi",
+      preferredTrainingDays: ["TUE", "THU", "SAT", "SUN"],
+      trainingGoal: "Build consistency",
+      trainingGoalCode: "build_consistency",
+      preparation: {
+        primaryGoal: {
+          name: "Valencia Half Marathon",
+          eventDate: "2026-10-25",
+          distanceKm: 21.1,
+        },
+      },
+    });
+
+    await expect(getAthleteProfile("athlete-1")).resolves.toMatchObject({
+      athleteId: "athlete-1",
+      trainingGoal: "build_consistency",
+      goalRaceEventName: "Valencia Half Marathon",
+    });
+  });
+
+  it("sends the closed training goal code in profile updates", async () => {
+    apiRequestMock.mockResolvedValueOnce({ athleteId: "athlete-1" });
+
+    await updateAthleteProfile("athlete-1", {
+      displayName: "Jordi",
+      trainingGoal: "race_personal_best",
+      preferredTrainingDays: ["TUE", "THU", "SAT", "SUN"],
+      goalRaceEventName: "Valencia Half Marathon",
+      goalRaceEventDate: "2026-10-25",
+      goalRaceEventDistanceKm: 21.1,
+    });
+
+    expect(apiRequestMock).toHaveBeenCalledWith("/api/v1/athletes/athlete-1", {
+      method: "PUT",
+      body: expect.objectContaining({
+        trainingGoal: "race_personal_best",
+      }),
+    });
+  });
+
+  it("calls the weekly plan retry endpoint", async () => {
+    apiRequestMock.mockResolvedValueOnce(undefined);
+
+    await retryCurrentUserWeeklyPlanGeneration();
+
+    expect(apiRequestMock).toHaveBeenCalledWith("/api/v1/me/onboarding/weekly-plan:retry", {
+      method: "POST",
     });
   });
 });

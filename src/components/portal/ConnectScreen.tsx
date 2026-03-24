@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { motion } from "framer-motion";
 import { Check, Link2, Plus, RefreshCcw } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -62,12 +63,14 @@ export default function ConnectScreen({
 }: ConnectScreenProps) {
   const queryClient = useQueryClient();
   const completionTriggeredRef = useRef(false);
+  const [awaitingOAuthCompletion, setAwaitingOAuthCompletion] = useState(false);
+  const [showConnectedTransition, setShowConnectedTransition] = useState(false);
   const intervalsQuery = useQuery({
     queryKey: ["portal", "intervals", athleteId],
     queryFn: () => getIntervalsIntegrationStatus(athleteId),
     enabled: Boolean(athleteId),
     refetchInterval: (query) =>
-      query.state.data?.status === "pending_authorization" ? 3000 : false,
+      awaitingOAuthCompletion || query.state.data?.status === "pending_authorization" ? 3000 : false,
   });
 
   const connectMutation = useMutation({
@@ -75,6 +78,7 @@ export default function ConnectScreen({
     onSuccess: async (result) => {
       if (result.redirectUrl) {
         if (isOnboarding) {
+          setAwaitingOAuthCompletion(true);
           const popup = window.open(result.redirectUrl, "_blank", "noopener,noreferrer");
 
           if (!popup) {
@@ -122,8 +126,25 @@ export default function ConnectScreen({
     }
 
     completionTriggeredRef.current = true;
-    void onComplete?.();
+    setAwaitingOAuthCompletion(false);
+    setShowConnectedTransition(true);
+
+    const timeout = window.setTimeout(() => {
+      void onComplete?.();
+    }, 850);
+
+    return () => window.clearTimeout(timeout);
   }, [intervalsQuery.data?.connected, isOnboarding, onComplete]);
+
+  useEffect(() => {
+    if (!awaitingOAuthCompletion || intervalsQuery.data?.connected !== false) {
+      return;
+    }
+
+    if (intervalsQuery.data?.status === "auth_failed") {
+      setAwaitingOAuthCompletion(false);
+    }
+  }, [awaitingOAuthCompletion, intervalsQuery.data]);
 
   return (
     <div className={isOnboarding ? "space-y-5" : "max-w-2xl"}>
@@ -201,6 +222,22 @@ export default function ConnectScreen({
           );
         })}
       </div>
+
+      {isOnboarding && showConnectedTransition ? (
+        <motion.div
+          initial={{ opacity: 0, y: 10, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          className="flex items-center gap-3 rounded-xl border border-primary/20 bg-primary/10 px-4 py-3 text-sm text-primary"
+        >
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+            <Check className="h-4 w-4" />
+          </div>
+          <div className="space-y-0.5">
+            <p className="font-medium">Connected to Intervals.icu</p>
+            <p className="text-xs text-primary/80">Moving on to your profile…</p>
+          </div>
+        </motion.div>
+      ) : null}
 
       {!isOnboarding ? (
         <div className="mt-6 rounded-xl border border-divider bg-card p-4 text-sm text-muted-foreground">

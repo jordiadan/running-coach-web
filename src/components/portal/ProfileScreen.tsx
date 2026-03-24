@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, startOfToday } from "date-fns";
 import { CalendarIcon, MessageSquareMore, RefreshCcw } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -7,9 +7,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import {
   getAthleteProfile,
+  trainingGoalOptions,
   updateAthleteProfile,
   type AthleteProfileUpdate,
 } from "@/lib/portal-api";
@@ -162,11 +170,21 @@ export default function ProfileScreen({
 
         <div className="space-y-2">
           <Label htmlFor="training-goal">Training goal</Label>
-          <Input
-            id="training-goal"
+          <Select
             value={form.trainingGoal}
-            onChange={(event) => setForm((prev) => ({ ...prev, trainingGoal: event.target.value }))}
-          />
+            onValueChange={(value) => setForm((prev) => ({ ...prev, trainingGoal: value as AthleteProfileUpdate["trainingGoal"] }))}
+          >
+            <SelectTrigger id="training-goal">
+              <SelectValue placeholder="Choose a training goal" />
+            </SelectTrigger>
+            <SelectContent>
+              {trainingGoalOptions.map((option) => (
+                <SelectItem key={option.code} value={option.code}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="space-y-2">
@@ -209,6 +227,8 @@ export default function ProfileScreen({
               <Input
                 type="number"
                 min="1"
+                max="250"
+                step="0.1"
                 value={form.goalRaceEventDistanceKm}
                 placeholder="Distance (km)"
                 onChange={(event) =>
@@ -232,6 +252,7 @@ export default function ProfileScreen({
                   <Calendar
                     mode="single"
                     selected={raceDate}
+                    disabled={(date) => date < startOfToday()}
                     onSelect={(value) =>
                       setForm((prev) => ({
                         ...prev,
