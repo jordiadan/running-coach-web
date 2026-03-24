@@ -3,7 +3,8 @@ import { format, parseISO } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Battery,
-  CalendarRange,
+  BedDouble,
+  CalendarDays,
   Check,
   ChevronDown,
   ChevronUp,
@@ -11,9 +12,13 @@ import {
   Dumbbell,
   Moon,
   RefreshCcw,
+  Route,
+  Shield,
+  Star,
   StretchHorizontal,
-  TimerReset,
-  Trophy,
+  Target,
+  TrendingDown,
+  TrendingUp,
   Zap,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -48,10 +53,17 @@ const modalityLabels: Record<string, string> = {
 };
 
 const intensityStyles: Record<string, string> = {
-  LOW: "bg-secondary text-foreground border-border",
-  MODERATE: "bg-primary/10 text-primary border-primary/20",
-  HIGH: "bg-accent/15 text-accent border-accent/20",
-  REST: "bg-muted text-muted-foreground border-border",
+  REST: "bg-muted text-muted-foreground",
+  LOW: "bg-primary/8 text-primary",
+  MODERATE: "bg-accent/10 text-accent",
+  HIGH: "bg-destructive/10 text-destructive",
+};
+
+const intensityLabels: Record<string, string> = {
+  LOW: "Low",
+  MODERATE: "Moderate",
+  HIGH: "High",
+  REST: "Rest",
 };
 
 const sessionTypeStyles: Record<string, string> = {
@@ -108,6 +120,36 @@ const typeConfig: Record<
   },
 };
 
+const weekTypeConfig: Record<
+  string,
+  {
+    icon: typeof TrendingUp;
+    badgeClass: string;
+    dashboardGlowClass: string;
+  }
+> = {
+  BUILD: {
+    icon: TrendingUp,
+    badgeClass: "border-primary/30 bg-primary/5 text-primary",
+    dashboardGlowClass: "from-primary/12 via-primary/4 to-transparent",
+  },
+  DELOAD: {
+    icon: TrendingDown,
+    badgeClass: "border-accent/30 bg-accent/5 text-accent",
+    dashboardGlowClass: "from-accent/12 via-accent/4 to-transparent",
+  },
+  MAINTENANCE: {
+    icon: Shield,
+    badgeClass: "border-secondary-foreground/20 bg-secondary text-foreground",
+    dashboardGlowClass: "from-secondary via-secondary/50 to-transparent",
+  },
+  SHARPEN: {
+    icon: Target,
+    badgeClass: "border-destructive/25 bg-destructive/5 text-destructive",
+    dashboardGlowClass: "from-destructive/12 via-destructive/4 to-transparent",
+  },
+};
+
 function formatWeekType(weekType: string) {
   if (!weekType) return "Planned week";
   return weekType
@@ -148,6 +190,126 @@ function totalPlannedMinutes(sessions: WeeklyCoachSession[]) {
 
 function plannedSessionsCount(sessions: WeeklyCoachSession[]) {
   return sessions.filter((session) => session.modality !== "REST").length;
+}
+
+function formatPhase(phase: string | undefined) {
+  if (!phase) return "—";
+  return phase
+    .toLowerCase()
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function formatDecimal(value: number | undefined) {
+  if (typeof value !== "number" || !Number.isFinite(value)) return "—";
+  return value % 1 === 0 ? String(value) : value.toFixed(1);
+}
+
+function deriveSleepStatus(sleepHours: number | undefined) {
+  if (typeof sleepHours !== "number" || !Number.isFinite(sleepHours)) {
+    return {
+      label: "—",
+      valueToneClass: "text-foreground",
+      iconToneClass: "text-muted-foreground",
+    };
+  }
+
+  if (sleepHours < 6) {
+    return {
+      label: "Poor",
+      valueToneClass: "text-destructive",
+      iconToneClass: "text-destructive",
+    };
+  }
+
+  if (sleepHours < 7) {
+    return {
+      label: "Fair",
+      valueToneClass: "text-accent",
+      iconToneClass: "text-accent",
+    };
+  }
+
+  if (sleepHours < 8) {
+    return {
+      label: "Good",
+      valueToneClass: "text-primary",
+      iconToneClass: "text-primary",
+    };
+  }
+
+  return {
+    label: "Great",
+    valueToneClass: "text-emerald-600",
+    iconToneClass: "text-emerald-600",
+  };
+}
+
+function RadialGauge({
+  value,
+  max = 100,
+  size = 78,
+  strokeWidth = 7,
+  label,
+  color,
+}: {
+  value: number;
+  max?: number;
+  size?: number;
+  strokeWidth?: number;
+  label: string;
+  color: string;
+}) {
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const progress = value / max;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9, y: 8 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: "easeOut" }}
+      className="flex flex-col items-center gap-1.5"
+    >
+      <div className="relative" style={{ width: size, height: size }}>
+        <svg width={size} height={size} className="-rotate-90">
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            fill="none"
+            stroke="hsl(var(--border))"
+            strokeWidth={strokeWidth}
+          />
+          <motion.circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            fill="none"
+            stroke={color}
+            strokeWidth={strokeWidth}
+            strokeDasharray={circumference}
+            initial={{ strokeDashoffset: circumference }}
+            animate={{ strokeDashoffset: circumference - progress * circumference }}
+            transition={{ duration: 0.9, ease: "easeOut", delay: 0.08 }}
+            strokeLinecap="round"
+          />
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <motion.span
+            initial={{ opacity: 0, scale: 0.92 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3, delay: 0.18 }}
+            className="text-lg font-bold text-foreground"
+          >
+            {value}
+          </motion.span>
+        </div>
+      </div>
+      <span className="text-[11px] font-medium text-muted-foreground">{label}</span>
+    </motion.div>
+  );
 }
 
 export default function WeeklyPlanScreen({
@@ -287,21 +449,75 @@ export default function WeeklyPlanScreen({
     totalPlannedMinutes(sessions) > 0
       ? Math.round((completedMinutes / totalPlannedMinutes(sessions)) * 100)
       : 0;
+  const currentWeekType = plan.plan.weekType || "";
+  const currentWeekTypeConfig = weekTypeConfig[currentWeekType] ?? {
+    icon: Zap,
+    badgeClass: "border-border bg-muted/40 text-foreground",
+    dashboardGlowClass: "from-muted via-muted/50 to-transparent",
+  };
+  const WeekTypeIcon = currentWeekTypeConfig.icon;
+  const readinessScore = plan.summary.readinessScore ?? 0;
+  const fatigue = plan.summary.fatigue ?? 0;
+  const sleepStatus = deriveSleepStatus(plan.summary.sleepHours);
+  const dashboardStats = [
+    {
+      icon: BedDouble,
+      label: "Sleep",
+      value: sleepStatus.label,
+      valueToneClass: sleepStatus.valueToneClass,
+      iconToneClass: sleepStatus.iconToneClass,
+    },
+    {
+      icon: Route,
+      label: "Last 7 days",
+      value:
+        typeof plan.summary.last7dDistanceKm === "number"
+          ? `${formatDecimal(plan.summary.last7dDistanceKm)} km`
+          : "—",
+      valueToneClass: "text-foreground",
+      iconToneClass: "text-muted-foreground",
+    },
+    {
+      icon: Target,
+      label: "Phase",
+      value: formatPhase(plan.summary.phase),
+      valueToneClass: "text-foreground",
+      iconToneClass: "text-muted-foreground",
+    },
+    {
+      icon: CalendarDays,
+      label: "To goal",
+      value: typeof plan.summary.daysToGoal === "number" ? `${plan.summary.daysToGoal}d` : "—",
+      valueToneClass: "text-foreground",
+      iconToneClass: "text-muted-foreground",
+    },
+  ];
 
   return (
     <div className="max-w-3xl space-y-6">
       <div className="space-y-4">
-        <div className="flex items-start justify-between gap-4">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.28 }}
+          className="flex items-start justify-between gap-4"
+        >
           <div>
             <div className="mb-1 flex items-center gap-2">
               <h2 className="font-serif text-2xl text-foreground">Weekly Plan</h2>
-              <Badge
-                variant="outline"
-                className="h-5 border-accent/30 bg-accent/5 px-2 py-0 text-[10px] font-medium text-accent"
+              <motion.div
+                initial={{ opacity: 0, scale: 0.92 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.08, duration: 0.22 }}
               >
-                <Trophy className="mr-1 h-3 w-3" />
-                {formatWeekType(plan.plan.weekType)}
+                <Badge
+                variant="outline"
+                className={`h-5 px-2 py-0 text-[10px] font-medium ${currentWeekTypeConfig.badgeClass}`}
+              >
+                <WeekTypeIcon className="mr-1 h-3 w-3" />
+                {formatWeekType(currentWeekType)}
               </Badge>
+              </motion.div>
             </div>
             <p className="text-sm text-muted-foreground">{weekRangeLabel}</p>
           </div>
@@ -315,32 +531,62 @@ export default function WeeklyPlanScreen({
               "Refresh"
             )}
           </Button>
-        </div>
+        </motion.div>
 
-        <div className="overflow-hidden rounded-2xl border border-border bg-card">
-          <div className="p-5">
-            <div className="grid gap-3 sm:grid-cols-3">
-              <div className="rounded-xl bg-muted/40 p-4">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Trophy className="h-4 w-4" />
-                  <p className="text-[11px] uppercase tracking-[0.16em]">Week type</p>
-                </div>
-                <p className="mt-3 text-xl font-semibold text-foreground">{formatWeekType(plan.plan.weekType)}</p>
-              </div>
-              <div className="rounded-xl bg-muted/40 p-4">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <CalendarRange className="h-4 w-4" />
-                  <p className="text-[11px] uppercase tracking-[0.16em]">Planned sessions</p>
-                </div>
-                <p className="mt-3 text-xl font-semibold text-foreground">{plannedSessionsCount(sessions)}</p>
-              </div>
-              <div className="rounded-xl bg-muted/40 p-4">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <TimerReset className="h-4 w-4" />
-                  <p className="text-[11px] uppercase tracking-[0.16em]">Total minutes</p>
-                </div>
-                <p className="mt-3 text-xl font-semibold text-foreground">{totalPlannedMinutes(sessions)} min</p>
-              </div>
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="relative overflow-hidden rounded-2xl border border-border bg-card"
+        >
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.45 }}
+            className={`pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-r ${currentWeekTypeConfig.dashboardGlowClass}`}
+          />
+          <div className="flex flex-col gap-6 p-5 sm:flex-row">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.35 }}
+              className="flex items-center gap-5 sm:gap-6"
+            >
+              <RadialGauge
+                value={readinessScore}
+                label="Readiness"
+                color={
+                  readinessScore >= 70
+                    ? "hsl(var(--primary))"
+                    : readinessScore >= 50
+                      ? "hsl(var(--accent))"
+                      : "hsl(var(--destructive))"
+                }
+              />
+              <RadialGauge value={fatigue} max={10} label="Fatigue" color="hsl(var(--accent))" />
+            </motion.div>
+
+            <div className="hidden w-px bg-border sm:block" />
+            <div className="h-px bg-border sm:hidden" />
+
+            <div className="grid flex-1 grid-cols-2 gap-2.5">
+              {dashboardStats.map((item, index) => (
+                <motion.div
+                  key={item.label}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.06 * index, duration: 0.22 }}
+                  className="flex items-center gap-2.5 rounded-xl bg-muted/50 p-2.5"
+                >
+                  <item.icon className={`h-4 w-4 shrink-0 ${item.iconToneClass}`} />
+                  <div className="min-w-0">
+                    <p className="text-[10px] leading-tight text-muted-foreground">{item.label}</p>
+                    <p className={`truncate text-sm font-semibold leading-tight ${item.valueToneClass}`}>
+                      {item.value}
+                    </p>
+                  </div>
+                </motion.div>
+              ))}
             </div>
           </div>
 
@@ -349,29 +595,74 @@ export default function WeeklyPlanScreen({
               <span className="font-medium text-foreground">Objective:</span> {plan.plan.weekObjective}
             </p>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="flex items-center justify-between gap-2 px-2">
-          {sessions.map((session) => {
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15, duration: 0.28 }}
+          className="flex items-center justify-between gap-2 px-2"
+        >
+          {sessions.map((session, index) => {
             const done = completed.has(session.day);
             const isKey = keySession?.day === session.day;
             return (
-              <div key={session.day} className="flex min-w-0 flex-1 flex-col items-center gap-2">
-                <div
+              <motion.div
+                key={session.day}
+                initial={{ opacity: 0, scale: 0.92 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.03 * index, duration: 0.2 }}
+                className="flex min-w-0 flex-1 flex-col items-center gap-2"
+              >
+                <motion.div
+                  layout
+                  initial={{ scaleX: 0.6 }}
+                  animate={{ scaleX: 1 }}
+                  transition={{ delay: 0.04 * index, duration: 0.25 }}
                   className={`h-2 w-full rounded-full ${done ? "bg-primary" : modalityTone(session)} ${
                     session.modality === "REST" ? "opacity-35" : ""
                   }`}
                 />
-                <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
-                  <span className={isKey ? "font-semibold text-foreground" : ""}>{shortDayLabel(session.day)}</span>
-                  {isKey ? <span className="text-primary">•</span> : null}
+                <motion.div
+                  animate={done ? { scale: [1, 1.08, 1] } : isKey ? { y: [0, -1.5, 0] } : {}}
+                  transition={
+                    done
+                      ? { duration: 0.22 }
+                      : isKey
+                        ? { repeat: Infinity, duration: 1.8, ease: "easeInOut" }
+                        : undefined
+                  }
+                  className={`flex h-7 w-7 items-center justify-center rounded-full border ${
+                    done
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : isKey
+                        ? "border-primary/40 bg-primary/10 text-primary"
+                        : "border-border bg-card text-muted-foreground"
+                  }`}
+                >
+                  {done ? <Check className="h-3.5 w-3.5" /> : <span className="h-1.5 w-1.5 rounded-full bg-current" />}
+                </motion.div>
+                <div className="flex items-center gap-1 text-[11px]">
+                  <span
+                    className={`font-medium ${
+                      done ? "text-foreground" : isKey ? "text-foreground" : "text-muted-foreground"
+                    }`}
+                  >
+                    {shortDayLabel(session.day)}
+                  </span>
+                  {isKey ? <Star className="h-3 w-3 fill-current text-primary" /> : null}
                 </div>
-              </div>
+              </motion.div>
             );
           })}
-        </div>
+        </motion.div>
 
-        <div className="rounded-xl border border-border bg-card p-4">
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.28 }}
+          className="rounded-xl border border-border bg-card p-4"
+        >
           <div className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Battery className="h-4 w-4 text-primary" />
@@ -389,7 +680,7 @@ export default function WeeklyPlanScreen({
             <span>{completedMinutes} min done</span>
             <span>{Math.max(totalPlannedMinutes(sessions) - completedMinutes, 0)} min remaining</span>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       <div className="space-y-2">
@@ -409,6 +700,7 @@ export default function WeeklyPlanScreen({
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.04, duration: 0.25 }}
+                whileHover={{ y: -2 }}
                 className={`relative overflow-hidden rounded-xl border transition-all duration-200 ${
                   isDone
                     ? "border-primary/20 bg-primary/5"
@@ -440,7 +732,12 @@ export default function WeeklyPlanScreen({
                   <div
                     className={`rounded-lg border bg-gradient-to-br p-2 ${config.gradient} ${config.tileClass}`}
                   >
-                    <TypeIcon className="h-4 w-4" />
+                    <motion.div
+                      animate={!isDone ? { rotate: [0, -3, 3, 0] } : {}}
+                      transition={!isDone ? { delay: index * 0.03, duration: 0.35 } : undefined}
+                    >
+                      <TypeIcon className="h-4 w-4" />
+                    </motion.div>
                   </div>
 
                   <div className="min-w-0 flex-1">
@@ -463,11 +760,11 @@ export default function WeeklyPlanScreen({
                       </span>
                       <Badge
                         variant="secondary"
-                        className={`h-4 border px-1.5 py-0 text-[10px] ${
-                          intensityStyles[session.intensityCategory] ?? "bg-secondary text-foreground border-border"
+                        className={`h-4 px-1.5 py-0 text-[10px] ${
+                          intensityStyles[session.intensityCategory] ?? "bg-secondary text-foreground"
                         }`}
                       >
-                        {session.intensityCategory}
+                        {intensityLabels[session.intensityCategory] ?? session.intensityCategory}
                       </Badge>
                       <Badge variant="outline" className={`h-4 px-1.5 py-0 text-[10px] ${config.badgeClass}`}>
                         {modalityLabels[session.modality] ?? config.label}
@@ -477,7 +774,7 @@ export default function WeeklyPlanScreen({
                           variant="outline"
                           className="h-4 border-primary/30 bg-primary/5 px-1.5 py-0 text-[10px] text-primary"
                         >
-                          Key
+                          ★ Key
                         </Badge>
                       ) : null}
                     </div>
@@ -492,9 +789,13 @@ export default function WeeklyPlanScreen({
                       <Check className="h-3 w-3" />
                     </motion.div>
                   ) : !isRest ? (
-                    <div className="text-muted-foreground/50">
+                    <motion.div
+                      animate={{ rotate: isExpanded ? 180 : 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="text-muted-foreground/50"
+                    >
                       {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                    </div>
+                    </motion.div>
                   ) : null}
                 </div>
 

@@ -78,4 +78,51 @@ describe("portal-api weekly coach helpers", () => {
       nextStep: "prepare_weekly_plan",
     });
   });
+
+  it("maps weekly plan summary fields when reading a plan", async () => {
+    apiRequestMock.mockResolvedValueOnce({
+      athleteId: "athlete-1",
+      weekStartDate: "2026-03-23",
+      planId: "plan-1",
+      createdAt: "2026-03-23T08:00:00Z",
+      updatedAt: "2026-03-23T08:00:00Z",
+      summary: {
+        readinessScore: 42,
+        fatigue: 6,
+        sleepHours: 6.5,
+        last7dDistanceKm: 39.4,
+        phase: "BUILD",
+        daysToGoal: 321,
+      },
+      plan: {
+        schemaVersion: "1.0",
+        weekType: "DELOAD",
+        weekObjective: "Reduce fatigue",
+        progressionNote: "Keep consistency",
+        sessions: [],
+        justification: [],
+      },
+      llmMeta: {
+        provider: "openai",
+        model: "gpt-5",
+        promptVersion: "v1",
+      },
+    });
+
+    await expect(getWeeklyCoachPlan("athlete-1", "2026-03-23")).resolves.toMatchObject({
+      athleteId: "athlete-1",
+      weekStartDate: "2026-03-23",
+      summary: {
+        readinessScore: 42,
+        fatigue: 6,
+        sleepHours: 6.5,
+        last7dDistanceKm: 39.4,
+        phase: "BUILD",
+        daysToGoal: 321,
+      },
+      plan: {
+        weekType: "DELOAD",
+      },
+    });
+  });
 });

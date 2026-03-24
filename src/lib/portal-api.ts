@@ -59,6 +59,14 @@ export type WeeklyCoachPlan = {
   planId: string;
   createdAt: string;
   updatedAt: string;
+  summary: {
+    readinessScore?: number;
+    fatigue?: number;
+    sleepHours?: number;
+    last7dDistanceKm?: number;
+    phase?: string;
+    daysToGoal?: number;
+  };
   plan: {
     schemaVersion: string;
     weekType: string;
@@ -90,6 +98,10 @@ function asString(value: unknown): string {
 
 function asNumberOrBlank(value: unknown): number | "" {
   return typeof value === "number" && Number.isFinite(value) ? value : "";
+}
+
+function asOptionalNumber(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
 }
 
 function getApiErrorCode(error: unknown): string | undefined {
@@ -249,6 +261,7 @@ export async function getWeeklyCoachPlan(athleteId: string, weekStartDate: strin
 
   const record = asRecord(payload);
   const plan = asRecord(record.plan);
+  const summary = asRecord(record.summary);
   const llmMeta = asRecord(record.llmMeta);
   const sessions = Array.isArray(plan.sessions) ? plan.sessions.map((item) => asRecord(item)) : [];
   const justification = Array.isArray(plan.justification)
@@ -261,6 +274,14 @@ export async function getWeeklyCoachPlan(athleteId: string, weekStartDate: strin
     planId: asString(record.planId),
     createdAt: asString(record.createdAt),
     updatedAt: asString(record.updatedAt),
+    summary: {
+      readinessScore: asOptionalNumber(summary.readinessScore),
+      fatigue: asOptionalNumber(summary.fatigue),
+      sleepHours: asOptionalNumber(summary.sleepHours),
+      last7dDistanceKm: asOptionalNumber(summary.last7dDistanceKm),
+      phase: asString(summary.phase) || undefined,
+      daysToGoal: asOptionalNumber(summary.daysToGoal),
+    },
     plan: {
       schemaVersion: asString(plan.schemaVersion),
       weekType: asString(plan.weekType),
