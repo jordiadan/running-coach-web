@@ -8,6 +8,7 @@ import LandingPage from "./pages/LandingPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import LoginPage from "./pages/LoginPage";
 import PortalPage from "./pages/PortalPage";
+import OnboardingDemoPage from "./pages/OnboardingDemoPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/portal" element={<PortalPage />} />
+            <Route path="/portal/onboarding-demo" element={<OnboardingDemoPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
