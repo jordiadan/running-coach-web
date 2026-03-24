@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { Check, Link2, Plus, RefreshCcw } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,8 @@ import {
 
 type ConnectScreenProps = {
   athleteId: string;
+  variant?: "page" | "onboarding";
+  onComplete?: () => void | Promise<unknown>;
 };
 
 const staticSources = [
@@ -53,18 +55,38 @@ function resolveIntervalsBadge(status: IntervalsIntegrationStatus | undefined) {
   }
 }
 
-export default function ConnectScreen({ athleteId }: ConnectScreenProps) {
+export default function ConnectScreen({
+  athleteId,
+  variant = "page",
+  onComplete,
+}: ConnectScreenProps) {
   const queryClient = useQueryClient();
+  const completionTriggeredRef = useRef(false);
   const intervalsQuery = useQuery({
     queryKey: ["portal", "intervals", athleteId],
     queryFn: () => getIntervalsIntegrationStatus(athleteId),
     enabled: Boolean(athleteId),
+    refetchInterval: (query) =>
+      query.state.data?.status === "pending_authorization" ? 3000 : false,
   });
 
   const connectMutation = useMutation({
     mutationFn: () => connectIntervals(athleteId),
     onSuccess: async (result) => {
       if (result.redirectUrl) {
+        if (isOnboarding) {
+          const popup = window.open(result.redirectUrl, "_blank", "noopener,noreferrer");
+
+          if (!popup) {
+            window.location.assign(result.redirectUrl);
+            return;
+          }
+
+          await queryClient.invalidateQueries({ queryKey: ["portal", "bootstrap"] });
+          await queryClient.invalidateQueries({ queryKey: ["portal", "intervals", athleteId] });
+          return;
+        }
+
         window.location.assign(result.redirectUrl);
         return;
       }
@@ -92,13 +114,27 @@ export default function ConnectScreen({ athleteId }: ConnectScreenProps) {
     }),
     [intervalsQuery.data],
   );
+  const isOnboarding = variant === "onboarding";
+
+  useEffect(() => {
+    if (!isOnboarding || !intervalsQuery.data?.connected || completionTriggeredRef.current === true) {
+      return;
+    }
+
+    completionTriggeredRef.current = true;
+    void onComplete?.();
+  }, [intervalsQuery.data?.connected, isOnboarding, onComplete]);
 
   return (
-    <div className="max-w-2xl">
-      <h2 className="font-serif text-2xl mb-2">Connect your data</h2>
-      <p className="text-muted-foreground text-sm mb-8">
-        Link Intervals first. The rest of the onboarding will use that training context to personalize your plan.
-      </p>
+    <div className={isOnboarding ? "space-y-5" : "max-w-2xl"}>
+      {!isOnboarding ? (
+        <>
+          <h2 className="mb-2 font-serif text-2xl">Connect your data</h2>
+          <p className="mb-8 text-sm text-muted-foreground">
+            Link Intervals first. The rest of the onboarding will use that training context to personalize your plan.
+          </p>
+        </>
+      ) : null}
 
       <div className="space-y-3">
         {[intervalsSource, ...staticSources].map((source) => {
@@ -166,14 +202,16 @@ export default function ConnectScreen({ athleteId }: ConnectScreenProps) {
         })}
       </div>
 
-      <div className="mt-6 rounded-xl border border-divider bg-card p-4 text-sm text-muted-foreground">
-        <div className="flex items-start gap-3">
-          <Link2 className="mt-0.5 h-4 w-4 shrink-0" />
-          <p>
-            The portal checks your Intervals status on load. If you finish the OAuth flow in another tab, reopen the portal and the connection state should refresh.
-          </p>
+      {!isOnboarding ? (
+        <div className="mt-6 rounded-xl border border-divider bg-card p-4 text-sm text-muted-foreground">
+          <div className="flex items-start gap-3">
+            <Link2 className="mt-0.5 h-4 w-4 shrink-0" />
+            <p>
+              The portal checks your Intervals status on load. If you finish the OAuth flow in another tab, reopen the portal and the connection state should refresh.
+            </p>
+          </div>
         </div>
-      </div>
+      ) : null}
     </div>
   );
 }
