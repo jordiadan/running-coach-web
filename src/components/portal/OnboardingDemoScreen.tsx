@@ -50,12 +50,6 @@ function ConnectStep({ onDone }: { onDone: () => void }) {
       desc: "Sync structured workouts, fitness and fatigue data",
       available: true,
     },
-    {
-      id: "manual",
-      name: "Manual Input",
-      desc: "Enter your recent training history by hand",
-      available: true,
-    },
     { id: "strava", name: "Strava", desc: "Coming soon", available: false },
     {
       id: "garmin",
