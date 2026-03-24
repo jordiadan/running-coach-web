@@ -26,6 +26,8 @@ const allDays = [
 
 type ProfileScreenProps = {
   athleteId: string;
+  variant?: "page" | "onboarding";
+  onComplete?: () => void | Promise<unknown>;
 };
 
 const emptyForm: AthleteProfileUpdate = {
@@ -37,7 +39,11 @@ const emptyForm: AthleteProfileUpdate = {
   goalRaceEventDistanceKm: "",
 };
 
-export default function ProfileScreen({ athleteId }: ProfileScreenProps) {
+export default function ProfileScreen({
+  athleteId,
+  variant = "page",
+  onComplete,
+}: ProfileScreenProps) {
   const queryClient = useQueryClient();
   const profileQuery = useQuery({
     queryKey: ["portal", "athlete", athleteId],
@@ -68,6 +74,7 @@ export default function ProfileScreen({ athleteId }: ProfileScreenProps) {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["portal", "bootstrap"] });
       await queryClient.invalidateQueries({ queryKey: ["portal", "athlete", athleteId] });
+      await onComplete?.();
     },
   });
 
@@ -103,10 +110,19 @@ export default function ProfileScreen({ athleteId }: ProfileScreenProps) {
     event.preventDefault();
     saveMutation.mutate(form);
   };
+  const isOnboarding = variant === "onboarding";
+  const isFormComplete =
+    form.displayName.trim().length > 0 &&
+    form.trainingGoal.trim().length > 0 &&
+    form.preferredTrainingDays.length >= 4 &&
+    form.goalRaceEventName.trim().length > 0 &&
+    form.goalRaceEventDate.trim().length > 0 &&
+    form.goalRaceEventDistanceKm !== "" &&
+    Number(form.goalRaceEventDistanceKm) > 0;
 
   if (profileQuery.isLoading) {
     return (
-      <div className="max-w-lg rounded-2xl border border-divider bg-card p-6 shadow-card">
+      <div className={isOnboarding ? "rounded-2xl border border-divider bg-card p-6 shadow-card" : "max-w-lg rounded-2xl border border-divider bg-card p-6 shadow-card"}>
         <p className="text-sm text-muted-foreground">Loading your profile…</p>
       </div>
     );
@@ -114,7 +130,7 @@ export default function ProfileScreen({ athleteId }: ProfileScreenProps) {
 
   if (profileQuery.isError) {
     return (
-      <div className="max-w-lg rounded-2xl border border-divider bg-card p-6 shadow-card">
+      <div className={isOnboarding ? "rounded-2xl border border-divider bg-card p-6 shadow-card" : "max-w-lg rounded-2xl border border-divider bg-card p-6 shadow-card"}>
         <h2 className="font-serif text-2xl text-foreground">We couldn't load your profile</h2>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
           Refresh the page or try again in a moment. The portal still needs your athlete context before the plan can stay in sync.
@@ -124,11 +140,15 @@ export default function ProfileScreen({ athleteId }: ProfileScreenProps) {
   }
 
   return (
-    <div className="max-w-lg">
-      <h2 className="font-serif text-2xl mb-2">Your profile</h2>
-      <p className="text-muted-foreground text-sm mb-8">
-        Update your running context to keep your plan relevant.
-      </p>
+    <div className={isOnboarding ? "" : "max-w-lg"}>
+      {!isOnboarding ? (
+        <>
+          <h2 className="mb-2 font-serif text-2xl">Your profile</h2>
+          <p className="mb-8 text-sm text-muted-foreground">
+            Update your running context to keep your plan relevant.
+          </p>
+        </>
+      ) : null}
 
       <form className="space-y-6" onSubmit={handleSubmit}>
         <div className="space-y-2">
@@ -252,11 +272,15 @@ export default function ProfileScreen({ athleteId }: ProfileScreenProps) {
           <p className="text-sm text-primary">Profile saved.</p>
         )}
 
-        <Button variant="hero" className="mt-2" disabled={saveMutation.isPending}>
+        <Button
+          variant="hero"
+          className="mt-2"
+          disabled={saveMutation.isPending || (isOnboarding && !isFormComplete)}
+        >
           {saveMutation.isPending ? (
             <><RefreshCcw className="mr-2 h-4 w-4 animate-spin" /> Saving</>
           ) : (
-            "Save changes"
+            isOnboarding ? "Save & continue" : "Save changes"
           )}
         </Button>
       </form>
