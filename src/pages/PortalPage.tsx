@@ -62,7 +62,6 @@ export default function PortalPage() {
 
     const previousNextStep = previousNextStepRef.current;
     previousNextStepRef.current = bootstrapQuery.data.nextStep;
-    let timeout: number | undefined;
 
     if (
       previousNextStep !== null &&
@@ -70,9 +69,6 @@ export default function PortalPage() {
       bootstrapQuery.data.nextStep === "view_weekly_plan"
     ) {
       setShowReadyTransition(true);
-      timeout = window.setTimeout(() => {
-        setShowReadyTransition(false);
-      }, 1600);
     }
 
     switch (bootstrapQuery.data.nextStep) {
@@ -89,11 +85,6 @@ export default function PortalPage() {
         break;
     }
 
-    return () => {
-      if (timeout) {
-        window.clearTimeout(timeout);
-      }
-    };
   }, [bootstrapQuery.data]);
 
   const handleLogout = async () => {
@@ -174,8 +165,15 @@ export default function PortalPage() {
       </nav>
 
       <div className="max-w-5xl mx-auto px-6 py-8">
-        {bootstrapQuery.data.nextStep === "view_weekly_plan" && !showReadyTransition ? (
-          <>
+        <AnimatePresence mode="wait">
+          {bootstrapQuery.data.nextStep === "view_weekly_plan" && !showReadyTransition ? (
+            <motion.div
+              key="portal-shell"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.25 }}
+            >
             <div className="flex gap-1 mb-10 bg-secondary/60 rounded-lg p-1 w-fit">
               {tabs.map((tab) => (
                 <button
@@ -222,13 +220,23 @@ export default function PortalPage() {
                 {activeTab === "profile" && <ProfileScreen athleteId={athleteId} />}
               </motion.div>
             </AnimatePresence>
-          </>
-        ) : (
-          <OnboardingScreen
-            bootstrap={bootstrapQuery.data}
-            onRefresh={async () => (await bootstrapQuery.refetch()).data}
-          />
-        )}
+            </motion.div>
+          ) : (
+            <motion.div
+              key="onboarding-shell"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.25 }}
+            >
+              <OnboardingScreen
+                bootstrap={bootstrapQuery.data}
+                onRefresh={async () => (await bootstrapQuery.refetch()).data}
+                onEnterPortal={() => setShowReadyTransition(false)}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

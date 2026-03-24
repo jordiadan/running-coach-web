@@ -12,6 +12,7 @@ import { Progress } from "@/components/ui/progress";
 type OnboardingScreenProps = {
   bootstrap: PortalBootstrapResponse;
   onRefresh: () => Promise<PortalBootstrapResponse | undefined>;
+  onEnterPortal?: () => void;
 };
 
 function PreparingPlanStep({
@@ -146,6 +147,7 @@ function PreparingPlanStep({
 export default function OnboardingScreen({
   bootstrap,
   onRefresh,
+  onEnterPortal,
 }: OnboardingScreenProps) {
   const [optimisticConnected, setOptimisticConnected] = useState(false);
   const [optimisticReady, setOptimisticReady] = useState(false);
@@ -347,6 +349,12 @@ export default function OnboardingScreen({
                 </div>
                 <Progress value={100} className="h-1.5" />
               </div>
+              {onEnterPortal ? (
+                <Button onClick={onEnterPortal} className="mx-auto gap-2" variant="hero">
+                  Open weekly plan
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              ) : null}
             </div>
           </motion.div>
         ) : null}
