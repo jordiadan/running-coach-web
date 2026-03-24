@@ -151,7 +151,6 @@ function ConnectStep({ onDone }: { onDone: () => void }) {
 
 function ProfileStep({ onDone }: { onDone: () => void }) {
   const [goal, setGoal] = useState("");
-  const [level, setLevel] = useState<string | null>(null);
   const [days, setDays] = useState<string[]>(["Mon", "Wed", "Thu", "Sat"]);
   const allDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
@@ -165,7 +164,7 @@ function ProfileStep({ onDone }: { onDone: () => void }) {
     );
   };
 
-  const canContinue = level && goal.length > 0;
+  const canContinue = goal.length > 0;
 
   return (
     <motion.div
@@ -198,33 +197,6 @@ function ProfileStep({ onDone }: { onDone: () => void }) {
         className="space-y-2"
       >
         <label className="text-sm font-medium text-foreground">
-          Current fitness level
-        </label>
-        <div className="grid grid-cols-3 gap-2">
-          {["Beginner", "Intermediate", "Advanced"].map((item) => (
-            <button
-              key={item}
-              type="button"
-              onClick={() => setLevel(item)}
-              className={`rounded-xl border py-3 text-sm font-medium transition-all duration-200 ${
-                level === item
-                  ? "border-primary bg-primary text-primary-foreground shadow-sm"
-                  : "border-border bg-card text-muted-foreground hover:border-primary/30 hover:text-foreground"
-              }`}
-            >
-              {item}
-            </button>
-          ))}
-        </div>
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0, x: -15 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.3 }}
-        className="space-y-2"
-      >
-        <label className="text-sm font-medium text-foreground">
           Training days <span className="font-normal text-muted-foreground">(min. 4)</span>
         </label>
         <div className="flex gap-1.5">
@@ -252,7 +224,7 @@ function ProfileStep({ onDone }: { onDone: () => void }) {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.4 }}
+        transition={{ delay: 0.3 }}
       >
         <Button
           onClick={onDone}
@@ -320,7 +292,7 @@ function ReadyStep({ onDone }: { onDone: () => void }) {
           <div>
             <h3 className="mb-2 font-serif text-xl text-foreground">Your plan is ready! 🎉</h3>
             <p className="text-sm text-muted-foreground">
-              We've created a personalized deload week based on your profile and training data
+              We've created a personalized weekly plan based on your profile and training data
             </p>
           </div>
           <Button onClick={onDone} className="gap-2" variant="hero" size="lg">
