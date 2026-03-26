@@ -35,7 +35,8 @@ export type AthleteProfile = {
   athleteId: string;
   displayName: string;
   trainingGoal: TrainingGoalCode | "";
-  preferredTrainingDays: string[];
+  runningDays: string[];
+  longRunPreferredDay: string;
   goalRaceEventName: string;
   goalRaceEventDate: string;
   goalRaceEventDistanceKm: number | "";
@@ -261,7 +262,8 @@ export async function getAthleteProfile(athleteId: string) {
     athleteId,
     displayName: asString(record.displayName),
     trainingGoal: trainingGoalCode ?? "",
-    preferredTrainingDays: asStringArray(record.preferredTrainingDays),
+    runningDays: asStringArray(record.runningDays),
+    longRunPreferredDay: asString(record.longRunPreferredDay),
     goalRaceEventName: asString(primaryGoal.name),
     goalRaceEventDate: asString(primaryGoal.eventDate),
     goalRaceEventDistanceKm: asNumberOrBlank(primaryGoal.distanceKm),
@@ -274,7 +276,8 @@ export async function updateAthleteProfile(athleteId: string, input: AthleteProf
     body: {
       displayName: input.displayName,
       trainingGoal: input.trainingGoal,
-      preferredTrainingDays: input.preferredTrainingDays,
+      runningDays: input.runningDays,
+      longRunPreferredDay: input.longRunPreferredDay,
       preparation: {
         primaryGoal: {
           name: input.goalRaceEventName,
@@ -357,7 +360,8 @@ export function isProfileComplete(profile: AthleteProfile | undefined) {
   return Boolean(
       profile.displayName &&
       profile.trainingGoal &&
-      profile.preferredTrainingDays.length >= 4 &&
+      profile.runningDays.length >= 4 &&
+      profile.longRunPreferredDay &&
       profile.goalRaceEventName &&
       profile.goalRaceEventDate &&
       profile.goalRaceEventDistanceKm !== "",

@@ -41,7 +41,8 @@ type ProfileScreenProps = {
 const emptyForm: AthleteProfileUpdate = {
   displayName: "",
   trainingGoal: "",
-  preferredTrainingDays: ["TUE", "THU", "SAT", "SUN"],
+  runningDays: ["TUE", "THU", "SAT", "SUN"],
+  longRunPreferredDay: "SUN",
   goalRaceEventName: "",
   goalRaceEventDate: "",
   goalRaceEventDistanceKm: "",
@@ -67,10 +68,14 @@ export default function ProfileScreen({
     setForm({
       displayName: profileQuery.data.displayName,
       trainingGoal: profileQuery.data.trainingGoal,
-      preferredTrainingDays:
-        profileQuery.data.preferredTrainingDays.length > 0
-          ? profileQuery.data.preferredTrainingDays
-          : emptyForm.preferredTrainingDays,
+      runningDays:
+        profileQuery.data.runningDays.length > 0
+          ? profileQuery.data.runningDays
+          : emptyForm.runningDays,
+      longRunPreferredDay:
+        profileQuery.data.longRunPreferredDay ||
+        profileQuery.data.runningDays.at(-1) ||
+        emptyForm.longRunPreferredDay,
       goalRaceEventName: profileQuery.data.goalRaceEventName,
       goalRaceEventDate: profileQuery.data.goalRaceEventDate,
       goalRaceEventDistanceKm: profileQuery.data.goalRaceEventDistanceKm,
@@ -98,18 +103,26 @@ export default function ProfileScreen({
 
   const toggleDay = (day: string) => {
     setForm((prev) => {
-      if (prev.preferredTrainingDays.includes(day)) {
-        return prev.preferredTrainingDays.length > 4
-          ? {
-              ...prev,
-              preferredTrainingDays: prev.preferredTrainingDays.filter((item) => item !== day),
-            }
-          : prev;
+      if (prev.runningDays.includes(day)) {
+        if (prev.runningDays.length <= 4) {
+          return prev;
+        }
+
+        const runningDays = prev.runningDays.filter((item) => item !== day);
+
+        return {
+          ...prev,
+          runningDays,
+          longRunPreferredDay:
+            prev.longRunPreferredDay === day
+              ? runningDays[runningDays.length - 1] ?? emptyForm.longRunPreferredDay
+              : prev.longRunPreferredDay,
+        };
       }
 
       return {
         ...prev,
-        preferredTrainingDays: [...prev.preferredTrainingDays, day],
+        runningDays: [...prev.runningDays, day],
       };
     });
   };
@@ -122,7 +135,8 @@ export default function ProfileScreen({
   const isFormComplete =
     form.displayName.trim().length > 0 &&
     form.trainingGoal.trim().length > 0 &&
-    form.preferredTrainingDays.length >= 4 &&
+    form.runningDays.length >= 4 &&
+    form.runningDays.includes(form.longRunPreferredDay) &&
     form.goalRaceEventName.trim().length > 0 &&
     form.goalRaceEventDate.trim().length > 0 &&
     form.goalRaceEventDistanceKm !== "" &&
@@ -188,11 +202,13 @@ export default function ProfileScreen({
         </div>
 
         <div className="space-y-2">
-          <Label>Training days</Label>
-          <div className="grid grid-cols-7 gap-2">
+          <Label>
+            Running days <span className="font-normal text-muted-foreground">(min. 4)</span>
+          </Label>
+          <div className="flex gap-2">
             {allDays.map((day) => {
-              const active = form.preferredTrainingDays.includes(day.value);
-              const locked = active && form.preferredTrainingDays.length === 4;
+              const active = form.runningDays.includes(day.value);
+              const locked = active && form.runningDays.length === 4;
 
               return (
                 <button
@@ -200,7 +216,7 @@ export default function ProfileScreen({
                   type="button"
                   onClick={() => toggleDay(day.value)}
                   className={cn(
-                    "w-full rounded-lg border px-0 py-2.5 text-sm font-medium transition-colors",
+                    "flex-1 rounded-lg border px-0 py-2.5 text-sm font-medium transition-colors",
                     active
                       ? "border-primary bg-primary text-primary-foreground"
                       : "border-divider text-muted-foreground hover:border-foreground/20 hover:text-foreground",
@@ -212,7 +228,50 @@ export default function ProfileScreen({
               );
             })}
           </div>
-          <p className="text-xs text-muted-foreground">Choose the days you usually train. Minimum 4 days.</p>
+          <p className="text-xs text-muted-foreground">{form.runningDays.length} days selected</p>
+        </div>
+
+        <div className="space-y-2">
+          <Label>
+            Preferred long run day <span className="font-normal text-muted-foreground">(anchor)</span>
+          </Label>
+          <div className="flex gap-2">
+            {allDays.map((day) => {
+              const isRunDay = form.runningDays.includes(day.value);
+              const isLongRun = form.longRunPreferredDay === day.value;
+
+              return (
+                <button
+                  key={day.value}
+                  type="button"
+                  onClick={() =>
+                    isRunDay &&
+                    setForm((prev) => ({
+                      ...prev,
+                      longRunPreferredDay: day.value,
+                    }))
+                  }
+                  disabled={!isRunDay}
+                  className={cn(
+                    "flex-1 rounded-lg border px-0 py-2.5 text-sm font-medium transition-colors",
+                    !isRunDay
+                      ? "cursor-not-allowed border-border bg-muted/30 text-muted-foreground opacity-30"
+                      : isLongRun
+                        ? "border-accent bg-accent text-accent-foreground shadow-sm"
+                        : "border-divider text-muted-foreground hover:border-foreground/20 hover:text-foreground"
+                  )}
+                >
+                  {day.label}
+                </button>
+              );
+            })}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Long run scheduled on{" "}
+            <span className="font-medium text-foreground">
+              {allDays.find((day) => day.value === form.longRunPreferredDay)?.label ?? form.longRunPreferredDay}
+            </span>
+          </p>
         </div>
 
         <div className="space-y-3">

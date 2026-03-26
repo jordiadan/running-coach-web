@@ -140,7 +140,8 @@ describe("portal-api weekly coach helpers", () => {
     apiRequestMock.mockResolvedValueOnce({
       athleteId: "athlete-1",
       displayName: "Jordi",
-      preferredTrainingDays: ["TUE", "THU", "SAT", "SUN"],
+      runningDays: ["TUE", "THU", "SAT", "SUN"],
+      longRunPreferredDay: "SUN",
       trainingGoal: "Build consistency",
       trainingGoalCode: "build_consistency",
       preparation: {
@@ -155,6 +156,8 @@ describe("portal-api weekly coach helpers", () => {
     await expect(getAthleteProfile("athlete-1")).resolves.toMatchObject({
       athleteId: "athlete-1",
       trainingGoal: "build_consistency",
+      runningDays: ["TUE", "THU", "SAT", "SUN"],
+      longRunPreferredDay: "SUN",
       goalRaceEventName: "Valencia Half Marathon",
     });
   });
@@ -165,7 +168,8 @@ describe("portal-api weekly coach helpers", () => {
     await updateAthleteProfile("athlete-1", {
       displayName: "Jordi",
       trainingGoal: "race_personal_best",
-      preferredTrainingDays: ["TUE", "THU", "SAT", "SUN"],
+      runningDays: ["TUE", "THU", "SAT", "SUN"],
+      longRunPreferredDay: "SUN",
       goalRaceEventName: "Valencia Half Marathon",
       goalRaceEventDate: "2026-10-25",
       goalRaceEventDistanceKm: 21.1,
@@ -175,6 +179,8 @@ describe("portal-api weekly coach helpers", () => {
       method: "PUT",
       body: expect.objectContaining({
         trainingGoal: "race_personal_best",
+        runningDays: ["TUE", "THU", "SAT", "SUN"],
+        longRunPreferredDay: "SUN",
       }),
     });
   });
