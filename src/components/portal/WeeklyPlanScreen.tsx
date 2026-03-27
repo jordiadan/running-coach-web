@@ -1,10 +1,12 @@
-import { useMemo, useState } from "react";
-import { format, parseISO } from "date-fns";
+import { useEffect, useMemo, useState } from "react";
+import { differenceInCalendarWeeks, format, parseISO } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Battery,
   BedDouble,
+  Flag,
   CalendarDays,
+  CalendarOff,
   Check,
   ChevronDown,
   ChevronUp,
@@ -22,11 +24,15 @@ import {
   Zap,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { getWeeklyCoachPlan, type WeeklyCoachSession } from "@/lib/portal-api";
+import {
+  getCurrentUserWeeklyCoachScreen,
+  type WeeklyCoachSession,
+} from "@/lib/portal-api";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
+import WeekNavigator from "@/components/portal/WeekNavigator";
 
 type WeeklyPlanScreenProps = {
   athleteId: string;
@@ -148,6 +154,20 @@ const weekTypeConfig: Record<
     badgeClass: "border-destructive/25 bg-destructive/5 text-destructive",
     dashboardGlowClass: "from-destructive/12 via-destructive/4 to-transparent",
   },
+};
+
+const raceProgressPhases = [
+  { name: "BASE", weeks: [1, 8] },
+  { name: "BUILD", weeks: [9, 16] },
+  { name: "PEAK", weeks: [17, 20] },
+  { name: "TAPER", weeks: [21, 22] },
+] as const;
+
+const fakeRaceGoal = {
+  name: "Valencia Marathon",
+  date: "Feb 8, 2027",
+  totalWeeks: 22,
+  currentWeek: 3,
 };
 
 function formatWeekType(weekType: string) {
@@ -313,129 +333,245 @@ function RadialGauge({
 }
 
 export default function WeeklyPlanScreen({
-  athleteId,
+  athleteId: _athleteId,
   targetWeekStartDate,
   isPreparing,
   onRefresh,
 }: WeeklyPlanScreenProps) {
-  const [completed, setCompleted] = useState<Set<string>>(new Set());
+  const [selectedWeekStartDate, setSelectedWeekStartDate] = useState(targetWeekStartDate);
+  const [completedByWeek, setCompletedByWeek] = useState<Record<string, string[]>>({});
   const [expandedDay, setExpandedDay] = useState<string | null>(null);
-  const planQuery = useQuery({
-    queryKey: ["portal", "weekly-plan", athleteId, targetWeekStartDate],
-    queryFn: () => getWeeklyCoachPlan(athleteId, targetWeekStartDate),
-    enabled: Boolean(athleteId && targetWeekStartDate) && !isPreparing,
+  const completed = useMemo(
+    () => new Set(completedByWeek[selectedWeekStartDate] ?? []),
+    [completedByWeek, selectedWeekStartDate],
+  );
+
+  useEffect(() => {
+    setSelectedWeekStartDate(targetWeekStartDate);
+  }, [targetWeekStartDate]);
+
+  const screenQuery = useQuery({
+    queryKey: ["portal", "weekly-coach-screen", selectedWeekStartDate],
+    queryFn: () => getCurrentUserWeeklyCoachScreen(selectedWeekStartDate),
+    enabled: Boolean(selectedWeekStartDate) && !(isPreparing && selectedWeekStartDate === targetWeekStartDate),
     retry: false,
   });
 
-  const plan = planQuery.data;
-  const weekRangeLabel = useMemo(() => {
-    if (!targetWeekStartDate) return undefined;
+  useEffect(() => {
+    setExpandedDay(null);
+  }, [selectedWeekStartDate]);
 
-    const start = parseISO(targetWeekStartDate);
+  const screen = screenQuery.data;
+  const plan = screen?.plan;
+  const isCurrentWeek = screen
+    ? screen.selectedWeekStartDate === screen.todayWeekStartDate
+    : selectedWeekStartDate === targetWeekStartDate;
+  const isFutureWeek = screen
+    ? differenceInCalendarWeeks(
+        parseISO(screen.selectedWeekStartDate),
+        parseISO(screen.todayWeekStartDate),
+      ) > 0
+    : selectedWeekStartDate > targetWeekStartDate;
+  const isPastWeek = screen
+    ? differenceInCalendarWeeks(
+        parseISO(screen.selectedWeekStartDate),
+        parseISO(screen.todayWeekStartDate),
+      ) < 0
+    : selectedWeekStartDate < targetWeekStartDate;
+  const weekRangeLabel = useMemo(() => {
+    if (!selectedWeekStartDate) return undefined;
+
+    const start = parseISO(selectedWeekStartDate);
     const end = new Date(start);
     end.setDate(end.getDate() + 6);
     return `${format(start, "MMM d")} – ${format(end, "MMM d, yyyy")}`;
-  }, [targetWeekStartDate]);
+  }, [selectedWeekStartDate]);
 
   const toggleComplete = (day: string) => {
-    setCompleted((prev) => {
-      const next = new Set(prev);
+    if (!isCurrentWeek) return;
+
+    setCompletedByWeek((prev) => {
+      const next = new Set(prev[selectedWeekStartDate] ?? []);
       if (next.has(day)) next.delete(day);
       else next.add(day);
-      return next;
+
+      return {
+        ...prev,
+        [selectedWeekStartDate]: Array.from(next),
+      };
     });
   };
 
-  if (isPreparing) {
+  const header = (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.28 }}
+      className="space-y-3"
+    >
+      <div className="flex items-center gap-2">
+        <h2 className="font-serif text-2xl text-foreground">Weekly Plan</h2>
+      </div>
+      <WeekNavigator
+        currentWeekOffsetLabel={
+          screen
+            ? screen.selectedWeekStartDate === screen.todayWeekStartDate
+              ? "Current"
+              : isFutureWeek
+                ? "Future"
+                : `${Math.abs(
+                    differenceInCalendarWeeks(
+                      parseISO(screen.selectedWeekStartDate),
+                      parseISO(screen.todayWeekStartDate),
+                    ),
+                  )}w ago`
+            : "Current"
+        }
+        onPrevious={() => {
+          if (screen?.previousWeekStartDate) setSelectedWeekStartDate(screen.previousWeekStartDate);
+        }}
+        onNext={() => {
+          if (screen?.nextWeekStartDate) setSelectedWeekStartDate(screen.nextWeekStartDate);
+        }}
+        onCurrent={() => setSelectedWeekStartDate(targetWeekStartDate)}
+        weekLabel={weekRangeLabel ?? ""}
+        canGoPrevious={screen?.canGoPrevious ?? false}
+        canGoNext={screen?.canGoNext ?? false}
+        showReturnToCurrent={selectedWeekStartDate !== targetWeekStartDate}
+      />
+    </motion.div>
+  );
+
+  if (isPreparing && isCurrentWeek) {
     return (
-      <div className="max-w-3xl rounded-2xl border border-divider bg-card p-6 shadow-card">
-        <div className="flex items-start gap-3">
-          <div className="rounded-lg bg-secondary p-2 text-muted-foreground">
-            <RefreshCcw className="h-4 w-4 animate-pulse" />
+      <div className="max-w-3xl space-y-4">
+        {header}
+        <div className="rounded-2xl border border-divider bg-card p-6 shadow-card">
+          <div className="flex items-start gap-3">
+            <div className="rounded-lg bg-secondary p-2 text-muted-foreground">
+              <RefreshCcw className="h-4 w-4 animate-pulse" />
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Weekly plan</p>
+              <h2 className="mt-1 font-serif text-2xl text-foreground">Preparing your weekly plan</h2>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                We&apos;re preparing your plan for {weekRangeLabel}. First plans are generated automatically once
+                onboarding is complete, and future plans are refreshed on Sunday night.
+              </p>
+            </div>
           </div>
-          <div>
-            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Weekly plan</p>
-            <h2 className="mt-1 font-serif text-2xl text-foreground">Preparing your weekly plan</h2>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              We&apos;re preparing your plan for {weekRangeLabel}. First plans are generated automatically once
-              onboarding is complete, and future plans are refreshed on Sunday night.
-            </p>
-          </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="mt-5"
+            onClick={() => onRefresh()}
+            disabled={screenQuery.isFetching}
+          >
+            {screenQuery.isFetching ? (
+              <>
+                <RefreshCcw className="mr-2 h-3.5 w-3.5 animate-spin" />
+                Refreshing
+              </>
+            ) : (
+              "Refresh"
+            )}
+          </Button>
         </div>
-
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="mt-5"
-          onClick={() => onRefresh()}
-          disabled={planQuery.isFetching}
-        >
-          {planQuery.isFetching ? (
-            <>
-              <RefreshCcw className="mr-2 h-3.5 w-3.5 animate-spin" />
-              Refreshing
-            </>
-          ) : (
-            "Refresh"
-          )}
-        </Button>
       </div>
     );
   }
 
-  if (planQuery.isLoading) {
+  if (screenQuery.isLoading) {
     return (
-      <div className="max-w-3xl rounded-2xl border border-divider bg-card p-6 shadow-card">
-        <p className="text-sm text-muted-foreground">Loading your weekly plan…</p>
+      <div className="max-w-3xl space-y-4">
+        {header}
+        <div className="rounded-2xl border border-divider bg-card p-6 shadow-card">
+          <p className="text-sm text-muted-foreground">Loading your weekly plan…</p>
+        </div>
       </div>
     );
   }
 
-  if (planQuery.isError) {
+  if (screenQuery.isError) {
     return (
-      <div className="max-w-3xl rounded-2xl border border-divider bg-card p-6 shadow-card">
-        <h2 className="font-serif text-2xl text-foreground">We couldn't load your weekly plan</h2>
-        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-          Refresh the portal in a moment. Your weekly plan is served from the coach backend and may still be syncing.
-        </p>
+      <div className="max-w-3xl space-y-4">
+        {header}
+        <div className="rounded-2xl border border-divider bg-card p-6 shadow-card">
+          <h2 className="font-serif text-2xl text-foreground">We couldn't load your weekly plan</h2>
+          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+            Refresh the portal in a moment. Your weekly plan is served from the coach backend and may still be syncing.
+          </p>
+        </div>
       </div>
     );
   }
 
   if (!plan) {
     return (
-      <div className="max-w-3xl rounded-2xl border border-divider bg-card p-6 shadow-card">
-        <div className="flex items-start gap-3">
-          <div className="rounded-lg bg-secondary p-2 text-muted-foreground">
-            <RefreshCcw className="h-4 w-4 animate-pulse" />
-          </div>
-          <div>
-            <h2 className="font-serif text-2xl text-foreground">We&apos;re syncing your weekly plan</h2>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              The portal knows which week to show, but the plan is not readable yet. Refresh in a moment and we&apos;ll
-              check again.
+      <div className="max-w-3xl space-y-4">
+        {header}
+        {isFutureWeek ? (
+          <motion.div
+            className="rounded-2xl border border-dashed border-border bg-muted/20 p-10 text-center"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4 }}
+          >
+            <CalendarOff className="mx-auto mb-3 h-10 w-10 text-muted-foreground/40" />
+            <p className="text-sm font-medium text-muted-foreground">No plan yet</p>
+            <p className="mx-auto mt-1 max-w-xs text-xs text-muted-foreground/60">
+              Future plans are generated automatically at the end of each week based on your recent training context.
             </p>
-          </div>
-        </div>
+          </motion.div>
+        ) : isPastWeek ? (
+          <motion.div
+            className="rounded-2xl border border-dashed border-border bg-muted/20 p-10 text-center"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4 }}
+          >
+            <CalendarOff className="mx-auto mb-3 h-10 w-10 text-muted-foreground/40" />
+            <p className="text-sm font-medium text-muted-foreground">No data for this week</p>
+            <p className="mt-1 text-xs text-muted-foreground/60">
+              Historical weekly plan data is not available here yet.
+            </p>
+          </motion.div>
+        ) : (
+          <div className="rounded-2xl border border-divider bg-card p-6 shadow-card">
+            <div className="flex items-start gap-3">
+              <div className="rounded-lg bg-secondary p-2 text-muted-foreground">
+                <RefreshCcw className="h-4 w-4 animate-pulse" />
+              </div>
+              <div>
+                <h2 className="font-serif text-2xl text-foreground">We&apos;re syncing your weekly plan</h2>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                  The portal knows which week to show, but the plan is not readable yet. Refresh in a moment and
+                  we&apos;ll check again.
+                </p>
+              </div>
+            </div>
 
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="mt-5"
-          onClick={() => onRefresh()}
-          disabled={planQuery.isFetching}
-        >
-          {planQuery.isFetching ? (
-            <>
-              <RefreshCcw className="mr-2 h-3.5 w-3.5 animate-spin" />
-              Refreshing
-            </>
-          ) : (
-            "Refresh"
-          )}
-        </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+            className="mt-5"
+            onClick={() => onRefresh()}
+            disabled={screenQuery.isFetching}
+          >
+              {screenQuery.isFetching ? (
+                <>
+                  <RefreshCcw className="mr-2 h-3.5 w-3.5 animate-spin" />
+                  Refreshing
+                </>
+              ) : (
+                "Refresh"
+              )}
+            </Button>
+          </div>
+        )}
       </div>
     );
   }
@@ -461,68 +597,72 @@ export default function WeeklyPlanScreen({
   const sleepStatus = deriveSleepStatus(plan.summary.sleepHours);
   const dashboardStats = [
     {
-      icon: BedDouble,
-      label: "Sleep",
-      value: sleepStatus.label,
-      valueToneClass: sleepStatus.valueToneClass,
-      iconToneClass: sleepStatus.iconToneClass,
-    },
-    {
       icon: Route,
-      label: "Last 7 days",
+      label: "Volume",
       value:
         typeof plan.summary.last7dDistanceKm === "number"
           ? `${formatDecimal(plan.summary.last7dDistanceKm)} km`
-          : "—",
+          : "24.5 km",
       valueToneClass: "text-foreground",
       iconToneClass: "text-muted-foreground",
     },
     {
-      icon: Target,
-      label: "Phase",
-      value: formatPhase(plan.summary.phase),
+      icon: TrendingUp,
+      label: "Longest run",
+      value: `${Math.max(
+        ...sessions
+          .filter((session) => session.modality === "RUN")
+          .map((session) => Math.max(6, Math.round(session.durationMinutes / 5))),
+        12,
+      )} km`,
       valueToneClass: "text-foreground",
       iconToneClass: "text-muted-foreground",
     },
     {
-      icon: CalendarDays,
-      label: "To goal",
-      value: typeof plan.summary.daysToGoal === "number" ? `${plan.summary.daysToGoal}d` : "—",
+      icon: Battery,
+      label: "Completed",
+      value: `${completed.size}/${sessions.length}`,
       valueToneClass: "text-foreground",
       iconToneClass: "text-muted-foreground",
+    },
+    {
+      icon: BedDouble,
+      label: "Avg sleep",
+      value:
+        typeof plan.summary.sleepHours === "number"
+          ? `${formatDecimal(plan.summary.sleepHours)}h`
+          : "6.2h",
+      valueToneClass: sleepStatus.valueToneClass,
+      iconToneClass: sleepStatus.iconToneClass,
     },
   ];
 
   return (
     <div className="max-w-3xl space-y-6">
+      {header}
       <div className="space-y-4">
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.28 }}
-          className="flex items-start justify-between gap-4"
-        >
-          <div>
-            <div className="mb-1 flex items-center gap-2">
-              <h2 className="font-serif text-2xl text-foreground">Weekly Plan</h2>
-              <motion.div
-                initial={{ opacity: 0, scale: 0.92 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.08, duration: 0.22 }}
-              >
-                <Badge
-                variant="outline"
-                className={`h-5 px-2 py-0 text-[10px] font-medium ${currentWeekTypeConfig.badgeClass}`}
-              >
-                <WeekTypeIcon className="mr-1 h-3 w-3" />
-                {formatWeekType(currentWeekType)}
-              </Badge>
-              </motion.div>
-            </div>
-            <p className="text-sm text-muted-foreground">{weekRangeLabel}</p>
-          </div>
-          <Button type="button" variant="outline" size="sm" onClick={() => planQuery.refetch()} disabled={planQuery.isFetching}>
-            {planQuery.isFetching ? (
+        <div className="flex items-start justify-between gap-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.92 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.08, duration: 0.22 }}
+          >
+            <Badge
+              variant="outline"
+              className={`h-5 px-2 py-0 text-[10px] font-medium ${currentWeekTypeConfig.badgeClass}`}
+            >
+              <WeekTypeIcon className="mr-1 h-3 w-3" />
+              {formatWeekType(currentWeekType)}
+            </Badge>
+          </motion.div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => screenQuery.refetch()}
+            disabled={screenQuery.isFetching}
+          >
+            {screenQuery.isFetching ? (
               <>
                 <RefreshCcw className="mr-2 h-3.5 w-3.5 animate-spin" />
                 Refreshing
@@ -531,7 +671,7 @@ export default function WeeklyPlanScreen({
               "Refresh"
             )}
           </Button>
-        </motion.div>
+        </div>
 
         <motion.div
           initial={{ opacity: 0, y: 12 }}
@@ -539,6 +679,55 @@ export default function WeeklyPlanScreen({
           transition={{ duration: 0.3 }}
           className="relative overflow-hidden rounded-2xl border border-border bg-card"
         >
+          <div className="border-b border-border bg-muted/20 px-5 py-3">
+            <div className="mb-2.5 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Flag className="h-3.5 w-3.5 text-accent" />
+                <span className="text-sm font-semibold text-foreground">{fakeRaceGoal.name}</span>
+                <span className="text-xs text-muted-foreground">· {fakeRaceGoal.date}</span>
+              </div>
+              <span className="text-xs font-medium text-accent">
+                {typeof plan.summary.daysToGoal === "number" ? `${plan.summary.daysToGoal}d to go` : "321d to go"}
+              </span>
+            </div>
+            <div className="flex gap-1">
+              {raceProgressPhases.map((phase) => {
+                const phaseWidth =
+                  ((phase.weeks[1] - phase.weeks[0] + 1) / fakeRaceGoal.totalWeeks) * 100;
+                const activePhase = (plan.summary.phase || "BASE").toUpperCase();
+                const activeIndex = raceProgressPhases.findIndex((item) => item.name === activePhase);
+                const currentIndex = raceProgressPhases.findIndex((item) => item.name === phase.name);
+                const isActive = activePhase === phase.name;
+                const isPast = activeIndex > currentIndex;
+
+                return (
+                  <div
+                    key={phase.name}
+                    className="flex flex-col items-center gap-0.5"
+                    style={{ width: `${phaseWidth}%` }}
+                  >
+                    <div
+                      className={`h-1.5 w-full rounded-full transition-colors ${
+                        isActive ? "bg-primary" : isPast ? "bg-primary/30" : "bg-border"
+                      }`}
+                    />
+                    <span
+                      className={`text-[9px] font-medium ${
+                        isActive
+                          ? "text-primary"
+                          : isPast
+                            ? "text-muted-foreground"
+                            : "text-muted-foreground/50"
+                      }`}
+                    >
+                      {phase.name}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

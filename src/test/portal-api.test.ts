@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiError, apiRequest } from "@/lib/api";
 import {
   bootstrapPortal,
+  getCurrentUserWeeklyCoachScreen,
   getAthleteProfile,
   getWeeklyCoachPlan,
   retryCurrentUserWeeklyPlanGeneration,
@@ -132,6 +133,66 @@ describe("portal-api weekly coach helpers", () => {
       },
       plan: {
         weekType: "DELOAD",
+      },
+    });
+  });
+
+  it("maps the navigable weekly coach screen read model", async () => {
+    apiRequestMock.mockResolvedValueOnce({
+      viewType: "PLAN",
+      selectedWeekStartDate: "2026-03-23",
+      todayWeekStartDate: "2026-03-23",
+      latestGeneratedWeekStartDate: "2026-03-23",
+      futurePreviewWeekStartDate: "2026-03-30",
+      previousWeekStartDate: "2026-03-16",
+      nextWeekStartDate: "2026-03-30",
+      canGoPrevious: true,
+      canGoNext: true,
+      plan: {
+        weekStartDate: "2026-03-23",
+        planId: "athlete-1:2026-03-23",
+        createdAt: "2026-03-23T08:00:00Z",
+        updatedAt: "2026-03-23T08:00:00Z",
+        plan: {
+          schemaVersion: "1.0",
+          weekType: "BUILD",
+          weekObjective: "Build aerobic capacity",
+          progressionNote: "Hold one quality run",
+          sessions: [],
+          justification: [],
+        },
+        summary: {
+          readinessScore: 93,
+          fatigue: 3,
+          sleepHours: 7.9,
+          last7dDistanceKm: 45,
+          phase: "BUILD",
+          daysToGoal: 101,
+        },
+        llmMeta: {
+          provider: "openai",
+          model: "gpt-5",
+          promptVersion: "v1",
+        },
+      },
+    });
+
+    await expect(getCurrentUserWeeklyCoachScreen("2026-03-23")).resolves.toMatchObject({
+      viewType: "PLAN",
+      selectedWeekStartDate: "2026-03-23",
+      previousWeekStartDate: "2026-03-16",
+      nextWeekStartDate: "2026-03-30",
+      canGoPrevious: true,
+      canGoNext: true,
+      plan: {
+        planId: "athlete-1:2026-03-23",
+        summary: {
+          readinessScore: 93,
+          phase: "BUILD",
+        },
+        plan: {
+          weekType: "BUILD",
+        },
       },
     });
   });

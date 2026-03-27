@@ -100,6 +100,21 @@ export type WeeklyCoachPlan = {
   };
 };
 
+export type CurrentUserWeeklyCoachScreenViewType = "PLAN" | "FUTURE_PREVIEW" | "EMPTY";
+
+export type CurrentUserWeeklyCoachScreen = {
+  viewType: CurrentUserWeeklyCoachScreenViewType;
+  selectedWeekStartDate: string;
+  todayWeekStartDate: string;
+  latestGeneratedWeekStartDate?: string;
+  futurePreviewWeekStartDate?: string;
+  previousWeekStartDate?: string;
+  nextWeekStartDate?: string;
+  canGoPrevious: boolean;
+  canGoNext: boolean;
+  plan?: WeeklyCoachPlan;
+};
+
 type UnknownRecord = Record<string, unknown>;
 
 function asRecord(value: unknown): UnknownRecord {
@@ -352,6 +367,88 @@ export async function getWeeklyCoachPlan(athleteId: string, weekStartDate: strin
       promptVersion: asString(llmMeta.promptVersion),
     },
   } satisfies WeeklyCoachPlan;
+}
+
+export async function getCurrentUserWeeklyCoachScreen(weekStartDate?: string) {
+  const search = weekStartDate ? `?weekStartDate=${encodeURIComponent(weekStartDate)}` : "";
+  const payload = await apiRequest<unknown>(`/api/v1/me/weekly-coach/screen${search}`);
+  const record = asRecord(payload);
+  const planRecord = record.plan ? asRecord(record.plan) : undefined;
+  const planBody = planRecord ? asRecord(planRecord.plan) : undefined;
+  const summary = planRecord ? asRecord(planRecord.summary) : undefined;
+  const llmMeta = planRecord ? asRecord(planRecord.llmMeta) : undefined;
+  const sessions =
+    planBody && Array.isArray(planBody.sessions) ? planBody.sessions.map((item) => asRecord(item)) : [];
+  const justification =
+    planBody && Array.isArray(planBody.justification)
+      ? planBody.justification.filter((item): item is string => typeof item === "string")
+      : [];
+  const viewType = asString(record.viewType);
+
+  if (viewType !== "PLAN" && viewType !== "FUTURE_PREVIEW" && viewType !== "EMPTY") {
+    throw new Error("Missing weekly coach screen view type");
+  }
+
+  const selectedWeekStartDate = asString(record.selectedWeekStartDate);
+  const todayWeekStartDate = asString(record.todayWeekStartDate);
+
+  if (!selectedWeekStartDate || !todayWeekStartDate) {
+    throw new Error("Missing weekly coach screen dates");
+  }
+
+  return {
+    viewType,
+    selectedWeekStartDate,
+    todayWeekStartDate,
+    latestGeneratedWeekStartDate: asString(record.latestGeneratedWeekStartDate) || undefined,
+    futurePreviewWeekStartDate: asString(record.futurePreviewWeekStartDate) || undefined,
+    previousWeekStartDate: asString(record.previousWeekStartDate) || undefined,
+    nextWeekStartDate: asString(record.nextWeekStartDate) || undefined,
+    canGoPrevious: Boolean(record.canGoPrevious),
+    canGoNext: Boolean(record.canGoNext),
+    plan: planRecord
+      ? ({
+          athleteId: "",
+          weekStartDate: asString(planRecord.weekStartDate),
+          planId: asString(planRecord.planId),
+          createdAt: asString(planRecord.createdAt),
+          updatedAt: asString(planRecord.updatedAt),
+          summary: {
+            readinessScore: asOptionalNumber(summary?.readinessScore),
+            fatigue: asOptionalNumber(summary?.fatigue),
+            sleepHours: asOptionalNumber(summary?.sleepHours),
+            last7dDistanceKm: asOptionalNumber(summary?.last7dDistanceKm),
+            phase: asString(summary?.phase) || undefined,
+            daysToGoal: asOptionalNumber(summary?.daysToGoal),
+          },
+          plan: {
+            schemaVersion: asString(planBody?.schemaVersion),
+            weekType: asString(planBody?.weekType),
+            weekObjective: asString(planBody?.weekObjective),
+            progressionNote: asString(planBody?.progressionNote),
+            sessions: sessions.map((session) => ({
+              day: asString(session.day),
+              modality: asString(session.modality),
+              type: asString(session.type),
+              title: asString(session.title),
+              durationMinutes: typeof session.durationMinutes === "number" ? session.durationMinutes : 0,
+              intensityCategory: asString(session.intensityCategory),
+              placementReason: asString(session.placementReason),
+              notes: asString(session.notes) || undefined,
+              strengthFocus: Array.isArray(session.strengthFocus)
+                ? session.strengthFocus.filter((item): item is string => typeof item === "string")
+                : undefined,
+            })),
+            justification,
+          },
+          llmMeta: {
+            provider: asString(llmMeta?.provider),
+            model: asString(llmMeta?.model),
+            promptVersion: asString(llmMeta?.promptVersion),
+          },
+        } satisfies WeeklyCoachPlan)
+      : undefined,
+  } satisfies CurrentUserWeeklyCoachScreen;
 }
 
 export function isProfileComplete(profile: AthleteProfile | undefined) {
