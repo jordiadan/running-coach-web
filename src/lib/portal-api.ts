@@ -112,6 +112,31 @@ export type CurrentUserWeeklyCoachScreen = {
   nextWeekStartDate?: string;
   canGoPrevious: boolean;
   canGoNext: boolean;
+  goal?: {
+    goalSummary: string;
+    primaryGoal: {
+      name: string;
+      eventDate: string;
+      distanceKm: number;
+    };
+    phase: string;
+    daysToGoal: number;
+    nextSecondaryGoal?: {
+      role: string;
+      name: string;
+      eventDate: string;
+      distanceKm: number;
+      daysUntilEvent: number;
+    };
+  };
+  highlights: {
+    longRun?: {
+      day: string;
+      title: string;
+      durationMinutes: number;
+      intensityCategory: string;
+    };
+  };
   plan?: WeeklyCoachPlan;
 };
 
@@ -373,6 +398,11 @@ export async function getCurrentUserWeeklyCoachScreen(weekStartDate?: string) {
   const search = weekStartDate ? `?weekStartDate=${encodeURIComponent(weekStartDate)}` : "";
   const payload = await apiRequest<unknown>(`/api/v1/me/weekly-coach/screen${search}`);
   const record = asRecord(payload);
+  const goal = asRecord(record.goal);
+  const primaryGoal = asRecord(goal.primaryGoal);
+  const nextSecondaryGoal = asRecord(goal.nextSecondaryGoal);
+  const highlights = asRecord(record.highlights);
+  const longRun = asRecord(highlights.longRun);
   const planRecord = record.plan ? asRecord(record.plan) : undefined;
   const planBody = planRecord ? asRecord(planRecord.plan) : undefined;
   const summary = planRecord ? asRecord(planRecord.summary) : undefined;
@@ -406,6 +436,37 @@ export async function getCurrentUserWeeklyCoachScreen(weekStartDate?: string) {
     nextWeekStartDate: asString(record.nextWeekStartDate) || undefined,
     canGoPrevious: Boolean(record.canGoPrevious),
     canGoNext: Boolean(record.canGoNext),
+    goal: record.goal
+      ? {
+          goalSummary: asString(goal.goalSummary),
+          primaryGoal: {
+            name: asString(primaryGoal.name),
+            eventDate: asString(primaryGoal.eventDate),
+            distanceKm: asOptionalNumber(primaryGoal.distanceKm) ?? 0,
+          },
+          phase: asString(goal.phase),
+          daysToGoal: asOptionalNumber(goal.daysToGoal) ?? 0,
+          nextSecondaryGoal: goal.nextSecondaryGoal
+            ? {
+                role: asString(nextSecondaryGoal.role),
+                name: asString(nextSecondaryGoal.name),
+                eventDate: asString(nextSecondaryGoal.eventDate),
+                distanceKm: asOptionalNumber(nextSecondaryGoal.distanceKm) ?? 0,
+                daysUntilEvent: asOptionalNumber(nextSecondaryGoal.daysUntilEvent) ?? 0,
+              }
+            : undefined,
+        }
+      : undefined,
+    highlights: {
+      longRun: highlights.longRun
+        ? {
+            day: asString(longRun.day),
+            title: asString(longRun.title),
+            durationMinutes: asOptionalNumber(longRun.durationMinutes) ?? 0,
+            intensityCategory: asString(longRun.intensityCategory),
+          }
+        : undefined,
+    },
     plan: planRecord
       ? ({
           athleteId: "",

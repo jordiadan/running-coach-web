@@ -148,6 +148,31 @@ describe("portal-api weekly coach helpers", () => {
       nextWeekStartDate: "2026-03-30",
       canGoPrevious: true,
       canGoNext: true,
+      goal: {
+        goalSummary: "Sub-1:40 half marathon",
+        primaryGoal: {
+          name: "Barcelona Half Marathon",
+          eventDate: "2026-06-01",
+          distanceKm: 21.1,
+        },
+        phase: "BUILD",
+        daysToGoal: 67,
+        nextSecondaryGoal: {
+          role: "TUNE_UP",
+          name: "10K tune-up",
+          eventDate: "2026-05-01",
+          distanceKm: 10,
+          daysUntilEvent: 36,
+        },
+      },
+      highlights: {
+        longRun: {
+          day: "SUN",
+          title: "Long run",
+          durationMinutes: 95,
+          intensityCategory: "LOW",
+        },
+      },
       plan: {
         weekStartDate: "2026-03-23",
         planId: "athlete-1:2026-03-23",
@@ -184,6 +209,19 @@ describe("portal-api weekly coach helpers", () => {
       nextWeekStartDate: "2026-03-30",
       canGoPrevious: true,
       canGoNext: true,
+      goal: {
+        goalSummary: "Sub-1:40 half marathon",
+        primaryGoal: {
+          name: "Barcelona Half Marathon",
+        },
+        phase: "BUILD",
+        daysToGoal: 67,
+      },
+      highlights: {
+        longRun: {
+          durationMinutes: 95,
+        },
+      },
       plan: {
         planId: "athlete-1:2026-03-23",
         summary: {

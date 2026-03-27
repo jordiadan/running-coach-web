@@ -163,13 +163,6 @@ const raceProgressPhases = [
   { name: "TAPER", weeks: [21, 22] },
 ] as const;
 
-const fakeRaceGoal = {
-  name: "Valencia Marathon",
-  date: "Feb 8, 2027",
-  totalWeeks: 22,
-  currentWeek: 3,
-};
-
 function formatWeekType(weekType: string) {
   if (!weekType) return "Planned week";
   return weekType
@@ -595,6 +588,10 @@ export default function WeeklyPlanScreen({
   const readinessScore = plan.summary.readinessScore ?? 0;
   const fatigue = plan.summary.fatigue ?? 0;
   const sleepStatus = deriveSleepStatus(plan.summary.sleepHours);
+  const goal = screen?.goal;
+  const raceGoalDateLabel = goal?.primaryGoal.eventDate
+    ? format(parseISO(goal.primaryGoal.eventDate), "MMM d, yyyy")
+    : undefined;
   const dashboardStats = [
     {
       icon: Route,
@@ -609,12 +606,9 @@ export default function WeeklyPlanScreen({
     {
       icon: TrendingUp,
       label: "Longest run",
-      value: `${Math.max(
-        ...sessions
-          .filter((session) => session.modality === "RUN")
-          .map((session) => Math.max(6, Math.round(session.durationMinutes / 5))),
-        12,
-      )} km`,
+      value: screen?.highlights.longRun
+        ? `${screen.highlights.longRun.durationMinutes} min`
+        : "—",
       valueToneClass: "text-foreground",
       iconToneClass: "text-muted-foreground",
     },
@@ -679,54 +673,50 @@ export default function WeeklyPlanScreen({
           transition={{ duration: 0.3 }}
           className="relative overflow-hidden rounded-2xl border border-border bg-card"
         >
-          <div className="border-b border-border bg-muted/20 px-5 py-3">
-            <div className="mb-2.5 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Flag className="h-3.5 w-3.5 text-accent" />
-                <span className="text-sm font-semibold text-foreground">{fakeRaceGoal.name}</span>
-                <span className="text-xs text-muted-foreground">· {fakeRaceGoal.date}</span>
+          {goal ? (
+            <div className="border-b border-border bg-muted/20 px-5 py-3">
+              <div className="mb-2.5 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Flag className="h-3.5 w-3.5 text-accent" />
+                  <span className="text-sm font-semibold text-foreground">{goal.primaryGoal.name}</span>
+                  {raceGoalDateLabel ? (
+                    <span className="text-xs text-muted-foreground">· {raceGoalDateLabel}</span>
+                  ) : null}
+                </div>
+                <span className="text-xs font-medium text-accent">{goal.daysToGoal}d to go</span>
               </div>
-              <span className="text-xs font-medium text-accent">
-                {typeof plan.summary.daysToGoal === "number" ? `${plan.summary.daysToGoal}d to go` : "321d to go"}
-              </span>
-            </div>
-            <div className="flex gap-1">
-              {raceProgressPhases.map((phase) => {
-                const phaseWidth =
-                  ((phase.weeks[1] - phase.weeks[0] + 1) / fakeRaceGoal.totalWeeks) * 100;
-                const activePhase = (plan.summary.phase || "BASE").toUpperCase();
-                const activeIndex = raceProgressPhases.findIndex((item) => item.name === activePhase);
-                const currentIndex = raceProgressPhases.findIndex((item) => item.name === phase.name);
-                const isActive = activePhase === phase.name;
-                const isPast = activeIndex > currentIndex;
+              <div className="flex gap-1">
+                {raceProgressPhases.map((phase) => {
+                  const activePhase = (goal.phase || "BASE").toUpperCase();
+                  const activeIndex = raceProgressPhases.findIndex((item) => item.name === activePhase);
+                  const currentIndex = raceProgressPhases.findIndex((item) => item.name === phase.name);
+                  const isActive = activePhase === phase.name;
+                  const isPast = activeIndex > currentIndex;
 
-                return (
-                  <div
-                    key={phase.name}
-                    className="flex flex-col items-center gap-0.5"
-                    style={{ width: `${phaseWidth}%` }}
-                  >
-                    <div
-                      className={`h-1.5 w-full rounded-full transition-colors ${
-                        isActive ? "bg-primary" : isPast ? "bg-primary/30" : "bg-border"
-                      }`}
-                    />
-                    <span
-                      className={`text-[9px] font-medium ${
-                        isActive
-                          ? "text-primary"
-                          : isPast
-                            ? "text-muted-foreground"
-                            : "text-muted-foreground/50"
-                      }`}
-                    >
-                      {phase.name}
-                    </span>
-                  </div>
-                );
-              })}
+                  return (
+                    <div key={phase.name} className="flex flex-1 flex-col items-center gap-0.5">
+                      <div
+                        className={`h-1.5 w-full rounded-full transition-colors ${
+                          isActive ? "bg-primary" : isPast ? "bg-primary/30" : "bg-border"
+                        }`}
+                      />
+                      <span
+                        className={`text-[9px] font-medium ${
+                          isActive
+                            ? "text-primary"
+                            : isPast
+                              ? "text-muted-foreground"
+                              : "text-muted-foreground/50"
+                        }`}
+                      >
+                        {phase.name}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          ) : null}
 
           <motion.div
             initial={{ opacity: 0 }}
