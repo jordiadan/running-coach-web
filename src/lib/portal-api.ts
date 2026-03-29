@@ -65,6 +65,7 @@ export type WeeklyCoachSession = {
   type: string;
   title: string;
   durationMinutes: number;
+  completed?: boolean;
   intensityCategory: string;
   placementReason: string;
   notes?: string;
@@ -247,6 +248,17 @@ export async function retryCurrentUserWeeklyPlanGeneration() {
   });
 }
 
+export async function setCurrentUserWeeklyCoachSessionCompletion(
+  weekStartDate: string,
+  day: string,
+  completed: boolean,
+) {
+  await apiRequest<void>(`/api/v1/me/weekly-coach/weeks/${weekStartDate}/sessions/${day}/completion`, {
+    method: "PUT",
+    body: { completed },
+  });
+}
+
 export async function getIntervalsIntegrationStatus(athleteId: string) {
   const payload = await apiRequest<unknown>(`/api/v1/integrations/intervals/${athleteId}`);
   const record = asRecord(payload);
@@ -377,6 +389,7 @@ export async function getWeeklyCoachPlan(athleteId: string, weekStartDate: strin
         type: asString(session.type),
         title: asString(session.title),
         durationMinutes: typeof session.durationMinutes === "number" ? session.durationMinutes : 0,
+        completed: Boolean(session.completed),
         intensityCategory: asString(session.intensityCategory),
         placementReason: asString(session.placementReason),
         notes: asString(session.notes) || undefined,
@@ -493,6 +506,7 @@ export async function getCurrentUserWeeklyCoachScreen(weekStartDate?: string) {
               type: asString(session.type),
               title: asString(session.title),
               durationMinutes: typeof session.durationMinutes === "number" ? session.durationMinutes : 0,
+              completed: Boolean(session.completed),
               intensityCategory: asString(session.intensityCategory),
               placementReason: asString(session.placementReason),
               notes: asString(session.notes) || undefined,

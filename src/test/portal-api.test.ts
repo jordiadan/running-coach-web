@@ -6,6 +6,7 @@ import {
   getAthleteProfile,
   getWeeklyCoachPlan,
   retryCurrentUserWeeklyPlanGeneration,
+  setCurrentUserWeeklyCoachSessionCompletion,
   updateAthleteProfile,
 } from "@/lib/portal-api";
 
@@ -183,7 +184,18 @@ describe("portal-api weekly coach helpers", () => {
           weekType: "BUILD",
           weekObjective: "Build aerobic capacity",
           progressionNote: "Hold one quality run",
-          sessions: [],
+          sessions: [
+            {
+              day: "SUN",
+              modality: "RUN",
+              type: "LONG_RUN",
+              title: "Long run",
+              durationMinutes: 95,
+              completed: true,
+              intensityCategory: "LOW",
+              placementReason: "Anchor session",
+            },
+          ],
           justification: [],
         },
         summary: {
@@ -230,6 +242,7 @@ describe("portal-api weekly coach helpers", () => {
         },
         plan: {
           weekType: "BUILD",
+          sessions: [{ day: "SUN", completed: true }],
         },
       },
     });
@@ -292,5 +305,19 @@ describe("portal-api weekly coach helpers", () => {
     expect(apiRequestMock).toHaveBeenCalledWith("/api/v1/me/onboarding/weekly-plan:retry", {
       method: "POST",
     });
+  });
+
+  it("persists weekly coach session completion state", async () => {
+    apiRequestMock.mockResolvedValueOnce(undefined);
+
+    await setCurrentUserWeeklyCoachSessionCompletion("2026-03-23", "SUN", true);
+
+    expect(apiRequestMock).toHaveBeenCalledWith(
+      "/api/v1/me/weekly-coach/weeks/2026-03-23/sessions/SUN/completion",
+      {
+        method: "PUT",
+        body: { completed: true },
+      },
+    );
   });
 });

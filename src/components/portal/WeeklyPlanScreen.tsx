@@ -23,9 +23,11 @@ import {
   TrendingUp,
   Zap,
 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getCurrentUserWeeklyCoachScreen,
+  setCurrentUserWeeklyCoachSessionCompletion,
+  type CurrentUserWeeklyCoachScreen,
   type WeeklyCoachSession,
 } from "@/lib/portal-api";
 import { Badge } from "@/components/ui/badge";
@@ -332,12 +334,8 @@ export default function WeeklyPlanScreen({
   onRefresh,
 }: WeeklyPlanScreenProps) {
   const [selectedWeekStartDate, setSelectedWeekStartDate] = useState(targetWeekStartDate);
-  const [completedByWeek, setCompletedByWeek] = useState<Record<string, string[]>>({});
   const [expandedDay, setExpandedDay] = useState<string | null>(null);
-  const completed = useMemo(
-    () => new Set(completedByWeek[selectedWeekStartDate] ?? []),
-    [completedByWeek, selectedWeekStartDate],
-  );
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     setSelectedWeekStartDate(targetWeekStartDate);
@@ -348,6 +346,57 @@ export default function WeeklyPlanScreen({
     queryFn: () => getCurrentUserWeeklyCoachScreen(selectedWeekStartDate),
     enabled: Boolean(selectedWeekStartDate) && !(isPreparing && selectedWeekStartDate === targetWeekStartDate),
     retry: false,
+  });
+
+  const completionMutation = useMutation({
+    mutationFn: ({ day, completed }: { day: string; completed: boolean }) =>
+      setCurrentUserWeeklyCoachSessionCompletion(selectedWeekStartDate, day, completed),
+    onMutate: async ({ day, completed }) => {
+      await queryClient.cancelQueries({
+        queryKey: ["portal", "weekly-coach-screen", selectedWeekStartDate],
+      });
+
+      const previousScreen = queryClient.getQueryData<CurrentUserWeeklyCoachScreen>([
+        "portal",
+        "weekly-coach-screen",
+        selectedWeekStartDate,
+      ]);
+
+      queryClient.setQueryData<CurrentUserWeeklyCoachScreen>(
+        ["portal", "weekly-coach-screen", selectedWeekStartDate],
+        (current) => {
+          if (!current?.plan) return current;
+
+          return {
+            ...current,
+            plan: {
+              ...current.plan,
+              plan: {
+                ...current.plan.plan,
+                sessions: current.plan.plan.sessions.map((session) =>
+                  session.day === day ? { ...session, completed } : session,
+                ),
+              },
+            },
+          };
+        },
+      );
+
+      return { previousScreen };
+    },
+    onError: (_error, _variables, context) => {
+      if (!context?.previousScreen) return;
+
+      queryClient.setQueryData(
+        ["portal", "weekly-coach-screen", selectedWeekStartDate],
+        context.previousScreen,
+      );
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["portal", "weekly-coach-screen", selectedWeekStartDate],
+      });
+    },
   });
 
   useEffect(() => {
@@ -382,16 +431,12 @@ export default function WeeklyPlanScreen({
 
   const toggleComplete = (day: string) => {
     if (!isCurrentWeek) return;
+    const session = screenQuery.data?.plan?.plan.sessions.find((item) => item.day === day);
+    if (!session) return;
 
-    setCompletedByWeek((prev) => {
-      const next = new Set(prev[selectedWeekStartDate] ?? []);
-      if (next.has(day)) next.delete(day);
-      else next.add(day);
-
-      return {
-        ...prev,
-        [selectedWeekStartDate]: Array.from(next),
-      };
+    completionMutation.mutate({
+      day,
+      completed: !session.completed,
     });
   };
 
@@ -572,8 +617,9 @@ export default function WeeklyPlanScreen({
   const sessions = plan.plan.sessions;
   const keySession = resolveKeySession(sessions);
   const completedMinutes = sessions
-    .filter((session) => completed.has(session.day))
+    .filter((session) => session.completed)
     .reduce((total, session) => total + session.durationMinutes, 0);
+  const completedCount = sessions.filter((session) => session.completed).length;
   const progressPercent =
     totalPlannedMinutes(sessions) > 0
       ? Math.round((completedMinutes / totalPlannedMinutes(sessions)) * 100)
@@ -615,7 +661,7 @@ export default function WeeklyPlanScreen({
     {
       icon: Battery,
       label: "Completed",
-      value: `${completed.size}/${sessions.length}`,
+      value: `${completedCount}/${sessions.length}`,
       valueToneClass: "text-foreground",
       iconToneClass: "text-muted-foreground",
     },
@@ -783,7 +829,7 @@ export default function WeeklyPlanScreen({
           className="flex items-center justify-between gap-2 px-2"
         >
           {sessions.map((session, index) => {
-            const done = completed.has(session.day);
+            const done = Boolean(session.completed);
             const isKey = keySession?.day === session.day;
             return (
               <motion.div
@@ -849,7 +895,7 @@ export default function WeeklyPlanScreen({
             </div>
             <div className="flex items-center gap-3 text-xs text-muted-foreground">
               <span>
-                {completed.size}/{sessions.length} sessions
+                {completedCount}/{sessions.length} sessions
               </span>
               <span className="font-semibold text-foreground">{progressPercent}%</span>
             </div>
@@ -866,7 +912,7 @@ export default function WeeklyPlanScreen({
         <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Sessions</p>
         <div className="space-y-3">
           {sessions.map((session, index) => {
-            const isDone = completed.has(session.day);
+            const isDone = Boolean(session.completed);
             const isRest = session.modality === "REST";
             const isExpanded = expandedDay === session.day;
             const isKey = keySession?.day === session.day;
@@ -904,6 +950,7 @@ export default function WeeklyPlanScreen({
                     <Checkbox
                       checked={isDone}
                       className="h-5 w-5 rounded-md"
+                      disabled={!isCurrentWeek || completionMutation.isPending}
                       onCheckedChange={() => toggleComplete(session.day)}
                     />
                   </div>
