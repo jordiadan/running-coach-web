@@ -66,6 +66,7 @@ export type WeeklyCoachSession = {
   title: string;
   durationMinutes: number;
   completed?: boolean;
+  role?: string;
   intensityCategory: string;
   placementReason: string;
   notes?: string;
@@ -113,6 +114,8 @@ export type CurrentUserWeeklyCoachScreen = {
   nextWeekStartDate?: string;
   canGoPrevious: boolean;
   canGoNext: boolean;
+  todaySessionDay?: string;
+  upNextSessionDay?: string;
   goal?: {
     goalSummary: string;
     primaryGoal: {
@@ -390,6 +393,7 @@ export async function getWeeklyCoachPlan(athleteId: string, weekStartDate: strin
         title: asString(session.title),
         durationMinutes: typeof session.durationMinutes === "number" ? session.durationMinutes : 0,
         completed: Boolean(session.completed),
+        role: asString(session.role) || undefined,
         intensityCategory: asString(session.intensityCategory),
         placementReason: asString(session.placementReason),
         notes: asString(session.notes) || undefined,
@@ -449,6 +453,8 @@ export async function getCurrentUserWeeklyCoachScreen(weekStartDate?: string) {
     nextWeekStartDate: asString(record.nextWeekStartDate) || undefined,
     canGoPrevious: Boolean(record.canGoPrevious),
     canGoNext: Boolean(record.canGoNext),
+    todaySessionDay: asString(record.todaySessionDay) || undefined,
+    upNextSessionDay: asString(record.upNextSessionDay) || undefined,
     goal: record.goal
       ? {
           goalSummary: asString(goal.goalSummary),
@@ -507,6 +513,7 @@ export async function getCurrentUserWeeklyCoachScreen(weekStartDate?: string) {
               title: asString(session.title),
               durationMinutes: typeof session.durationMinutes === "number" ? session.durationMinutes : 0,
               completed: Boolean(session.completed),
+              role: asString(session.role) || undefined,
               intensityCategory: asString(session.intensityCategory),
               placementReason: asString(session.placementReason),
               notes: asString(session.notes) || undefined,

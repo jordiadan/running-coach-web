@@ -44,12 +44,12 @@ export default function WeekNavigator({
 
       <div className="flex items-center gap-2">
         <span className="text-sm font-medium text-foreground">{weekLabel}</span>
-        {currentWeekOffsetLabel === "Current" ? (
+        {currentWeekOffsetLabel === "Current" || currentWeekOffsetLabel === "This week" ? (
           <Badge
             variant="secondary"
             className="h-4 bg-primary/10 px-1.5 py-0 text-[10px] text-primary border-primary/20"
           >
-            Current
+            This week
           </Badge>
         ) : null}
         {currentWeekOffsetLabel === "Future" ? (
@@ -60,7 +60,9 @@ export default function WeekNavigator({
             Future
           </Badge>
         ) : null}
-        {currentWeekOffsetLabel !== "Current" && currentWeekOffsetLabel !== "Future" ? (
+        {currentWeekOffsetLabel !== "Current" &&
+        currentWeekOffsetLabel !== "This week" &&
+        currentWeekOffsetLabel !== "Future" ? (
           <Badge
             variant="outline"
             className="h-4 px-1.5 py-0 text-[10px] text-muted-foreground"
@@ -80,7 +82,7 @@ export default function WeekNavigator({
             onClick={onCurrent}
           >
             <CalendarDays className="mr-1 h-3.5 w-3.5" />
-            Current
+            Today
           </Button>
         ) : null}
         <Button

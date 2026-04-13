@@ -149,6 +149,8 @@ describe("portal-api weekly coach helpers", () => {
       nextWeekStartDate: "2026-03-30",
       canGoPrevious: true,
       canGoNext: true,
+      todaySessionDay: "SUN",
+      upNextSessionDay: "SUN",
       goal: {
         goalSummary: "Sub-1:40 half marathon",
         primaryGoal: {
@@ -192,6 +194,7 @@ describe("portal-api weekly coach helpers", () => {
               title: "Long run",
               durationMinutes: 95,
               completed: true,
+              role: "KEY",
               intensityCategory: "LOW",
               placementReason: "Anchor session",
             },
@@ -221,6 +224,8 @@ describe("portal-api weekly coach helpers", () => {
       nextWeekStartDate: "2026-03-30",
       canGoPrevious: true,
       canGoNext: true,
+      todaySessionDay: "SUN",
+      upNextSessionDay: "SUN",
       goal: {
         goalSummary: "Sub-1:40 half marathon",
         primaryGoal: {
@@ -242,7 +247,7 @@ describe("portal-api weekly coach helpers", () => {
         },
         plan: {
           weekType: "BUILD",
-          sessions: [{ day: "SUN", completed: true }],
+          sessions: [{ day: "SUN", completed: true, role: "KEY" }],
         },
       },
     });
