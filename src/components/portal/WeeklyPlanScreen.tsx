@@ -78,6 +78,18 @@ const intensityDot: Record<string, string> = {
   HIGH: "bg-destructive",
 };
 
+const roleLabels: Record<string, string> = {
+  KEY: "Key",
+  SUPPORTING: "Supporting",
+  RECOVERY: "Recovery",
+};
+
+const roleStyles: Record<string, string> = {
+  KEY: "border-primary/30 bg-primary/5 text-primary",
+  SUPPORTING: "border-border bg-secondary/60 text-foreground",
+  RECOVERY: "border-muted-foreground/20 bg-muted/60 text-muted-foreground",
+};
+
 const sessionCardStyles: Record<string, string> = {
   RUN: "border-primary/15 bg-card",
   STRENGTH: "border-accent/20 bg-card",
@@ -172,20 +184,6 @@ function dayOrderIndex(day: string) {
   return index === -1 ? Number.MAX_SAFE_INTEGER : index;
 }
 
-function localTodayDayCode() {
-  const day = new Date().getDay();
-  return weekDayOrder[day === 0 ? 6 : day - 1];
-}
-
-function resolveLocalUpNextDay(sessions: WeeklyCoachSession[], todayDay: string | undefined) {
-  if (!todayDay) return undefined;
-  const todayIndex = dayOrderIndex(todayDay);
-  return sessions.find(
-    (session) =>
-      dayOrderIndex(session.day) >= todayIndex && !session.completed && session.modality !== "REST",
-  )?.day;
-}
-
 function totalPlannedMinutes(sessions: WeeklyCoachSession[]) {
   return sessions.reduce((total, session) => total + session.durationMinutes, 0);
 }
@@ -257,8 +255,15 @@ export default function WeeklyPlanScreen({
   });
 
   const completionMutation = useMutation({
-    mutationFn: ({ day, completed }: { day: string; completed: boolean }) =>
-      setCurrentUserWeeklyCoachSessionCompletion(selectedWeekStartDate, day, completed),
+    mutationFn: ({
+      weekStartDate,
+      day,
+      completed,
+    }: {
+      weekStartDate: string;
+      day: string;
+      completed: boolean;
+    }) => setCurrentUserWeeklyCoachSessionCompletion(weekStartDate, day, completed),
     onMutate: async ({ day, completed }) => {
       await queryClient.cancelQueries({
         queryKey: ["portal", "weekly-coach-screen", selectedWeekStartDate],
@@ -339,10 +344,13 @@ export default function WeeklyPlanScreen({
 
   const toggleComplete = (day: string) => {
     if (!isCurrentWeek) return;
-    const session = screenQuery.data?.plan?.plan.sessions.find((item) => item.day === day);
-    if (!session) return;
+    const currentScreen = screenQuery.data;
+    const session = currentScreen?.plan?.plan.sessions.find((item) => item.day === day);
+    const weekStartDate = currentScreen?.plan?.weekStartDate ?? currentScreen?.selectedWeekStartDate;
+    if (!session || !weekStartDate) return;
 
     completionMutation.mutate({
+      weekStartDate,
       day,
       completed: !session.completed,
     });
@@ -539,10 +547,8 @@ export default function WeeklyPlanScreen({
   }
 
   const sessions = [...plan.plan.sessions].sort((a, b) => dayOrderIndex(a.day) - dayOrderIndex(b.day));
-  const todayDay = isCurrentWeek ? (screen?.todaySessionDay ?? localTodayDayCode()) : undefined;
-  const upNextDay = isCurrentWeek
-    ? (screen?.upNextSessionDay ?? resolveLocalUpNextDay(sessions, todayDay))
-    : undefined;
+  const todayDay = isCurrentWeek ? screen?.todaySessionDay : undefined;
+  const upNextDay = isCurrentWeek ? screen?.upNextSessionDay : undefined;
   const todaySession = todayDay ? sessions.find((session) => session.day === todayDay) : undefined;
   const showTodayHero = Boolean(isCurrentWeek && todaySession && !todaySession.completed);
   const completedMinutes = sessions
@@ -718,9 +724,7 @@ export default function WeeklyPlanScreen({
 
         {showTodayHero && todaySession ? (
           <motion.div
-            className={`group relative cursor-pointer overflow-hidden rounded-2xl border border-primary/12 bg-card ${
-              todaySession.completed ? "bg-primary/5" : ""
-            }`}
+            className="group relative cursor-pointer overflow-hidden rounded-2xl border border-primary/12 bg-card"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ type: "spring", bounce: 0.3, duration: 0.6, delay: 0.15 }}
@@ -752,11 +756,7 @@ export default function WeeklyPlanScreen({
                     <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-primary">
                       Today
                     </span>
-                    <p
-                      className={`mt-0.5 truncate text-base font-semibold ${
-                        todaySession.completed ? "text-muted-foreground line-through" : "text-foreground"
-                      }`}
-                    >
+                    <p className="mt-0.5 truncate text-base font-semibold text-foreground">
                       {todaySession.title}
                     </p>
                     <div className="mt-1 flex flex-wrap items-center gap-2.5">
@@ -774,8 +774,15 @@ export default function WeeklyPlanScreen({
                           {intensityLabels[todaySession.intensityCategory] ?? todaySession.intensityCategory}
                         </span>
                       </div>
-                      {todaySession.role === "KEY" ? (
-                        <span className="text-[9px] font-bold uppercase tracking-wider text-primary">Key</span>
+                      {todaySession.role ? (
+                        <Badge
+                          variant="outline"
+                          className={`h-4 px-1.5 py-0 text-[10px] ${
+                            roleStyles[todaySession.role] ?? "border-border bg-secondary text-foreground"
+                          }`}
+                        >
+                          {roleLabels[todaySession.role] ?? todaySession.role}
+                        </Badge>
                       ) : null}
                     </div>
                   </div>
@@ -783,11 +790,7 @@ export default function WeeklyPlanScreen({
 
                 <motion.button
                   type="button"
-                  className={`shrink-0 rounded-full p-3 shadow-sm transition-shadow hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60 ${
-                    todaySession.completed
-                      ? "bg-primary/10 text-primary"
-                      : "bg-primary text-primary-foreground"
-                  }`}
+                  className="shrink-0 rounded-full bg-primary p-3 text-primary-foreground shadow-sm transition-shadow hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
                   whileHover={{ scale: 1.08 }}
                   whileTap={{ scale: 0.92 }}
                   onClick={(event) => {
@@ -945,12 +948,14 @@ export default function WeeklyPlanScreen({
                           Up next
                         </Badge>
                       ) : null}
-                      {isKey ? (
+                      {session.role ? (
                         <Badge
                           variant="outline"
-                          className="h-4 border-primary/30 bg-primary/5 px-1.5 py-0 text-[10px] text-primary"
+                          className={`h-4 px-1.5 py-0 text-[10px] ${
+                            roleStyles[session.role] ?? "border-border bg-secondary text-foreground"
+                          }`}
                         >
-                          ★ Key
+                          {roleLabels[session.role] ?? session.role}
                         </Badge>
                       ) : null}
                     </div>
