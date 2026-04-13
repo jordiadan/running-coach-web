@@ -324,5 +324,17 @@ describe("portal-api weekly coach helpers", () => {
         body: { completed: true },
       },
     );
+
+    apiRequestMock.mockResolvedValueOnce(undefined);
+
+    await setCurrentUserWeeklyCoachSessionCompletion("2026-03-23", "SUN", false);
+
+    expect(apiRequestMock).toHaveBeenLastCalledWith(
+      "/api/v1/me/weekly-coach/weeks/2026-03-23/sessions/SUN/completion",
+      {
+        method: "PUT",
+        body: { completed: false },
+      },
+    );
   });
 });
