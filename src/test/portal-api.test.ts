@@ -150,7 +150,7 @@ describe("portal-api weekly coach helpers", () => {
       canGoPrevious: true,
       canGoNext: true,
       todaySessionDay: "SUN",
-      upNextSessionDay: "SUN",
+      upNextSessionDay: "SUNDAY",
       goal: {
         goalSummary: "Sub-1:40 half marathon",
         primaryGoal: {
@@ -170,7 +170,7 @@ describe("portal-api weekly coach helpers", () => {
       },
       highlights: {
         longRun: {
-          day: "SUN",
+          day: "SUNDAY",
           title: "Long run",
           durationMinutes: 95,
           intensityCategory: "LOW",
@@ -188,7 +188,7 @@ describe("portal-api weekly coach helpers", () => {
           progressionNote: "Hold one quality run",
           sessions: [
             {
-              day: "SUN",
+              day: "SUNDAY",
               modality: "RUN",
               type: "LONG_RUN",
               title: "Long run",
@@ -236,6 +236,7 @@ describe("portal-api weekly coach helpers", () => {
       },
       highlights: {
         longRun: {
+          day: "SUN",
           durationMinutes: 95,
         },
       },

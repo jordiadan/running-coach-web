@@ -166,6 +166,28 @@ function asOptionalNumber(value: unknown): number | undefined {
   return typeof value === "number" && Number.isFinite(value) ? value : undefined;
 }
 
+const weekdayCodeByBackendValue: Record<string, string> = {
+  MONDAY: "MON",
+  TUESDAY: "TUE",
+  WEDNESDAY: "WED",
+  THURSDAY: "THU",
+  FRIDAY: "FRI",
+  SATURDAY: "SAT",
+  SUNDAY: "SUN",
+  MON: "MON",
+  TUE: "TUE",
+  WED: "WED",
+  THU: "THU",
+  FRI: "FRI",
+  SAT: "SAT",
+  SUN: "SUN",
+};
+
+function asWeekdayCode(value: unknown): string {
+  const day = asString(value).toUpperCase();
+  return weekdayCodeByBackendValue[day] ?? asString(value);
+}
+
 function asTrainingGoalCode(value: unknown): TrainingGoalCode | undefined {
   const code = asString(value);
 
@@ -387,7 +409,7 @@ export async function getWeeklyCoachPlan(athleteId: string, weekStartDate: strin
       weekObjective: asString(plan.weekObjective),
       progressionNote: asString(plan.progressionNote),
       sessions: sessions.map((session) => ({
-        day: asString(session.day),
+        day: asWeekdayCode(session.day),
         modality: asString(session.modality),
         type: asString(session.type),
         title: asString(session.title),
@@ -453,8 +475,8 @@ export async function getCurrentUserWeeklyCoachScreen(weekStartDate?: string) {
     nextWeekStartDate: asString(record.nextWeekStartDate) || undefined,
     canGoPrevious: Boolean(record.canGoPrevious),
     canGoNext: Boolean(record.canGoNext),
-    todaySessionDay: asString(record.todaySessionDay) || undefined,
-    upNextSessionDay: asString(record.upNextSessionDay) || undefined,
+    todaySessionDay: asWeekdayCode(record.todaySessionDay) || undefined,
+    upNextSessionDay: asWeekdayCode(record.upNextSessionDay) || undefined,
     goal: record.goal
       ? {
           goalSummary: asString(goal.goalSummary),
@@ -479,7 +501,7 @@ export async function getCurrentUserWeeklyCoachScreen(weekStartDate?: string) {
     highlights: {
       longRun: highlights.longRun
         ? {
-            day: asString(longRun.day),
+            day: asWeekdayCode(longRun.day),
             title: asString(longRun.title),
             durationMinutes: asOptionalNumber(longRun.durationMinutes) ?? 0,
             intensityCategory: asString(longRun.intensityCategory),
@@ -507,7 +529,7 @@ export async function getCurrentUserWeeklyCoachScreen(weekStartDate?: string) {
             weekObjective: asString(planBody?.weekObjective),
             progressionNote: asString(planBody?.progressionNote),
             sessions: sessions.map((session) => ({
-              day: asString(session.day),
+              day: asWeekdayCode(session.day),
               modality: asString(session.modality),
               type: asString(session.type),
               title: asString(session.title),
