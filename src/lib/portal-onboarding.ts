@@ -16,25 +16,25 @@ const onboardingCopy: Record<
   { title: string; subtitle: string; emoji: string }
 > = {
   connect: {
-    title: "Connect your data",
-    subtitle: "Link a training source so we can understand your fitness",
-    emoji: "🔗",
+    title: "Choose your training source",
+    subtitle: "Connect Strava or Intervals before we build your plan",
+    emoji: "1",
   },
   profile: {
     title: "Set up your profile",
     subtitle: "Tell us about your goals and training preferences",
-    emoji: "🏃",
+    emoji: "2",
   },
   ready: {
     title: "Preparing your plan",
     subtitle: "We're preparing your personalized weekly plan",
-    emoji: "⚡",
+    emoji: "3",
   },
 };
 
 function currentStepFromNextStep(nextStep: PortalBootstrapResponse["nextStep"]): OnboardingStepId {
   switch (nextStep) {
-    case "connect_intervals":
+    case "connect_training_source":
       return "connect";
     case "complete_profile":
       return "profile";
@@ -49,7 +49,7 @@ export function deriveOnboardingState(bootstrap: PortalBootstrapResponse) {
   const currentStepId = currentStepFromNextStep(bootstrap.nextStep);
 
   const completed = {
-    connect: bootstrap.intervals.connected,
+    connect: bootstrap.trainingProvider.connected,
     profile: bootstrap.profile.isComplete,
     ready: bootstrap.weeklyPlan.hasPlan,
   } satisfies Record<OnboardingStepId, boolean>;

@@ -72,7 +72,7 @@ export default function PortalPage() {
     }
 
     switch (bootstrapQuery.data.nextStep) {
-      case "connect_intervals":
+      case "connect_training_source":
         setActiveTab("connect");
         break;
       case "complete_profile":
@@ -216,7 +216,12 @@ export default function PortalPage() {
                     onRefresh={() => bootstrapQuery.refetch()}
                   />
                 )}
-                {activeTab === "connect" && <ConnectScreen athleteId={athleteId} />}
+                {activeTab === "connect" && (
+                  <ConnectScreen
+                    athleteId={athleteId}
+                    trainingProvider={bootstrapQuery.data.trainingProvider}
+                  />
+                )}
                 {activeTab === "profile" && <ProfileScreen athleteId={athleteId} />}
               </motion.div>
             </AnimatePresence>

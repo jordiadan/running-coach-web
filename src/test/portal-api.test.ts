@@ -52,10 +52,13 @@ describe("portal-api weekly coach helpers", () => {
       profile: {
         isComplete: true,
       },
-      intervals: {
-        status: "connected",
+      trainingProvider: {
+        activeProvider: "intervals",
         connected: true,
-        providerAccountRef: "i372001",
+        activeProviderAccountRef: "i372001",
+        readinessCapability: "full",
+        lastProvider: null,
+        lastStatus: null,
       },
       weeklyPlan: {
         targetWeekStartDate: "2026-03-23",
@@ -76,10 +79,13 @@ describe("portal-api weekly coach helpers", () => {
       profile: {
         isComplete: true,
       },
-      intervals: {
-        status: "connected",
+      trainingProvider: {
+        activeProvider: "intervals",
         connected: true,
-        providerAccountRef: "i372001",
+        activeProviderAccountRef: "i372001",
+        readinessCapability: "full",
+        lastProvider: undefined,
+        lastStatus: undefined,
       },
       weeklyPlan: {
         targetWeekStartDate: "2026-03-23",
@@ -249,6 +255,60 @@ describe("portal-api weekly coach helpers", () => {
         plan: {
           weekType: "BUILD",
           sessions: [{ day: "SUN", completed: true, role: "KEY" }],
+        },
+      },
+    });
+  });
+
+  it("does not invent completion state when the backend omits it", async () => {
+    apiRequestMock.mockResolvedValueOnce({
+      viewType: "PLAN",
+      selectedWeekStartDate: "2026-03-23",
+      todayWeekStartDate: "2026-03-23",
+      latestGeneratedWeekStartDate: "2026-03-23",
+      futurePreviewWeekStartDate: null,
+      previousWeekStartDate: null,
+      nextWeekStartDate: null,
+      canGoPrevious: false,
+      canGoNext: false,
+      goal: null,
+      highlights: {},
+      plan: {
+        weekStartDate: "2026-03-23",
+        planId: "athlete-1:2026-03-23",
+        createdAt: "2026-03-23T08:00:00Z",
+        updatedAt: "2026-03-23T08:00:00Z",
+        plan: {
+          schemaVersion: "1.0",
+          weekType: "BUILD",
+          weekObjective: "Build aerobic capacity",
+          progressionNote: "Hold one quality run",
+          sessions: [
+            {
+              day: "MONDAY",
+              modality: "RUN",
+              type: "EASY_RUN",
+              title: "Easy run",
+              durationMinutes: 45,
+              intensityCategory: "LOW",
+              placementReason: "Start the week easy",
+            },
+          ],
+          justification: [],
+        },
+        summary: {},
+        llmMeta: {
+          provider: "openai",
+          model: "gpt-5",
+          promptVersion: "v1",
+        },
+      },
+    });
+
+    await expect(getCurrentUserWeeklyCoachScreen("2026-03-23")).resolves.toMatchObject({
+      plan: {
+        plan: {
+          sessions: [{ day: "MON", completed: undefined }],
         },
       },
     });

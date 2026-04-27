@@ -10,10 +10,13 @@ export type PortalBootstrapResponse = {
   profile: {
     isComplete: boolean;
   };
-  intervals: {
-    status: string;
+  trainingProvider: {
+    activeProvider?: string;
     connected: boolean;
-    providerAccountRef?: string;
+    activeProviderAccountRef?: string;
+    readinessCapability: string;
+    lastProvider?: string;
+    lastStatus?: string;
   };
   weeklyPlan: {
     targetWeekStartDate: string;
@@ -21,10 +24,13 @@ export type PortalBootstrapResponse = {
     status: "missing" | "preparing" | "failed" | "ready";
     failureCode?: string;
   };
-  nextStep: "connect_intervals" | "complete_profile" | "prepare_weekly_plan" | "view_weekly_plan";
+  nextStep: "connect_training_source" | "complete_profile" | "prepare_weekly_plan" | "view_weekly_plan";
 };
 
-export type IntervalsIntegrationStatus = {
+export type TrainingProviderId = "intervals" | "strava";
+
+export type TrainingProviderIntegrationStatus = {
+  provider: TrainingProviderId;
   connected: boolean;
   status: string;
   providerAccountRef?: string;
@@ -196,6 +202,25 @@ function asTrainingGoalCode(value: unknown): TrainingGoalCode | undefined {
     : undefined;
 }
 
+function asBootstrapNextStep(value: unknown): PortalBootstrapResponse["nextStep"] {
+  const nextStep = asString(value);
+
+  if (nextStep === "connect_intervals") {
+    return "connect_training_source";
+  }
+
+  if (
+    nextStep === "connect_training_source" ||
+    nextStep === "complete_profile" ||
+    nextStep === "prepare_weekly_plan" ||
+    nextStep === "view_weekly_plan"
+  ) {
+    return nextStep;
+  }
+
+  return "" as PortalBootstrapResponse["nextStep"];
+}
+
 function getApiErrorCode(error: unknown): string | undefined {
   if (!(error instanceof ApiError)) return undefined;
 
@@ -218,23 +243,28 @@ export async function bootstrapPortal() {
   const record = asRecord(payload);
   const user = asRecord(record.user);
   const profile = asRecord(record.profile);
-  const intervals = asRecord(record.intervals);
+  const trainingProvider = asRecord(record.trainingProvider);
+  const legacyIntervals = asRecord(record.intervals);
   const weeklyPlan = asRecord(record.weeklyPlan);
   const athleteId = asString(record.athleteId);
   const userId = asString(user.userId);
-  const nextStep = asString(record.nextStep);
+  const nextStep = asBootstrapNextStep(record.nextStep);
   const targetWeekStartDate = asString(weeklyPlan.targetWeekStartDate);
   const weeklyPlanStatus = asString(weeklyPlan.status);
+  const readinessCapability =
+    asString(trainingProvider.readinessCapability) ||
+    (legacyIntervals.connected ? "full" : "unavailable");
 
   if (
     !athleteId ||
     !userId ||
     !targetWeekStartDate ||
+    !readinessCapability ||
     (weeklyPlanStatus !== "missing" &&
       weeklyPlanStatus !== "preparing" &&
       weeklyPlanStatus !== "failed" &&
       weeklyPlanStatus !== "ready") ||
-    (nextStep !== "connect_intervals" &&
+    (nextStep !== "connect_training_source" &&
       nextStep !== "complete_profile" &&
       nextStep !== "prepare_weekly_plan" &&
       nextStep !== "view_weekly_plan")
@@ -252,10 +282,18 @@ export async function bootstrapPortal() {
     profile: {
       isComplete: Boolean(profile.isComplete),
     },
-    intervals: {
-      status: asString(intervals.status),
-      connected: Boolean(intervals.connected),
-      providerAccountRef: asString(intervals.providerAccountRef) || undefined,
+    trainingProvider: {
+      activeProvider:
+        asString(trainingProvider.activeProvider) ||
+        (legacyIntervals.connected ? "intervals" : undefined),
+      connected: Boolean(trainingProvider.connected) || Boolean(legacyIntervals.connected),
+      activeProviderAccountRef:
+        asString(trainingProvider.activeProviderAccountRef) ||
+        asString(legacyIntervals.providerAccountRef) ||
+        undefined,
+      readinessCapability,
+      lastProvider: asString(trainingProvider.lastProvider) || undefined,
+      lastStatus: asString(trainingProvider.lastStatus) || undefined,
     },
     weeklyPlan: {
       targetWeekStartDate,
@@ -284,21 +322,27 @@ export async function setCurrentUserWeeklyCoachSessionCompletion(
   });
 }
 
-export async function getIntervalsIntegrationStatus(athleteId: string) {
-  const payload = await apiRequest<unknown>(`/api/v1/integrations/intervals/${athleteId}`);
+export async function getTrainingProviderIntegrationStatus(provider: TrainingProviderId, athleteId: string) {
+  const payload = await apiRequest<unknown>(`/api/v1/integrations/${provider}/${athleteId}`);
   const record = asRecord(payload);
   const status = asString(record.status);
 
   return {
+    provider,
     connected: status.toUpperCase() === "CONNECTED",
     status,
     providerAccountRef: asString(record.providerAccountRef) || undefined,
     authorizationStateExpiresAt: asString(record.authorizationStateExpiresAt) || undefined,
-  } satisfies IntervalsIntegrationStatus;
+  } satisfies TrainingProviderIntegrationStatus;
 }
 
-export async function connectIntervals(athleteId: string) {
-  const payload = await apiRequest<unknown>(`/api/v1/integrations/intervals/${athleteId}/connect`, {
+export async function connectTrainingProvider(
+  provider: TrainingProviderId,
+  athleteId: string,
+  replaceExistingProvider = false,
+) {
+  const action = replaceExistingProvider ? "replace" : "connect";
+  const payload = await apiRequest<unknown>(`/api/v1/integrations/${provider}/${athleteId}/${action}`, {
     method: "POST",
   });
   const record = asRecord(payload);
@@ -309,8 +353,8 @@ export async function connectIntervals(athleteId: string) {
   };
 }
 
-export async function disconnectIntervals(athleteId: string) {
-  await apiRequest<void>(`/api/v1/integrations/intervals/${athleteId}`, {
+export async function disconnectTrainingProvider(provider: TrainingProviderId, athleteId: string) {
+  await apiRequest<void>(`/api/v1/integrations/${provider}/${athleteId}`, {
     method: "DELETE",
   });
 }
@@ -414,7 +458,7 @@ export async function getWeeklyCoachPlan(athleteId: string, weekStartDate: strin
         type: asString(session.type),
         title: asString(session.title),
         durationMinutes: typeof session.durationMinutes === "number" ? session.durationMinutes : 0,
-        completed: Boolean(session.completed),
+        completed: typeof session.completed === "boolean" ? session.completed : undefined,
         role: asString(session.role) || undefined,
         intensityCategory: asString(session.intensityCategory),
         placementReason: asString(session.placementReason),
@@ -534,7 +578,7 @@ export async function getCurrentUserWeeklyCoachScreen(weekStartDate?: string) {
               type: asString(session.type),
               title: asString(session.title),
               durationMinutes: typeof session.durationMinutes === "number" ? session.durationMinutes : 0,
-              completed: Boolean(session.completed),
+              completed: typeof session.completed === "boolean" ? session.completed : undefined,
               role: asString(session.role) || undefined,
               intensityCategory: asString(session.intensityCategory),
               placementReason: asString(session.placementReason),

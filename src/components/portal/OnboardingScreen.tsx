@@ -159,10 +159,10 @@ export default function OnboardingScreen({
   });
 
   useEffect(() => {
-    if (bootstrap.nextStep !== "connect_intervals" || bootstrap.intervals.connected) {
+    if (bootstrap.nextStep !== "connect_training_source" || bootstrap.trainingProvider.connected) {
       setOptimisticConnected(false);
     }
-  }, [bootstrap.nextStep, bootstrap.intervals.connected]);
+  }, [bootstrap.nextStep, bootstrap.trainingProvider.connected]);
 
   useEffect(() => {
     if (bootstrap.nextStep !== "complete_profile") {
@@ -173,13 +173,12 @@ export default function OnboardingScreen({
   const effectiveBootstrap = useMemo(() => {
     let nextBootstrap = bootstrap;
 
-    if (optimisticConnected && bootstrap.nextStep === "connect_intervals") {
+    if (optimisticConnected && bootstrap.nextStep === "connect_training_source") {
       nextBootstrap = {
         ...nextBootstrap,
-        intervals: {
-          ...nextBootstrap.intervals,
+        trainingProvider: {
+          ...nextBootstrap.trainingProvider,
           connected: true,
-          status: "connected",
         },
         nextStep: "complete_profile",
       } satisfies PortalBootstrapResponse;
@@ -215,7 +214,7 @@ export default function OnboardingScreen({
     setOptimisticConnected(true);
     const next = await onRefresh();
 
-    if (next?.nextStep === "connect_intervals" && next.intervals.connected !== true) {
+    if (next?.nextStep === "connect_training_source" && next.trainingProvider.connected !== true) {
       setOptimisticConnected(false);
     }
   };
@@ -300,9 +299,10 @@ export default function OnboardingScreen({
           <p className="text-sm text-muted-foreground">{currentStep.subtitle}</p>
         </div>
 
-        {effectiveBootstrap.nextStep === "connect_intervals" ? (
+        {effectiveBootstrap.nextStep === "connect_training_source" ? (
           <ConnectScreen
             athleteId={effectiveBootstrap.athleteId}
+            trainingProvider={effectiveBootstrap.trainingProvider}
             variant="onboarding"
             onComplete={handleConnectComplete}
           />
