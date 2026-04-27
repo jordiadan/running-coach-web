@@ -3,19 +3,15 @@ import { differenceInCalendarWeeks, format, parseISO } from "date-fns";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   ArrowRight,
-  BedDouble,
   Flag,
   CalendarOff,
   Check,
   ChevronDown,
-  ChevronUp,
   Clock,
   Dumbbell,
-  Flame,
   MessageCircle,
   Moon,
   RefreshCcw,
-  Route,
   Sparkles,
   Star,
   StretchHorizontal,
@@ -31,8 +27,6 @@ import {
 } from "@/lib/portal-api";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Progress } from "@/components/ui/progress";
 import WeekNavigator from "@/components/portal/WeekNavigator";
 
 type WeeklyPlanScreenProps = {
@@ -40,13 +34,6 @@ type WeeklyPlanScreenProps = {
   targetWeekStartDate: string;
   isPreparing: boolean;
   onRefresh: () => void | Promise<unknown>;
-};
-
-const modalityLabels: Record<string, string> = {
-  RUN: "Run",
-  STRENGTH: "Strength",
-  REST: "Rest",
-  MOBILITY: "Mobility",
 };
 
 const weekDayOrder = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"] as const;
@@ -61,13 +48,6 @@ const shortDayLabels: Record<string, string> = {
   SUN: "Sun",
 };
 
-const intensityStyles: Record<string, string> = {
-  REST: "bg-muted text-muted-foreground",
-  LOW: "bg-primary/8 text-primary",
-  MODERATE: "bg-accent/10 text-accent",
-  HIGH: "bg-destructive/10 text-destructive",
-};
-
 const intensityLabels: Record<string, string> = {
   LOW: "Low",
   MODERATE: "Moderate",
@@ -80,25 +60,6 @@ const intensityDot: Record<string, string> = {
   LOW: "bg-primary/60",
   MODERATE: "bg-accent",
   HIGH: "bg-destructive",
-};
-
-const roleLabels: Record<string, string> = {
-  KEY: "Key",
-  SUPPORTING: "Supporting",
-  RECOVERY: "Recovery",
-};
-
-const roleStyles: Record<string, string> = {
-  KEY: "border-primary/30 bg-primary/5 text-primary",
-  SUPPORTING: "border-border bg-secondary/60 text-foreground",
-  RECOVERY: "border-muted-foreground/20 bg-muted/60 text-muted-foreground",
-};
-
-const sessionCardStyles: Record<string, string> = {
-  RUN: "border-primary/15 bg-card",
-  STRENGTH: "border-accent/20 bg-card",
-  MOBILITY: "border-border bg-card",
-  REST: "border-border bg-muted/40",
 };
 
 const typeConfig: Record<
@@ -141,26 +102,6 @@ const typeConfig: Record<
   },
 };
 
-const weekTypeConfig: Record<
-  string,
-  {
-    dashboardGlowClass: string;
-  }
-> = {
-  BUILD: {
-    dashboardGlowClass: "from-primary/12 via-primary/4 to-transparent",
-  },
-  DELOAD: {
-    dashboardGlowClass: "from-accent/12 via-accent/4 to-transparent",
-  },
-  MAINTENANCE: {
-    dashboardGlowClass: "from-secondary via-secondary/50 to-transparent",
-  },
-  SHARPEN: {
-    dashboardGlowClass: "from-destructive/12 via-destructive/4 to-transparent",
-  },
-};
-
 const raceProgressPhases = [
   { name: "BASE", weeks: [1, 8] },
   { name: "BUILD", weeks: [9, 16] },
@@ -190,10 +131,6 @@ function dayOrderIndex(day: string) {
 
 function dayCodeForDate(date: Date) {
   return weekDayOrder[(date.getDay() + 6) % 7];
-}
-
-function totalPlannedMinutes(sessions: WeeklyCoachSession[]) {
-  return sessions.reduce((total, session) => total + session.durationMinutes, 0);
 }
 
 function formatDecimal(value: number | undefined) {
@@ -582,6 +519,361 @@ function TodayDoneCard({
   );
 }
 
+function WeekMetrics({
+  last7dDistanceKm,
+  longRunMinutes,
+  sleepHours,
+}: {
+  last7dDistanceKm: number | undefined;
+  longRunMinutes: number | undefined;
+  sleepHours: number | undefined;
+}) {
+  const sleepStatus = deriveSleepStatus(sleepHours);
+  const metrics = [
+    {
+      label: "Volume",
+      value: formatDecimal(last7dDistanceKm),
+      unit: typeof last7dDistanceKm === "number" ? "km" : "",
+      valueClassName: "text-foreground",
+    },
+    {
+      label: "Long run",
+      value: typeof longRunMinutes === "number" ? String(longRunMinutes) : "—",
+      unit: typeof longRunMinutes === "number" ? "min" : "",
+      valueClassName: "text-foreground",
+    },
+    {
+      label: "Sleep avg",
+      value: formatDecimal(sleepHours),
+      unit: typeof sleepHours === "number" ? "h" : "",
+      valueClassName: sleepStatus.valueToneClass,
+    },
+  ];
+
+  return (
+    <motion.section
+      className="space-y-2"
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.2 }}
+      aria-label="This week metrics"
+    >
+      <div className="px-1">
+        <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">This week</span>
+      </div>
+      <div className="overflow-hidden rounded-xl border border-border bg-card">
+        <div className="grid grid-cols-3 divide-x divide-border">
+          {metrics.map((metric, index) => (
+            <motion.div
+              key={metric.label}
+              className="flex min-w-0 flex-col items-center justify-center px-2 py-3 text-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.22 + index * 0.04 }}
+            >
+              <div className="flex max-w-full items-baseline gap-0.5">
+                <span className={`truncate text-lg font-bold leading-none tabular-nums ${metric.valueClassName}`}>
+                  {metric.value}
+                </span>
+                {metric.unit ? <span className="text-[10px] text-muted-foreground">{metric.unit}</span> : null}
+              </div>
+              <span className="mt-1 text-[10px] text-muted-foreground">{metric.label}</span>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </motion.section>
+  );
+}
+
+function RoadToRace({
+  goal,
+  raceGoalDateLabel,
+}: {
+  goal: CurrentUserWeeklyCoachScreen["goal"];
+  raceGoalDateLabel: string | undefined;
+}) {
+  if (!goal) return null;
+
+  const activePhase = (goal.phase || "BASE").toUpperCase();
+  const activePhaseIndex = raceProgressPhases.findIndex((phase) => phase.name === activePhase);
+  const normalizedPhaseIndex = activePhaseIndex === -1 ? 0 : activePhaseIndex;
+
+  return (
+    <motion.section
+      className="space-y-2"
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.28 }}
+      aria-label="Road to race"
+    >
+      <div className="px-1">
+        <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Road to race</span>
+      </div>
+
+      <div className="overflow-hidden rounded-xl border border-border bg-card">
+        <div className="flex items-start gap-2.5 px-4 pb-3 pt-3.5">
+          <div className="shrink-0 rounded-lg border border-accent/15 bg-accent/10 p-1.5">
+            <Flag className="h-3.5 w-3.5 text-accent" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-semibold leading-tight text-foreground">{goal.primaryGoal.name}</p>
+            {raceGoalDateLabel ? <p className="mt-0.5 text-[11px] text-muted-foreground">{raceGoalDateLabel}</p> : null}
+          </div>
+          <div className="shrink-0 text-right">
+            <p className="text-base font-bold leading-none tabular-nums text-foreground">
+              {goal.daysToGoal}
+              <span className="ml-0.5 text-[10px] font-normal text-muted-foreground">d</span>
+            </p>
+            <p className="mt-1 text-[10px] text-muted-foreground">to go</p>
+          </div>
+        </div>
+
+        <div className="px-4 pb-3">
+          <div className="mb-1.5 flex gap-1">
+            {raceProgressPhases.map((phase, index) => {
+              const isActive = index === normalizedPhaseIndex;
+              const isPast = index < normalizedPhaseIndex;
+              return (
+                <motion.div
+                  key={phase.name}
+                  initial={{ scaleX: 0.3, opacity: 0 }}
+                  animate={{ scaleX: 1, opacity: 1 }}
+                  transition={{ delay: 0.35 + index * 0.05, duration: 0.35 }}
+                  style={{ transformOrigin: "left" }}
+                  className={`h-1.5 flex-1 rounded-full ${
+                    isActive ? "bg-primary" : isPast ? "bg-primary/30" : "bg-border"
+                  }`}
+                />
+              );
+            })}
+          </div>
+          <div className="grid grid-cols-4 gap-1">
+            {raceProgressPhases.map((phase, index) => (
+              <span
+                key={phase.name}
+                className={`text-[9px] font-medium tracking-wider ${
+                  index === normalizedPhaseIndex ? "text-primary" : "text-muted-foreground/60"
+                }`}
+              >
+                {phase.name}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 border-t border-border bg-muted/20 px-4 py-2.5">
+          <TrendingUp className="h-3 w-3 shrink-0 text-primary" />
+          <span className="text-[11px] text-muted-foreground">
+            <span className="font-medium text-foreground">{goal.phase}</span> phase
+          </span>
+          <span className="ml-auto truncate text-[11px] text-muted-foreground">{goal.goalSummary}</span>
+        </div>
+      </div>
+    </motion.section>
+  );
+}
+
+function ScheduleList({
+  sessions,
+  todayDay,
+  isCurrentWeek,
+  supportsCompletion,
+  completionPending,
+  expandedDay,
+  justCompletedDay,
+  reduceMotion,
+  onToggleComplete,
+  onToggleExpanded,
+  setSessionRef,
+}: {
+  sessions: WeeklyCoachSession[];
+  todayDay: string | undefined;
+  isCurrentWeek: boolean;
+  supportsCompletion: boolean;
+  completionPending: boolean;
+  expandedDay: string | null;
+  justCompletedDay: string | null;
+  reduceMotion: boolean;
+  onToggleComplete: (day: string) => void;
+  onToggleExpanded: (day: string) => void;
+  setSessionRef: (day: string, element: HTMLDivElement | null) => void;
+}) {
+  return (
+    <div className="space-y-2">
+      <div className="px-1">
+        <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Schedule</span>
+      </div>
+
+      <div className="relative">
+        <div className="absolute bottom-2 left-[1.05rem] top-2 w-px bg-border" aria-hidden />
+
+        <AnimatePresence mode="wait">
+          <motion.div
+            className="relative space-y-1"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            {sessions.map((session, index) => {
+              const isDone = session.completed === true;
+              const isRest = session.modality === "REST";
+              const isKey = session.role === "KEY";
+              const isToday = isCurrentWeek && session.day === todayDay;
+              const expanded = expandedDay === session.day;
+              const config = typeConfig[session.modality] ?? typeConfig.RUN;
+              const TypeIcon = config.icon;
+              const canToggle = supportsCompletion && isCurrentWeek && !completionPending && !isRest;
+
+              return (
+                <motion.div
+                  key={session.day}
+                  ref={(element) => setSessionRef(session.day, element)}
+                  initial={{ opacity: 0, x: -6 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.04, duration: 0.3 }}
+                  className={`group relative ${isRest && !isDone ? "opacity-60" : ""}`}
+                >
+                  <div
+                    className={`relative flex items-center gap-3 rounded-xl py-2.5 pl-2 pr-3 transition-all ${
+                      !isRest ? "cursor-pointer select-none" : ""
+                    } ${
+                      isToday
+                        ? "bg-primary/[0.06] ring-1 ring-primary/20"
+                        : expanded
+                          ? "bg-card shadow-sm ring-1 ring-border"
+                          : isDone
+                            ? "bg-primary/[0.03] hover:bg-primary/[0.06]"
+                            : "hover:bg-card/80"
+                    }`}
+                    onClick={() => {
+                      if (!isRest) onToggleExpanded(session.day);
+                    }}
+                  >
+                    <motion.button
+                      type="button"
+                      className={`relative z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-all ${
+                        isDone
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : isToday
+                            ? "border-primary/60 bg-background hover:bg-primary/10"
+                            : isRest
+                              ? "border-border bg-background"
+                              : "border-border bg-background hover:border-primary/40"
+                      }`}
+                      whileTap={canToggle && !reduceMotion ? { scale: 0.85 } : undefined}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        if (canToggle) onToggleComplete(session.day);
+                      }}
+                      disabled={!canToggle}
+                      aria-label={isDone ? `Mark ${session.title} as incomplete` : `Mark ${session.title} as complete`}
+                    >
+                      {isDone ? (
+                        <>
+                          {justCompletedDay === session.day && !reduceMotion ? (
+                            <motion.span
+                              className="absolute inset-0 rounded-full bg-primary"
+                              initial={{ opacity: 0.4, scale: 1 }}
+                              animate={{ opacity: 0, scale: 2.2 }}
+                              transition={{ duration: 0.7, ease: "easeOut" }}
+                            />
+                          ) : null}
+                          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", bounce: 0.5 }}>
+                            <Check className="h-3 w-3" strokeWidth={3} />
+                          </motion.div>
+                        </>
+                      ) : isRest ? (
+                        <Moon className="h-2.5 w-2.5 text-muted-foreground/40" />
+                      ) : null}
+                    </motion.button>
+
+                    <div className="w-8 shrink-0">
+                      <span className={`text-[11px] font-medium tracking-wide ${isToday ? "text-primary" : "text-muted-foreground"}`}>
+                        {shortDayLabel(session.day)}
+                      </span>
+                    </div>
+
+                    <div className={`shrink-0 rounded-lg p-1.5 ${config.badgeClass}`}>
+                      <TypeIcon className="h-3.5 w-3.5" />
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <span className={`block truncate text-sm ${isDone ? "text-muted-foreground line-through" : "text-foreground"}`}>
+                        {session.title}
+                      </span>
+                    </div>
+
+                    <div className="flex shrink-0 items-center gap-2">
+                      {isKey && !isDone ? (
+                        <Badge
+                          variant="outline"
+                          className="h-4 gap-0.5 border-accent/40 px-1.5 py-0 text-[9px] font-bold uppercase tracking-wider text-accent"
+                        >
+                          <Star className="h-2.5 w-2.5 fill-accent" />
+                          Key
+                        </Badge>
+                      ) : null}
+                      {session.durationMinutes > 0 ? (
+                        <span className="text-[11px] tabular-nums text-muted-foreground">{session.durationMinutes} min</span>
+                      ) : null}
+                      {!isRest ? (
+                        <motion.div
+                          animate={{ rotate: expanded ? 180 : 0 }}
+                          transition={{ duration: 0.2 }}
+                          className="text-muted-foreground/40 transition-colors group-hover:text-muted-foreground"
+                        >
+                          <ChevronDown className="h-3.5 w-3.5" />
+                        </motion.div>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  <AnimatePresence>
+                    {expanded && (session.notes || session.strengthFocus?.length) ? (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.22, ease: "easeOut" }}
+                        className="overflow-hidden"
+                      >
+                        <div className="pb-3 pl-[4.5rem] pr-3 pt-1.5">
+                          {session.notes ? (
+                            <p className="text-[13px] leading-relaxed text-foreground/75">{session.notes}</p>
+                          ) : null}
+                          <div className="mt-2.5 flex flex-wrap items-center gap-2">
+                            <div className="flex items-center gap-1 rounded-md bg-secondary/60 px-1.5 py-0.5">
+                              <div
+                                className={`h-1.5 w-1.5 rounded-full ${
+                                  intensityDot[session.intensityCategory] ?? "bg-muted-foreground/30"
+                                }`}
+                              />
+                              <span className="text-[10px] text-muted-foreground">
+                                {intensityLabels[session.intensityCategory] ?? session.intensityCategory}
+                              </span>
+                            </div>
+                            {session.strengthFocus?.map((focus) => (
+                              <span key={focus} className="rounded-full bg-secondary px-2 py-0.5 text-[10px] text-muted-foreground">
+                                {focus}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </motion.div>
+                    ) : null}
+                  </AnimatePresence>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+}
+
 export default function WeeklyPlanScreen({
   athleteId: _athleteId,
   targetWeekStartDate,
@@ -925,51 +1217,10 @@ export default function WeeklyPlanScreen({
   const todaySession = todayDay ? sessions.find((session) => session.day === todayDay) : undefined;
   const upNextSession = upNextDay ? sessions.find((session) => session.day === upNextDay) : undefined;
   const showTodayHero = Boolean(isCurrentWeek && todaySession);
-  const completedMinutes = sessions
-    .filter((session) => session.completed === true)
-    .reduce((total, session) => total + session.durationMinutes, 0);
-  const completedCount = sessions.filter((session) => session.completed === true).length;
-  const progressPercent = sessions.length > 0 ? Math.round((completedCount / sessions.length) * 100) : 0;
-  const currentWeekType = plan.plan.weekType || "";
-  const currentWeekTypeConfig = weekTypeConfig[currentWeekType] ?? {
-    dashboardGlowClass: "from-muted via-muted/50 to-transparent",
-  };
-  const sleepStatus = deriveSleepStatus(plan.summary.sleepHours);
   const goal = screen?.goal;
   const raceGoalDateLabel = goal?.primaryGoal.eventDate
     ? format(parseISO(goal.primaryGoal.eventDate), "MMM d, yyyy")
     : undefined;
-  const dashboardStats = [
-    {
-      icon: Route,
-      label: "Volume",
-      value:
-        typeof plan.summary.last7dDistanceKm === "number"
-          ? `${formatDecimal(plan.summary.last7dDistanceKm)} km`
-          : "—",
-      valueToneClass: "text-foreground",
-      iconToneClass: "text-muted-foreground",
-    },
-    {
-      icon: Flame,
-      label: "Long run",
-      value: screen?.highlights.longRun
-        ? `${screen.highlights.longRun.durationMinutes} min`
-        : "—",
-      valueToneClass: "text-foreground",
-      iconToneClass: "text-muted-foreground",
-    },
-    {
-      icon: BedDouble,
-      label: "Avg sleep",
-      value:
-        typeof plan.summary.sleepHours === "number"
-          ? `${formatDecimal(plan.summary.sleepHours)}h`
-          : "—",
-      valueToneClass: sleepStatus.valueToneClass,
-      iconToneClass: sleepStatus.iconToneClass,
-    },
-  ];
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
@@ -983,129 +1234,6 @@ export default function WeeklyPlanScreen({
           onSelectDay={scrollToDay}
           reduceMotion={Boolean(reduceMotion)}
         />
-
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="relative overflow-hidden rounded-2xl border border-border bg-card"
-        >
-          {goal ? (
-            <div className="border-b border-border bg-muted/20 px-5 py-3">
-              <div className="mb-2.5 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Flag className="h-3.5 w-3.5 text-accent" />
-                  <span className="text-sm font-semibold text-foreground">{goal.primaryGoal.name}</span>
-                  {raceGoalDateLabel ? (
-                    <span className="text-xs text-muted-foreground">· {raceGoalDateLabel}</span>
-                  ) : null}
-                </div>
-                <span className="text-xs font-medium text-accent">{goal.daysToGoal}d to go</span>
-              </div>
-              <div className="flex gap-1">
-                {raceProgressPhases.map((phase) => {
-                  const activePhase = (goal.phase || "BASE").toUpperCase();
-                  const activeIndex = raceProgressPhases.findIndex((item) => item.name === activePhase);
-                  const currentIndex = raceProgressPhases.findIndex((item) => item.name === phase.name);
-                  const isActive = activePhase === phase.name;
-                  const isPast = activeIndex > currentIndex;
-
-                  return (
-                    <div key={phase.name} className="flex flex-1 flex-col items-center gap-0.5">
-                      <div
-                        className={`h-1.5 w-full rounded-full transition-colors ${
-                          isActive ? "bg-primary" : isPast ? "bg-primary/30" : "bg-border"
-                        }`}
-                      />
-                      <span
-                        className={`text-[9px] font-medium ${
-                          isActive
-                            ? "text-primary"
-                            : isPast
-                              ? "text-muted-foreground"
-                              : "text-muted-foreground/50"
-                        }`}
-                      >
-                        {phase.name}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ) : null}
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.45 }}
-            className={`pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-r ${currentWeekTypeConfig.dashboardGlowClass}`}
-          />
-          <div className="p-5">
-            <div className="grid grid-cols-3 divide-x divide-border rounded-xl bg-muted/50">
-              {dashboardStats.map((item, index) => (
-                <motion.div
-                  key={item.label}
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.06 * index, duration: 0.22 }}
-                  className="flex min-w-0 flex-col items-center px-2.5 py-3 text-center"
-                >
-                  <div className="mb-1 flex items-center gap-1.5 text-[10px] leading-tight text-muted-foreground">
-                    <item.icon className={`h-3.5 w-3.5 shrink-0 ${item.iconToneClass}`} />
-                    <span className="truncate">{item.label}</span>
-                  </div>
-                  <div className="min-w-0 max-w-full">
-                    <p className={`truncate text-sm font-semibold leading-tight tabular-nums ${item.valueToneClass}`}>
-                      {item.value}
-                    </p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-
-        </motion.div>
-
-        <motion.div
-          className="relative rounded-xl border border-primary/10 bg-primary/4 px-4 py-3.5"
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35, delay: 0.1 }}
-          key={`coach-${screen?.selectedWeekStartDate ?? selectedWeekStartDate}`}
-        >
-          <div className="flex gap-3">
-            <MessageCircle className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-            <p className="text-[13px] leading-relaxed text-foreground">{plan.plan.weekObjective}</p>
-          </div>
-        </motion.div>
-
-        {supportsCompletion ? (
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.28 }}
-            className="rounded-xl border border-border bg-card p-4"
-          >
-            <div className="mb-3 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium text-foreground">Progress</span>
-              </div>
-              <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                <span>
-                  {completedCount}/{sessions.length} sessions
-                </span>
-                <span className="font-semibold text-foreground">{progressPercent}%</span>
-              </div>
-            </div>
-            <Progress value={progressPercent} className="h-2" />
-            <div className="mt-2 flex justify-between text-[11px] text-muted-foreground">
-              <span>{completedMinutes} min done</span>
-              <span>{Math.max(totalPlannedMinutes(sessions) - completedMinutes, 0)} min remaining</span>
-            </div>
-          </motion.div>
-        ) : null}
 
         {showTodayHero && todaySession ? (
           <AnimatePresence mode="wait">
@@ -1132,201 +1260,42 @@ export default function WeeklyPlanScreen({
           </AnimatePresence>
         ) : null}
 
-      </div>
+        <motion.div
+          className="relative rounded-xl border border-primary/10 bg-primary/4 px-4 py-3.5"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.15 }}
+          key={`coach-${screen?.selectedWeekStartDate ?? selectedWeekStartDate}`}
+        >
+          <div className="flex gap-2.5">
+            <MessageCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
+            <p className="text-[12px] leading-relaxed text-foreground/80">{plan.plan.weekObjective}</p>
+          </div>
+        </motion.div>
 
-      <div className="space-y-2">
-        <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Sessions</p>
-        <div className="space-y-3">
-          {sessions.map((session, index) => {
-            const isDone = session.completed === true;
-            const isRest = session.modality === "REST";
-            const isKey = session.role === "KEY";
-            const isToday = session.day === todayDay;
-            const isUpNext = session.day === upNextDay;
-            const isTodayHeroSession = showTodayHero && isToday;
-            const isExpanded = expandedDay === session.day && !isTodayHeroSession;
-            const config = typeConfig[session.modality] ?? typeConfig.RUN;
-            const TypeIcon = config.icon;
+        <WeekMetrics
+          last7dDistanceKm={plan.summary.last7dDistanceKm}
+          longRunMinutes={screen?.highlights.longRun?.durationMinutes}
+          sleepHours={plan.summary.sleepHours}
+        />
 
-            return (
-              <motion.div
-                key={session.day}
-                ref={(element) => {
-                  sessionRefs.current[session.day] = element;
-                }}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.04, duration: 0.25 }}
-                whileHover={{ y: -2 }}
-                className={`relative overflow-hidden rounded-xl border transition-all duration-200 ${
-                  isDone
-                    ? "border-primary/20 bg-primary/5"
-                    : sessionCardStyles[session.modality] ?? "border-border bg-card"
-                } ${isToday ? "ring-1 ring-primary/25" : isUpNext ? "ring-1 ring-accent/20" : ""} ${
-                  isRest && !isDone ? "opacity-60" : ""
-                }`}
-              >
-                {isKey && !isDone ? (
-                  <div className="h-0.5 bg-gradient-to-r from-primary/40 via-primary/20 to-transparent" />
-                ) : null}
+        <RoadToRace goal={goal} raceGoalDateLabel={raceGoalDateLabel} />
 
-                <div
-                  className={`flex items-center gap-3 p-4 ${!isRest ? "cursor-pointer select-none" : ""}`}
-                  onClick={() => {
-                    if (!isRest) setExpandedDay(isExpanded ? null : session.day);
-                  }}
-                >
-                  {supportsCompletion ? (
-                    <div
-                      onClick={(event) => {
-                        event.stopPropagation();
-                      }}
-                    >
-                      <Checkbox
-                        checked={isDone}
-                        className="h-5 w-5 rounded-md"
-                        disabled={!isCurrentWeek || completionMutation.isPending}
-                        onCheckedChange={() => toggleComplete(session.day)}
-                      />
-                    </div>
-                  ) : null}
-
-                  <div
-                    className={`rounded-lg border bg-gradient-to-br p-2 ${config.gradient} ${config.tileClass}`}
-                  >
-                    <motion.div
-                      animate={!isDone ? { rotate: [0, -3, 3, 0] } : {}}
-                      transition={!isDone ? { delay: index * 0.03, duration: 0.35 } : undefined}
-                    >
-                      <TypeIcon className="h-4 w-4" />
-                    </motion.div>
-                  </div>
-
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="w-8 text-xs font-medium text-muted-foreground">
-                        {shortDayLabel(session.day)}
-                      </span>
-                      <p
-                        className={`truncate text-sm font-medium ${
-                          isDone ? "line-through text-muted-foreground" : "text-foreground"
-                        }`}
-                      >
-                        {session.title}
-                      </p>
-                    </div>
-                    <div className={`${supportsCompletion ? "ml-10" : ""} mt-1.5 flex flex-wrap items-center gap-2`}>
-                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Clock className="h-3 w-3" />
-                        {session.durationMinutes} min
-                      </span>
-                      <Badge
-                        variant="secondary"
-                        className={`h-4 px-1.5 py-0 text-[10px] ${
-                          intensityStyles[session.intensityCategory] ?? "bg-secondary text-foreground"
-                        }`}
-                      >
-                        {intensityLabels[session.intensityCategory] ?? session.intensityCategory}
-                      </Badge>
-                      <Badge variant="outline" className={`h-4 px-1.5 py-0 text-[10px] ${config.badgeClass}`}>
-                        {modalityLabels[session.modality] ?? config.label}
-                      </Badge>
-                      {isToday ? (
-                        <Badge
-                          variant="outline"
-                          className="h-4 border-primary/30 bg-primary/5 px-1.5 py-0 text-[10px] text-primary"
-                        >
-                          Today
-                        </Badge>
-                      ) : null}
-                      {isUpNext && !isToday ? (
-                        <Badge
-                          variant="outline"
-                          className="h-4 border-accent/30 bg-accent/5 px-1.5 py-0 text-[10px] text-accent"
-                        >
-                          Up next
-                        </Badge>
-                      ) : null}
-                      {session.role ? (
-                        <Badge
-                          variant="outline"
-                          className={`h-4 px-1.5 py-0 text-[10px] ${
-                            roleStyles[session.role] ?? "border-border bg-secondary text-foreground"
-                          }`}
-                        >
-                          {roleLabels[session.role] ?? session.role}
-                        </Badge>
-                      ) : null}
-                    </div>
-                  </div>
-
-                  {isDone ? (
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      className="relative rounded-full bg-primary p-1 text-primary-foreground"
-                    >
-                      {justCompletedDay === session.day && !reduceMotion ? (
-                        <motion.span
-                          className="absolute inset-0 rounded-full bg-primary"
-                          initial={{ opacity: 0.4, scale: 1 }}
-                          animate={{ opacity: 0, scale: 2.2 }}
-                          transition={{ duration: 0.7, ease: "easeOut" }}
-                        />
-                      ) : null}
-                      <Check className="relative h-3 w-3" />
-                    </motion.div>
-                  ) : !isRest ? (
-                    <motion.div
-                      animate={{ rotate: isExpanded ? 180 : 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="text-muted-foreground/50"
-                    >
-                      {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                    </motion.div>
-                  ) : null}
-                </div>
-
-                <AnimatePresence initial={false}>
-                  {isExpanded && (session.notes || session.strengthFocus?.length) ? (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="overflow-hidden"
-                    >
-                      <div className="border-t border-border/40 px-4 pb-4 pt-3">
-                        {session.notes ? (
-                          <div className="rounded-lg border border-border/40 bg-muted/40 p-3">
-                            <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                              Coach note
-                            </p>
-                            <p className="text-sm leading-relaxed text-foreground">{session.notes}</p>
-                          </div>
-                        ) : null}
-
-                        {session.strengthFocus?.length ? (
-                          <div className="mt-3 flex flex-wrap gap-1.5">
-                            {session.strengthFocus.map((focus) => (
-                              <Badge
-                                key={focus}
-                                variant="outline"
-                                className="h-5 bg-secondary/50 px-2 py-0 text-[10px] font-normal"
-                              >
-                                {focus}
-                              </Badge>
-                            ))}
-                          </div>
-                        ) : null}
-                      </div>
-                    </motion.div>
-                  ) : null}
-                </AnimatePresence>
-              </motion.div>
-            );
-          })}
-        </div>
+        <ScheduleList
+          sessions={sessions}
+          todayDay={todayDay}
+          isCurrentWeek={isCurrentWeek}
+          supportsCompletion={supportsCompletion}
+          completionPending={completionMutation.isPending}
+          expandedDay={expandedDay}
+          justCompletedDay={justCompletedDay}
+          reduceMotion={Boolean(reduceMotion)}
+          onToggleComplete={toggleComplete}
+          onToggleExpanded={(day) => setExpandedDay(expandedDay === day ? null : day)}
+          setSessionRef={(day, element) => {
+            sessionRefs.current[day] = element;
+          }}
+        />
       </div>
     </div>
   );
