@@ -2,9 +2,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiError, apiRequest } from "@/lib/api";
 import {
   bootstrapPortal,
+  getCurrentUserWeeklyCoachScreen,
   getAthleteProfile,
   getWeeklyCoachPlan,
   retryCurrentUserWeeklyPlanGeneration,
+  setCurrentUserWeeklyCoachSessionCompletion,
   updateAthleteProfile,
 } from "@/lib/portal-api";
 
@@ -50,10 +52,13 @@ describe("portal-api weekly coach helpers", () => {
       profile: {
         isComplete: true,
       },
-      intervals: {
-        status: "connected",
+      trainingProvider: {
+        activeProvider: "intervals",
         connected: true,
-        providerAccountRef: "i372001",
+        activeProviderAccountRef: "i372001",
+        readinessCapability: "full",
+        lastProvider: null,
+        lastStatus: null,
       },
       weeklyPlan: {
         targetWeekStartDate: "2026-03-23",
@@ -74,10 +79,13 @@ describe("portal-api weekly coach helpers", () => {
       profile: {
         isComplete: true,
       },
-      intervals: {
-        status: "connected",
+      trainingProvider: {
+        activeProvider: "intervals",
         connected: true,
-        providerAccountRef: "i372001",
+        activeProviderAccountRef: "i372001",
+        readinessCapability: "full",
+        lastProvider: undefined,
+        lastStatus: undefined,
       },
       weeklyPlan: {
         targetWeekStartDate: "2026-03-23",
@@ -132,6 +140,176 @@ describe("portal-api weekly coach helpers", () => {
       },
       plan: {
         weekType: "DELOAD",
+      },
+    });
+  });
+
+  it("maps the navigable weekly coach screen read model", async () => {
+    apiRequestMock.mockResolvedValueOnce({
+      viewType: "PLAN",
+      selectedWeekStartDate: "2026-03-23",
+      todayWeekStartDate: "2026-03-23",
+      latestGeneratedWeekStartDate: "2026-03-23",
+      futurePreviewWeekStartDate: "2026-03-30",
+      previousWeekStartDate: "2026-03-16",
+      nextWeekStartDate: "2026-03-30",
+      canGoPrevious: true,
+      canGoNext: true,
+      todaySessionDay: "SUN",
+      upNextSessionDay: "SUNDAY",
+      goal: {
+        goalSummary: "Sub-1:40 half marathon",
+        primaryGoal: {
+          name: "Barcelona Half Marathon",
+          eventDate: "2026-06-01",
+          distanceKm: 21.1,
+        },
+        phase: "BUILD",
+        daysToGoal: 67,
+        nextSecondaryGoal: {
+          role: "TUNE_UP",
+          name: "10K tune-up",
+          eventDate: "2026-05-01",
+          distanceKm: 10,
+          daysUntilEvent: 36,
+        },
+      },
+      highlights: {
+        longRun: {
+          day: "SUNDAY",
+          title: "Long run",
+          durationMinutes: 95,
+          intensityCategory: "LOW",
+        },
+      },
+      plan: {
+        weekStartDate: "2026-03-23",
+        planId: "athlete-1:2026-03-23",
+        createdAt: "2026-03-23T08:00:00Z",
+        updatedAt: "2026-03-23T08:00:00Z",
+        plan: {
+          schemaVersion: "1.0",
+          weekType: "BUILD",
+          weekObjective: "Build aerobic capacity",
+          progressionNote: "Hold one quality run",
+          sessions: [
+            {
+              day: "SUNDAY",
+              modality: "RUN",
+              type: "LONG_RUN",
+              title: "Long run",
+              durationMinutes: 95,
+              completed: true,
+              role: "KEY",
+              intensityCategory: "LOW",
+              placementReason: "Anchor session",
+            },
+          ],
+          justification: [],
+        },
+        summary: {
+          readinessScore: 93,
+          fatigue: 3,
+          sleepHours: 7.9,
+          last7dDistanceKm: 45,
+          phase: "BUILD",
+          daysToGoal: 101,
+        },
+        llmMeta: {
+          provider: "openai",
+          model: "gpt-5",
+          promptVersion: "v1",
+        },
+      },
+    });
+
+    await expect(getCurrentUserWeeklyCoachScreen("2026-03-23")).resolves.toMatchObject({
+      viewType: "PLAN",
+      selectedWeekStartDate: "2026-03-23",
+      previousWeekStartDate: "2026-03-16",
+      nextWeekStartDate: "2026-03-30",
+      canGoPrevious: true,
+      canGoNext: true,
+      todaySessionDay: "SUN",
+      upNextSessionDay: "SUN",
+      goal: {
+        goalSummary: "Sub-1:40 half marathon",
+        primaryGoal: {
+          name: "Barcelona Half Marathon",
+        },
+        phase: "BUILD",
+        daysToGoal: 67,
+      },
+      highlights: {
+        longRun: {
+          day: "SUN",
+          durationMinutes: 95,
+        },
+      },
+      plan: {
+        planId: "athlete-1:2026-03-23",
+        summary: {
+          readinessScore: 93,
+          phase: "BUILD",
+        },
+        plan: {
+          weekType: "BUILD",
+          sessions: [{ day: "SUN", completed: true, role: "KEY" }],
+        },
+      },
+    });
+  });
+
+  it("does not invent completion state when the backend omits it", async () => {
+    apiRequestMock.mockResolvedValueOnce({
+      viewType: "PLAN",
+      selectedWeekStartDate: "2026-03-23",
+      todayWeekStartDate: "2026-03-23",
+      latestGeneratedWeekStartDate: "2026-03-23",
+      futurePreviewWeekStartDate: null,
+      previousWeekStartDate: null,
+      nextWeekStartDate: null,
+      canGoPrevious: false,
+      canGoNext: false,
+      goal: null,
+      highlights: {},
+      plan: {
+        weekStartDate: "2026-03-23",
+        planId: "athlete-1:2026-03-23",
+        createdAt: "2026-03-23T08:00:00Z",
+        updatedAt: "2026-03-23T08:00:00Z",
+        plan: {
+          schemaVersion: "1.0",
+          weekType: "BUILD",
+          weekObjective: "Build aerobic capacity",
+          progressionNote: "Hold one quality run",
+          sessions: [
+            {
+              day: "MONDAY",
+              modality: "RUN",
+              type: "EASY_RUN",
+              title: "Easy run",
+              durationMinutes: 45,
+              intensityCategory: "LOW",
+              placementReason: "Start the week easy",
+            },
+          ],
+          justification: [],
+        },
+        summary: {},
+        llmMeta: {
+          provider: "openai",
+          model: "gpt-5",
+          promptVersion: "v1",
+        },
+      },
+    });
+
+    await expect(getCurrentUserWeeklyCoachScreen("2026-03-23")).resolves.toMatchObject({
+      plan: {
+        plan: {
+          sessions: [{ day: "MON", completed: undefined }],
+        },
       },
     });
   });
@@ -193,5 +371,31 @@ describe("portal-api weekly coach helpers", () => {
     expect(apiRequestMock).toHaveBeenCalledWith("/api/v1/me/onboarding/weekly-plan:retry", {
       method: "POST",
     });
+  });
+
+  it("persists weekly coach session completion state", async () => {
+    apiRequestMock.mockResolvedValueOnce(undefined);
+
+    await setCurrentUserWeeklyCoachSessionCompletion("2026-03-23", "SUN", true);
+
+    expect(apiRequestMock).toHaveBeenCalledWith(
+      "/api/v1/me/weekly-coach/weeks/2026-03-23/sessions/SUN/completion",
+      {
+        method: "PUT",
+        body: { completed: true },
+      },
+    );
+
+    apiRequestMock.mockResolvedValueOnce(undefined);
+
+    await setCurrentUserWeeklyCoachSessionCompletion("2026-03-23", "SUN", false);
+
+    expect(apiRequestMock).toHaveBeenLastCalledWith(
+      "/api/v1/me/weekly-coach/weeks/2026-03-23/sessions/SUN/completion",
+      {
+        method: "PUT",
+        body: { completed: false },
+      },
+    );
   });
 });

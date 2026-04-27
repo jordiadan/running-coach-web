@@ -1,52 +1,145 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Check, Link2, Plus, RefreshCcw } from "lucide-react";
+import { AlertTriangle, ArrowLeftRight, Check, Link2, Plus, RefreshCcw } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ApiError } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import {
-  connectIntervals,
-  disconnectIntervals,
-  getIntervalsIntegrationStatus,
-  type IntervalsIntegrationStatus,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  connectTrainingProvider,
+  disconnectTrainingProvider,
+  getTrainingProviderIntegrationStatus,
+  type PortalBootstrapResponse,
+  type TrainingProviderId,
+  type TrainingProviderIntegrationStatus,
 } from "@/lib/portal-api";
 
 type ConnectScreenProps = {
   athleteId: string;
+  trainingProvider: PortalBootstrapResponse["trainingProvider"];
   variant?: "page" | "onboarding";
   onComplete?: () => void | Promise<unknown>;
 };
 
-const staticSources = [
-  { id: "strava", name: "Strava", description: "Coming soon", disabled: true },
-  { id: "garmin", name: "Garmin Connect", description: "Coming soon", disabled: true },
-  { id: "apple", name: "Apple Health", description: "Coming soon", disabled: true },
+type TrainingSource = {
+  id: TrainingProviderId;
+  name: string;
+  description: string;
+  readiness: string;
+};
+
+type ConnectRequest = {
+  provider: TrainingProviderId;
+  replaceExistingProvider?: boolean;
+};
+
+const trainingSources: TrainingSource[] = [
+  {
+    id: "strava",
+    name: "Strava",
+    description: "Sync your runs and core activity history from Strava.",
+    readiness: "Limited readiness context",
+  },
+  {
+    id: "intervals",
+    name: "Intervals.icu",
+    description: "Sync structured workouts, fitness, fatigue, and readiness context from Intervals.icu.",
+    readiness: "Full readiness context",
+  },
 ];
 
-function resolveIntervalsDescription(status: IntervalsIntegrationStatus | undefined) {
-  if (!status) {
-    return "Sync structured workouts, fitness, and fatigue data from Intervals.icu.";
-  }
+const providerNameById: Record<TrainingProviderId, string> = {
+  intervals: "Intervals.icu",
+  strava: "Strava",
+};
 
-  switch (status.status) {
+function asProviderId(value: string | undefined): TrainingProviderId | undefined {
+  return value === "intervals" || value === "strava" ? value : undefined;
+}
+
+function formatProviderName(provider: string | undefined) {
+  const providerId = asProviderId(provider);
+
+  return providerId ? providerNameById[providerId] : provider || "your current source";
+}
+
+function normalizeStatus(status: string | undefined) {
+  return status?.trim().toLowerCase() ?? "";
+}
+
+function formatStatus(status: string | undefined) {
+  const normalized = normalizeStatus(status);
+
+  switch (normalized) {
     case "connected":
-      return status.providerAccountRef
-        ? `Connected as ${status.providerAccountRef}.`
-        : "Your Intervals.icu account is connected.";
+      return "Connected";
     case "pending_authorization":
-      return "Authorization is in progress. Finish the Intervals flow, then come back to the portal.";
+      return "Waiting";
     case "auth_failed":
-      return "The last authorization attempt failed. Start the connection again to continue.";
+      return "Needs retry";
     case "disconnected":
+      return "Disconnected";
     case "absent":
     default:
-      return "Sync structured workouts, fitness, and fatigue data from Intervals.icu.";
+      return "";
   }
 }
 
-function resolveIntervalsBadge(status: IntervalsIntegrationStatus | undefined) {
-  switch (status?.status) {
-    case "connected":
-      return { label: "Connected", className: "bg-primary/10 text-primary" };
+function getApiErrorCode(error: unknown) {
+  if (!(error instanceof ApiError)) return undefined;
+  const payload = typeof error.payload === "object" && error.payload !== null
+    ? (error.payload as Record<string, unknown>)
+    : {};
+
+  return typeof payload.code === "string" ? payload.code : undefined;
+}
+
+function resolveDescription(
+  source: TrainingSource,
+  status: TrainingProviderIntegrationStatus | undefined,
+  isActive: boolean,
+  accountRef: string | undefined,
+) {
+  if (isActive) {
+    return accountRef ? `Connected as ${accountRef}.` : `${source.name} is connected.`;
+  }
+
+  switch (normalizeStatus(status?.status)) {
+    case "pending_authorization":
+      return `Authorization is in progress. Finish the ${source.name} flow, then come back to the portal.`;
+    case "auth_failed":
+      return "The last authorization attempt failed. Start the connection again to continue.";
+    default:
+      return source.description;
+  }
+}
+
+function resolveBadge(
+  source: TrainingSource,
+  status: TrainingProviderIntegrationStatus | undefined,
+  trainingProvider: PortalBootstrapResponse["trainingProvider"],
+  isActive: boolean,
+) {
+  if (isActive) {
+    return null;
+  }
+
+  if (!trainingProvider.connected && trainingProvider.lastProvider === source.id) {
+    const label = formatStatus(trainingProvider.lastStatus);
+
+    return label ? { label: `Last ${label.toLowerCase()}`, className: "bg-secondary text-foreground" } : null;
+  }
+
+  switch (normalizeStatus(status?.status)) {
     case "pending_authorization":
       return { label: "Waiting", className: "bg-secondary text-foreground" };
     case "auth_failed":
@@ -56,29 +149,69 @@ function resolveIntervalsBadge(status: IntervalsIntegrationStatus | undefined) {
   }
 }
 
+function shouldPollStatus(
+  awaitingOAuthCompletion: TrainingProviderId | null,
+  queryData: TrainingProviderIntegrationStatus | undefined,
+) {
+  return awaitingOAuthCompletion !== null || normalizeStatus(queryData?.status) === "pending_authorization";
+}
+
 export default function ConnectScreen({
   athleteId,
+  trainingProvider,
   variant = "page",
   onComplete,
 }: ConnectScreenProps) {
   const queryClient = useQueryClient();
   const completionTriggeredRef = useRef(false);
-  const [awaitingOAuthCompletion, setAwaitingOAuthCompletion] = useState(false);
+  const [awaitingOAuthCompletion, setAwaitingOAuthCompletion] = useState<TrainingProviderId | null>(null);
+  const [replaceCandidate, setReplaceCandidate] = useState<TrainingProviderId | null>(null);
+  const [isReplaceDialogOpen, setIsReplaceDialogOpen] = useState(false);
   const [showConnectedTransition, setShowConnectedTransition] = useState(false);
+  const isOnboarding = variant === "onboarding";
+  const activeProvider = asProviderId(trainingProvider.activeProvider);
+  const activeSource = trainingSources.find((source) => source.id === activeProvider);
+  const pendingSource = trainingSources.find((source) => source.id === replaceCandidate);
+
   const intervalsQuery = useQuery({
-    queryKey: ["portal", "intervals", athleteId],
-    queryFn: () => getIntervalsIntegrationStatus(athleteId),
+    queryKey: ["portal", "training-provider", "intervals", athleteId],
+    queryFn: () => getTrainingProviderIntegrationStatus("intervals", athleteId),
     enabled: Boolean(athleteId),
-    refetchInterval: (query) =>
-      awaitingOAuthCompletion || query.state.data?.status === "pending_authorization" ? 3000 : false,
+    refetchInterval: (query) => shouldPollStatus(awaitingOAuthCompletion, query.state.data) ? 3000 : false,
+  });
+  const stravaQuery = useQuery({
+    queryKey: ["portal", "training-provider", "strava", athleteId],
+    queryFn: () => getTrainingProviderIntegrationStatus("strava", athleteId),
+    enabled: Boolean(athleteId),
+    refetchInterval: (query) => shouldPollStatus(awaitingOAuthCompletion, query.state.data) ? 3000 : false,
   });
 
+  const statusByProvider = useMemo(
+    () => ({
+      intervals: intervalsQuery.data,
+      strava: stravaQuery.data,
+    }),
+    [intervalsQuery.data, stravaQuery.data],
+  );
+  const connectedProviderFromStatus =
+    (intervalsQuery.data?.connected ? "intervals" : undefined) ??
+    (stravaQuery.data?.connected ? "strava" : undefined);
+
+  const invalidateProviderState = async () => {
+    await queryClient.invalidateQueries({ queryKey: ["portal", "bootstrap"] });
+    await queryClient.invalidateQueries({ queryKey: ["portal", "training-provider"] });
+  };
+
   const connectMutation = useMutation({
-    mutationFn: () => connectIntervals(athleteId),
-    onSuccess: async (result) => {
+    mutationFn: ({ provider, replaceExistingProvider = false }: ConnectRequest) =>
+      connectTrainingProvider(provider, athleteId, replaceExistingProvider),
+    onSuccess: async (result, variables) => {
+      setIsReplaceDialogOpen(false);
+      setReplaceCandidate(null);
+
       if (result.redirectUrl) {
         if (isOnboarding) {
-          setAwaitingOAuthCompletion(true);
+          setAwaitingOAuthCompletion(variables.provider);
           const popup = window.open(result.redirectUrl, "_blank", "noopener,noreferrer");
 
           if (!popup) {
@@ -86,8 +219,7 @@ export default function ConnectScreen({
             return;
           }
 
-          await queryClient.invalidateQueries({ queryKey: ["portal", "bootstrap"] });
-          await queryClient.invalidateQueries({ queryKey: ["portal", "intervals", athleteId] });
+          await invalidateProviderState();
           return;
         }
 
@@ -95,38 +227,45 @@ export default function ConnectScreen({
         return;
       }
 
-      await queryClient.invalidateQueries({ queryKey: ["portal", "bootstrap"] });
-      await queryClient.invalidateQueries({ queryKey: ["portal", "intervals", athleteId] });
+      await invalidateProviderState();
     },
   });
 
   const disconnectMutation = useMutation({
-    mutationFn: () => disconnectIntervals(athleteId),
+    mutationFn: (provider: TrainingProviderId) => disconnectTrainingProvider(provider, athleteId),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["portal", "bootstrap"] });
-      await queryClient.invalidateQueries({ queryKey: ["portal", "intervals", athleteId] });
+      await invalidateProviderState();
     },
   });
 
-  const intervalsSource = useMemo(
-    () => ({
-      id: "intervals",
-      name: "Intervals.icu",
-      description: resolveIntervalsDescription(intervalsQuery.data),
-      connected: Boolean(intervalsQuery.data?.connected),
-      disabled: false,
-    }),
-    [intervalsQuery.data],
-  );
-  const isOnboarding = variant === "onboarding";
+  const confirmReplace = () => {
+    if (!replaceCandidate) {
+      return;
+    }
+
+    connectMutation.mutate({ provider: replaceCandidate, replaceExistingProvider: true });
+  };
+
+  const openReplaceDialog = (provider: TrainingProviderId) => {
+    setReplaceCandidate(provider);
+    setIsReplaceDialogOpen(true);
+  };
+
+  const handleReplaceDialogOpenChange = (open: boolean) => {
+    if (connectMutation.isPending && !open) {
+      return;
+    }
+
+    setIsReplaceDialogOpen(open);
+  };
 
   useEffect(() => {
-    if (!isOnboarding || !intervalsQuery.data?.connected || completionTriggeredRef.current === true) {
+    if (!isOnboarding || !connectedProviderFromStatus || completionTriggeredRef.current === true) {
       return;
     }
 
     completionTriggeredRef.current = true;
-    setAwaitingOAuthCompletion(false);
+    setAwaitingOAuthCompletion(null);
     setShowConnectedTransition(true);
 
     const timeout = window.setTimeout(() => {
@@ -134,94 +273,172 @@ export default function ConnectScreen({
     }, 850);
 
     return () => window.clearTimeout(timeout);
-  }, [intervalsQuery.data?.connected, isOnboarding, onComplete]);
+  }, [connectedProviderFromStatus, isOnboarding, onComplete]);
 
   useEffect(() => {
-    if (!awaitingOAuthCompletion || intervalsQuery.data?.connected !== false) {
+    if (!awaitingOAuthCompletion) {
       return;
     }
 
-    if (intervalsQuery.data?.status === "auth_failed") {
-      setAwaitingOAuthCompletion(false);
+    const status = statusByProvider[awaitingOAuthCompletion];
+
+    if (normalizeStatus(status?.status) === "auth_failed") {
+      setAwaitingOAuthCompletion(null);
     }
-  }, [awaitingOAuthCompletion, intervalsQuery.data]);
+  }, [awaitingOAuthCompletion, statusByProvider]);
 
   return (
     <div className={isOnboarding ? "space-y-5" : "max-w-2xl"}>
       {!isOnboarding ? (
         <>
           <h2 className="mb-2 font-serif text-2xl">Connect your data</h2>
-          <p className="mb-8 text-sm text-muted-foreground">
-            Link Intervals first. The rest of the onboarding will use that training context to personalize your plan.
+          <p className="mb-2 text-sm text-muted-foreground">
+            Link your training sources so we can build a plan around your real activity.
+          </p>
+          <p className="mb-8 text-xs text-muted-foreground">
+            Only one activity source (Strava or Intervals.icu) can be active at a time.
           </p>
         </>
       ) : null}
 
+      {isOnboarding ? (
+        <p className="text-xs text-muted-foreground">
+          Only one activity source (Strava or Intervals.icu) can be active at a time.
+        </p>
+      ) : null}
+
       <div className="space-y-3">
-        {[intervalsSource, ...staticSources].map((source) => {
-          const isIntervals = source.id === "intervals";
-          const isBusy = connectMutation.isPending || disconnectMutation.isPending;
-          const intervalsBadge = isIntervals ? resolveIntervalsBadge(intervalsQuery.data) : null;
+        {trainingSources.map((source) => {
+          const providerStatus = statusByProvider[source.id];
+          const isActive = trainingProvider.connected && activeProvider === source.id;
+          const isReplaceable = source.id !== activeProvider && trainingProvider.connected && Boolean(activeProvider);
+          const isBusy =
+            (connectMutation.isPending && connectMutation.variables?.provider === source.id) ||
+            (disconnectMutation.isPending && disconnectMutation.variables === source.id);
+          const isLoadingStatus = source.id === "intervals" ? intervalsQuery.isLoading : stravaQuery.isLoading;
+          const isStatusError = source.id === "intervals" ? intervalsQuery.isError : stravaQuery.isError;
+          const accountRef = isActive
+            ? trainingProvider.activeProviderAccountRef ?? providerStatus?.providerAccountRef
+            : providerStatus?.providerAccountRef;
+          const badge = resolveBadge(source, providerStatus, trainingProvider, isActive);
+          const connectionErrorCode =
+            connectMutation.variables?.provider === source.id ? getApiErrorCode(connectMutation.error) : undefined;
 
           return (
             <div
               key={source.id}
-              className={`flex items-center justify-between gap-4 rounded-xl border border-divider bg-card p-5 ${
-                source.disabled ? "opacity-50" : ""
-              }`}
+              className="rounded-xl border border-divider bg-card p-5"
             >
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <p className="font-medium text-foreground">{source.name}</p>
-                  {intervalsBadge && (
-                    <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${intervalsBadge.className}`}>
-                      {intervalsBadge.label}
-                    </span>
-                  )}
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="font-medium text-foreground">{source.name}</p>
+                    {badge && (
+                      <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${badge.className}`}>
+                        {badge.label}
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {resolveDescription(source, providerStatus, isActive, accountRef)}
+                  </p>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    {isActive
+                      ? `Readiness capability: ${trainingProvider.readinessCapability}.`
+                      : source.readiness}
+                  </p>
+                  {isStatusError ? (
+                    <p className="mt-2 text-sm text-destructive">We couldn't load this source status.</p>
+                  ) : null}
+                  {connectionErrorCode === "PROVIDER_CONNECTION_CONFLICT" ? (
+                    <p className="mt-2 text-sm text-destructive">
+                      Another source is already connected. Use replace to switch sources.
+                    </p>
+                  ) : null}
                 </div>
-                <p className="mt-1 text-sm text-muted-foreground">{source.description}</p>
-                {isIntervals && intervalsQuery.isError && (
-                  <p className="mt-2 text-sm text-destructive">We couldn't load the current Intervals status.</p>
+
+                {isActive ? (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => disconnectMutation.mutate(source.id)}
+                    className="min-w-[110px] self-start sm:self-center"
+                    disabled={isBusy}
+                  >
+                    {isBusy ? (
+                      <>
+                        <RefreshCcw className="mr-1 h-3.5 w-3.5 animate-spin" /> Disconnecting
+                      </>
+                    ) : (
+                      <>
+                        <Check className="mr-1 h-3.5 w-3.5" /> Connected
+                      </>
+                    )}
+                  </Button>
+                ) : isReplaceable ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => openReplaceDialog(source.id)}
+                    className="min-w-[110px] self-start sm:self-center"
+                    disabled={isBusy}
+                  >
+                    <ArrowLeftRight className="mr-1 h-3.5 w-3.5" /> Replace
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => connectMutation.mutate({ provider: source.id })}
+                    className="min-w-[110px] self-start sm:self-center"
+                    disabled={isBusy || isLoadingStatus}
+                  >
+                    {isBusy ? (
+                      <>
+                        <RefreshCcw className="mr-1 h-3.5 w-3.5 animate-spin" /> Connecting
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="mr-1 h-3.5 w-3.5" />
+                        {normalizeStatus(providerStatus?.status) === "pending_authorization" ? "Try again" : "Connect"}
+                      </>
+                    )}
+                  </Button>
                 )}
               </div>
-
-              {source.disabled ? (
-                <Button variant="outline" size="sm" disabled className="min-w-[110px]">
-                  Coming soon
-                </Button>
-              ) : intervalsQuery.data?.connected ? (
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => disconnectMutation.mutate()}
-                  className="min-w-[110px]"
-                  disabled={isBusy}
-                >
-                  {disconnectMutation.isPending ? (
-                    <><RefreshCcw className="mr-1 h-3.5 w-3.5 animate-spin" /> Disconnecting</>
-                  ) : (
-                    <><Check className="mr-1 h-3.5 w-3.5" /> Disconnect</>
-                  )}
-                </Button>
-              ) : (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => connectMutation.mutate()}
-                  className="min-w-[110px]"
-                  disabled={isBusy || intervalsQuery.isLoading}
-                >
-                  {connectMutation.isPending ? (
-                    <><RefreshCcw className="mr-1 h-3.5 w-3.5 animate-spin" /> Connecting</>
-                  ) : (
-                    <><Plus className="mr-1 h-3.5 w-3.5" /> {intervalsQuery.data?.status === "pending_authorization" ? "Try again" : "Connect"}</>
-                  )}
-                </Button>
-              )}
             </div>
           );
         })}
       </div>
+
+      <AlertDialog
+        open={isReplaceDialogOpen}
+        onOpenChange={handleReplaceDialogOpenChange}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-foreground" />
+              Replace active source?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              You can only have one activity source active at a time.{" "}
+              <span className="font-medium text-foreground">
+                {activeSource?.name ?? formatProviderName(trainingProvider.activeProvider)}
+              </span>{" "}
+              will be disconnected and replaced with{" "}
+              <span className="font-medium text-foreground">{pendingSource?.name}</span>.
+              Your existing data stays, but new activities will sync from {pendingSource?.name}.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={connectMutation.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmReplace} disabled={connectMutation.isPending}>
+              {connectMutation.isPending ? "Replacing..." : `Replace with ${pendingSource?.name}`}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {isOnboarding && showConnectedTransition ? (
         <motion.div
@@ -233,8 +450,8 @@ export default function ConnectScreen({
             <Check className="h-4 w-4" />
           </div>
           <div className="space-y-0.5">
-            <p className="font-medium">Connected to Intervals.icu</p>
-            <p className="text-xs text-primary/80">Moving on to your profile…</p>
+            <p className="font-medium">Training source connected</p>
+            <p className="text-xs text-primary/80">Moving on to your profile...</p>
           </div>
         </motion.div>
       ) : null}
@@ -244,7 +461,7 @@ export default function ConnectScreen({
           <div className="flex items-start gap-3">
             <Link2 className="mt-0.5 h-4 w-4 shrink-0" />
             <p>
-              The portal checks your Intervals status on load. If you finish the OAuth flow in another tab, reopen the portal and the connection state should refresh.
+              The portal checks provider status on load. If you finish an OAuth flow in another tab, reopen the portal and the connection state should refresh.
             </p>
           </div>
         </div>

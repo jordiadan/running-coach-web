@@ -10,10 +10,13 @@ export type PortalBootstrapResponse = {
   profile: {
     isComplete: boolean;
   };
-  intervals: {
-    status: string;
+  trainingProvider: {
+    activeProvider?: string;
     connected: boolean;
-    providerAccountRef?: string;
+    activeProviderAccountRef?: string;
+    readinessCapability: string;
+    lastProvider?: string;
+    lastStatus?: string;
   };
   weeklyPlan: {
     targetWeekStartDate: string;
@@ -21,10 +24,13 @@ export type PortalBootstrapResponse = {
     status: "missing" | "preparing" | "failed" | "ready";
     failureCode?: string;
   };
-  nextStep: "connect_intervals" | "complete_profile" | "prepare_weekly_plan" | "view_weekly_plan";
+  nextStep: "connect_training_source" | "complete_profile" | "prepare_weekly_plan" | "view_weekly_plan";
 };
 
-export type IntervalsIntegrationStatus = {
+export type TrainingProviderId = "intervals" | "strava";
+
+export type TrainingProviderIntegrationStatus = {
+  provider: TrainingProviderId;
   connected: boolean;
   status: string;
   providerAccountRef?: string;
@@ -65,6 +71,8 @@ export type WeeklyCoachSession = {
   type: string;
   title: string;
   durationMinutes: number;
+  completed?: boolean;
+  role?: string;
   intensityCategory: string;
   placementReason: string;
   notes?: string;
@@ -100,6 +108,48 @@ export type WeeklyCoachPlan = {
   };
 };
 
+export type CurrentUserWeeklyCoachScreenViewType = "PLAN" | "FUTURE_PREVIEW" | "EMPTY";
+
+export type CurrentUserWeeklyCoachScreen = {
+  viewType: CurrentUserWeeklyCoachScreenViewType;
+  selectedWeekStartDate: string;
+  todayWeekStartDate: string;
+  latestGeneratedWeekStartDate?: string;
+  futurePreviewWeekStartDate?: string;
+  previousWeekStartDate?: string;
+  nextWeekStartDate?: string;
+  canGoPrevious: boolean;
+  canGoNext: boolean;
+  todaySessionDay?: string;
+  upNextSessionDay?: string;
+  goal?: {
+    goalSummary: string;
+    primaryGoal: {
+      name: string;
+      eventDate: string;
+      distanceKm: number;
+    };
+    phase: string;
+    daysToGoal: number;
+    nextSecondaryGoal?: {
+      role: string;
+      name: string;
+      eventDate: string;
+      distanceKm: number;
+      daysUntilEvent: number;
+    };
+  };
+  highlights: {
+    longRun?: {
+      day: string;
+      title: string;
+      durationMinutes: number;
+      intensityCategory: string;
+    };
+  };
+  plan?: WeeklyCoachPlan;
+};
+
 type UnknownRecord = Record<string, unknown>;
 
 function asRecord(value: unknown): UnknownRecord {
@@ -122,12 +172,53 @@ function asOptionalNumber(value: unknown): number | undefined {
   return typeof value === "number" && Number.isFinite(value) ? value : undefined;
 }
 
+const weekdayCodeByBackendValue: Record<string, string> = {
+  MONDAY: "MON",
+  TUESDAY: "TUE",
+  WEDNESDAY: "WED",
+  THURSDAY: "THU",
+  FRIDAY: "FRI",
+  SATURDAY: "SAT",
+  SUNDAY: "SUN",
+  MON: "MON",
+  TUE: "TUE",
+  WED: "WED",
+  THU: "THU",
+  FRI: "FRI",
+  SAT: "SAT",
+  SUN: "SUN",
+};
+
+function asWeekdayCode(value: unknown): string {
+  const day = asString(value).toUpperCase();
+  return weekdayCodeByBackendValue[day] ?? asString(value);
+}
+
 function asTrainingGoalCode(value: unknown): TrainingGoalCode | undefined {
   const code = asString(value);
 
   return trainingGoalOptions.some((option) => option.code === code)
     ? (code as TrainingGoalCode)
     : undefined;
+}
+
+function asBootstrapNextStep(value: unknown): PortalBootstrapResponse["nextStep"] {
+  const nextStep = asString(value);
+
+  if (nextStep === "connect_intervals") {
+    return "connect_training_source";
+  }
+
+  if (
+    nextStep === "connect_training_source" ||
+    nextStep === "complete_profile" ||
+    nextStep === "prepare_weekly_plan" ||
+    nextStep === "view_weekly_plan"
+  ) {
+    return nextStep;
+  }
+
+  return "" as PortalBootstrapResponse["nextStep"];
 }
 
 function getApiErrorCode(error: unknown): string | undefined {
@@ -152,23 +243,28 @@ export async function bootstrapPortal() {
   const record = asRecord(payload);
   const user = asRecord(record.user);
   const profile = asRecord(record.profile);
-  const intervals = asRecord(record.intervals);
+  const trainingProvider = asRecord(record.trainingProvider);
+  const legacyIntervals = asRecord(record.intervals);
   const weeklyPlan = asRecord(record.weeklyPlan);
   const athleteId = asString(record.athleteId);
   const userId = asString(user.userId);
-  const nextStep = asString(record.nextStep);
+  const nextStep = asBootstrapNextStep(record.nextStep);
   const targetWeekStartDate = asString(weeklyPlan.targetWeekStartDate);
   const weeklyPlanStatus = asString(weeklyPlan.status);
+  const readinessCapability =
+    asString(trainingProvider.readinessCapability) ||
+    (legacyIntervals.connected ? "full" : "unavailable");
 
   if (
     !athleteId ||
     !userId ||
     !targetWeekStartDate ||
+    !readinessCapability ||
     (weeklyPlanStatus !== "missing" &&
       weeklyPlanStatus !== "preparing" &&
       weeklyPlanStatus !== "failed" &&
       weeklyPlanStatus !== "ready") ||
-    (nextStep !== "connect_intervals" &&
+    (nextStep !== "connect_training_source" &&
       nextStep !== "complete_profile" &&
       nextStep !== "prepare_weekly_plan" &&
       nextStep !== "view_weekly_plan")
@@ -186,10 +282,18 @@ export async function bootstrapPortal() {
     profile: {
       isComplete: Boolean(profile.isComplete),
     },
-    intervals: {
-      status: asString(intervals.status),
-      connected: Boolean(intervals.connected),
-      providerAccountRef: asString(intervals.providerAccountRef) || undefined,
+    trainingProvider: {
+      activeProvider:
+        asString(trainingProvider.activeProvider) ||
+        (legacyIntervals.connected ? "intervals" : undefined),
+      connected: Boolean(trainingProvider.connected) || Boolean(legacyIntervals.connected),
+      activeProviderAccountRef:
+        asString(trainingProvider.activeProviderAccountRef) ||
+        asString(legacyIntervals.providerAccountRef) ||
+        undefined,
+      readinessCapability,
+      lastProvider: asString(trainingProvider.lastProvider) || undefined,
+      lastStatus: asString(trainingProvider.lastStatus) || undefined,
     },
     weeklyPlan: {
       targetWeekStartDate,
@@ -207,21 +311,38 @@ export async function retryCurrentUserWeeklyPlanGeneration() {
   });
 }
 
-export async function getIntervalsIntegrationStatus(athleteId: string) {
-  const payload = await apiRequest<unknown>(`/api/v1/integrations/intervals/${athleteId}`);
+export async function setCurrentUserWeeklyCoachSessionCompletion(
+  weekStartDate: string,
+  day: string,
+  completed: boolean,
+) {
+  await apiRequest<void>(`/api/v1/me/weekly-coach/weeks/${weekStartDate}/sessions/${day}/completion`, {
+    method: "PUT",
+    body: { completed },
+  });
+}
+
+export async function getTrainingProviderIntegrationStatus(provider: TrainingProviderId, athleteId: string) {
+  const payload = await apiRequest<unknown>(`/api/v1/integrations/${provider}/${athleteId}`);
   const record = asRecord(payload);
   const status = asString(record.status);
 
   return {
+    provider,
     connected: status.toUpperCase() === "CONNECTED",
     status,
     providerAccountRef: asString(record.providerAccountRef) || undefined,
     authorizationStateExpiresAt: asString(record.authorizationStateExpiresAt) || undefined,
-  } satisfies IntervalsIntegrationStatus;
+  } satisfies TrainingProviderIntegrationStatus;
 }
 
-export async function connectIntervals(athleteId: string) {
-  const payload = await apiRequest<unknown>(`/api/v1/integrations/intervals/${athleteId}/connect`, {
+export async function connectTrainingProvider(
+  provider: TrainingProviderId,
+  athleteId: string,
+  replaceExistingProvider = false,
+) {
+  const action = replaceExistingProvider ? "replace" : "connect";
+  const payload = await apiRequest<unknown>(`/api/v1/integrations/${provider}/${athleteId}/${action}`, {
     method: "POST",
   });
   const record = asRecord(payload);
@@ -232,8 +353,8 @@ export async function connectIntervals(athleteId: string) {
   };
 }
 
-export async function disconnectIntervals(athleteId: string) {
-  await apiRequest<void>(`/api/v1/integrations/intervals/${athleteId}`, {
+export async function disconnectTrainingProvider(provider: TrainingProviderId, athleteId: string) {
+  await apiRequest<void>(`/api/v1/integrations/${provider}/${athleteId}`, {
     method: "DELETE",
   });
 }
@@ -332,11 +453,13 @@ export async function getWeeklyCoachPlan(athleteId: string, weekStartDate: strin
       weekObjective: asString(plan.weekObjective),
       progressionNote: asString(plan.progressionNote),
       sessions: sessions.map((session) => ({
-        day: asString(session.day),
+        day: asWeekdayCode(session.day),
         modality: asString(session.modality),
         type: asString(session.type),
         title: asString(session.title),
         durationMinutes: typeof session.durationMinutes === "number" ? session.durationMinutes : 0,
+        completed: typeof session.completed === "boolean" ? session.completed : undefined,
+        role: asString(session.role) || undefined,
         intensityCategory: asString(session.intensityCategory),
         placementReason: asString(session.placementReason),
         notes: asString(session.notes) || undefined,
@@ -352,6 +475,128 @@ export async function getWeeklyCoachPlan(athleteId: string, weekStartDate: strin
       promptVersion: asString(llmMeta.promptVersion),
     },
   } satisfies WeeklyCoachPlan;
+}
+
+export async function getCurrentUserWeeklyCoachScreen(weekStartDate?: string) {
+  const search = weekStartDate ? `?weekStartDate=${encodeURIComponent(weekStartDate)}` : "";
+  const payload = await apiRequest<unknown>(`/api/v1/me/weekly-coach/screen${search}`);
+  const record = asRecord(payload);
+  const goal = asRecord(record.goal);
+  const primaryGoal = asRecord(goal.primaryGoal);
+  const nextSecondaryGoal = asRecord(goal.nextSecondaryGoal);
+  const highlights = asRecord(record.highlights);
+  const longRun = asRecord(highlights.longRun);
+  const planRecord = record.plan ? asRecord(record.plan) : undefined;
+  const planBody = planRecord ? asRecord(planRecord.plan) : undefined;
+  const summary = planRecord ? asRecord(planRecord.summary) : undefined;
+  const llmMeta = planRecord ? asRecord(planRecord.llmMeta) : undefined;
+  const sessions =
+    planBody && Array.isArray(planBody.sessions) ? planBody.sessions.map((item) => asRecord(item)) : [];
+  const justification =
+    planBody && Array.isArray(planBody.justification)
+      ? planBody.justification.filter((item): item is string => typeof item === "string")
+      : [];
+  const viewType = asString(record.viewType);
+
+  if (viewType !== "PLAN" && viewType !== "FUTURE_PREVIEW" && viewType !== "EMPTY") {
+    throw new Error("Missing weekly coach screen view type");
+  }
+
+  const selectedWeekStartDate = asString(record.selectedWeekStartDate);
+  const todayWeekStartDate = asString(record.todayWeekStartDate);
+
+  if (!selectedWeekStartDate || !todayWeekStartDate) {
+    throw new Error("Missing weekly coach screen dates");
+  }
+
+  return {
+    viewType,
+    selectedWeekStartDate,
+    todayWeekStartDate,
+    latestGeneratedWeekStartDate: asString(record.latestGeneratedWeekStartDate) || undefined,
+    futurePreviewWeekStartDate: asString(record.futurePreviewWeekStartDate) || undefined,
+    previousWeekStartDate: asString(record.previousWeekStartDate) || undefined,
+    nextWeekStartDate: asString(record.nextWeekStartDate) || undefined,
+    canGoPrevious: Boolean(record.canGoPrevious),
+    canGoNext: Boolean(record.canGoNext),
+    todaySessionDay: asWeekdayCode(record.todaySessionDay) || undefined,
+    upNextSessionDay: asWeekdayCode(record.upNextSessionDay) || undefined,
+    goal: record.goal
+      ? {
+          goalSummary: asString(goal.goalSummary),
+          primaryGoal: {
+            name: asString(primaryGoal.name),
+            eventDate: asString(primaryGoal.eventDate),
+            distanceKm: asOptionalNumber(primaryGoal.distanceKm) ?? 0,
+          },
+          phase: asString(goal.phase),
+          daysToGoal: asOptionalNumber(goal.daysToGoal) ?? 0,
+          nextSecondaryGoal: goal.nextSecondaryGoal
+            ? {
+                role: asString(nextSecondaryGoal.role),
+                name: asString(nextSecondaryGoal.name),
+                eventDate: asString(nextSecondaryGoal.eventDate),
+                distanceKm: asOptionalNumber(nextSecondaryGoal.distanceKm) ?? 0,
+                daysUntilEvent: asOptionalNumber(nextSecondaryGoal.daysUntilEvent) ?? 0,
+              }
+            : undefined,
+        }
+      : undefined,
+    highlights: {
+      longRun: highlights.longRun
+        ? {
+            day: asWeekdayCode(longRun.day),
+            title: asString(longRun.title),
+            durationMinutes: asOptionalNumber(longRun.durationMinutes) ?? 0,
+            intensityCategory: asString(longRun.intensityCategory),
+          }
+        : undefined,
+    },
+    plan: planRecord
+      ? ({
+          athleteId: "",
+          weekStartDate: asString(planRecord.weekStartDate),
+          planId: asString(planRecord.planId),
+          createdAt: asString(planRecord.createdAt),
+          updatedAt: asString(planRecord.updatedAt),
+          summary: {
+            readinessScore: asOptionalNumber(summary?.readinessScore),
+            fatigue: asOptionalNumber(summary?.fatigue),
+            sleepHours: asOptionalNumber(summary?.sleepHours),
+            last7dDistanceKm: asOptionalNumber(summary?.last7dDistanceKm),
+            phase: asString(summary?.phase) || undefined,
+            daysToGoal: asOptionalNumber(summary?.daysToGoal),
+          },
+          plan: {
+            schemaVersion: asString(planBody?.schemaVersion),
+            weekType: asString(planBody?.weekType),
+            weekObjective: asString(planBody?.weekObjective),
+            progressionNote: asString(planBody?.progressionNote),
+            sessions: sessions.map((session) => ({
+              day: asWeekdayCode(session.day),
+              modality: asString(session.modality),
+              type: asString(session.type),
+              title: asString(session.title),
+              durationMinutes: typeof session.durationMinutes === "number" ? session.durationMinutes : 0,
+              completed: typeof session.completed === "boolean" ? session.completed : undefined,
+              role: asString(session.role) || undefined,
+              intensityCategory: asString(session.intensityCategory),
+              placementReason: asString(session.placementReason),
+              notes: asString(session.notes) || undefined,
+              strengthFocus: Array.isArray(session.strengthFocus)
+                ? session.strengthFocus.filter((item): item is string => typeof item === "string")
+                : undefined,
+            })),
+            justification,
+          },
+          llmMeta: {
+            provider: asString(llmMeta?.provider),
+            model: asString(llmMeta?.model),
+            promptVersion: asString(llmMeta?.promptVersion),
+          },
+        } satisfies WeeklyCoachPlan)
+      : undefined,
+  } satisfies CurrentUserWeeklyCoachScreen;
 }
 
 export function isProfileComplete(profile: AthleteProfile | undefined) {

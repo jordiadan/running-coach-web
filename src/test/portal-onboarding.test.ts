@@ -15,15 +15,16 @@ function buildBootstrap(
     profile: {
       isComplete: false,
     },
-    intervals: {
-      status: "absent",
+    trainingProvider: {
       connected: false,
+      readinessCapability: "unavailable",
     },
     weeklyPlan: {
       targetWeekStartDate: "2026-03-23",
       hasPlan: false,
+      status: "missing",
     },
-    nextStep: "connect_intervals",
+    nextStep: "connect_training_source",
     ...overrides,
   };
 }
@@ -33,7 +34,7 @@ describe("deriveOnboardingState", () => {
     const state = deriveOnboardingState(
       buildBootstrap({
         profile: { isComplete: true },
-        nextStep: "connect_intervals",
+        nextStep: "connect_training_source",
       }),
     );
 
@@ -50,10 +51,11 @@ describe("deriveOnboardingState", () => {
   it("marks connect complete and profile current when backend asks for profile completion", () => {
     const state = deriveOnboardingState(
       buildBootstrap({
-        intervals: {
-          status: "connected",
+        trainingProvider: {
+          activeProvider: "intervals",
           connected: true,
-          providerAccountRef: "i372001",
+          activeProviderAccountRef: "i372001",
+          readinessCapability: "full",
         },
         nextStep: "complete_profile",
       }),
@@ -71,10 +73,11 @@ describe("deriveOnboardingState", () => {
   it("uses the ready step when the backend is preparing the weekly plan", () => {
     const state = deriveOnboardingState(
       buildBootstrap({
-        intervals: {
-          status: "connected",
+        trainingProvider: {
+          activeProvider: "intervals",
           connected: true,
-          providerAccountRef: "i372001",
+          activeProviderAccountRef: "i372001",
+          readinessCapability: "full",
         },
         profile: { isComplete: true },
         nextStep: "prepare_weekly_plan",
@@ -99,10 +102,11 @@ describe("deriveOnboardingState", () => {
   it("uses a success title when the weekly plan is ready to view", () => {
     const state = deriveOnboardingState(
       buildBootstrap({
-        intervals: {
-          status: "connected",
+        trainingProvider: {
+          activeProvider: "intervals",
           connected: true,
-          providerAccountRef: "i372001",
+          activeProviderAccountRef: "i372001",
+          readinessCapability: "full",
         },
         profile: { isComplete: true },
         weeklyPlan: {
