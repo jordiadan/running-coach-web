@@ -520,20 +520,20 @@ function TodayDoneCard({
 }
 
 function WeekMetrics({
-  last7dDistanceKm,
+  completedWeekDistanceKm,
   longRunMinutes,
   sleepHours,
 }: {
-  last7dDistanceKm: number | undefined;
+  completedWeekDistanceKm: number | undefined;
   longRunMinutes: number | undefined;
   sleepHours: number | undefined;
 }) {
   const sleepStatus = deriveSleepStatus(sleepHours);
   const metrics = [
     {
-      label: "Volume",
-      value: formatDecimal(last7dDistanceKm),
-      unit: typeof last7dDistanceKm === "number" ? "km" : "",
+      label: "Done",
+      value: formatDecimal(completedWeekDistanceKm),
+      unit: typeof completedWeekDistanceKm === "number" ? "km" : "",
       valueClassName: "text-foreground",
     },
     {
@@ -1274,7 +1274,7 @@ export default function WeeklyPlanScreen({
         </motion.div>
 
         <WeekMetrics
-          last7dDistanceKm={plan.summary.last7dDistanceKm}
+          completedWeekDistanceKm={plan.summary.completedWeekDistanceKm ?? plan.summary.last7dDistanceKm}
           longRunMinutes={screen?.highlights.longRun?.durationMinutes}
           sleepHours={plan.summary.sleepHours}
         />
