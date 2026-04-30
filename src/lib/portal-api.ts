@@ -90,6 +90,7 @@ export type WeeklyCoachPlan = {
     fatigue?: number;
     sleepHours?: number;
     last7dDistanceKm?: number;
+    completedWeekDistanceKm?: number;
     phase?: string;
     daysToGoal?: number;
   };
@@ -444,6 +445,7 @@ export async function getWeeklyCoachPlan(athleteId: string, weekStartDate: strin
       fatigue: asOptionalNumber(summary.fatigue),
       sleepHours: asOptionalNumber(summary.sleepHours),
       last7dDistanceKm: asOptionalNumber(summary.last7dDistanceKm),
+      completedWeekDistanceKm: asOptionalNumber(summary.completedWeekDistanceKm),
       phase: asString(summary.phase) || undefined,
       daysToGoal: asOptionalNumber(summary.daysToGoal),
     },
@@ -564,6 +566,7 @@ export async function getCurrentUserWeeklyCoachScreen(weekStartDate?: string) {
             fatigue: asOptionalNumber(summary?.fatigue),
             sleepHours: asOptionalNumber(summary?.sleepHours),
             last7dDistanceKm: asOptionalNumber(summary?.last7dDistanceKm),
+            completedWeekDistanceKm: asOptionalNumber(summary?.completedWeekDistanceKm),
             phase: asString(summary?.phase) || undefined,
             daysToGoal: asOptionalNumber(summary?.daysToGoal),
           },

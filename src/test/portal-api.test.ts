@@ -109,6 +109,7 @@ describe("portal-api weekly coach helpers", () => {
         fatigue: 6,
         sleepHours: 6.5,
         last7dDistanceKm: 39.4,
+        completedWeekDistanceKm: 11.2,
         phase: "BUILD",
         daysToGoal: 321,
       },
@@ -135,6 +136,7 @@ describe("portal-api weekly coach helpers", () => {
         fatigue: 6,
         sleepHours: 6.5,
         last7dDistanceKm: 39.4,
+        completedWeekDistanceKm: 11.2,
         phase: "BUILD",
         daysToGoal: 321,
       },
@@ -212,6 +214,7 @@ describe("portal-api weekly coach helpers", () => {
           fatigue: 3,
           sleepHours: 7.9,
           last7dDistanceKm: 45,
+          completedWeekDistanceKm: 10.5,
           phase: "BUILD",
           daysToGoal: 101,
         },
@@ -250,6 +253,7 @@ describe("portal-api weekly coach helpers", () => {
         planId: "athlete-1:2026-03-23",
         summary: {
           readinessScore: 93,
+          completedWeekDistanceKm: 10.5,
           phase: "BUILD",
         },
         plan: {
