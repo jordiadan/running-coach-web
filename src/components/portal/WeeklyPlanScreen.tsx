@@ -153,6 +153,21 @@ function formatDecimal(value: number | undefined) {
   return value % 1 === 0 ? String(value) : value.toFixed(1);
 }
 
+function formatWeekRangeLabel(start: Date, end: Date) {
+  const sameMonth = format(start, "MMM yyyy") === format(end, "MMM yyyy");
+  const sameYear = format(start, "yyyy") === format(end, "yyyy");
+
+  if (sameMonth) {
+    return `${format(start, "MMM d")} – ${format(end, "d, yyyy")}`;
+  }
+
+  if (sameYear) {
+    return `${format(start, "MMM d")} – ${format(end, "MMM d, yyyy")}`;
+  }
+
+  return `${format(start, "MMM d, yyyy")} – ${format(end, "MMM d, yyyy")}`;
+}
+
 function boundedPercent(value: number, max: number) {
   if (!Number.isFinite(value) || !Number.isFinite(max) || max <= 0) return 0;
   return Math.max(0, Math.min(100, (value / max) * 100));
@@ -1125,7 +1140,7 @@ export default function WeeklyPlanScreen({
     const start = parseISO(selectedWeekStartDate);
     const end = new Date(start);
     end.setDate(end.getDate() + 6);
-    return `${format(start, "MMM d")} – ${format(end, "d")}`;
+    return formatWeekRangeLabel(start, end);
   }, [selectedWeekStartDate]);
 
   const toggleComplete = (day: string) => {
