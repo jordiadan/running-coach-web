@@ -150,6 +150,7 @@ describe("WeeklyPlanScreen race goal outcome", () => {
       screen.getByText("Goal skipped. This race will not guide recovery or race preparation."),
     ).toBeInTheDocument();
     expect(screen.queryByText("Race completed. Recovery-first training can continue.")).not.toBeInTheDocument();
+    expect(screen.queryByText(/day 1 of 14/i)).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /mark completed/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /skip goal/i })).not.toBeInTheDocument();
   });

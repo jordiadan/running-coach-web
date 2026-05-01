@@ -714,8 +714,10 @@ function RaceGoalCard({
   const activePhaseIndex = raceProgressPhases.findIndex((phase) => phase.name === activePhase);
   const normalizedPhaseIndex = activePhaseIndex === -1 ? 0 : activePhaseIndex;
   const showPhaseTimeline = timeline.state === "UPCOMING" || timeline.state === "RACE_WEEK";
+  const outcomeStatus = goal.goalOutcomeStatus ?? "UNKNOWN";
   const showRecoveryWindow =
     timeline.state === "POST_GOAL" &&
+    outcomeStatus !== "SKIPPED" &&
     typeof goal.postGoalRecoveryDay === "number" &&
     typeof goal.postGoalWindowDays === "number" &&
     goal.postGoalWindowDays > 0;
@@ -726,7 +728,6 @@ function RaceGoalCard({
   const isRaceDay = timeline.state === "RACE_DAY";
   const isPastGoal = timeline.state === "EXPIRED" || timeline.state === "LEGACY_PAST";
   const GoalIcon = isPostGoal ? Heart : Flag;
-  const outcomeStatus = goal.goalOutcomeStatus ?? "UNKNOWN";
   const canSetOutcome = canSetGoalOutcome(goal, timeline);
   const badgeLabel =
     outcomeStatus === "COMPLETED" ? "Completed" : outcomeStatus === "SKIPPED" ? "Skipped" : timeline.badgeLabel;
