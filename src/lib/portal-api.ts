@@ -123,6 +123,8 @@ export type GoalTimelineState =
   | "POST_GOAL"
   | "EXPIRED";
 
+export type GoalOutcomeStatus = "UNKNOWN" | "COMPLETED" | "SKIPPED";
+
 export type CurrentUserWeeklyCoachScreen = {
   viewType: CurrentUserWeeklyCoachScreenViewType;
   selectedWeekStartDate: string;
@@ -149,6 +151,7 @@ export type CurrentUserWeeklyCoachScreen = {
     daysSinceGoal?: number;
     postGoalWindowDays?: number;
     postGoalRecoveryDay?: number;
+    goalOutcomeStatus?: GoalOutcomeStatus;
     nextSecondaryGoal?: {
       role: string;
       name: string;
@@ -201,6 +204,16 @@ function asGoalTimelineState(value: unknown): GoalTimelineState | undefined {
     state === "EXPIRED"
   ) {
     return state;
+  }
+
+  return undefined;
+}
+
+function asGoalOutcomeStatus(value: unknown): GoalOutcomeStatus | undefined {
+  const status = asString(value);
+
+  if (status === "UNKNOWN" || status === "COMPLETED" || status === "SKIPPED") {
+    return status;
   }
 
   return undefined;
@@ -353,6 +366,13 @@ export async function setCurrentUserWeeklyCoachSessionCompletion(
   await apiRequest<void>(`/api/v1/me/weekly-coach/weeks/${weekStartDate}/sessions/${day}/completion`, {
     method: "PUT",
     body: { completed },
+  });
+}
+
+export async function setCurrentUserRaceGoalOutcome(outcome: Exclude<GoalOutcomeStatus, "UNKNOWN">) {
+  await apiRequest<void>("/api/v1/me/race-goals/current/outcome", {
+    method: "PUT",
+    body: { outcome },
   });
 }
 
@@ -576,6 +596,7 @@ export async function getCurrentUserWeeklyCoachScreen(weekStartDate?: string) {
           daysSinceGoal: asOptionalNumber(goal.daysSinceGoal),
           postGoalWindowDays: asOptionalNumber(goal.postGoalWindowDays),
           postGoalRecoveryDay: asOptionalNumber(goal.postGoalRecoveryDay),
+          goalOutcomeStatus: asGoalOutcomeStatus(goal.goalOutcomeStatus),
           nextSecondaryGoal: goal.nextSecondaryGoal
             ? {
                 role: asString(nextSecondaryGoal.role),
