@@ -93,6 +93,11 @@ export type WeeklyCoachPlan = {
     completedWeekDistanceKm?: number;
     phase?: string;
     daysToGoal?: number;
+    goalTimelineState?: GoalTimelineState;
+    daysUntilGoal?: number;
+    daysSinceGoal?: number;
+    postGoalWindowDays?: number;
+    postGoalRecoveryDay?: number;
   };
   plan: {
     schemaVersion: string;
@@ -110,6 +115,13 @@ export type WeeklyCoachPlan = {
 };
 
 export type CurrentUserWeeklyCoachScreenViewType = "PLAN" | "FUTURE_PREVIEW" | "EMPTY";
+
+export type GoalTimelineState =
+  | "UPCOMING"
+  | "RACE_WEEK"
+  | "RACE_DAY"
+  | "POST_GOAL"
+  | "EXPIRED";
 
 export type CurrentUserWeeklyCoachScreen = {
   viewType: CurrentUserWeeklyCoachScreenViewType;
@@ -132,6 +144,11 @@ export type CurrentUserWeeklyCoachScreen = {
     };
     phase: string;
     daysToGoal: number;
+    goalTimelineState?: GoalTimelineState;
+    daysUntilGoal?: number;
+    daysSinceGoal?: number;
+    postGoalWindowDays?: number;
+    postGoalRecoveryDay?: number;
     nextSecondaryGoal?: {
       role: string;
       name: string;
@@ -171,6 +188,22 @@ function asNumberOrBlank(value: unknown): number | "" {
 
 function asOptionalNumber(value: unknown): number | undefined {
   return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+function asGoalTimelineState(value: unknown): GoalTimelineState | undefined {
+  const state = asString(value);
+
+  if (
+    state === "UPCOMING" ||
+    state === "RACE_WEEK" ||
+    state === "RACE_DAY" ||
+    state === "POST_GOAL" ||
+    state === "EXPIRED"
+  ) {
+    return state;
+  }
+
+  return undefined;
 }
 
 const weekdayCodeByBackendValue: Record<string, string> = {
@@ -448,6 +481,11 @@ export async function getWeeklyCoachPlan(athleteId: string, weekStartDate: strin
       completedWeekDistanceKm: asOptionalNumber(summary.completedWeekDistanceKm),
       phase: asString(summary.phase) || undefined,
       daysToGoal: asOptionalNumber(summary.daysToGoal),
+      goalTimelineState: asGoalTimelineState(summary.goalTimelineState),
+      daysUntilGoal: asOptionalNumber(summary.daysUntilGoal),
+      daysSinceGoal: asOptionalNumber(summary.daysSinceGoal),
+      postGoalWindowDays: asOptionalNumber(summary.postGoalWindowDays),
+      postGoalRecoveryDay: asOptionalNumber(summary.postGoalRecoveryDay),
     },
     plan: {
       schemaVersion: asString(plan.schemaVersion),
@@ -533,6 +571,11 @@ export async function getCurrentUserWeeklyCoachScreen(weekStartDate?: string) {
           },
           phase: asString(goal.phase),
           daysToGoal: asOptionalNumber(goal.daysToGoal) ?? 0,
+          goalTimelineState: asGoalTimelineState(goal.goalTimelineState),
+          daysUntilGoal: asOptionalNumber(goal.daysUntilGoal),
+          daysSinceGoal: asOptionalNumber(goal.daysSinceGoal),
+          postGoalWindowDays: asOptionalNumber(goal.postGoalWindowDays),
+          postGoalRecoveryDay: asOptionalNumber(goal.postGoalRecoveryDay),
           nextSecondaryGoal: goal.nextSecondaryGoal
             ? {
                 role: asString(nextSecondaryGoal.role),
@@ -569,6 +612,11 @@ export async function getCurrentUserWeeklyCoachScreen(weekStartDate?: string) {
             completedWeekDistanceKm: asOptionalNumber(summary?.completedWeekDistanceKm),
             phase: asString(summary?.phase) || undefined,
             daysToGoal: asOptionalNumber(summary?.daysToGoal),
+            goalTimelineState: asGoalTimelineState(summary?.goalTimelineState),
+            daysUntilGoal: asOptionalNumber(summary?.daysUntilGoal),
+            daysSinceGoal: asOptionalNumber(summary?.daysSinceGoal),
+            postGoalWindowDays: asOptionalNumber(summary?.postGoalWindowDays),
+            postGoalRecoveryDay: asOptionalNumber(summary?.postGoalRecoveryDay),
           },
           plan: {
             schemaVersion: asString(planBody?.schemaVersion),

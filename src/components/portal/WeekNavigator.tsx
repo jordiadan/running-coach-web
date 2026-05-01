@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 type WeekNavigatorProps = {
@@ -24,12 +23,20 @@ export default function WeekNavigator({
   canGoNext,
   showReturnToCurrent,
 }: WeekNavigatorProps) {
+  const isCurrentWeek =
+    currentWeekOffsetLabel === "Current" || currentWeekOffsetLabel === "This week";
+  const secondaryLabel = isCurrentWeek
+    ? "This week"
+    : currentWeekOffsetLabel === "Future"
+      ? "Future"
+      : currentWeekOffsetLabel;
+
   return (
     <motion.div
-      className="flex items-center justify-between gap-2"
-      initial={{ opacity: 0, y: -10 }}
+      className="flex items-center justify-between rounded-xl border border-border bg-card/40 px-1.5 py-1"
+      initial={{ opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
+      transition={{ delay: 0.08 }}
     >
       <Button
         type="button"
@@ -42,34 +49,22 @@ export default function WeekNavigator({
         <ChevronLeft className="h-4 w-4" />
       </Button>
 
-      <div className="flex items-center gap-2">
-        <span className="text-sm font-medium text-foreground">{weekLabel}</span>
-        {currentWeekOffsetLabel === "Current" || currentWeekOffsetLabel === "This week" ? (
-          <Badge
-            variant="secondary"
-            className="h-4 bg-primary/10 px-1.5 py-0 text-[10px] text-primary border-primary/20"
-          >
-            This week
-          </Badge>
-        ) : null}
-        {currentWeekOffsetLabel === "Future" ? (
-          <Badge
-            variant="outline"
-            className="h-4 px-1.5 py-0 text-[10px] text-muted-foreground"
-          >
-            Future
-          </Badge>
-        ) : null}
-        {currentWeekOffsetLabel !== "Current" &&
-        currentWeekOffsetLabel !== "This week" &&
-        currentWeekOffsetLabel !== "Future" ? (
-          <Badge
-            variant="outline"
-            className="h-4 px-1.5 py-0 text-[10px] text-muted-foreground"
-          >
-            {currentWeekOffsetLabel}
-          </Badge>
-        ) : null}
+      <div className="flex min-w-0 items-center gap-2 text-[13px]">
+        <span
+          className={`truncate font-medium tabular-nums ${
+            isCurrentWeek ? "text-foreground" : "text-muted-foreground"
+          }`}
+        >
+          {weekLabel}
+        </span>
+        <span
+          className={`inline-flex shrink-0 items-center gap-1 text-[10px] font-semibold uppercase tracking-widest ${
+            isCurrentWeek ? "text-primary" : "text-muted-foreground"
+          }`}
+        >
+          {isCurrentWeek ? <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" /> : null}
+          {secondaryLabel}
+        </span>
       </div>
 
       <div className="flex items-center gap-1">
