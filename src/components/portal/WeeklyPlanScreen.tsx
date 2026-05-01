@@ -20,10 +20,13 @@ import {
   Zap,
 } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ApiError } from "@/lib/api";
 import {
   getCurrentUserWeeklyCoachScreen,
+  setCurrentUserRaceGoalOutcome,
   setCurrentUserWeeklyCoachSessionCompletion,
   type CurrentUserWeeklyCoachScreen,
+  type GoalOutcomeStatus,
   type GoalTimelineState,
   type WeeklyCoachSession,
 } from "@/lib/portal-api";
@@ -124,6 +127,8 @@ type GoalTimelineDisplay = {
   };
 };
 
+type GoalOutcomeAction = Exclude<GoalOutcomeStatus, "UNKNOWN">;
+
 const screenShellClassName = "mx-auto max-w-2xl space-y-4";
 
 function formatWeekType(weekType: string) {
@@ -217,6 +222,24 @@ function deriveGoalTimelineDisplay(goal: CurrentUserWeeklyCoachScreen["goal"]): 
     badgeClassName: badgeClassNames[state],
     dayLabel,
   };
+}
+
+function canSetGoalOutcome(goal: CurrentUserWeeklyCoachScreen["goal"], timeline: GoalTimelineDisplay) {
+  if (!goal) return false;
+
+  const outcomeStatus = goal.goalOutcomeStatus ?? "UNKNOWN";
+  return (
+    outcomeStatus === "UNKNOWN" &&
+    (timeline.state === "RACE_DAY" || timeline.state === "POST_GOAL" || timeline.state === "EXPIRED")
+  );
+}
+
+function goalOutcomeErrorMessage(error: unknown) {
+  if (error instanceof ApiError && error.status === 409) {
+    return "Race outcome can only be set on or after race day.";
+  }
+
+  return "Could not update race outcome. Try again.";
 }
 
 function deriveSleepStatus(sleepHours: number | undefined) {
@@ -670,9 +693,17 @@ function WeekMetrics({
 function RaceGoalCard({
   goal,
   raceGoalDateLabel,
+  outcomePending,
+  outcomeError,
+  outcomePendingAction,
+  onSetOutcome,
 }: {
   goal: CurrentUserWeeklyCoachScreen["goal"];
   raceGoalDateLabel: string | undefined;
+  outcomePending: boolean;
+  outcomeError: string | undefined;
+  outcomePendingAction: GoalOutcomeAction | null;
+  onSetOutcome: (outcome: GoalOutcomeAction) => void;
 }) {
   if (!goal) return null;
 
@@ -695,6 +726,16 @@ function RaceGoalCard({
   const isRaceDay = timeline.state === "RACE_DAY";
   const isPastGoal = timeline.state === "EXPIRED" || timeline.state === "LEGACY_PAST";
   const GoalIcon = isPostGoal ? Heart : Flag;
+  const outcomeStatus = goal.goalOutcomeStatus ?? "UNKNOWN";
+  const canSetOutcome = canSetGoalOutcome(goal, timeline);
+  const badgeLabel =
+    outcomeStatus === "COMPLETED" ? "Completed" : outcomeStatus === "SKIPPED" ? "Skipped" : timeline.badgeLabel;
+  const outcomeCopy =
+    outcomeStatus === "COMPLETED"
+      ? "Race completed. Recovery-first training can continue."
+      : outcomeStatus === "SKIPPED"
+        ? "Goal skipped. This race will not guide recovery or race preparation."
+        : undefined;
 
   return (
     <motion.section
@@ -709,7 +750,7 @@ function RaceGoalCard({
           {timeline.sectionLabel}
         </span>
         <span className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${timeline.badgeClassName}`}>
-          {timeline.badgeLabel}
+          {badgeLabel}
         </span>
       </div>
 
@@ -801,7 +842,16 @@ function RaceGoalCard({
         ) : null}
 
         <div className="flex items-center gap-2 border-t border-border bg-muted/20 px-4 py-2.5">
-          {timeline.state === "UPCOMING" || timeline.state === "RACE_WEEK" ? (
+          {outcomeCopy ? (
+            <>
+              {outcomeStatus === "COMPLETED" ? (
+                <Check className="h-3 w-3 shrink-0 text-primary" />
+              ) : (
+                <CalendarOff className="h-3 w-3 shrink-0 text-muted-foreground" />
+              )}
+              <span className="text-[11px] text-muted-foreground">{outcomeCopy}</span>
+            </>
+          ) : timeline.state === "UPCOMING" || timeline.state === "RACE_WEEK" ? (
             <>
               <TrendingUp className="h-3 w-3 shrink-0 text-primary" />
               <span className="text-[11px] text-muted-foreground">
@@ -826,6 +876,41 @@ function RaceGoalCard({
             </>
           )}
         </div>
+
+        {canSetOutcome ? (
+          <div className="flex flex-wrap items-center gap-2 border-t border-border px-4 py-2.5">
+            <Button
+              type="button"
+              size="sm"
+              className="h-8 px-3 text-xs"
+              onClick={() => onSetOutcome("COMPLETED")}
+              disabled={outcomePending}
+            >
+              {outcomePending && outcomePendingAction === "COMPLETED" ? (
+                <RefreshCcw className="mr-1.5 h-3 w-3 animate-spin" />
+              ) : null}
+              Mark completed
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-8 px-3 text-xs"
+              onClick={() => onSetOutcome("SKIPPED")}
+              disabled={outcomePending}
+            >
+              {outcomePending && outcomePendingAction === "SKIPPED" ? (
+                <RefreshCcw className="mr-1.5 h-3 w-3 animate-spin" />
+              ) : null}
+              Skip goal
+            </Button>
+            {outcomeError ? <p className="basis-full text-[11px] text-destructive">{outcomeError}</p> : null}
+          </div>
+        ) : outcomeError ? (
+          <div className="border-t border-border px-4 py-2.5">
+            <p className="text-[11px] text-destructive">{outcomeError}</p>
+          </div>
+        ) : null}
       </div>
     </motion.section>
   );
@@ -1040,6 +1125,8 @@ export default function WeeklyPlanScreen({
   const [selectedWeekStartDate, setSelectedWeekStartDate] = useState(targetWeekStartDate);
   const [expandedDay, setExpandedDay] = useState<string | null>(null);
   const [justCompletedDay, setJustCompletedDay] = useState<string | null>(null);
+  const [outcomePendingAction, setOutcomePendingAction] = useState<GoalOutcomeAction | null>(null);
+  const [outcomeError, setOutcomeError] = useState<string | undefined>(undefined);
   const sessionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const reduceMotion = useReducedMotion();
   const queryClient = useQueryClient();
@@ -1113,8 +1200,28 @@ export default function WeeklyPlanScreen({
     },
   });
 
+  const raceGoalOutcomeMutation = useMutation({
+    mutationFn: (outcome: GoalOutcomeAction) => setCurrentUserRaceGoalOutcome(outcome),
+    onMutate: (outcome) => {
+      setOutcomePendingAction(outcome);
+      setOutcomeError(undefined);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["portal", "weekly-coach-screen", selectedWeekStartDate],
+      });
+    },
+    onError: (error) => {
+      setOutcomeError(goalOutcomeErrorMessage(error));
+    },
+    onSettled: () => {
+      setOutcomePendingAction(null);
+    },
+  });
+
   useEffect(() => {
     setExpandedDay(null);
+    setOutcomeError(undefined);
   }, [selectedWeekStartDate]);
 
   const screen = screenQuery.data;
@@ -1436,7 +1543,14 @@ export default function WeeklyPlanScreen({
           sleepHours={plan.summary.sleepHours}
         />
 
-        <RaceGoalCard goal={goal} raceGoalDateLabel={raceGoalDateLabel} />
+        <RaceGoalCard
+          goal={goal}
+          raceGoalDateLabel={raceGoalDateLabel}
+          outcomePending={raceGoalOutcomeMutation.isPending}
+          outcomeError={outcomeError}
+          outcomePendingAction={outcomePendingAction}
+          onSetOutcome={(outcome) => raceGoalOutcomeMutation.mutate(outcome)}
+        />
 
         <ScheduleList
           sessions={sessions}

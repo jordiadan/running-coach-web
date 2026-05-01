@@ -6,6 +6,7 @@ import {
   getAthleteProfile,
   getWeeklyCoachPlan,
   retryCurrentUserWeeklyPlanGeneration,
+  setCurrentUserRaceGoalOutcome,
   setCurrentUserWeeklyCoachSessionCompletion,
   updateAthleteProfile,
 } from "@/lib/portal-api";
@@ -183,6 +184,7 @@ describe("portal-api weekly coach helpers", () => {
         daysSinceGoal: null,
         postGoalWindowDays: 14,
         postGoalRecoveryDay: null,
+        goalOutcomeStatus: "UNKNOWN",
         nextSecondaryGoal: {
           role: "TUNE_UP",
           name: "10K tune-up",
@@ -267,6 +269,7 @@ describe("portal-api weekly coach helpers", () => {
         daysSinceGoal: undefined,
         postGoalWindowDays: 14,
         postGoalRecoveryDay: undefined,
+        goalOutcomeStatus: "UNKNOWN",
       },
       highlights: {
         longRun: {
@@ -366,6 +369,7 @@ describe("portal-api weekly coach helpers", () => {
         daysSinceGoal: 1,
         postGoalWindowDays: 14,
         postGoalRecoveryDay: 1,
+        goalOutcomeStatus: "COMPLETED",
       },
       highlights: {},
       plan: {
@@ -405,6 +409,7 @@ describe("portal-api weekly coach helpers", () => {
         daysSinceGoal: 1,
         postGoalWindowDays: 14,
         postGoalRecoveryDay: 1,
+        goalOutcomeStatus: "COMPLETED",
       },
       plan: {
         summary: {
@@ -499,5 +504,25 @@ describe("portal-api weekly coach helpers", () => {
         body: { completed: false },
       },
     );
+  });
+
+  it("sets the current race goal outcome", async () => {
+    apiRequestMock.mockResolvedValueOnce(undefined);
+
+    await setCurrentUserRaceGoalOutcome("COMPLETED");
+
+    expect(apiRequestMock).toHaveBeenCalledWith("/api/v1/me/race-goals/current/outcome", {
+      method: "PUT",
+      body: { outcome: "COMPLETED" },
+    });
+
+    apiRequestMock.mockResolvedValueOnce(undefined);
+
+    await setCurrentUserRaceGoalOutcome("SKIPPED");
+
+    expect(apiRequestMock).toHaveBeenLastCalledWith("/api/v1/me/race-goals/current/outcome", {
+      method: "PUT",
+      body: { outcome: "SKIPPED" },
+    });
   });
 });
