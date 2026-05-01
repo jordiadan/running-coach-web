@@ -9,6 +9,7 @@ import {
   ChevronDown,
   Clock,
   Dumbbell,
+  Heart,
   MessageCircle,
   Moon,
   RefreshCcw,
@@ -23,6 +24,7 @@ import {
   getCurrentUserWeeklyCoachScreen,
   setCurrentUserWeeklyCoachSessionCompletion,
   type CurrentUserWeeklyCoachScreen,
+  type GoalTimelineState,
   type WeeklyCoachSession,
 } from "@/lib/portal-api";
 import { Badge } from "@/components/ui/badge";
@@ -109,6 +111,19 @@ const raceProgressPhases = [
   { name: "TAPER", weeks: [21, 22] },
 ] as const;
 
+type GoalTimelineDisplayState = GoalTimelineState | "LEGACY_PAST";
+
+type GoalTimelineDisplay = {
+  state: GoalTimelineDisplayState;
+  sectionLabel: string;
+  badgeLabel: string;
+  badgeClassName: string;
+  dayLabel?: {
+    value: string;
+    unit?: string;
+  };
+};
+
 const screenShellClassName = "mx-auto max-w-2xl space-y-4";
 
 function formatWeekType(weekType: string) {
@@ -136,6 +151,72 @@ function dayCodeForDate(date: Date) {
 function formatDecimal(value: number | undefined) {
   if (typeof value !== "number" || !Number.isFinite(value)) return "—";
   return value % 1 === 0 ? String(value) : value.toFixed(1);
+}
+
+function formatWeekRangeLabel(start: Date, end: Date) {
+  const sameMonth = format(start, "MMM yyyy") === format(end, "MMM yyyy");
+  const sameYear = format(start, "yyyy") === format(end, "yyyy");
+
+  if (sameMonth) {
+    return `${format(start, "MMM d")} – ${format(end, "d, yyyy")}`;
+  }
+
+  if (sameYear) {
+    return `${format(start, "MMM d")} – ${format(end, "MMM d, yyyy")}`;
+  }
+
+  return `${format(start, "MMM d, yyyy")} – ${format(end, "MMM d, yyyy")}`;
+}
+
+function boundedPercent(value: number, max: number) {
+  if (!Number.isFinite(value) || !Number.isFinite(max) || max <= 0) return 0;
+  return Math.max(0, Math.min(100, (value / max) * 100));
+}
+
+function deriveGoalTimelineDisplay(goal: CurrentUserWeeklyCoachScreen["goal"]): GoalTimelineDisplay | undefined {
+  if (!goal) return undefined;
+
+  const legacyDaysToGoal = Number.isFinite(goal.daysToGoal) ? goal.daysToGoal : undefined;
+  const state: GoalTimelineDisplayState =
+    goal.goalTimelineState ?? (typeof legacyDaysToGoal === "number" && legacyDaysToGoal < 0 ? "LEGACY_PAST" : "UPCOMING");
+
+  const futureDays = goal.daysUntilGoal ?? (typeof legacyDaysToGoal === "number" ? Math.max(0, legacyDaysToGoal) : undefined);
+  const pastDays = goal.daysSinceGoal ?? (typeof legacyDaysToGoal === "number" && legacyDaysToGoal < 0 ? Math.abs(legacyDaysToGoal) : undefined);
+
+  const badgeClassNames: Record<GoalTimelineDisplayState, string> = {
+    UPCOMING: "border-border bg-muted/40 text-muted-foreground",
+    RACE_WEEK: "border-accent/20 bg-accent/10 text-accent",
+    RACE_DAY: "border-primary/20 bg-primary/10 text-primary",
+    POST_GOAL: "border-primary/20 bg-primary/10 text-primary",
+    EXPIRED: "border-muted-foreground/20 bg-muted/50 text-muted-foreground",
+    LEGACY_PAST: "border-accent/20 bg-accent/10 text-accent",
+  };
+
+  const meta: Record<GoalTimelineDisplayState, Pick<GoalTimelineDisplay, "sectionLabel" | "badgeLabel">> = {
+    UPCOMING: { sectionLabel: "Road to race", badgeLabel: "Upcoming" },
+    RACE_WEEK: { sectionLabel: "Road to race", badgeLabel: "Race week" },
+    RACE_DAY: { sectionLabel: "Today is the day", badgeLabel: "Race day" },
+    POST_GOAL: { sectionLabel: "Post-race", badgeLabel: "Recovery window" },
+    EXPIRED: { sectionLabel: "Past goal", badgeLabel: "Expired" },
+    LEGACY_PAST: { sectionLabel: "Past goal", badgeLabel: "Result not logged" },
+  };
+
+  const dayLabel = (() => {
+    if (state === "RACE_DAY") return { value: "Today" };
+    if (state === "POST_GOAL" || state === "EXPIRED" || state === "LEGACY_PAST") {
+      return typeof pastDays === "number" ? { value: `${pastDays}d`, unit: "ago" } : undefined;
+    }
+
+    return typeof futureDays === "number" ? { value: `${futureDays}`, unit: "d to go" } : undefined;
+  })();
+
+  return {
+    state,
+    sectionLabel: meta[state].sectionLabel,
+    badgeLabel: meta[state].badgeLabel,
+    badgeClassName: badgeClassNames[state],
+    dayLabel,
+  };
 }
 
 function deriveSleepStatus(sleepHours: number | undefined) {
@@ -586,7 +667,7 @@ function WeekMetrics({
   );
 }
 
-function RoadToRace({
+function RaceGoalCard({
   goal,
   raceGoalDateLabel,
 }: {
@@ -595,9 +676,25 @@ function RoadToRace({
 }) {
   if (!goal) return null;
 
+  const timeline = deriveGoalTimelineDisplay(goal);
+  if (!timeline) return null;
+
   const activePhase = (goal.phase || "BASE").toUpperCase();
   const activePhaseIndex = raceProgressPhases.findIndex((phase) => phase.name === activePhase);
   const normalizedPhaseIndex = activePhaseIndex === -1 ? 0 : activePhaseIndex;
+  const showPhaseTimeline = timeline.state === "UPCOMING" || timeline.state === "RACE_WEEK";
+  const showRecoveryWindow =
+    timeline.state === "POST_GOAL" &&
+    typeof goal.postGoalRecoveryDay === "number" &&
+    typeof goal.postGoalWindowDays === "number" &&
+    goal.postGoalWindowDays > 0;
+  const recoveryPercent = showRecoveryWindow
+    ? boundedPercent(goal.postGoalRecoveryDay ?? 0, goal.postGoalWindowDays ?? 0)
+    : 0;
+  const isPostGoal = timeline.state === "POST_GOAL";
+  const isRaceDay = timeline.state === "RACE_DAY";
+  const isPastGoal = timeline.state === "EXPIRED" || timeline.state === "LEGACY_PAST";
+  const GoalIcon = isPostGoal ? Heart : Flag;
 
   return (
     <motion.section
@@ -605,69 +702,129 @@ function RoadToRace({
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.28 }}
-      aria-label="Road to race"
+      aria-label={timeline.sectionLabel}
     >
-      <div className="px-1">
-        <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Road to race</span>
+      <div className="flex items-center justify-between px-1">
+        <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+          {timeline.sectionLabel}
+        </span>
+        <span className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${timeline.badgeClassName}`}>
+          {timeline.badgeLabel}
+        </span>
       </div>
 
       <div className="overflow-hidden rounded-xl border border-border bg-card">
         <div className="flex items-start gap-2.5 px-4 pb-3 pt-3.5">
-          <div className="shrink-0 rounded-lg border border-accent/15 bg-accent/10 p-1.5">
-            <Flag className="h-3.5 w-3.5 text-accent" />
+          <div
+            className={`shrink-0 rounded-lg border p-1.5 ${
+              isPostGoal || isRaceDay
+                ? "border-primary/20 bg-primary/10"
+                : isPastGoal
+                  ? "border-border bg-muted/40"
+                  : "border-accent/15 bg-accent/10"
+            }`}
+          >
+            <GoalIcon className={`h-3.5 w-3.5 ${isPostGoal || isRaceDay ? "text-primary" : isPastGoal ? "text-muted-foreground" : "text-accent"}`} />
           </div>
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold leading-tight text-foreground">{goal.primaryGoal.name}</p>
             {raceGoalDateLabel ? <p className="mt-0.5 text-[11px] text-muted-foreground">{raceGoalDateLabel}</p> : null}
           </div>
-          <div className="shrink-0 text-right">
-            <p className="text-base font-bold leading-none tabular-nums text-foreground">
-              {goal.daysToGoal}
-              <span className="ml-0.5 text-[10px] font-normal text-muted-foreground">d</span>
-            </p>
-            <p className="mt-1 text-[10px] text-muted-foreground">to go</p>
-          </div>
+          {timeline.dayLabel ? (
+            <div className="shrink-0 text-right">
+              <p className="text-base font-bold leading-none tabular-nums text-foreground">
+                {timeline.dayLabel.value}
+              </p>
+              {timeline.dayLabel.unit ? (
+                <p className="mt-1 text-[10px] text-muted-foreground">{timeline.dayLabel.unit}</p>
+              ) : null}
+            </div>
+          ) : null}
         </div>
 
-        <div className="px-4 pb-3">
-          <div className="mb-1.5 flex gap-1">
-            {raceProgressPhases.map((phase, index) => {
-              const isActive = index === normalizedPhaseIndex;
-              const isPast = index < normalizedPhaseIndex;
-              return (
-                <motion.div
+        {showPhaseTimeline ? (
+          <div className="px-4 pb-3">
+            <div className="mb-1.5 flex gap-1">
+              {raceProgressPhases.map((phase, index) => {
+                const isActive = index === normalizedPhaseIndex;
+                const isPast = index < normalizedPhaseIndex;
+                return (
+                  <motion.div
+                    key={phase.name}
+                    initial={{ scaleX: 0.3, opacity: 0 }}
+                    animate={{ scaleX: 1, opacity: 1 }}
+                    transition={{ delay: 0.35 + index * 0.05, duration: 0.35 }}
+                    style={{ transformOrigin: "left" }}
+                    className={`h-1.5 flex-1 rounded-full ${
+                      isActive ? "bg-primary" : isPast ? "bg-primary/30" : "bg-border"
+                    }`}
+                  />
+                );
+              })}
+            </div>
+            <div className="grid grid-cols-4 gap-1">
+              {raceProgressPhases.map((phase, index) => (
+                <span
                   key={phase.name}
-                  initial={{ scaleX: 0.3, opacity: 0 }}
-                  animate={{ scaleX: 1, opacity: 1 }}
-                  transition={{ delay: 0.35 + index * 0.05, duration: 0.35 }}
-                  style={{ transformOrigin: "left" }}
-                  className={`h-1.5 flex-1 rounded-full ${
-                    isActive ? "bg-primary" : isPast ? "bg-primary/30" : "bg-border"
+                  className={`text-[9px] font-medium tracking-wider ${
+                    index === normalizedPhaseIndex ? "text-primary" : "text-muted-foreground/60"
                   }`}
-                />
-              );
-            })}
+                >
+                  {phase.name}
+                </span>
+              ))}
+            </div>
           </div>
-          <div className="grid grid-cols-4 gap-1">
-            {raceProgressPhases.map((phase, index) => (
-              <span
-                key={phase.name}
-                className={`text-[9px] font-medium tracking-wider ${
-                  index === normalizedPhaseIndex ? "text-primary" : "text-muted-foreground/60"
-                }`}
-              >
-                {phase.name}
+        ) : null}
+
+        {showRecoveryWindow ? (
+          <div className="px-4 pb-3">
+            <div className="mb-1.5 flex items-center justify-between">
+              <span className="text-[11px] text-muted-foreground">Recovery window</span>
+              <span className="text-[11px] tabular-nums text-muted-foreground">
+                day <span className="font-medium text-foreground">{goal.postGoalRecoveryDay}</span> of{" "}
+                {goal.postGoalWindowDays}
               </span>
-            ))}
+            </div>
+            <div className="h-1.5 overflow-hidden rounded-full bg-border">
+              <motion.div
+                className="h-full bg-primary"
+                initial={{ width: 0 }}
+                animate={{ width: `${recoveryPercent}%` }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
+              />
+            </div>
+            <p className="mt-2 text-[10.5px] leading-relaxed text-muted-foreground/80">
+              Easy efforts and short runs only while the coach rebuilds training around recovery.
+            </p>
           </div>
-        </div>
+        ) : null}
 
         <div className="flex items-center gap-2 border-t border-border bg-muted/20 px-4 py-2.5">
-          <TrendingUp className="h-3 w-3 shrink-0 text-primary" />
-          <span className="text-[11px] text-muted-foreground">
-            <span className="font-medium text-foreground">{goal.phase}</span> phase
-          </span>
-          <span className="ml-auto truncate text-[11px] text-muted-foreground">{goal.goalSummary}</span>
+          {timeline.state === "UPCOMING" || timeline.state === "RACE_WEEK" ? (
+            <>
+              <TrendingUp className="h-3 w-3 shrink-0 text-primary" />
+              <span className="text-[11px] text-muted-foreground">
+                <span className="font-medium text-foreground">{goal.phase}</span> phase
+              </span>
+              <span className="ml-auto truncate text-[11px] text-muted-foreground">{goal.goalSummary}</span>
+            </>
+          ) : isRaceDay ? (
+            <>
+              <Sparkles className="h-3 w-3 shrink-0 text-primary" />
+              <span className="text-[11px] font-medium text-foreground">Trust your training. Run smart.</span>
+            </>
+          ) : isPostGoal ? (
+            <>
+              <Heart className="h-3 w-3 shrink-0 text-primary" />
+              <span className="text-[11px] text-muted-foreground">Recovery-first training this week.</span>
+            </>
+          ) : (
+            <>
+              <CalendarOff className="h-3 w-3 shrink-0 text-muted-foreground" />
+              <span className="text-[11px] text-muted-foreground">Recovery window closed</span>
+            </>
+          )}
         </div>
       </div>
     </motion.section>
@@ -983,7 +1140,7 @@ export default function WeeklyPlanScreen({
     const start = parseISO(selectedWeekStartDate);
     const end = new Date(start);
     end.setDate(end.getDate() + 6);
-    return `${format(start, "MMM d")} – ${format(end, "MMM d, yyyy")}`;
+    return formatWeekRangeLabel(start, end);
   }, [selectedWeekStartDate]);
 
   const toggleComplete = (day: string) => {
@@ -1279,7 +1436,7 @@ export default function WeeklyPlanScreen({
           sleepHours={plan.summary.sleepHours}
         />
 
-        <RoadToRace goal={goal} raceGoalDateLabel={raceGoalDateLabel} />
+        <RaceGoalCard goal={goal} raceGoalDateLabel={raceGoalDateLabel} />
 
         <ScheduleList
           sessions={sessions}

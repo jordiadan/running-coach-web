@@ -112,6 +112,11 @@ describe("portal-api weekly coach helpers", () => {
         completedWeekDistanceKm: 11.2,
         phase: "BUILD",
         daysToGoal: 321,
+        goalTimelineState: "UPCOMING",
+        daysUntilGoal: 321,
+        daysSinceGoal: null,
+        postGoalWindowDays: 14,
+        postGoalRecoveryDay: null,
       },
       plan: {
         schemaVersion: "1.0",
@@ -139,6 +144,11 @@ describe("portal-api weekly coach helpers", () => {
         completedWeekDistanceKm: 11.2,
         phase: "BUILD",
         daysToGoal: 321,
+        goalTimelineState: "UPCOMING",
+        daysUntilGoal: 321,
+        daysSinceGoal: undefined,
+        postGoalWindowDays: 14,
+        postGoalRecoveryDay: undefined,
       },
       plan: {
         weekType: "DELOAD",
@@ -168,6 +178,11 @@ describe("portal-api weekly coach helpers", () => {
         },
         phase: "BUILD",
         daysToGoal: 67,
+        goalTimelineState: "UPCOMING",
+        daysUntilGoal: 67,
+        daysSinceGoal: null,
+        postGoalWindowDays: 14,
+        postGoalRecoveryDay: null,
         nextSecondaryGoal: {
           role: "TUNE_UP",
           name: "10K tune-up",
@@ -217,6 +232,11 @@ describe("portal-api weekly coach helpers", () => {
           completedWeekDistanceKm: 10.5,
           phase: "BUILD",
           daysToGoal: 101,
+          goalTimelineState: "UPCOMING",
+          daysUntilGoal: 101,
+          daysSinceGoal: null,
+          postGoalWindowDays: 14,
+          postGoalRecoveryDay: null,
         },
         llmMeta: {
           provider: "openai",
@@ -242,6 +262,11 @@ describe("portal-api weekly coach helpers", () => {
         },
         phase: "BUILD",
         daysToGoal: 67,
+        goalTimelineState: "UPCOMING",
+        daysUntilGoal: 67,
+        daysSinceGoal: undefined,
+        postGoalWindowDays: 14,
+        postGoalRecoveryDay: undefined,
       },
       highlights: {
         longRun: {
@@ -255,6 +280,8 @@ describe("portal-api weekly coach helpers", () => {
           readinessScore: 93,
           completedWeekDistanceKm: 10.5,
           phase: "BUILD",
+          goalTimelineState: "UPCOMING",
+          daysUntilGoal: 101,
         },
         plan: {
           weekType: "BUILD",
@@ -313,6 +340,77 @@ describe("portal-api weekly coach helpers", () => {
       plan: {
         plan: {
           sessions: [{ day: "MON", completed: undefined }],
+        },
+      },
+    });
+  });
+
+  it("maps post-goal timeline fields and ignores unknown timeline states", async () => {
+    apiRequestMock.mockResolvedValueOnce({
+      viewType: "EMPTY",
+      selectedWeekStartDate: "2026-04-27",
+      todayWeekStartDate: "2026-04-27",
+      canGoPrevious: false,
+      canGoNext: false,
+      goal: {
+        goalSummary: "Mediterrani recovery",
+        primaryGoal: {
+          name: "Mediterrani Half",
+          eventDate: "2026-04-26",
+          distanceKm: 21.1,
+        },
+        phase: "POST_GOAL",
+        daysToGoal: 0,
+        goalTimelineState: "POST_GOAL",
+        daysUntilGoal: null,
+        daysSinceGoal: 1,
+        postGoalWindowDays: 14,
+        postGoalRecoveryDay: 1,
+      },
+      highlights: {},
+      plan: {
+        weekStartDate: "2026-04-27",
+        planId: "athlete-1:2026-04-27",
+        createdAt: "2026-04-27T08:00:00Z",
+        updatedAt: "2026-04-27T08:00:00Z",
+        plan: {
+          schemaVersion: "1.0",
+          weekType: "DELOAD",
+          weekObjective: "Recover from race day",
+          progressionNote: "Keep everything easy",
+          sessions: [],
+          justification: [],
+        },
+        summary: {
+          phase: "POST_GOAL",
+          daysToGoal: 0,
+          goalTimelineState: "SOMETHING_NEW",
+          daysUntilGoal: null,
+          daysSinceGoal: 1,
+          postGoalWindowDays: 14,
+          postGoalRecoveryDay: 1,
+        },
+        llmMeta: {
+          provider: "openai",
+          model: "gpt-5",
+          promptVersion: "v1",
+        },
+      },
+    });
+
+    await expect(getCurrentUserWeeklyCoachScreen("2026-04-27")).resolves.toMatchObject({
+      goal: {
+        goalTimelineState: "POST_GOAL",
+        daysUntilGoal: undefined,
+        daysSinceGoal: 1,
+        postGoalWindowDays: 14,
+        postGoalRecoveryDay: 1,
+      },
+      plan: {
+        summary: {
+          goalTimelineState: undefined,
+          daysUntilGoal: undefined,
+          daysSinceGoal: 1,
         },
       },
     });
