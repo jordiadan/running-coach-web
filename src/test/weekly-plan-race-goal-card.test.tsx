@@ -100,7 +100,23 @@ function weeklyCoachScreen({
   };
 }
 
-function renderWeeklyPlan(screenData: CurrentUserWeeklyCoachScreen) {
+function renderWeeklyPlan(screenData: CurrentUserWeeklyCoachScreen, onSetNextGoal = vi.fn()) {
+  getCurrentUserWeeklyCoachScreenMock.mockResolvedValue(screenData);
+
+  renderWithQueryClient(
+    <WeeklyPlanScreen
+      athleteId="athlete-1"
+      targetWeekStartDate={screenData.selectedWeekStartDate}
+      isPreparing={false}
+      onRefresh={vi.fn()}
+      onSetNextGoal={onSetNextGoal}
+    />,
+  );
+
+  return { onSetNextGoal };
+}
+
+function renderWeeklyPlanWithoutSetNextGoal(screenData: CurrentUserWeeklyCoachScreen) {
   getCurrentUserWeeklyCoachScreenMock.mockResolvedValue(screenData);
 
   renderWithQueryClient(
@@ -134,12 +150,29 @@ describe("WeeklyPlanScreen race goal outcome", () => {
   });
 
   it("shows completed outcome copy and hides actions", async () => {
-    renderWeeklyPlan(weeklyCoachScreen({ goalTimelineState: "POST_GOAL", goalOutcomeStatus: "COMPLETED" }));
+    const { onSetNextGoal } = renderWeeklyPlan(
+      weeklyCoachScreen({ goalTimelineState: "POST_GOAL", goalOutcomeStatus: "COMPLETED" }),
+    );
 
     expect(await screen.findByText("Completed")).toBeInTheDocument();
     expect(screen.getByText("Race completed. Recovery-first training can continue.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /plan next race/i })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /mark completed/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /skip goal/i })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /plan next race/i }));
+
+    expect(onSetNextGoal).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not render a next-goal CTA without a handler", async () => {
+    renderWeeklyPlanWithoutSetNextGoal(
+      weeklyCoachScreen({ goalTimelineState: "POST_GOAL", goalOutcomeStatus: "COMPLETED" }),
+    );
+
+    expect(await screen.findByText("Completed")).toBeInTheDocument();
+    expect(screen.getByText("Race completed. Recovery-first training can continue.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /plan next race/i })).not.toBeInTheDocument();
   });
 
   it("shows skipped outcome copy and hides actions", async () => {
@@ -149,16 +182,29 @@ describe("WeeklyPlanScreen race goal outcome", () => {
     expect(
       screen.getByText("Goal skipped. This race will not guide recovery or race preparation."),
     ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /set new goal/i })).toBeInTheDocument();
     expect(screen.queryByText("Race completed. Recovery-first training can continue.")).not.toBeInTheDocument();
     expect(screen.queryByText(/day 1 of 14/i)).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /mark completed/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /skip goal/i })).not.toBeInTheDocument();
   });
 
-  it("does not show outcome actions before race day", async () => {
+  it("shows the next-goal CTA for expired goals", async () => {
+    renderWeeklyPlan(weeklyCoachScreen({ goalTimelineState: "EXPIRED", goalOutcomeStatus: "UNKNOWN" }));
+
+    expect(await screen.findByText("Expired")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /set next goal/i })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /mark completed/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /skip goal/i })).not.toBeInTheDocument();
+  });
+
+  it("does not show next-goal CTA before a goal is closed or expired", async () => {
     renderWeeklyPlan(weeklyCoachScreen({ goalTimelineState: "UPCOMING", goalOutcomeStatus: "UNKNOWN" }));
 
     expect(await screen.findByText("Upcoming")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /plan next race/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /set new goal/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /set next goal/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /mark completed/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /skip goal/i })).not.toBeInTheDocument();
 
@@ -166,7 +212,19 @@ describe("WeeklyPlanScreen race goal outcome", () => {
     renderWeeklyPlan(weeklyCoachScreen({ goalTimelineState: "RACE_WEEK", goalOutcomeStatus: "UNKNOWN" }));
 
     expect(await screen.findByText("Race week")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /plan next race/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /set new goal/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /set next goal/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /mark completed/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /skip goal/i })).not.toBeInTheDocument();
+
+    vi.clearAllMocks();
+    renderWeeklyPlan(weeklyCoachScreen({ goalTimelineState: "POST_GOAL", goalOutcomeStatus: "UNKNOWN" }));
+
+    expect(await screen.findByRole("button", { name: /mark completed/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /skip goal/i })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /plan next race/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /set new goal/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /set next goal/i })).not.toBeInTheDocument();
   });
 });

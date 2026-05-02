@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Calendar, User, Link2, LogOut } from "lucide-react";
@@ -13,6 +13,7 @@ import { bootstrapPortal } from "@/lib/portal-api";
 import { supabase } from "@/integrations/supabase/client";
 
 type Tab = "plan" | "connect" | "profile";
+type ProfileFocusTarget = "race-goal" | null;
 
 const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "plan", label: "Weekly Plan", icon: Calendar },
@@ -23,6 +24,7 @@ const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
 export default function PortalPage() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<Tab>("plan");
+  const [profileFocusTarget, setProfileFocusTarget] = useState<ProfileFocusTarget>(null);
   const [hasSession, setHasSession] = useState<boolean | null>(null);
   const [showReadyTransition, setShowReadyTransition] = useState(false);
   const previousNextStepRef = useRef<string | null>(null);
@@ -91,6 +93,15 @@ export default function PortalPage() {
     await supabase.auth.signOut();
     navigate("/login", { replace: true });
   };
+
+  const handleSetNextGoal = useCallback(() => {
+    setActiveTab("profile");
+    setProfileFocusTarget("race-goal");
+  }, []);
+
+  const handleProfileFocusTargetHandled = useCallback(() => {
+    setProfileFocusTarget(null);
+  }, []);
 
   if (hasSession === null) {
     return (
@@ -214,6 +225,7 @@ export default function PortalPage() {
                     targetWeekStartDate={bootstrapQuery.data.weeklyPlan.targetWeekStartDate}
                     isPreparing={false}
                     onRefresh={() => bootstrapQuery.refetch()}
+                    onSetNextGoal={handleSetNextGoal}
                   />
                 )}
                 {activeTab === "connect" && (
@@ -222,7 +234,13 @@ export default function PortalPage() {
                     trainingProvider={bootstrapQuery.data.trainingProvider}
                   />
                 )}
-                {activeTab === "profile" && <ProfileScreen athleteId={athleteId} />}
+                {activeTab === "profile" && (
+                  <ProfileScreen
+                    athleteId={athleteId}
+                    focusTarget={profileFocusTarget}
+                    onFocusTargetHandled={handleProfileFocusTargetHandled}
+                  />
+                )}
               </motion.div>
             </AnimatePresence>
             </motion.div>
