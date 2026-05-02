@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { format, parseISO, startOfToday } from "date-fns";
+import { motion, useReducedMotion } from "framer-motion";
 import { CalendarIcon, MessageSquareMore, RefreshCcw } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,8 @@ type ProfileScreenProps = {
   athleteId: string;
   variant?: "page" | "onboarding";
   onComplete?: () => void | Promise<unknown>;
+  focusTarget?: "race-goal" | null;
+  onFocusTargetHandled?: () => void;
 };
 
 const emptyForm: AthleteProfileUpdate = {
@@ -52,8 +55,11 @@ export default function ProfileScreen({
   athleteId,
   variant = "page",
   onComplete,
+  focusTarget,
+  onFocusTargetHandled,
 }: ProfileScreenProps) {
   const queryClient = useQueryClient();
+  const reduceMotion = useReducedMotion();
   const profileQuery = useQuery({
     queryKey: ["portal", "athlete", athleteId],
     queryFn: () => getAthleteProfile(athleteId),
@@ -61,6 +67,9 @@ export default function ProfileScreen({
   });
 
   const [form, setForm] = useState<AthleteProfileUpdate>(emptyForm);
+  const [highlightRaceGoal, setHighlightRaceGoal] = useState(false);
+  const raceGoalSectionRef = useRef<HTMLDivElement | null>(null);
+  const raceGoalEventNameRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (!profileQuery.data) return;
@@ -87,9 +96,34 @@ export default function ProfileScreen({
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["portal", "bootstrap"] });
       await queryClient.invalidateQueries({ queryKey: ["portal", "athlete", athleteId] });
+      await queryClient.invalidateQueries({ queryKey: ["portal", "weekly-coach-screen"] });
       await onComplete?.();
     },
   });
+
+  useEffect(() => {
+    if (focusTarget !== "race-goal") return;
+    if (!profileQuery.data) return;
+
+    const animationFrameId = window.requestAnimationFrame(() => {
+      raceGoalSectionRef.current?.scrollIntoView({
+        behavior: reduceMotion ? "auto" : "smooth",
+        block: "center",
+      });
+      raceGoalEventNameRef.current?.focus({ preventScroll: true });
+      raceGoalEventNameRef.current?.select();
+      setHighlightRaceGoal(true);
+    });
+    const timeoutId = window.setTimeout(() => {
+      setHighlightRaceGoal(false);
+      onFocusTargetHandled?.();
+    }, 1800);
+
+    return () => {
+      window.cancelAnimationFrame(animationFrameId);
+      window.clearTimeout(timeoutId);
+    };
+  }, [focusTarget, profileQuery.data, onFocusTargetHandled, reduceMotion]);
 
   const raceDate = useMemo(() => {
     if (!form.goalRaceEventDate) return undefined;
@@ -274,10 +308,27 @@ export default function ProfileScreen({
           </p>
         </div>
 
-        <div className="space-y-3">
-          <Label>Goal race / event</Label>
+        <motion.div
+          ref={raceGoalSectionRef}
+          id="goal-race-section"
+          className={cn(
+            "-mx-3 space-y-3 rounded-lg px-3 py-3 transition-all duration-500",
+            highlightRaceGoal
+              ? "bg-primary/5 shadow-sm ring-2 ring-primary/60"
+              : "ring-0 ring-transparent",
+          )}
+          animate={
+            highlightRaceGoal && !reduceMotion
+              ? { scale: [1, 1.01, 1] }
+              : { scale: 1 }
+          }
+          transition={{ duration: 0.45, ease: "easeOut" }}
+        >
+          <Label htmlFor="goal-race-event-name">Goal race / event</Label>
           <div className="space-y-3">
             <Input
+              id="goal-race-event-name"
+              ref={raceGoalEventNameRef}
               value={form.goalRaceEventName}
               placeholder="Event name"
               onChange={(event) => setForm((prev) => ({ ...prev, goalRaceEventName: event.target.value }))}
@@ -325,7 +376,7 @@ export default function ProfileScreen({
               </Popover>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         <div className="space-y-2">
           <Label>Notes for your coach</Label>

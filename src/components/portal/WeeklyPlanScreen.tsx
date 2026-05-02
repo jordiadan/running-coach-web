@@ -39,6 +39,7 @@ type WeeklyPlanScreenProps = {
   targetWeekStartDate: string;
   isPreparing: boolean;
   onRefresh: () => void | Promise<unknown>;
+  onSetNextGoal?: () => void;
 };
 
 const weekDayOrder = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"] as const;
@@ -230,8 +231,20 @@ function canSetGoalOutcome(goal: CurrentUserWeeklyCoachScreen["goal"], timeline:
   const outcomeStatus = goal.goalOutcomeStatus ?? "UNKNOWN";
   return (
     outcomeStatus === "UNKNOWN" &&
-    (timeline.state === "RACE_DAY" || timeline.state === "POST_GOAL" || timeline.state === "EXPIRED")
+    (timeline.state === "RACE_DAY" || timeline.state === "POST_GOAL")
   );
+}
+
+function nextGoalCtaLabel(goal: CurrentUserWeeklyCoachScreen["goal"], timeline: GoalTimelineDisplay) {
+  if (!goal) return undefined;
+
+  const outcomeStatus = goal.goalOutcomeStatus ?? "UNKNOWN";
+
+  if (outcomeStatus === "COMPLETED") return "Plan next race";
+  if (outcomeStatus === "SKIPPED") return "Set new goal";
+  if (timeline.state === "EXPIRED") return "Set next goal";
+
+  return undefined;
 }
 
 function goalOutcomeErrorMessage(error: unknown) {
@@ -697,6 +710,7 @@ function RaceGoalCard({
   outcomeError,
   outcomePendingAction,
   onSetOutcome,
+  onSetNextGoal,
 }: {
   goal: CurrentUserWeeklyCoachScreen["goal"];
   raceGoalDateLabel: string | undefined;
@@ -704,6 +718,7 @@ function RaceGoalCard({
   outcomeError: string | undefined;
   outcomePendingAction: GoalOutcomeAction | null;
   onSetOutcome: (outcome: GoalOutcomeAction) => void;
+  onSetNextGoal?: () => void;
 }) {
   if (!goal) return null;
 
@@ -737,6 +752,7 @@ function RaceGoalCard({
       : outcomeStatus === "SKIPPED"
         ? "Goal skipped. This race will not guide recovery or race preparation."
         : undefined;
+  const ctaLabel = nextGoalCtaLabel(goal, timeline);
 
   return (
     <motion.section
@@ -876,6 +892,16 @@ function RaceGoalCard({
               <span className="text-[11px] text-muted-foreground">Recovery window closed</span>
             </>
           )}
+          {ctaLabel && onSetNextGoal ? (
+            <button
+              type="button"
+              onClick={onSetNextGoal}
+              className="ml-auto inline-flex shrink-0 items-center gap-1 rounded-md bg-primary px-2.5 py-1 text-[11px] font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              {ctaLabel}
+              <ArrowRight className="h-3 w-3" />
+            </button>
+          ) : null}
         </div>
 
         {canSetOutcome ? (
@@ -1122,6 +1148,7 @@ export default function WeeklyPlanScreen({
   targetWeekStartDate,
   isPreparing,
   onRefresh,
+  onSetNextGoal,
 }: WeeklyPlanScreenProps) {
   const [selectedWeekStartDate, setSelectedWeekStartDate] = useState(targetWeekStartDate);
   const [expandedDay, setExpandedDay] = useState<string | null>(null);
@@ -1551,6 +1578,7 @@ export default function WeeklyPlanScreen({
           outcomeError={outcomeError}
           outcomePendingAction={outcomePendingAction}
           onSetOutcome={(outcome) => raceGoalOutcomeMutation.mutate(outcome)}
+          onSetNextGoal={onSetNextGoal}
         />
 
         <ScheduleList
