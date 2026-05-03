@@ -288,7 +288,7 @@ export default function ConnectScreen({
   }, [awaitingOAuthCompletion, statusByProvider]);
 
   return (
-    <div className={isOnboarding ? "space-y-5" : "max-w-2xl"}>
+    <div className={isOnboarding ? "space-y-5" : "max-w-2xl mx-auto"}>
       {!isOnboarding ? (
         <>
           <h2 className="mb-2 font-serif text-2xl">Connect your data</h2>

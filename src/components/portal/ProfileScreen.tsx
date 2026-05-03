@@ -178,7 +178,7 @@ export default function ProfileScreen({
 
   if (profileQuery.isLoading) {
     return (
-      <div className={isOnboarding ? "rounded-2xl border border-divider bg-card p-6 shadow-card" : "max-w-lg rounded-2xl border border-divider bg-card p-6 shadow-card"}>
+      <div className={isOnboarding ? "rounded-2xl border border-divider bg-card p-6 shadow-card" : "max-w-2xl mx-auto rounded-2xl border border-divider bg-card p-6 shadow-card"}>
         <p className="text-sm text-muted-foreground">Loading your profile…</p>
       </div>
     );
@@ -186,7 +186,7 @@ export default function ProfileScreen({
 
   if (profileQuery.isError) {
     return (
-      <div className={isOnboarding ? "rounded-2xl border border-divider bg-card p-6 shadow-card" : "max-w-lg rounded-2xl border border-divider bg-card p-6 shadow-card"}>
+      <div className={isOnboarding ? "rounded-2xl border border-divider bg-card p-6 shadow-card" : "max-w-2xl mx-auto rounded-2xl border border-divider bg-card p-6 shadow-card"}>
         <h2 className="font-serif text-2xl text-foreground">We couldn't load your profile</h2>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
           Refresh the page or try again in a moment. The portal still needs your athlete context before the plan can stay in sync.
@@ -196,7 +196,7 @@ export default function ProfileScreen({
   }
 
   return (
-    <div className={isOnboarding ? "" : "max-w-lg"}>
+    <div className={isOnboarding ? "" : "max-w-2xl mx-auto"}>
       {!isOnboarding ? (
         <>
           <h2 className="mb-2 font-serif text-2xl">Your profile</h2>

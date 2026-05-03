@@ -158,7 +158,7 @@ export default function PortalPage() {
   return (
     <div className="min-h-screen bg-background">
       <nav className="border-b border-divider bg-background/80 backdrop-blur-md sticky top-0 z-40">
-        <div className="max-w-5xl mx-auto flex items-center justify-between px-6 h-16">
+        <div className="max-w-2xl mx-auto flex items-center justify-between px-6 h-16">
           <Link to="/" className="font-serif text-xl tracking-tight text-foreground">
             Running Coach
           </Link>
@@ -175,7 +175,7 @@ export default function PortalPage() {
         </div>
       </nav>
 
-      <div className="max-w-5xl mx-auto px-6 py-8">
+      <div className="max-w-2xl mx-auto px-6 py-8">
         <AnimatePresence mode="wait">
           {bootstrapQuery.data.nextStep === "view_weekly_plan" && !showReadyTransition ? (
             <motion.div
