@@ -25,12 +25,15 @@ const updateAthleteProfileMock = vi.mocked(updateAthleteProfile);
 const athleteProfile: AthleteProfile = {
   athleteId: "athlete-1",
   displayName: "Jordi",
-  trainingGoal: "complete_goal_race",
+  trainingGoal: "prepare_for_race",
   runningDays: ["TUE", "THU", "SAT", "SUN"],
   longRunPreferredDay: "SUN",
   goalRaceEventName: "Mediterrani Half",
-  goalRaceEventDate: "2026-04-26",
+  goalRaceEventDate: "2027-04-26",
   goalRaceEventDistanceKm: 21.1,
+  raceTargetType: "FINISH_ONLY",
+  targetTimeSeconds: "",
+  targetPaceSecondsPerKm: "",
 };
 
 function renderWithQueryClient(ui: React.ReactElement, queryClient = new QueryClient({
@@ -146,5 +149,49 @@ describe("ProfileScreen race goal focus", () => {
       expect(invalidateQueriesSpy).toHaveBeenCalledWith({ queryKey: ["portal", "athlete", "athlete-1"] });
       expect(invalidateQueriesSpy).toHaveBeenCalledWith({ queryKey: ["portal", "weekly-coach-screen"] });
     });
+  });
+
+  it("shows race details only when preparing for a race", async () => {
+    getAthleteProfileMock.mockResolvedValueOnce({
+      ...athleteProfile,
+      trainingGoal: "improve_running",
+      goalRaceEventName: "",
+      goalRaceEventDate: "",
+      goalRaceEventDistanceKm: "",
+    });
+
+    renderWithQueryClient(<ProfileScreen athleteId="athlete-1" />);
+
+    expect(await screen.findByDisplayValue("Jordi")).toBeInTheDocument();
+    expect(screen.queryByText("Goal race / event")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /save changes/i })).toBeEnabled();
+  });
+
+  it("keeps target time and equivalent pace in sync with distance", async () => {
+    renderWithQueryClient(<ProfileScreen athleteId="athlete-1" />);
+
+    await screen.findByDisplayValue("Mediterrani Half");
+    fireEvent.click(screen.getByRole("radio", { name: "Target time" }));
+    fireEvent.change(screen.getByRole("textbox", { name: "Target time" }), {
+      target: { value: "1:45:30" },
+    });
+
+    expect(screen.getByLabelText("Equivalent pace / km")).toHaveValue("5:00");
+
+    fireEvent.change(screen.getByLabelText("Race distance in kilometres"), {
+      target: { value: "10" },
+    });
+
+    expect(screen.getByLabelText("Equivalent pace / km")).toHaveValue("10:33");
+  });
+
+  it("keeps target pace and equivalent time in sync with distance", async () => {
+    renderWithQueryClient(<ProfileScreen athleteId="athlete-1" />);
+
+    await screen.findByDisplayValue("Mediterrani Half");
+    fireEvent.click(screen.getByRole("radio", { name: "Target pace" }));
+    fireEvent.change(screen.getByLabelText("Target pace / km"), { target: { value: "5:00" } });
+
+    expect(screen.getByLabelText("Equivalent time")).toHaveValue("1:45:30");
   });
 });

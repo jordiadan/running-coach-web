@@ -46,23 +46,20 @@ export type AthleteProfile = {
   goalRaceEventName: string;
   goalRaceEventDate: string;
   goalRaceEventDistanceKm: number | "";
+  raceTargetType: RaceTargetType;
+  targetTimeSeconds: number | "";
+  targetPaceSecondsPerKm: number | "";
 };
 
 export type AthleteProfileUpdate = Omit<AthleteProfile, "athleteId">;
 
-export type TrainingGoalCode =
-  | "build_consistency"
-  | "improve_fitness"
-  | "complete_goal_race"
-  | "race_personal_best"
-  | "return_to_running";
+export type TrainingGoalCode = "prepare_for_race" | "improve_running";
+
+export type RaceTargetType = "FINISH_ONLY" | "TIME" | "PACE";
 
 export const trainingGoalOptions: { code: TrainingGoalCode; label: string }[] = [
-  { code: "build_consistency", label: "Build consistency" },
-  { code: "improve_fitness", label: "Improve fitness" },
-  { code: "complete_goal_race", label: "Complete my goal race" },
-  { code: "race_personal_best", label: "Race a personal best" },
-  { code: "return_to_running", label: "Return to running" },
+  { code: "prepare_for_race", label: "Prepare for a race" },
+  { code: "improve_running", label: "Improve my running" },
 ];
 
 export type WeeklyCoachSession = {
@@ -249,6 +246,16 @@ function asTrainingGoalCode(value: unknown): TrainingGoalCode | undefined {
     : undefined;
 }
 
+function asRaceTargetType(value: unknown): RaceTargetType {
+  const type = asString(value);
+
+  if (type === "TIME" || type === "PACE") {
+    return type;
+  }
+
+  return "FINISH_ONLY";
+}
+
 function asBootstrapNextStep(value: unknown): PortalBootstrapResponse["nextStep"] {
   const nextStep = asString(value);
 
@@ -429,6 +436,7 @@ export async function getAthleteProfile(athleteId: string) {
   const record = asRecord(payload);
   const preparation = asRecord(record.preparation);
   const primaryGoal = asRecord(preparation.primaryGoal);
+  const raceTarget = asRecord(primaryGoal.raceTarget);
   const trainingGoalCode =
     asTrainingGoalCode(record.trainingGoalCode) ??
     trainingGoalOptions.find((option) => option.label.toLowerCase() === asString(record.trainingGoal).trim().toLowerCase())?.code;
@@ -442,10 +450,27 @@ export async function getAthleteProfile(athleteId: string) {
     goalRaceEventName: asString(primaryGoal.name),
     goalRaceEventDate: asString(primaryGoal.eventDate),
     goalRaceEventDistanceKm: asNumberOrBlank(primaryGoal.distanceKm),
+    raceTargetType: asRaceTargetType(raceTarget.type),
+    targetTimeSeconds: asNumberOrBlank(raceTarget.targetTimeSeconds),
+    targetPaceSecondsPerKm: asNumberOrBlank(raceTarget.targetPaceSecondsPerKm),
   } satisfies AthleteProfile;
 }
 
 export async function updateAthleteProfile(athleteId: string, input: AthleteProfileUpdate) {
+  const raceTarget =
+    input.raceTargetType === "TIME"
+      ? {
+          type: input.raceTargetType,
+          targetTimeSeconds: input.targetTimeSeconds === "" ? 0 : input.targetTimeSeconds,
+        }
+      : input.raceTargetType === "PACE"
+        ? {
+            type: input.raceTargetType,
+            targetPaceSecondsPerKm:
+              input.targetPaceSecondsPerKm === "" ? 0 : input.targetPaceSecondsPerKm,
+          }
+        : { type: input.raceTargetType };
+
   return apiRequest<unknown>(`/api/v1/athletes/${athleteId}`, {
     method: "PUT",
     body: {
@@ -453,14 +478,20 @@ export async function updateAthleteProfile(athleteId: string, input: AthleteProf
       trainingGoal: input.trainingGoal,
       runningDays: input.runningDays,
       longRunPreferredDay: input.longRunPreferredDay,
-      preparation: {
-        primaryGoal: {
-          name: input.goalRaceEventName,
-          eventDate: input.goalRaceEventDate,
-          distanceKm: input.goalRaceEventDistanceKm === "" ? 0 : input.goalRaceEventDistanceKm,
-        },
-        secondaryGoals: [],
-      },
+      ...(input.trainingGoal === "prepare_for_race"
+        ? {
+            preparation: {
+              primaryGoal: {
+                name: input.goalRaceEventName,
+                eventDate: input.goalRaceEventDate,
+                distanceKm:
+                  input.goalRaceEventDistanceKm === "" ? 0 : input.goalRaceEventDistanceKm,
+                raceTarget,
+              },
+              secondaryGoals: [],
+            },
+          }
+        : {}),
     },
   });
 }
@@ -674,13 +705,60 @@ export async function getCurrentUserWeeklyCoachScreen(weekStartDate?: string) {
 export function isProfileComplete(profile: AthleteProfile | undefined) {
   if (!profile) return false;
 
-  return Boolean(
-      profile.displayName &&
+  return isProfileUpdateComplete(profile);
+}
+
+export function isProfileUpdateComplete(profile: AthleteProfileUpdate) {
+  const baseProfileComplete = Boolean(
+    profile.displayName.trim() &&
+      profile.displayName.trim().length <= 120 &&
       profile.trainingGoal &&
-      profile.runningDays.length >= 4 &&
+      new Set(profile.runningDays).size >= 4 &&
       profile.longRunPreferredDay &&
-      profile.goalRaceEventName &&
-      profile.goalRaceEventDate &&
-      profile.goalRaceEventDistanceKm !== "",
+      profile.runningDays.includes(profile.longRunPreferredDay),
   );
+
+  if (!baseProfileComplete || profile.trainingGoal === "") return false;
+  if (profile.trainingGoal === "improve_running") return true;
+
+  const raceTargetComplete =
+    profile.raceTargetType === "FINISH_ONLY" ||
+    (profile.raceTargetType === "TIME" &&
+      profile.targetTimeSeconds !== "" &&
+      Number.isFinite(profile.targetTimeSeconds) &&
+      profile.targetTimeSeconds > 0) ||
+    (profile.raceTargetType === "PACE" &&
+      profile.targetPaceSecondsPerKm !== "" &&
+      Number.isFinite(profile.targetPaceSecondsPerKm) &&
+      profile.targetPaceSecondsPerKm > 0);
+
+  return Boolean(
+    profile.goalRaceEventName.trim() &&
+      profile.goalRaceEventName.trim().length <= 120 &&
+      isFutureOrPresentIsoDate(profile.goalRaceEventDate) &&
+      profile.goalRaceEventDistanceKm !== "" &&
+      Number.isFinite(profile.goalRaceEventDistanceKm) &&
+      profile.goalRaceEventDistanceKm >= 1 &&
+      profile.goalRaceEventDistanceKm <= 250 &&
+      raceTargetComplete,
+  );
+}
+
+function isFutureOrPresentIsoDate(value: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+
+  const [year, month, day] = value.split("-").map(Number);
+  const selectedDate = new Date(year, month - 1, day);
+  if (Number.isNaN(selectedDate.getTime())) return false;
+  if (
+    selectedDate.getFullYear() !== year ||
+    selectedDate.getMonth() !== month - 1 ||
+    selectedDate.getDate() !== day
+  ) {
+    return false;
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return selectedDate >= today;
 }

@@ -8,6 +8,7 @@ import {
   retryCurrentUserWeeklyPlanGeneration,
   setCurrentUserRaceGoalOutcome,
   setCurrentUserWeeklyCoachSessionCompletion,
+  trainingGoalOptions,
   updateAthleteProfile,
 } from "@/lib/portal-api";
 
@@ -25,6 +26,13 @@ const apiRequestMock = vi.mocked(apiRequest);
 describe("portal-api weekly coach helpers", () => {
   beforeEach(() => {
     apiRequestMock.mockReset();
+  });
+
+  it("exposes only the two backend training goals", () => {
+    expect(trainingGoalOptions).toEqual([
+      { code: "prepare_for_race", label: "Prepare for a race" },
+      { code: "improve_running", label: "Improve my running" },
+    ]);
   });
 
   it("returns undefined only for the expected weekly plan not found code", async () => {
@@ -421,52 +429,164 @@ describe("portal-api weekly coach helpers", () => {
     });
   });
 
-  it("maps trainingGoalCode from athlete profile GET", async () => {
+  it("maps the race target and both equivalent values from athlete profile GET", async () => {
     apiRequestMock.mockResolvedValueOnce({
       athleteId: "athlete-1",
       displayName: "Jordi",
       runningDays: ["TUE", "THU", "SAT", "SUN"],
       longRunPreferredDay: "SUN",
-      trainingGoal: "Build consistency",
-      trainingGoalCode: "build_consistency",
+      trainingGoal: "Prepare for race",
+      trainingGoalCode: "prepare_for_race",
       preparation: {
         primaryGoal: {
           name: "Valencia Half Marathon",
           eventDate: "2026-10-25",
           distanceKm: 21.1,
+          raceTarget: {
+            type: "TIME",
+            targetTimeSeconds: 5400,
+            targetPaceSecondsPerKm: 256,
+          },
         },
       },
     });
 
     await expect(getAthleteProfile("athlete-1")).resolves.toMatchObject({
       athleteId: "athlete-1",
-      trainingGoal: "build_consistency",
+      trainingGoal: "prepare_for_race",
       runningDays: ["TUE", "THU", "SAT", "SUN"],
       longRunPreferredDay: "SUN",
       goalRaceEventName: "Valencia Half Marathon",
+      raceTargetType: "TIME",
+      targetTimeSeconds: 5400,
+      targetPaceSecondsPerKm: 256,
     });
   });
 
-  it("sends the closed training goal code in profile updates", async () => {
+  it("sends only the original target time in race profile updates", async () => {
     apiRequestMock.mockResolvedValueOnce({ athleteId: "athlete-1" });
 
     await updateAthleteProfile("athlete-1", {
       displayName: "Jordi",
-      trainingGoal: "race_personal_best",
+      trainingGoal: "prepare_for_race",
       runningDays: ["TUE", "THU", "SAT", "SUN"],
       longRunPreferredDay: "SUN",
       goalRaceEventName: "Valencia Half Marathon",
       goalRaceEventDate: "2026-10-25",
       goalRaceEventDistanceKm: 21.1,
+      raceTargetType: "TIME",
+      targetTimeSeconds: 5400,
+      targetPaceSecondsPerKm: 256,
+    });
+
+    expect(apiRequestMock).toHaveBeenCalledWith("/api/v1/athletes/athlete-1", {
+      method: "PUT",
+      body: {
+        displayName: "Jordi",
+        trainingGoal: "prepare_for_race",
+        runningDays: ["TUE", "THU", "SAT", "SUN"],
+        longRunPreferredDay: "SUN",
+        preparation: {
+          primaryGoal: {
+            name: "Valencia Half Marathon",
+            eventDate: "2026-10-25",
+            distanceKm: 21.1,
+            raceTarget: {
+              type: "TIME",
+              targetTimeSeconds: 5400,
+            },
+          },
+          secondaryGoals: [],
+        },
+      },
+    });
+  });
+
+  it("sends only the original target pace in race profile updates", async () => {
+    apiRequestMock.mockResolvedValueOnce({ athleteId: "athlete-1" });
+
+    await updateAthleteProfile("athlete-1", {
+      displayName: "Jordi",
+      trainingGoal: "prepare_for_race",
+      runningDays: ["TUE", "THU", "SAT", "SUN"],
+      longRunPreferredDay: "SUN",
+      goalRaceEventName: "Valencia Half Marathon",
+      goalRaceEventDate: "2026-10-25",
+      goalRaceEventDistanceKm: 21.1,
+      raceTargetType: "PACE",
+      targetTimeSeconds: 6330,
+      targetPaceSecondsPerKm: 300,
     });
 
     expect(apiRequestMock).toHaveBeenCalledWith("/api/v1/athletes/athlete-1", {
       method: "PUT",
       body: expect.objectContaining({
-        trainingGoal: "race_personal_best",
+        preparation: expect.objectContaining({
+          primaryGoal: expect.objectContaining({
+            raceTarget: {
+              type: "PACE",
+              targetPaceSecondsPerKm: 300,
+            },
+          }),
+        }),
+      }),
+    });
+  });
+
+  it("sends a finish-only race target without time or pace", async () => {
+    apiRequestMock.mockResolvedValueOnce({ athleteId: "athlete-1" });
+
+    await updateAthleteProfile("athlete-1", {
+      displayName: "Jordi",
+      trainingGoal: "prepare_for_race",
+      runningDays: ["TUE", "THU", "SAT", "SUN"],
+      longRunPreferredDay: "SUN",
+      goalRaceEventName: "Valencia Half Marathon",
+      goalRaceEventDate: "2026-10-25",
+      goalRaceEventDistanceKm: 21.1,
+      raceTargetType: "FINISH_ONLY",
+      targetTimeSeconds: "",
+      targetPaceSecondsPerKm: "",
+    });
+
+    expect(apiRequestMock).toHaveBeenCalledWith("/api/v1/athletes/athlete-1", {
+      method: "PUT",
+      body: expect.objectContaining({
+        preparation: expect.objectContaining({
+          primaryGoal: expect.objectContaining({
+            raceTarget: {
+              type: "FINISH_ONLY",
+            },
+          }),
+        }),
+      }),
+    });
+  });
+
+  it("omits race preparation when the goal is improve running", async () => {
+    apiRequestMock.mockResolvedValueOnce({ athleteId: "athlete-1" });
+
+    await updateAthleteProfile("athlete-1", {
+      displayName: "Jordi",
+      trainingGoal: "improve_running",
+      runningDays: ["TUE", "THU", "SAT", "SUN"],
+      longRunPreferredDay: "SUN",
+      goalRaceEventName: "Ignored race",
+      goalRaceEventDate: "2026-10-25",
+      goalRaceEventDistanceKm: 21.1,
+      raceTargetType: "FINISH_ONLY",
+      targetTimeSeconds: "",
+      targetPaceSecondsPerKm: "",
+    });
+
+    expect(apiRequestMock).toHaveBeenCalledWith("/api/v1/athletes/athlete-1", {
+      method: "PUT",
+      body: {
+        displayName: "Jordi",
+        trainingGoal: "improve_running",
         runningDays: ["TUE", "THU", "SAT", "SUN"],
         longRunPreferredDay: "SUN",
-      }),
+      },
     });
   });
 
