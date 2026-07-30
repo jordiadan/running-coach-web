@@ -18,10 +18,20 @@ import {
 import { cn } from "@/lib/utils";
 import {
   getAthleteProfile,
+  isProfileUpdateComplete,
   trainingGoalOptions,
   updateAthleteProfile,
   type AthleteProfileUpdate,
+  type RaceTargetType,
 } from "@/lib/portal-api";
+import {
+  equivalentPaceSeconds,
+  equivalentTimeSeconds,
+  formatRacePace,
+  formatRaceTime,
+  parseRacePace,
+  parseRaceTime,
+} from "@/lib/race-target";
 
 const allDays = [
   { value: "MON", label: "Mon" },
@@ -32,6 +42,12 @@ const allDays = [
   { value: "SAT", label: "Sat" },
   { value: "SUN", label: "Sun" },
 ] as const;
+
+const raceTargetOptions: { value: RaceTargetType; label: string }[] = [
+  { value: "FINISH_ONLY", label: "Finish" },
+  { value: "TIME", label: "Target time" },
+  { value: "PACE", label: "Target pace" },
+];
 
 type ProfileScreenProps = {
   athleteId: string;
@@ -49,6 +65,9 @@ const emptyForm: AthleteProfileUpdate = {
   goalRaceEventName: "",
   goalRaceEventDate: "",
   goalRaceEventDistanceKm: "",
+  raceTargetType: "FINISH_ONLY",
+  targetTimeSeconds: "",
+  targetPaceSecondsPerKm: "",
 };
 
 export default function ProfileScreen({
@@ -67,6 +86,8 @@ export default function ProfileScreen({
   });
 
   const [form, setForm] = useState<AthleteProfileUpdate>(emptyForm);
+  const [timeInputValue, setTimeInputValue] = useState("");
+  const [paceInputValue, setPaceInputValue] = useState("");
   const [highlightRaceGoal, setHighlightRaceGoal] = useState(false);
   const raceGoalSectionRef = useRef<HTMLDivElement | null>(null);
   const raceGoalEventNameRef = useRef<HTMLInputElement | null>(null);
@@ -88,7 +109,12 @@ export default function ProfileScreen({
       goalRaceEventName: profileQuery.data.goalRaceEventName,
       goalRaceEventDate: profileQuery.data.goalRaceEventDate,
       goalRaceEventDistanceKm: profileQuery.data.goalRaceEventDistanceKm,
+      raceTargetType: profileQuery.data.raceTargetType,
+      targetTimeSeconds: profileQuery.data.targetTimeSeconds,
+      targetPaceSecondsPerKm: profileQuery.data.targetPaceSecondsPerKm,
     });
+    setTimeInputValue(formatRaceTime(profileQuery.data.targetTimeSeconds));
+    setPaceInputValue(formatRacePace(profileQuery.data.targetPaceSecondsPerKm));
   }, [profileQuery.data]);
 
   const saveMutation = useMutation({
@@ -163,18 +189,135 @@ export default function ProfileScreen({
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (!isProfileUpdateComplete(form)) return;
     saveMutation.mutate(form);
   };
+
+  const handleDistanceChange = (value: string) => {
+    const distanceKm = value === "" ? "" : Number(value);
+
+    if (form.raceTargetType === "TIME") {
+      const targetPaceSecondsPerKm = equivalentPaceSeconds(
+        form.targetTimeSeconds,
+        distanceKm,
+      );
+      setPaceInputValue(formatRacePace(targetPaceSecondsPerKm));
+      setForm((previous) => ({
+        ...previous,
+        goalRaceEventDistanceKm: distanceKm,
+        targetPaceSecondsPerKm,
+      }));
+      return;
+    }
+
+    if (form.raceTargetType === "PACE") {
+      const targetTimeSeconds = equivalentTimeSeconds(
+        form.targetPaceSecondsPerKm,
+        distanceKm,
+      );
+      setTimeInputValue(formatRaceTime(targetTimeSeconds));
+      setForm((previous) => ({
+        ...previous,
+        goalRaceEventDistanceKm: distanceKm,
+        targetTimeSeconds,
+      }));
+      return;
+    }
+
+    setForm((previous) => ({ ...previous, goalRaceEventDistanceKm: distanceKm }));
+  };
+
+  const handleRaceTargetTypeChange = (raceTargetType: RaceTargetType) => {
+    if (raceTargetType === "FINISH_ONLY") {
+      setTimeInputValue("");
+      setPaceInputValue("");
+      setForm((previous) => ({
+        ...previous,
+        raceTargetType,
+        targetTimeSeconds: "",
+        targetPaceSecondsPerKm: "",
+      }));
+      return;
+    }
+
+    if (raceTargetType === "TIME") {
+      const targetTimeSeconds =
+        form.targetTimeSeconds ||
+        equivalentTimeSeconds(form.targetPaceSecondsPerKm, form.goalRaceEventDistanceKm);
+      const targetPaceSecondsPerKm = equivalentPaceSeconds(
+        targetTimeSeconds,
+        form.goalRaceEventDistanceKm,
+      );
+      setTimeInputValue(formatRaceTime(targetTimeSeconds));
+      setPaceInputValue(formatRacePace(targetPaceSecondsPerKm));
+      setForm((previous) => ({
+        ...previous,
+        raceTargetType,
+        targetTimeSeconds,
+        targetPaceSecondsPerKm,
+      }));
+      return;
+    }
+
+    const targetPaceSecondsPerKm =
+      form.targetPaceSecondsPerKm ||
+      equivalentPaceSeconds(form.targetTimeSeconds, form.goalRaceEventDistanceKm);
+    const targetTimeSeconds = equivalentTimeSeconds(
+      targetPaceSecondsPerKm,
+      form.goalRaceEventDistanceKm,
+    );
+    setPaceInputValue(formatRacePace(targetPaceSecondsPerKm));
+    setTimeInputValue(formatRaceTime(targetTimeSeconds));
+    setForm((previous) => ({
+      ...previous,
+      raceTargetType,
+      targetTimeSeconds,
+      targetPaceSecondsPerKm,
+    }));
+  };
+
+  const handleTimeChange = (value: string) => {
+    const targetTimeSeconds = parseRaceTime(value);
+    const targetPaceSecondsPerKm = equivalentPaceSeconds(
+      targetTimeSeconds,
+      form.goalRaceEventDistanceKm,
+    );
+
+    setTimeInputValue(value);
+    setPaceInputValue(formatRacePace(targetPaceSecondsPerKm));
+    setForm((previous) => ({
+      ...previous,
+      targetTimeSeconds,
+      targetPaceSecondsPerKm,
+    }));
+  };
+
+  const handlePaceChange = (value: string) => {
+    const targetPaceSecondsPerKm = parseRacePace(value);
+    const targetTimeSeconds = equivalentTimeSeconds(
+      targetPaceSecondsPerKm,
+      form.goalRaceEventDistanceKm,
+    );
+
+    setPaceInputValue(value);
+    setTimeInputValue(formatRaceTime(targetTimeSeconds));
+    setForm((previous) => ({
+      ...previous,
+      targetTimeSeconds,
+      targetPaceSecondsPerKm,
+    }));
+  };
+
   const isOnboarding = variant === "onboarding";
-  const isFormComplete =
-    form.displayName.trim().length > 0 &&
-    form.trainingGoal.trim().length > 0 &&
-    form.runningDays.length >= 4 &&
-    form.runningDays.includes(form.longRunPreferredDay) &&
-    form.goalRaceEventName.trim().length > 0 &&
-    form.goalRaceEventDate.trim().length > 0 &&
-    form.goalRaceEventDistanceKm !== "" &&
-    Number(form.goalRaceEventDistanceKm) > 0;
+  const isFormComplete = isProfileUpdateComplete(form);
+  const invalidTime =
+    form.raceTargetType === "TIME" &&
+    timeInputValue.trim().length > 0 &&
+    parseRaceTime(timeInputValue) === "";
+  const invalidPace =
+    form.raceTargetType === "PACE" &&
+    paceInputValue.trim().length > 0 &&
+    parseRacePace(paceInputValue) === "";
 
   if (profileQuery.isLoading) {
     return (
@@ -212,6 +355,8 @@ export default function ProfileScreen({
           <Input
             id="display-name"
             value={form.displayName}
+            maxLength={120}
+            required
             onChange={(event) => setForm((prev) => ({ ...prev, displayName: event.target.value }))}
           />
         </div>
@@ -308,75 +453,166 @@ export default function ProfileScreen({
           </p>
         </div>
 
-        <motion.div
-          ref={raceGoalSectionRef}
-          id="goal-race-section"
-          className={cn(
-            "-mx-3 space-y-3 rounded-lg px-3 py-3 transition-all duration-500",
-            highlightRaceGoal
-              ? "bg-primary/5 shadow-sm ring-2 ring-primary/60"
-              : "ring-0 ring-transparent",
-          )}
-          animate={
-            highlightRaceGoal && !reduceMotion
-              ? { scale: [1, 1.01, 1] }
-              : { scale: 1 }
-          }
-          transition={{ duration: 0.45, ease: "easeOut" }}
-        >
-          <Label htmlFor="goal-race-event-name">Goal race / event</Label>
-          <div className="space-y-3">
-            <Input
-              id="goal-race-event-name"
-              ref={raceGoalEventNameRef}
-              value={form.goalRaceEventName}
-              placeholder="Event name"
-              onChange={(event) => setForm((prev) => ({ ...prev, goalRaceEventName: event.target.value }))}
-            />
-            <div className="grid gap-3 sm:grid-cols-[minmax(8rem,0.75fr)_minmax(0,1.25fr)]">
+        {form.trainingGoal === "prepare_for_race" ? (
+          <motion.div
+            ref={raceGoalSectionRef}
+            id="goal-race-section"
+            className={cn(
+              "-mx-3 space-y-5 rounded-lg px-3 py-3 transition-all duration-500",
+              highlightRaceGoal
+                ? "bg-primary/5 shadow-sm ring-2 ring-primary/60"
+                : "ring-0 ring-transparent",
+            )}
+            animate={
+              highlightRaceGoal && !reduceMotion
+                ? { scale: [1, 1.01, 1] }
+                : { scale: 1 }
+            }
+            transition={{ duration: 0.45, ease: "easeOut" }}
+          >
+            <div className="space-y-3">
+              <Label htmlFor="goal-race-event-name">Goal race / event</Label>
               <Input
-                type="number"
-                min="1"
-                max="250"
-                step="0.1"
-                value={form.goalRaceEventDistanceKm}
-                placeholder="Distance (km)"
+                id="goal-race-event-name"
+                ref={raceGoalEventNameRef}
+                value={form.goalRaceEventName}
+                placeholder="Event name"
+                maxLength={120}
+                required
                 onChange={(event) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    goalRaceEventDistanceKm: event.target.value === "" ? "" : Number(event.target.value),
-                  }))
+                  setForm((prev) => ({ ...prev, goalRaceEventName: event.target.value }))
                 }
               />
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn("w-full justify-start text-left font-normal", !raceDate && "text-muted-foreground")}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {raceDate ? format(raceDate, "PPP") : "Pick a date"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={raceDate}
-                    disabled={(date) => date < startOfToday()}
-                    onSelect={(value) =>
-                      setForm((prev) => ({
-                        ...prev,
-                        goalRaceEventDate: value ? format(value, "yyyy-MM-dd") : "",
-                      }))
-                    }
-                    initialFocus
-                    className={cn("pointer-events-auto p-3")}
-                  />
-                </PopoverContent>
-              </Popover>
+              <div className="grid gap-3 sm:grid-cols-[minmax(8rem,0.75fr)_minmax(0,1.25fr)]">
+                <Input
+                  aria-label="Race distance in kilometres"
+                  type="number"
+                  min="1"
+                  max="250"
+                  step="0.1"
+                  value={form.goalRaceEventDistanceKm}
+                  placeholder="Distance (km)"
+                  required
+                  onChange={(event) => handleDistanceChange(event.target.value)}
+                />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !raceDate && "text-muted-foreground",
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {raceDate ? format(raceDate, "PPP") : "Pick a date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={raceDate}
+                      disabled={(date) => date < startOfToday()}
+                      onSelect={(value) =>
+                        setForm((prev) => ({
+                          ...prev,
+                          goalRaceEventDate: value ? format(value, "yyyy-MM-dd") : "",
+                        }))
+                      }
+                      initialFocus
+                      className={cn("pointer-events-auto p-3")}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
             </div>
-          </div>
-        </motion.div>
+
+            <fieldset className="space-y-3">
+              <legend className="text-sm font-medium leading-none text-foreground">
+                Race target
+              </legend>
+              <div className="grid gap-2 sm:grid-cols-3">
+                {raceTargetOptions.map((option) => (
+                  <label
+                    key={option.value}
+                    className={cn(
+                      "flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-3 text-sm font-medium transition-colors",
+                      form.raceTargetType === option.value
+                        ? "border-primary bg-primary/5 text-foreground"
+                        : "border-divider text-muted-foreground hover:border-foreground/20 hover:text-foreground",
+                    )}
+                  >
+                    <input
+                      type="radio"
+                      name="race-target"
+                      value={option.value}
+                      checked={form.raceTargetType === option.value}
+                      onChange={() => handleRaceTargetTypeChange(option.value)}
+                      className="h-4 w-4 accent-primary"
+                    />
+                    {option.label}
+                  </label>
+                ))}
+              </div>
+
+              {form.raceTargetType === "FINISH_ONLY" ? (
+                <p className="text-xs leading-relaxed text-muted-foreground">
+                  No finish time target. Your plan will focus on getting you race-ready.
+                </p>
+              ) : (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="target-time">
+                      {form.raceTargetType === "TIME" ? "Target time" : "Equivalent time"}
+                    </Label>
+                    <Input
+                      id="target-time"
+                      value={timeInputValue}
+                      placeholder="1:45:00"
+                      inputMode="numeric"
+                      readOnly={form.raceTargetType !== "TIME"}
+                      required={form.raceTargetType === "TIME"}
+                      aria-invalid={invalidTime}
+                      aria-describedby="target-format-hint"
+                      className={cn(
+                        form.raceTargetType !== "TIME" && "bg-muted/40 text-muted-foreground",
+                      )}
+                      onChange={(event) => handleTimeChange(event.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="target-pace">
+                      {form.raceTargetType === "PACE"
+                        ? "Target pace / km"
+                        : "Equivalent pace / km"}
+                    </Label>
+                    <Input
+                      id="target-pace"
+                      value={paceInputValue}
+                      placeholder="4:58"
+                      inputMode="numeric"
+                      readOnly={form.raceTargetType !== "PACE"}
+                      required={form.raceTargetType === "PACE"}
+                      aria-invalid={invalidPace}
+                      aria-describedby="target-format-hint"
+                      className={cn(
+                        form.raceTargetType !== "PACE" && "bg-muted/40 text-muted-foreground",
+                      )}
+                      onChange={(event) => handlePaceChange(event.target.value)}
+                    />
+                  </div>
+                  <p
+                    id="target-format-hint"
+                    className="text-xs leading-relaxed text-muted-foreground sm:col-span-2"
+                  >
+                    Enter time as h:mm:ss or mm:ss, and pace as mm:ss. The equivalent
+                    updates from the race distance.
+                  </p>
+                </div>
+              )}
+            </fieldset>
+          </motion.div>
+        ) : null}
 
         <div className="space-y-2">
           <Label>Notes for your coach</Label>
@@ -406,7 +642,7 @@ export default function ProfileScreen({
         <Button
           variant="hero"
           className="mt-2"
-          disabled={saveMutation.isPending || (isOnboarding && !isFormComplete)}
+          disabled={saveMutation.isPending || !isFormComplete}
         >
           {saveMutation.isPending ? (
             <><RefreshCcw className="mr-2 h-4 w-4 animate-spin" /> Saving</>
