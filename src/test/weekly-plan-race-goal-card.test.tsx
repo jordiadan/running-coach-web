@@ -149,6 +149,8 @@ describe("WeeklyPlanScreen race goal outcome", () => {
 
     expect((await screen.findAllByText("Synced from Strava")).length).toBeGreaterThan(0);
     expect(document.querySelector('img[src="/strava-echelon-white.svg"]')).toBeInTheDocument();
+    expect(screen.getAllByText("Planned").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Actual").length).toBeGreaterThan(0);
     expect(screen.getAllByText(/47 min · 8.2 km/).length).toBeGreaterThan(0);
     expect(screen.getByText("45 min")).toBeInTheDocument();
   });

@@ -176,10 +176,17 @@ function SyncedActivityBadge({ session }: { session: WeeklyCoachSession }) {
   );
 }
 
-function SyncedActivityMetrics({ session }: { session: WeeklyCoachSession }) {
+function SyncedActivityComparison({ session }: { session: WeeklyCoachSession }) {
   if (!session.completed || session.completionSource !== "SYNCED_ACTIVITY" || !session.syncedActivity) return null;
   const activity = session.syncedActivity;
-  return <div className="mt-1 text-[11px] text-muted-foreground">{activity.durationMinutes} min · {formatDecimal(activity.distanceKm)} km</div>;
+  return (
+    <div className="mt-1.5 grid w-fit grid-cols-[auto_auto] gap-x-2 gap-y-0.5 text-xs leading-4">
+      <span className="text-muted-foreground">Planned</span>
+      <span className="tabular-nums text-muted-foreground">{session.durationMinutes} min</span>
+      <span className="font-medium text-foreground">Actual</span>
+      <span className="tabular-nums font-medium text-foreground">{activity.durationMinutes} min · {formatDecimal(activity.distanceKm)} km</span>
+    </div>
+  );
 }
 
 function formatWeekRangeLabel(start: Date, end: Date) {
@@ -599,7 +606,7 @@ function TodayDoneCard({
                 </p>
                 <SyncedActivityBadge session={session} />
               </div>
-              <SyncedActivityMetrics session={session} />
+              <SyncedActivityComparison session={session} />
             </div>
           </div>
           {canToggleCompletion ? (
@@ -1102,7 +1109,7 @@ function ScheduleList({
                         </span>
                         <SyncedActivityBadge session={session} />
                       </div>
-                      <SyncedActivityMetrics session={session} />
+                      <SyncedActivityComparison session={session} />
                     </div>
 
                     <div className="flex shrink-0 items-center gap-2">
@@ -1115,7 +1122,7 @@ function ScheduleList({
                           Key
                         </Badge>
                       ) : null}
-                      {session.durationMinutes > 0 ? (
+                      {session.durationMinutes > 0 && session.completionSource !== "SYNCED_ACTIVITY" ? (
                         <span className="text-[11px] tabular-nums text-muted-foreground">{session.durationMinutes} min</span>
                       ) : null}
                       {!isRest ? (
