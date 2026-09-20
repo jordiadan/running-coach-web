@@ -159,20 +159,27 @@ function formatDecimal(value: number | undefined) {
   return value % 1 === 0 ? String(value) : value.toFixed(1);
 }
 
-function SyncedCompletion({ session }: { session: WeeklyCoachSession }) {
+function SyncedActivityBadge({ session }: { session: WeeklyCoachSession }) {
   if (!session.completed || session.completionSource !== "SYNCED_ACTIVITY") return null;
-  const activity = session.syncedActivity;
+  const provider = session.syncedActivity?.provider;
+  if (provider !== "STRAVA") {
+    return <span className="text-[11px] text-muted-foreground">Synced activity{provider ? ` · ${provider}` : ""}</span>;
+  }
+
   return (
-    <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground">
-      <span className="font-medium text-primary">✓ Completed automatically</span>
-      {activity?.provider === "STRAVA" ? (
-        <span className="rounded-full border border-orange-500/20 bg-orange-500/10 px-1.5 py-0.5 font-semibold text-orange-700 dark:text-orange-300">
-          Strava
-        </span>
-      ) : activity?.provider ? <span>· {activity.provider}</span> : null}
-      {activity ? <span>· {activity.durationMinutes} min · {formatDecimal(activity.distanceKm)} km</span> : null}
-    </div>
+    <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-orange-500/25 bg-orange-500/10 py-0.5 pl-0.5 pr-2 text-[11px] font-medium text-orange-800 dark:text-orange-200">
+      <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[#FC5200]">
+        <img src="/strava-echelon-white.svg" alt="" className="h-2.5 w-auto" />
+      </span>
+      Synced from Strava
+    </span>
   );
+}
+
+function SyncedActivityMetrics({ session }: { session: WeeklyCoachSession }) {
+  if (!session.completed || session.completionSource !== "SYNCED_ACTIVITY" || !session.syncedActivity) return null;
+  const activity = session.syncedActivity;
+  return <div className="mt-1 text-[11px] text-muted-foreground">{activity.durationMinutes} min · {formatDecimal(activity.distanceKm)} km</div>;
 }
 
 function formatWeekRangeLabel(start: Date, end: Date) {
@@ -586,10 +593,13 @@ function TodayDoneCard({
                 <Sparkles className="h-3 w-3 text-primary" />
                 <span className="text-[10px] font-semibold uppercase tracking-widest text-primary">Today done</span>
               </div>
-              <p className="mt-0.5 truncate text-sm font-medium text-foreground/90 line-through decoration-muted-foreground/40">
-                {session.title}
-              </p>
-              <SyncedCompletion session={session} />
+              <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
+                <p className="min-w-0 max-w-full truncate text-sm font-medium text-foreground/90 line-through decoration-muted-foreground/40">
+                  {session.title}
+                </p>
+                <SyncedActivityBadge session={session} />
+              </div>
+              <SyncedActivityMetrics session={session} />
             </div>
           </div>
           {canToggleCompletion ? (
@@ -1086,10 +1096,13 @@ function ScheduleList({
                     </div>
 
                     <div className="min-w-0 flex-1">
-                      <span className={`block truncate text-sm ${isDone ? "text-muted-foreground line-through" : "text-foreground"}`}>
-                        {session.title}
-                      </span>
-                      <SyncedCompletion session={session} />
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <span className={`min-w-0 max-w-full truncate text-sm ${isDone ? "text-muted-foreground line-through" : "text-foreground"}`}>
+                          {session.title}
+                        </span>
+                        <SyncedActivityBadge session={session} />
+                      </div>
+                      <SyncedActivityMetrics session={session} />
                     </div>
 
                     <div className="flex shrink-0 items-center gap-2">

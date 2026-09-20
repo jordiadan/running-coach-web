@@ -147,7 +147,8 @@ describe("WeeklyPlanScreen race goal outcome", () => {
     }];
     renderWeeklyPlan(data);
 
-    expect((await screen.findAllByText("Strava")).length).toBeGreaterThan(0);
+    expect((await screen.findAllByText("Synced from Strava")).length).toBeGreaterThan(0);
+    expect(document.querySelector('img[src="/strava-echelon-white.svg"]')).toBeInTheDocument();
     expect(screen.getAllByText(/47 min · 8.2 km/).length).toBeGreaterThan(0);
     expect(screen.getByText("45 min")).toBeInTheDocument();
   });
@@ -161,7 +162,7 @@ describe("WeeklyPlanScreen race goal outcome", () => {
     renderWeeklyPlan(data);
 
     expect(await screen.findByText("Easy run")).toBeInTheDocument();
-    expect(screen.queryByText("Strava")).not.toBeInTheDocument();
+    expect(screen.queryByText("Synced from Strava")).not.toBeInTheDocument();
   });
 
   it("shows outcome actions for unknown post-goal races", async () => {
