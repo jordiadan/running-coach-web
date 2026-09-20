@@ -229,7 +229,7 @@ describe("portal-api weekly coach helpers", () => {
               completed: true,
               completionSource: "SYNCED_ACTIVITY",
               syncedActivity: {
-                activityId: "12345", provider: "STRAVA", durationMinutes: 97,
+                activityId: "12345", provider: "STRAVA", activityUrl: "https://www.strava.com/activities/12345", durationMinutes: 97,
                 distanceKm: 17.2, elevationGainMeters: 90,
               },
               role: "KEY",
@@ -270,7 +270,7 @@ describe("portal-api weekly coach helpers", () => {
         plan: {
           sessions: [{
             completionSource: "SYNCED_ACTIVITY",
-            syncedActivity: { activityId: "12345", provider: "STRAVA", durationMinutes: 97, distanceKm: 17.2 },
+            syncedActivity: { activityId: "12345", provider: "STRAVA", activityUrl: "https://www.strava.com/activities/12345", durationMinutes: 97, distanceKm: 17.2 },
           }],
         },
       },

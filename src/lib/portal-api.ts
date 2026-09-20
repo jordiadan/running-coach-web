@@ -73,6 +73,7 @@ export type WeeklyCoachSession = {
   syncedActivity?: {
     activityId: string;
     provider?: string;
+    activityUrl?: string;
     durationMinutes: number;
     distanceKm: number;
     elevationGainMeters?: number;
@@ -96,6 +97,7 @@ function asSyncedActivity(value: unknown): WeeklyCoachSession["syncedActivity"] 
   return {
     activityId: activity.activityId,
     provider: typeof activity.provider === "string" ? activity.provider : undefined,
+    activityUrl: typeof activity.activityUrl === "string" ? activity.activityUrl : undefined,
     durationMinutes: activity.durationMinutes,
     distanceKm: activity.distanceKm,
     elevationGainMeters: typeof activity.elevationGainMeters === "number" ? activity.elevationGainMeters : undefined,

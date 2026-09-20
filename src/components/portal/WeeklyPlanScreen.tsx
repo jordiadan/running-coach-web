@@ -3,6 +3,7 @@ import { differenceInCalendarWeeks, format, parseISO } from "date-fns";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   ArrowRight,
+  ExternalLink,
   Flag,
   CalendarOff,
   Check,
@@ -161,30 +162,43 @@ function formatDecimal(value: number | undefined) {
 
 function SyncedActivityBadge({ session }: { session: WeeklyCoachSession }) {
   if (!session.completed || session.completionSource !== "SYNCED_ACTIVITY") return null;
-  const provider = session.syncedActivity?.provider;
+  const activity = session.syncedActivity;
+  const provider = activity?.provider;
   if (provider !== "STRAVA") {
     return <span className="text-[11px] text-muted-foreground">Synced activity{provider ? ` · ${provider}` : ""}</span>;
   }
 
-  return (
-    <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-orange-500/25 bg-orange-500/10 py-0.5 pl-0.5 pr-2 text-[11px] font-medium text-orange-800 dark:text-orange-200">
+  const content = (
+    <>
       <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[#FC5200]">
         <img src="/strava-echelon-white.svg" alt="" className="h-2.5 w-auto" />
       </span>
-      Synced from Strava
-    </span>
+      <span className="hidden sm:inline">View on Strava</span>
+      {activity.activityUrl ? <ExternalLink className="hidden h-2.5 w-2.5 sm:inline" aria-hidden="true" /> : null}
+    </>
+  );
+
+  const className = "inline-flex shrink-0 items-center gap-1 rounded-full border border-orange-500/25 bg-orange-500/10 p-0.5 text-[11px] font-medium text-orange-800 transition-colors hover:bg-orange-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 sm:pr-2 dark:text-orange-200";
+
+  if (!activity.activityUrl) {
+    return <span aria-label="Synced from Strava" title="Synced from Strava" className={className}>{content}</span>;
+  }
+
+  return (
+    <a href={activity.activityUrl} target="_blank" rel="noopener noreferrer" aria-label="View on Strava (opens in a new tab)" className={className}>
+      {content}
+    </a>
   );
 }
 
-function SyncedActivityComparison({ session }: { session: WeeklyCoachSession }) {
-  if (!session.completed || session.completionSource !== "SYNCED_ACTIVITY" || !session.syncedActivity) return null;
-  const activity = session.syncedActivity;
+function SessionRightSummary({ session }: { session: WeeklyCoachSession }) {
+  if (session.durationMinutes <= 0) return null;
+  const isSynced = session.completed && session.completionSource === "SYNCED_ACTIVITY";
+
   return (
-    <div className="mt-1.5 grid w-fit grid-cols-[auto_auto] gap-x-2 gap-y-0.5 text-xs leading-4">
-      <span className="text-muted-foreground">Planned</span>
-      <span className="tabular-nums text-muted-foreground">{session.durationMinutes} min</span>
-      <span className="font-medium text-foreground">Actual</span>
-      <span className="tabular-nums font-medium text-foreground">{activity.durationMinutes} min · {formatDecimal(activity.distanceKm)} km</span>
+    <div className="inline-flex items-center gap-2 whitespace-nowrap">
+      {isSynced ? <SyncedActivityBadge session={session} /> : null}
+      <span className="text-[11px] tabular-nums text-muted-foreground" title="Planned duration">{session.durationMinutes} min</span>
     </div>
   );
 }
@@ -604,10 +618,9 @@ function TodayDoneCard({
                 <p className="min-w-0 max-w-full truncate text-sm font-medium text-foreground/90 line-through decoration-muted-foreground/40">
                   {session.title}
                 </p>
-                <SyncedActivityBadge session={session} />
               </div>
-              <SyncedActivityComparison session={session} />
             </div>
+            <SessionRightSummary session={session} />
           </div>
           {canToggleCompletion ? (
             <button
@@ -1103,16 +1116,13 @@ function ScheduleList({
                     </div>
 
                     <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                        <span className={`min-w-0 max-w-full truncate text-sm ${isDone ? "text-muted-foreground line-through" : "text-foreground"}`}>
-                          {session.title}
-                        </span>
-                        <SyncedActivityBadge session={session} />
-                      </div>
-                      <SyncedActivityComparison session={session} />
+                      <span className={`block min-w-0 max-w-full truncate text-sm ${isDone ? "text-muted-foreground line-through" : "text-foreground"}`}>
+                        {session.title}
+                      </span>
                     </div>
 
                     <div className="flex shrink-0 items-center gap-2">
+                      <SessionRightSummary session={session} />
                       {isKey && !isDone ? (
                         <Badge
                           variant="outline"
@@ -1121,9 +1131,6 @@ function ScheduleList({
                           <Star className="h-2.5 w-2.5 fill-accent" />
                           Key
                         </Badge>
-                      ) : null}
-                      {session.durationMinutes > 0 && session.completionSource !== "SYNCED_ACTIVITY" ? (
-                        <span className="text-[11px] tabular-nums text-muted-foreground">{session.durationMinutes} min</span>
                       ) : null}
                       {!isRest ? (
                         <motion.div

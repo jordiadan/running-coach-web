@@ -136,23 +136,24 @@ describe("WeeklyPlanScreen race goal outcome", () => {
     setCurrentUserWeeklyCoachSessionCompletionMock.mockResolvedValue(undefined);
   });
 
-  it("shows Strava completion and actual activity alongside planned duration", async () => {
+  it("shows a compact link to the synced Strava activity beside planned duration", async () => {
     const data = weeklyCoachScreen({ goalTimelineState: "POST_GOAL", goalOutcomeStatus: "UNKNOWN" });
     data.plan!.plan.sessions = [{
       day: "MON", modality: "RUN", type: "EASY", title: "Easy run", durationMinutes: 45,
       completed: true, completionSource: "SYNCED_ACTIVITY", intensityCategory: "LOW",
       placementReason: "Aerobic work", syncedActivity: {
-        activityId: "12345", provider: "STRAVA", durationMinutes: 47, distanceKm: 8.2,
+        activityId: "12345", provider: "STRAVA", activityUrl: "https://www.strava.com/activities/12345",
+        durationMinutes: 47, distanceKm: 8.2,
       },
     }];
     renderWeeklyPlan(data);
 
-    expect((await screen.findAllByText("Synced from Strava")).length).toBeGreaterThan(0);
+    expect((await screen.findAllByText("View on Strava")).length).toBeGreaterThan(0);
     expect(document.querySelector('img[src="/strava-echelon-white.svg"]')).toBeInTheDocument();
-    expect(screen.getAllByText("Planned").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Actual").length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/47 min · 8.2 km/).length).toBeGreaterThan(0);
-    expect(screen.getByText("45 min")).toBeInTheDocument();
+    expect(screen.getAllByText("45 min").length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("link", { name: "View on Strava (opens in a new tab)" })[0]).toHaveAttribute(
+      "href", "https://www.strava.com/activities/12345",
+    );
   });
 
   it("keeps manual completion without a provider badge", async () => {
@@ -164,7 +165,7 @@ describe("WeeklyPlanScreen race goal outcome", () => {
     renderWeeklyPlan(data);
 
     expect(await screen.findByText("Easy run")).toBeInTheDocument();
-    expect(screen.queryByText("Synced from Strava")).not.toBeInTheDocument();
+    expect(screen.queryByText("View on Strava")).not.toBeInTheDocument();
   });
 
   it("shows outcome actions for unknown post-goal races", async () => {
