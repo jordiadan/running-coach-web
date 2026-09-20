@@ -69,12 +69,38 @@ export type WeeklyCoachSession = {
   title: string;
   durationMinutes: number;
   completed?: boolean;
+  completionSource?: "MANUAL" | "SYNCED_ACTIVITY";
+  syncedActivity?: {
+    activityId: string;
+    provider?: string;
+    durationMinutes: number;
+    distanceKm: number;
+    elevationGainMeters?: number;
+  };
   role?: string;
   intensityCategory: string;
   placementReason: string;
   notes?: string;
   strengthFocus?: string[] | null;
 };
+
+function asCompletionSource(value: unknown): WeeklyCoachSession["completionSource"] {
+  return value === "MANUAL" || value === "SYNCED_ACTIVITY" ? value : undefined;
+}
+
+function asSyncedActivity(value: unknown): WeeklyCoachSession["syncedActivity"] {
+  if (!value || typeof value !== "object") return undefined;
+  const activity = value as Record<string, unknown>;
+  if (typeof activity.activityId !== "string" || typeof activity.durationMinutes !== "number" ||
+      typeof activity.distanceKm !== "number") return undefined;
+  return {
+    activityId: activity.activityId,
+    provider: typeof activity.provider === "string" ? activity.provider : undefined,
+    durationMinutes: activity.durationMinutes,
+    distanceKm: activity.distanceKm,
+    elevationGainMeters: typeof activity.elevationGainMeters === "number" ? activity.elevationGainMeters : undefined,
+  };
+}
 
 export type WeeklyCoachPlan = {
   athleteId: string;
@@ -550,6 +576,8 @@ export async function getWeeklyCoachPlan(athleteId: string, weekStartDate: strin
         title: asString(session.title),
         durationMinutes: typeof session.durationMinutes === "number" ? session.durationMinutes : 0,
         completed: typeof session.completed === "boolean" ? session.completed : undefined,
+        completionSource: asCompletionSource(session.completionSource),
+        syncedActivity: asSyncedActivity(session.syncedActivity),
         role: asString(session.role) || undefined,
         intensityCategory: asString(session.intensityCategory),
         placementReason: asString(session.placementReason),
@@ -682,6 +710,8 @@ export async function getCurrentUserWeeklyCoachScreen(weekStartDate?: string) {
               title: asString(session.title),
               durationMinutes: typeof session.durationMinutes === "number" ? session.durationMinutes : 0,
               completed: typeof session.completed === "boolean" ? session.completed : undefined,
+              completionSource: asCompletionSource(session.completionSource),
+              syncedActivity: asSyncedActivity(session.syncedActivity),
               role: asString(session.role) || undefined,
               intensityCategory: asString(session.intensityCategory),
               placementReason: asString(session.placementReason),

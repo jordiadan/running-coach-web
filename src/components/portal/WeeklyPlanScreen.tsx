@@ -159,6 +159,22 @@ function formatDecimal(value: number | undefined) {
   return value % 1 === 0 ? String(value) : value.toFixed(1);
 }
 
+function SyncedCompletion({ session }: { session: WeeklyCoachSession }) {
+  if (!session.completed || session.completionSource !== "SYNCED_ACTIVITY") return null;
+  const activity = session.syncedActivity;
+  return (
+    <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground">
+      <span className="font-medium text-primary">✓ Completed automatically</span>
+      {activity?.provider === "STRAVA" ? (
+        <span className="rounded-full border border-orange-500/20 bg-orange-500/10 px-1.5 py-0.5 font-semibold text-orange-700 dark:text-orange-300">
+          Strava
+        </span>
+      ) : activity?.provider ? <span>· {activity.provider}</span> : null}
+      {activity ? <span>· {activity.durationMinutes} min · {formatDecimal(activity.distanceKm)} km</span> : null}
+    </div>
+  );
+}
+
 function formatWeekRangeLabel(start: Date, end: Date) {
   const sameMonth = format(start, "MMM yyyy") === format(end, "MMM yyyy");
   const sameYear = format(start, "yyyy") === format(end, "yyyy");
@@ -573,6 +589,7 @@ function TodayDoneCard({
               <p className="mt-0.5 truncate text-sm font-medium text-foreground/90 line-through decoration-muted-foreground/40">
                 {session.title}
               </p>
+              <SyncedCompletion session={session} />
             </div>
           </div>
           {canToggleCompletion ? (
@@ -1072,6 +1089,7 @@ function ScheduleList({
                       <span className={`block truncate text-sm ${isDone ? "text-muted-foreground line-through" : "text-foreground"}`}>
                         {session.title}
                       </span>
+                      <SyncedCompletion session={session} />
                     </div>
 
                     <div className="flex shrink-0 items-center gap-2">
@@ -1203,7 +1221,12 @@ export default function WeeklyPlanScreen({
               plan: {
                 ...current.plan.plan,
                 sessions: current.plan.plan.sessions.map((session) =>
-                  session.day === day ? { ...session, completed } : session,
+                  session.day === day ? {
+                    ...session,
+                    completed,
+                    completionSource: completed ? "MANUAL" as const : undefined,
+                    syncedActivity: undefined,
+                  } : session,
                 ),
               },
             },

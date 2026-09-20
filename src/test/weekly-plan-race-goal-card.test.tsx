@@ -136,6 +136,34 @@ describe("WeeklyPlanScreen race goal outcome", () => {
     setCurrentUserWeeklyCoachSessionCompletionMock.mockResolvedValue(undefined);
   });
 
+  it("shows Strava completion and actual activity alongside planned duration", async () => {
+    const data = weeklyCoachScreen({ goalTimelineState: "POST_GOAL", goalOutcomeStatus: "UNKNOWN" });
+    data.plan!.plan.sessions = [{
+      day: "MON", modality: "RUN", type: "EASY", title: "Easy run", durationMinutes: 45,
+      completed: true, completionSource: "SYNCED_ACTIVITY", intensityCategory: "LOW",
+      placementReason: "Aerobic work", syncedActivity: {
+        activityId: "12345", provider: "STRAVA", durationMinutes: 47, distanceKm: 8.2,
+      },
+    }];
+    renderWeeklyPlan(data);
+
+    expect((await screen.findAllByText("Strava")).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/47 min · 8.2 km/).length).toBeGreaterThan(0);
+    expect(screen.getByText("45 min")).toBeInTheDocument();
+  });
+
+  it("keeps manual completion without a provider badge", async () => {
+    const data = weeklyCoachScreen({ goalTimelineState: "POST_GOAL", goalOutcomeStatus: "UNKNOWN" });
+    data.plan!.plan.sessions = [{
+      day: "MON", modality: "RUN", type: "EASY", title: "Easy run", durationMinutes: 45,
+      completed: true, completionSource: "MANUAL", intensityCategory: "LOW", placementReason: "Aerobic work",
+    }];
+    renderWeeklyPlan(data);
+
+    expect(await screen.findByText("Easy run")).toBeInTheDocument();
+    expect(screen.queryByText("Strava")).not.toBeInTheDocument();
+  });
+
   it("shows outcome actions for unknown post-goal races", async () => {
     renderWeeklyPlan(weeklyCoachScreen({ goalTimelineState: "POST_GOAL", goalOutcomeStatus: "UNKNOWN" }));
 
