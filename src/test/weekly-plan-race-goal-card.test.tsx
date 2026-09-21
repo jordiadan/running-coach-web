@@ -136,6 +136,38 @@ describe("WeeklyPlanScreen race goal outcome", () => {
     setCurrentUserWeeklyCoachSessionCompletionMock.mockResolvedValue(undefined);
   });
 
+  it("shows a compact link to the synced Strava activity beside planned duration", async () => {
+    const data = weeklyCoachScreen({ goalTimelineState: "POST_GOAL", goalOutcomeStatus: "UNKNOWN" });
+    data.plan!.plan.sessions = [{
+      day: "MON", modality: "RUN", type: "EASY", title: "Easy run", durationMinutes: 45,
+      completed: true, completionSource: "SYNCED_ACTIVITY", intensityCategory: "LOW",
+      placementReason: "Aerobic work", syncedActivity: {
+        activityId: "12345", provider: "STRAVA", activityUrl: "https://www.strava.com/activities/12345",
+        durationMinutes: 47, distanceKm: 8.2,
+      },
+    }];
+    renderWeeklyPlan(data);
+
+    expect((await screen.findAllByText("View on Strava")).length).toBeGreaterThan(0);
+    expect(document.querySelector('img[src="/strava-echelon-white.svg"]')).toBeInTheDocument();
+    expect(screen.getAllByText("45 min").length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("link", { name: "View on Strava (opens in a new tab)" })[0]).toHaveAttribute(
+      "href", "https://www.strava.com/activities/12345",
+    );
+  });
+
+  it("keeps manual completion without a provider badge", async () => {
+    const data = weeklyCoachScreen({ goalTimelineState: "POST_GOAL", goalOutcomeStatus: "UNKNOWN" });
+    data.plan!.plan.sessions = [{
+      day: "MON", modality: "RUN", type: "EASY", title: "Easy run", durationMinutes: 45,
+      completed: true, completionSource: "MANUAL", intensityCategory: "LOW", placementReason: "Aerobic work",
+    }];
+    renderWeeklyPlan(data);
+
+    expect(await screen.findByText("Easy run")).toBeInTheDocument();
+    expect(screen.queryByText("View on Strava")).not.toBeInTheDocument();
+  });
+
   it("shows outcome actions for unknown post-goal races", async () => {
     renderWeeklyPlan(weeklyCoachScreen({ goalTimelineState: "POST_GOAL", goalOutcomeStatus: "UNKNOWN" }));
 
