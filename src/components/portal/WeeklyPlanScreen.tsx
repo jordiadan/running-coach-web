@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { differenceInCalendarWeeks, format, parseISO } from "date-fns";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
+  Activity,
   ArrowRight,
   ExternalLink,
   Flag,
@@ -164,28 +165,36 @@ function SyncedActivityBadge({ session }: { session: WeeklyCoachSession }) {
   if (!session.completed || session.completionSource !== "SYNCED_ACTIVITY") return null;
   const activity = session.syncedActivity;
   const provider = activity?.provider;
-  if (provider !== "STRAVA") {
+  if (provider !== "STRAVA" && provider !== "INTERVALS") {
     return <span className="text-[11px] text-muted-foreground">Synced activity{provider ? ` · ${provider}` : ""}</span>;
   }
+  const isStrava = provider === "STRAVA";
+  const providerName = isStrava ? "Strava" : "Intervals";
 
   const content = (
     <>
-      <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[#FC5200]">
-        <img src="/strava-echelon-white.svg" alt="" className="h-2.5 w-auto" />
+      <span className={isStrava
+        ? "flex h-4 w-4 items-center justify-center rounded-full bg-[#FC5200]"
+        : "flex h-4 w-4 items-center justify-center rounded-full bg-sky-600 text-white"}>
+        {isStrava
+          ? <img src="/strava-echelon-white.svg" alt="" className="h-2.5 w-auto" />
+          : <Activity className="h-2.5 w-2.5" aria-hidden="true" />}
       </span>
-      <span className="hidden sm:inline">View on Strava</span>
+      <span className="hidden sm:inline">View on {providerName}</span>
       {activity.activityUrl ? <ExternalLink className="hidden h-2.5 w-2.5 sm:inline" aria-hidden="true" /> : null}
     </>
   );
 
-  const className = "inline-flex shrink-0 items-center gap-1 rounded-full border border-orange-500/25 bg-orange-500/10 p-0.5 text-[11px] font-medium text-orange-800 transition-colors hover:bg-orange-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 sm:pr-2 dark:text-orange-200";
+  const className = isStrava
+    ? "inline-flex shrink-0 items-center gap-1 rounded-full border border-orange-500/25 bg-orange-500/10 p-0.5 text-[11px] font-medium text-orange-800 transition-colors hover:bg-orange-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 sm:pr-2 dark:text-orange-200"
+    : "inline-flex shrink-0 items-center gap-1 rounded-full border border-sky-500/25 bg-sky-500/10 p-0.5 text-[11px] font-medium text-sky-800 transition-colors hover:bg-sky-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 sm:pr-2 dark:text-sky-200";
 
   if (!activity.activityUrl) {
-    return <span aria-label="Synced from Strava" title="Synced from Strava" className={className}>{content}</span>;
+    return <span aria-label={`Synced from ${providerName}`} title={`Synced from ${providerName}`} className={className}>{content}</span>;
   }
 
   return (
-    <a href={activity.activityUrl} target="_blank" rel="noopener noreferrer" aria-label="View on Strava (opens in a new tab)" className={className}>
+    <a href={activity.activityUrl} target="_blank" rel="noopener noreferrer" aria-label={`View on ${providerName} (opens in a new tab)`} className={className}>
       {content}
     </a>
   );

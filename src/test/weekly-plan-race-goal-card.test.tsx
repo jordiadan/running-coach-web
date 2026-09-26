@@ -154,6 +154,27 @@ describe("WeeklyPlanScreen race goal outcome", () => {
     expect(screen.getAllByRole("link", { name: "View on Strava (opens in a new tab)" })[0]).toHaveAttribute(
       "href", "https://www.strava.com/activities/12345",
     );
+    expect(screen.getAllByRole("link", { name: "View on Strava (opens in a new tab)" })[0]).toHaveAttribute("target", "_blank");
+  });
+
+  it("shows a compact link to the synced Intervals activity beside planned duration", async () => {
+    const data = weeklyCoachScreen({ goalTimelineState: "POST_GOAL", goalOutcomeStatus: "UNKNOWN" });
+    data.plan!.plan.sessions = [{
+      day: "MON", modality: "RUN", type: "EASY", title: "Easy run", durationMinutes: 45,
+      completed: true, completionSource: "SYNCED_ACTIVITY", intensityCategory: "LOW",
+      placementReason: "Aerobic work", syncedActivity: {
+        activityId: "i12345", provider: "INTERVALS", activityUrl: "https://intervals.icu/activities/i12345",
+        durationMinutes: 47, distanceKm: 8.2,
+      },
+    }];
+    renderWeeklyPlan(data);
+
+    expect((await screen.findAllByText("View on Intervals")).length).toBeGreaterThan(0);
+    expect(screen.getAllByText("45 min").length).toBeGreaterThan(0);
+    const link = screen.getAllByRole("link", { name: "View on Intervals (opens in a new tab)" })[0];
+    expect(link).toHaveAttribute("href", "https://intervals.icu/activities/i12345");
+    expect(link).toHaveAttribute("target", "_blank");
+    expect(link).toHaveAttribute("rel", "noopener noreferrer");
   });
 
   it("keeps manual completion without a provider badge", async () => {
@@ -161,11 +182,33 @@ describe("WeeklyPlanScreen race goal outcome", () => {
     data.plan!.plan.sessions = [{
       day: "MON", modality: "RUN", type: "EASY", title: "Easy run", durationMinutes: 45,
       completed: true, completionSource: "MANUAL", intensityCategory: "LOW", placementReason: "Aerobic work",
+      syncedActivity: {
+        activityId: "i12345", provider: "INTERVALS", activityUrl: "https://intervals.icu/activities/i12345",
+        durationMinutes: 47, distanceKm: 8.2,
+      },
     }];
     renderWeeklyPlan(data);
 
-    expect(await screen.findByText("Easy run")).toBeInTheDocument();
-    expect(screen.queryByText("View on Strava")).not.toBeInTheDocument();
+    expect((await screen.findAllByText("Easy run")).length).toBeGreaterThan(0);
+    expect(screen.queryByText(/View on (Strava|Intervals)/)).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /view on (strava|intervals)/i })).not.toBeInTheDocument();
+    expect(screen.queryByText(/Synced activity/)).not.toBeInTheDocument();
+  });
+
+  it("shows generic synced activity text for an unknown provider", async () => {
+    const data = weeklyCoachScreen({ goalTimelineState: "POST_GOAL", goalOutcomeStatus: "UNKNOWN" });
+    data.plan!.plan.sessions = [{
+      day: "MON", modality: "RUN", type: "EASY", title: "Easy run", durationMinutes: 45,
+      completed: true, completionSource: "SYNCED_ACTIVITY", intensityCategory: "LOW",
+      placementReason: "Aerobic work", syncedActivity: {
+        activityId: "12345", provider: "OTHER", activityUrl: "https://example.com/activities/12345",
+        durationMinutes: 47, distanceKm: 8.2,
+      },
+    }];
+    renderWeeklyPlan(data);
+
+    expect((await screen.findAllByText("Synced activity · OTHER")).length).toBeGreaterThan(0);
+    expect(screen.queryByRole("link", { name: /view on/i })).not.toBeInTheDocument();
   });
 
   it("shows outcome actions for unknown post-goal races", async () => {
