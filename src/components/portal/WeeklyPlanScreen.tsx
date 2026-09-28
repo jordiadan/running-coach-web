@@ -162,9 +162,9 @@ function formatDecimal(value: number | undefined) {
 }
 
 function SyncedActivityBadge({ session }: { session: WeeklyCoachSession }) {
-  if (!session.completed || session.completionSource !== "SYNCED_ACTIVITY") return null;
   const activity = session.syncedActivity;
-  const provider = activity?.provider;
+  if (!activity) return null;
+  const provider = activity.provider;
   if (provider !== "STRAVA" && provider !== "INTERVALS") {
     return <span className="text-[11px] text-muted-foreground">Synced activity{provider ? ` · ${provider}` : ""}</span>;
   }
@@ -201,13 +201,14 @@ function SyncedActivityBadge({ session }: { session: WeeklyCoachSession }) {
 }
 
 function SessionRightSummary({ session }: { session: WeeklyCoachSession }) {
-  if (session.durationMinutes <= 0) return null;
-  const isSynced = session.completed && session.completionSource === "SYNCED_ACTIVITY";
+  if (session.durationMinutes <= 0 && !session.syncedActivity) return null;
 
   return (
     <div className="inline-flex items-center gap-2 whitespace-nowrap">
-      {isSynced ? <SyncedActivityBadge session={session} /> : null}
-      <span className="text-[11px] tabular-nums text-muted-foreground" title="Planned duration">{session.durationMinutes} min</span>
+      <SyncedActivityBadge session={session} />
+      {session.durationMinutes > 0 ? (
+        <span className="text-[11px] tabular-nums text-muted-foreground" title="Planned duration">{session.durationMinutes} min</span>
+      ) : null}
     </div>
   );
 }
@@ -509,6 +510,7 @@ function TodayPendingCard({
                 <Clock className="h-3.5 w-3.5 text-muted-foreground" />
                 {session.durationMinutes} min
               </span>
+              <SyncedActivityBadge session={session} />
               <span className="inline-flex items-center gap-1.5 text-xs text-foreground/70">
                 <span
                   className={`h-1.5 w-1.5 rounded-full ${
@@ -1261,7 +1263,6 @@ export default function WeeklyPlanScreen({
                     ...session,
                     completed,
                     completionSource: completed ? "MANUAL" as const : undefined,
-                    syncedActivity: undefined,
                   } : session,
                 ),
               },

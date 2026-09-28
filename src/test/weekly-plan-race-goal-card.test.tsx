@@ -36,11 +36,13 @@ function renderWithQueryClient(ui: React.ReactElement) {
     },
   });
 
-  return render(
+  render(
     <QueryClientProvider client={queryClient}>
       {ui}
     </QueryClientProvider>,
   );
+
+  return queryClient;
 }
 
 function weeklyCoachScreen({
@@ -103,7 +105,7 @@ function weeklyCoachScreen({
 function renderWeeklyPlan(screenData: CurrentUserWeeklyCoachScreen, onSetNextGoal = vi.fn()) {
   getCurrentUserWeeklyCoachScreenMock.mockResolvedValue(screenData);
 
-  renderWithQueryClient(
+  const queryClient = renderWithQueryClient(
     <WeeklyPlanScreen
       athleteId="athlete-1"
       targetWeekStartDate={screenData.selectedWeekStartDate}
@@ -113,7 +115,7 @@ function renderWeeklyPlan(screenData: CurrentUserWeeklyCoachScreen, onSetNextGoa
     />,
   );
 
-  return { onSetNextGoal };
+  return { onSetNextGoal, queryClient };
 }
 
 function renderWeeklyPlanWithoutSetNextGoal(screenData: CurrentUserWeeklyCoachScreen) {
@@ -177,7 +179,7 @@ describe("WeeklyPlanScreen race goal outcome", () => {
     expect(link).toHaveAttribute("rel", "noopener noreferrer");
   });
 
-  it("keeps manual completion without a provider badge", async () => {
+  it("keeps a matched activity visible with manual completion", async () => {
     const data = weeklyCoachScreen({ goalTimelineState: "POST_GOAL", goalOutcomeStatus: "UNKNOWN" });
     data.plan!.plan.sessions = [{
       day: "MON", modality: "RUN", type: "EASY", title: "Easy run", durationMinutes: 45,
@@ -189,10 +191,68 @@ describe("WeeklyPlanScreen race goal outcome", () => {
     }];
     renderWeeklyPlan(data);
 
+    expect((await screen.findAllByRole("link", { name: "View on Intervals (opens in a new tab)" })).length).toBeGreaterThan(0);
+    expect(screen.getByRole("button", { name: "Mark Easy run as incomplete" })).toBeInTheDocument();
+  });
+
+  it("keeps a matched activity visible after manual uncompletion", async () => {
+    const data = weeklyCoachScreen({ goalTimelineState: "POST_GOAL", goalOutcomeStatus: "UNKNOWN" });
+    data.todaySessionDay = "MON";
+    data.plan!.plan.sessions = [{
+      day: "MON", modality: "RUN", type: "EASY", title: "Easy run", durationMinutes: 45,
+      completed: false, intensityCategory: "LOW", placementReason: "Aerobic work",
+      syncedActivity: {
+        activityId: "i12345", provider: "INTERVALS", activityUrl: "https://intervals.icu/activities/i12345",
+        durationMinutes: 47, distanceKm: 8.2,
+      },
+    }];
+    renderWeeklyPlan(data);
+
+    expect(await screen.findAllByRole("link", { name: "View on Intervals (opens in a new tab)" })).toHaveLength(2);
+    expect(screen.getByRole("button", { name: "Mark Easy run as complete" })).toBeInTheDocument();
+  });
+
+  it("shows no matched activity for a session without one", async () => {
+    const data = weeklyCoachScreen({ goalTimelineState: "POST_GOAL", goalOutcomeStatus: "UNKNOWN" });
+    data.plan!.plan.sessions = [{
+      day: "MON", modality: "RUN", type: "EASY", title: "Easy run", durationMinutes: 45,
+      completed: true, completionSource: "SYNCED_ACTIVITY", intensityCategory: "LOW", placementReason: "Aerobic work",
+    }];
+    renderWeeklyPlan(data);
+
     expect((await screen.findAllByText("Easy run")).length).toBeGreaterThan(0);
-    expect(screen.queryByText(/View on (Strava|Intervals)/)).not.toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: /view on (strava|intervals)/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /view on/i })).not.toBeInTheDocument();
     expect(screen.queryByText(/Synced activity/)).not.toBeInTheDocument();
+  });
+
+  it.each([true, false])("preserves the activity during an optimistic completion toggle from %s", async (completed) => {
+    const data = weeklyCoachScreen({ goalTimelineState: "UPCOMING", goalOutcomeStatus: "UNKNOWN" });
+    data.todaySessionDay = "MON";
+    const syncedActivity = {
+      activityId: "i12345", provider: "INTERVALS", activityUrl: "https://intervals.icu/activities/i12345",
+      durationMinutes: 47, distanceKm: 8.2,
+    };
+    data.plan!.plan.sessions = [{
+      day: "MON", modality: "RUN", type: "EASY", title: "Easy run", durationMinutes: 45,
+      completed, completionSource: completed ? "SYNCED_ACTIVITY" : undefined,
+      intensityCategory: "LOW", placementReason: "Aerobic work", syncedActivity,
+    }];
+    setCurrentUserWeeklyCoachSessionCompletionMock.mockImplementation(() => new Promise(() => {}));
+    const { queryClient } = renderWeeklyPlan(data);
+
+    fireEvent.click(await screen.findByRole("button", {
+      name: completed ? "Mark Easy run as incomplete" : "Mark Easy run as complete",
+    }));
+
+    await waitFor(() => {
+      const cached = queryClient.getQueryData<CurrentUserWeeklyCoachScreen>(["portal", "weekly-coach-screen", "2026-04-27"]);
+      expect(cached?.plan?.plan.sessions[0]).toMatchObject({
+        completed: !completed,
+        completionSource: !completed ? "MANUAL" : undefined,
+      });
+      expect(cached?.plan?.plan.sessions[0].syncedActivity).toBe(syncedActivity);
+    });
+    expect(screen.getAllByRole("link", { name: "View on Intervals (opens in a new tab)" }).length).toBeGreaterThan(0);
   });
 
   it("shows generic synced activity text for an unknown provider", async () => {
