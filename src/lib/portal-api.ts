@@ -29,6 +29,10 @@ export type PortalBootstrapResponse = {
 
 export type TrainingProviderId = "intervals" | "strava";
 
+function trainingProviderIntegrationPath(provider: TrainingProviderId, athleteId: string) {
+  return `/api/v1/integrations/${provider}/${athleteId}`;
+}
+
 export type TrainingProviderIntegrationStatus = {
   provider: TrainingProviderId;
   connected: boolean;
@@ -412,7 +416,7 @@ export async function setCurrentUserRaceGoalOutcome(outcome: Exclude<GoalOutcome
 }
 
 export async function getTrainingProviderIntegrationStatus(provider: TrainingProviderId, athleteId: string) {
-  const payload = await apiRequest<unknown>(`/api/v1/integrations/${provider}/${athleteId}`);
+  const payload = await apiRequest<unknown>(trainingProviderIntegrationPath(provider, athleteId));
   const record = asRecord(payload);
   const status = asString(record.status);
 
@@ -431,7 +435,7 @@ export async function connectTrainingProvider(
   replaceExistingProvider = false,
 ) {
   const action = replaceExistingProvider ? "replace" : "connect";
-  const payload = await apiRequest<unknown>(`/api/v1/integrations/${provider}/${athleteId}/${action}`, {
+  const payload = await apiRequest<unknown>(`${trainingProviderIntegrationPath(provider, athleteId)}/${action}`, {
     method: "POST",
   });
   const record = asRecord(payload);
@@ -443,7 +447,7 @@ export async function connectTrainingProvider(
 }
 
 export async function disconnectTrainingProvider(provider: TrainingProviderId, athleteId: string) {
-  await apiRequest<void>(`/api/v1/integrations/${provider}/${athleteId}`, {
+  await apiRequest<void>(trainingProviderIntegrationPath(provider, athleteId), {
     method: "DELETE",
   });
 }
