@@ -51,6 +51,7 @@ describe("ConnectScreen", () => {
         status: provider === "strava" ? "connected" : "absent",
         connected: provider === "strava",
         providerAccountRef: provider === "strava" ? "strava-athlete-42" : undefined,
+        authorizationStateExpiresAt: undefined,
       }),
     );
     connectTrainingProviderMock.mockResolvedValue({ redirectUrl: undefined });
@@ -82,5 +83,46 @@ describe("ConnectScreen", () => {
     await waitFor(() => {
       expect(connectTrainingProviderMock).toHaveBeenCalledWith("intervals", "athlete-1", true);
     });
+  });
+
+  it.each([
+    { provider: "strava", name: "Strava", description: "Sync your runs and core activity history from Strava.", index: 0 },
+    { provider: "intervals", name: "Intervals.icu", description: "Sync structured workouts, fitness, fatigue, and readiness context from Intervals.icu.", index: 1 },
+  ] as const)("shows $name branding and connects through generic API", async ({ provider, name, description, index }) => {
+    renderWithQueryClient(
+      <ConnectScreen athleteId="athlete-1" trainingProvider={{ connected: false, readinessCapability: "limited" }} />,
+    );
+
+    expect(screen.getByText(name)).toBeInTheDocument();
+    expect(screen.getByText(description)).toBeInTheDocument();
+    await waitFor(() => expect(screen.getAllByRole("button", { name: /^connect$/i })).toHaveLength(2));
+    fireEvent.click(screen.getAllByRole("button", { name: /^connect$/i })[index]);
+
+    await waitFor(() => expect(connectTrainingProviderMock).toHaveBeenCalledWith(provider, "athlete-1", false));
+    expect(getTrainingProviderIntegrationStatusMock).toHaveBeenCalledWith(provider, "athlete-1");
+  });
+
+  it.each(["strava", "intervals"] as const)("shows %s connection status and disconnects it", async (provider) => {
+    getTrainingProviderIntegrationStatusMock.mockImplementation((requestedProvider: TrainingProviderId) =>
+      Promise.resolve({
+        provider: requestedProvider,
+        status: requestedProvider === provider ? "connected" : "absent",
+        connected: requestedProvider === provider,
+        providerAccountRef: requestedProvider === provider ? "account-42" : undefined,
+        authorizationStateExpiresAt: undefined,
+      }),
+    );
+    renderWithQueryClient(
+      <ConnectScreen athleteId="athlete-1" trainingProvider={{
+        activeProvider: provider,
+        connected: true,
+        activeProviderAccountRef: "account-42",
+        readinessCapability: "full",
+      }} />,
+    );
+
+    expect(await screen.findByText("Connected as account-42.")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /connected/i }));
+    await waitFor(() => expect(disconnectTrainingProviderMock).toHaveBeenCalledWith(provider, "athlete-1"));
   });
 });

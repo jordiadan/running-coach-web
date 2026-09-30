@@ -2,6 +2,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiError, apiRequest } from "@/lib/api";
 import {
   bootstrapPortal,
+  connectTrainingProvider,
+  disconnectTrainingProvider,
+  getTrainingProviderIntegrationStatus,
   getCurrentUserWeeklyCoachScreen,
   getAthleteProfile,
   getWeeklyCoachPlan,
@@ -22,6 +25,46 @@ vi.mock("@/lib/api", async () => {
 });
 
 const apiRequestMock = vi.mocked(apiRequest);
+
+describe("training provider integration API", () => {
+  beforeEach(() => {
+    apiRequestMock.mockReset();
+  });
+
+  it.each(["strava", "intervals"] as const)("uses generic endpoints for %s", async (provider) => {
+    const path = `/api/v1/integrations/${provider}/athlete-1`;
+
+    apiRequestMock.mockResolvedValueOnce({
+      athleteId: "athlete-1",
+      status: "connected",
+      providerAccountRef: "account-42",
+    });
+    await expect(getTrainingProviderIntegrationStatus(provider, "athlete-1")).resolves.toEqual({
+      provider,
+      connected: true,
+      status: "connected",
+      providerAccountRef: "account-42",
+      authorizationStateExpiresAt: undefined,
+    });
+    expect(apiRequestMock).toHaveBeenLastCalledWith(path);
+
+    apiRequestMock.mockResolvedValueOnce({ authorizationUrl: "https://provider.test/authorize" });
+    await expect(connectTrainingProvider(provider, "athlete-1")).resolves.toEqual({
+      redirectUrl: "https://provider.test/authorize",
+    });
+    expect(apiRequestMock).toHaveBeenLastCalledWith(`${path}/connect`, { method: "POST" });
+
+    apiRequestMock.mockResolvedValueOnce({ authorizationUrl: "https://provider.test/replace" });
+    await expect(connectTrainingProvider(provider, "athlete-1", true)).resolves.toEqual({
+      redirectUrl: "https://provider.test/replace",
+    });
+    expect(apiRequestMock).toHaveBeenLastCalledWith(`${path}/replace`, { method: "POST" });
+
+    apiRequestMock.mockResolvedValueOnce(undefined);
+    await disconnectTrainingProvider(provider, "athlete-1");
+    expect(apiRequestMock).toHaveBeenLastCalledWith(path, { method: "DELETE" });
+  });
+});
 
 describe("portal-api weekly coach helpers", () => {
   beforeEach(() => {
