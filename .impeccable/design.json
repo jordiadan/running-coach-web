@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-08T21:24:03.651716Z",
+  "title": "Design System: Running Coach",
+  "extensions": {
+    "shadows": [
+      {
+        "name": "shadow-sm",
+        "value": "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+        "purpose": "Sombra de la tarjeta base de Tailwind."
+      }
+    ],
+    "motion": [
+      {
+        "name": "body-theme-transition",
+        "value": "background-color 0.3s ease, color 0.3s ease",
+        "purpose": "Transición declarada en el body."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      },
+      {
+        "name": "xl",
+        "value": "1280px"
+      },
+      {
+        "name": "2xl",
+        "value": "1536px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Variante default del Button existente; hereda las variables CSS del tema.",
+      "html": "<button class=\"ds-button\">Continue</button>",
+      "css": ".ds-button { display:inline-flex; align-items:center; justify-content:center; gap:8px; height:40px; padding:8px 16px; background:hsl(var(--primary)); color:hsl(var(--primary-foreground)); border:0; border-radius:calc(var(--radius) - 2px); font-family:\"DM Sans\",system-ui,sans-serif; font-size:14px; font-weight:500; line-height:20px; transition:background-color 0.15s; } .ds-button:hover { background:hsl(var(--primary) / 0.9); } .ds-button:focus-visible { outline:2px solid hsl(var(--ring)); outline-offset:2px; } .ds-button:disabled { pointer-events:none; opacity:0.5; }"
+    }
+  ],
+  "narrative": {
+    "overview": "Registro descriptivo del sistema existente en React/Tailwind. No establece una dirección visual nueva ni sustituye el frame de Pencil requerido por AGENTS.md.",
+    "keyCharacteristics": [
+      "Títulos serif y cuerpo sans",
+      "Superficies tonales y controles redondeados",
+      "Landing fotográfica; portal centrado en sesiones"
+    ],
+    "rules": [],
+    "dos": [
+      "Reutilizar los roles y componentes existentes.",
+      "Seguir AGENTS.md y el requisito de Pencil para trabajo estructural."
+    ],
+    "donts": [
+      "Inventar preferencias visuales no documentadas.",
+      "Confundir captura de código con auditoría o rediseño."
+    ]
+  }
+}
