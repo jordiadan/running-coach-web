@@ -109,6 +109,23 @@ overrides, consent and runtime artifacts stay gitignored. Codex hook trust is
 machine-local and separate from Impeccable consent; see README.md. Avoid running
 the same detector from both user/global and project hook sources.
 
+## Pull requests and screen screenshots
+
+Before opening any PR that changes a rendered screen or UI state, run the app
+and capture screenshots of the **actual implemented result** for every affected
+screen. Include both mobile and desktop views whenever the change affects both.
+For existing screens, show before/after screenshots when feasible, with clear
+screen, viewport and state labels (including important empty/error/loading
+states that changed). Upload or link the captures **in the PR description** so
+reviewers can see the changes without checking out the branch. Never invent
+screenshots or present design mockups as implementation evidence.
+
+Screenshots are a pre-PR requirement, not an optional review follow-up. If the
+UI cannot be captured, document the blocker explicitly and keep the PR in
+draft until evidence is available. For changes with no rendered UI impact
+(e.g., docs, tooling, backend contracts), mark the screenshot section
+`Not applicable — no screens changed`; do not generate irrelevant images.
+
 ## Verification and done
 
 For meaningful changes, format changed files, run `npm run lint`, relevant tests
