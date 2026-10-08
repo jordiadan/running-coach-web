@@ -26,6 +26,33 @@ copy and clear UX. No overengineering, speculative abstractions or new heavy UI
 libraries without a concrete need. Reuse the existing foundation before adding
 dependencies or components; do not generalize until repetition is real.
 
+## Agent communication — Caveman Ultra
+
+At the start of each session in this repository, use Caveman Ultra for agent
+chat: plans, progress, summaries, reviews and final handoffs. Read and apply
+the available, enabled `ultracave` skill's `SKILL.md` using its discovered path. For
+older installations exposing only `caveman`, read that skill and select its
+`ultra` level if supported. This is a standing instruction to use the skill;
+do not wait for the user to mention it on every task. If neither is available
+or enabled, follow the concise rules below and report the missing skill once;
+do not claim activation. Do not install or change global skills automatically.
+
+Codex loads this instruction through `AGENTS.md`; it is not a runtime
+activation flag or proof that a skill was loaded. Honor explicit user style
+overrides (including `normal mode` and `stop caveman`) for the rest of the
+session. Preserve required status updates, confirmations and the Impeccable
+workflow; this rule changes chat style only.
+
+Lead with the result. Keep prose terse, direct and non-repetitive; no
+greetings, unnecessary preambles or recap. Keep negations, conditions,
+identifiers, numbers, paths and commands precise. Do not shorten code,
+terminal output, literal errors, user-facing product copy or generated
+documentation, commits or PR descriptions just to satisfy this rule. Use
+complete, unambiguous prose for security, destructive or irreversible changes,
+important trade-offs and any explanation where compression could hide a
+critical detail.
+Follow explicit user instructions about response format or detail.
+
 ## Sources of truth
 
 - Product context: `PRODUCT.md`; open decisions are not approved preferences.
@@ -90,6 +117,31 @@ The shared setup lives in `.impeccable/` and `.codex/hooks.json`. Developer
 overrides, consent and runtime artifacts stay gitignored. Codex hook trust is
 machine-local and separate from Impeccable consent; see README.md. Avoid running
 the same detector from both user/global and project hook sources.
+
+## Pull requests and screen screenshots
+
+Before requesting review of any PR that changes a rendered screen or UI state,
+run the app and capture screenshots of the **actual implemented result** for
+every affected screen. Include both mobile and desktop views whenever the
+change affects both.
+For existing screens, show before/after screenshots when feasible, with clear
+screen, viewport and state labels (including important empty/error/loading
+states that changed). Upload or link the captures **in the PR description** so
+reviewers can see the changes without checking out the branch. Never invent
+screenshots or present design mockups as implementation evidence.
+
+Use test or anonymized data for every capture. Never expose personal
+information, credentials or tokens, including in URLs, browser chrome or
+developer tools. Inspect each image before uploading; redact any sensitive
+content that remains.
+
+Screenshots must be in the description before requesting review, including
+after updates to an existing PR. Complete the visible checklist in
+`.github/pull_request_template.md`. If the UI cannot be captured, document
+the blocker explicitly and keep the PR in draft until evidence is available.
+For changes with no rendered UI impact
+(e.g., docs, tooling, backend contracts), mark the screenshot section
+`Not applicable — no screens changed`; do not generate irrelevant images.
 
 ## Verification and done
 
