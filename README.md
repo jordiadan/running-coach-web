@@ -12,6 +12,26 @@ npm test
 npm run build
 ```
 
+## Caveman Ultra in Codex
+
+Agent chat in this repo defaults to **Caveman Ultra** (now named
+`ultracave`). `AGENTS.md` defines the communication rule, and
+`.caveman.json` sets the project default for Caveman runtimes that
+support it. This is **response style only**: it must not compress code,
+product text, literal errors or documentation.
+
+For the upstream Codex skill, install it if it is not already available:
+
+```sh
+npx skills add JuliusBrussee/caveman --skill ultracave -a codex -g
+```
+
+Restart Codex after installation. The global skill is only *available* in
+other repos; this repo's `AGENTS.md` requests Ultra by default. If Codex
+does not activate it automatically, use `$ultracave` in the session.
+The repository cannot verify a developer's local skill installation or
+force activation in an already-running session.
+
 ## Impeccable in Codex
 
 Reuse the global skill at `~/.agents/skills/impeccable`; this setup was verified
