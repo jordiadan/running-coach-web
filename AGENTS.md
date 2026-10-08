@@ -2,156 +2,111 @@
 
 Rules for AI coding agents working in this repo.
 
-## 1. Product
+## Product and scope
 
-This repo is the user-facing web app for Running Coach.
-It is not the backend.
+This repo is the user-facing web app for Running Coach, not the backend.
 
-Ship the smallest useful slice first:
-- homepage
-- privacy
-- clean frontend foundation
+Current surfaces:
 
-The future portal may include:
-- sign up
-- connect Intervals
-- onboarding and goals
-- weekly plan
-- calendar
-- session detail
+- Public landing page (`/`) and privacy page (`/privacy`).
+- Google sign-in (`/login`) and authenticated portal (`/portal`).
+- Portal onboarding, one active training source (Strava or Intervals.icu),
+  profile and goals, and the weekly plan with session details and completion.
 
-Do not build future portal features speculatively.
+Keep public/trust pages and authenticated workflows separate in a change unless
+the task explicitly requires both. See PRODUCT.md for current capabilities,
+backend boundaries, future initiatives and decisions awaiting confirmation.
+Do not implement future features speculatively or infer frontend scope from
+backend capabilities alone.
 
-## 2. Scope
+## Decision rules
 
-Keep these separate:
-- `Now`: public site and trust pages
-- `Next`: authenticated app flows
+Prefer smaller changes, simpler scope, less JavaScript, semantic HTML, readable
+copy and clear UX. No overengineering, speculative abstractions or new heavy UI
+libraries without a concrete need. Reuse the existing foundation before adding
+dependencies or components; do not generalize until repetition is real.
 
-Do not mix both in one slice unless the task explicitly requires it.
-Do not implement app flows directly from backend assumptions alone.
+## Sources of truth
 
-## 3. Decision Rules
+- Product context: `PRODUCT.md`; open decisions are not approved preferences.
+- Frontend behavior, routes and assets: `src/`.
+- Tokens and theme declarations: `src/index.css` and `tailwind.config.ts`.
+- Existing components: `src/components/ui/` and `src/components/portal/`.
+- Observed visual system: `DESIGN.md` and `.impeccable/design.json`.
+- API consumption: `src/lib/api.ts` and `src/lib/portal-api.ts`; verify backend
+  contracts before changing integration behavior.
 
-Prefer:
-- simpler scope
-- smaller changes
-- lower JS
-- more semantic HTML
-- more readable copy
-- clearer UX
+Code is the incumbent visual authority; DESIGN.md records it and must be checked
+against it when changing visuals. No canonical Pencil file is currently tracked.
+Do not require an absent frame or token file. If a task supplies a Pencil frame,
+use and compare it; temporary/demo/old files are not product authority.
 
-No overengineering.
-No speculative features.
-No abstractions until repetition is real.
-No heavy UI libraries unless explicitly required.
+## How to work
 
-If something starts feeling like “mini SaaS frontend” before the product needs it, stop and simplify.
+For simple changes: state the intended outcome briefly, implement and verify.
 
-## 4. Source Of Truth
+For non-trivial UI changes:
 
-- design: `design/running-coach.pen`
-- frontend: `src/`
-- tokens: `src/styles/tokens.css`
+1. Define the goal, target user and primary action.
+2. Define minimum content and loading, empty, error and success states.
+3. Establish a mobile-first hierarchy before implementation; use the supplied
+   design or a scoped surface brief for new pages and structural changes.
+4. Implement the smallest useful frontend slice.
+5. Compare the implementation with that design/brief and the existing system.
+6. Verify and state intentional deviations.
 
-Do not implement a meaningful new screen without a corresponding frame in `design/running-coach.pen`.
-Do not use temporary Pencil files, demo files, or old design files as product source of truth.
+Design first, then implement. Copy edits, spacing tweaks and small fixes do not
+need a new design artifact. If implementation goes sideways, stop and re-plan.
+Setup/documentation tasks do not authorize UX audits or interface changes.
 
-## 5. How To Work
+## UX conventions
 
-For simple changes:
-- state the intended outcome briefly
-- implement directly
-- verify
+- Mobile first, strong hierarchy and one primary action per screen/state.
+- Make the next step obvious; keep flows simple, intuitive and calm.
+- Plain language, no marketing fluff or competing focal points.
+- Accessibility by default: semantic elements, keyboard access, visible focus,
+  labels, readable contrast and appropriate reduced-motion behavior.
+- Every screen should quickly explain what it is, why it matters and what to do.
 
-For non-trivial changes:
-1. define the goal, target user, and primary action
-2. define the minimum content needed
-3. create or update the mobile-first frame in `design/running-coach.pen`
-4. validate hierarchy and states
-5. implement the smallest FE slice
-6. compare design and code
-7. verify before closing
+## Frontend conventions
 
-If implementation starts going sideways, stop and re-plan.
+Current stack: React 18, TypeScript, Vite, React Router and Tailwind CSS, with
+shadcn/Radix UI primitives, TanStack Query and Framer Motion already installed.
+Use the current stack; do not migrate frameworks as incidental cleanup.
 
-## 6. Pencil
+Prefer composition, existing CSS variables/Tailwind tokens, and native elements
+over ARIA workarounds. Keep client state only where behavior needs it. Use
+TanStack Query for the existing server-data workflows. Do not hardcode new
+visual values when an existing token fits.
 
-Use Pencil for new pages, new flows, and structural UI changes.
-Do not block on Pencil for copy edits, spacing tweaks, or small fixes.
+## Impeccable
 
-Design first, then implement.
+Reuse the global skill; do not vendor it or add an npm dependency for setup.
+Follow its scoped command references, with PRODUCT.md for product facts and
+DESIGN.md for the incumbent system. Do not turn unconfirmed decisions into
+`buildPath`, aesthetic defaults, roadmap commitments or user-facing claims.
 
-## 7. UX Rules
+The shared setup lives in `.impeccable/` and `.codex/hooks.json`. Developer
+overrides, consent and runtime artifacts stay gitignored. Codex hook trust is
+machine-local and separate from Impeccable consent; see README.md. Avoid running
+the same detector from both user/global and project hook sources.
 
-- mobile first
-- one primary CTA per screen
-- strong hierarchy
-- obvious next step
-- simple, intuitive, calm flows
-- plain language
-- no marketing fluff
-- no competing focal points
-- accessibility by default
+## Verification and done
 
-Every screen should answer quickly:
-- what is this
-- why does it matter
-- what should the user do next
+For meaningful changes, format changed files, run `npm run lint`, relevant tests
+(`npm test` for the suite), and `npm run build`. No formatting script is currently
+defined: use available tooling without adding a dependency just for a one-off.
 
-## 8. FE Rules
+For UI changes, preview mobile and desktop, check keyboard access and obvious
+accessibility issues, compare against the supplied design/brief and record
+deviations. These visual checks do not apply to a setup-only change.
 
-Default stack:
-- Astro
-- TypeScript
-- plain CSS
-- minimal JavaScript
+Work is done when the requested scope is complete, verification passes and
+remaining limitations or open decisions are stated. For UI work, hierarchy,
+responsive behavior and baseline accessibility must also be checked.
 
-Prefer:
-- semantic HTML
-- CSS variables and tokens
-- composition over abstraction
-- native elements over ARIA workarounds
+## Boundaries
 
-Do not:
-- add client state without a real need
-- add dependencies for simple UI
-- create reusable components before repetition is real
-- hardcode new visual values if an existing token fits
-
-## 9. Verification And Done
-
-Agents must verify their work.
-
-For meaningful changes:
-- run formatting
-- run linting
-- run tests if present and relevant
-- build successfully
-
-For UI changes:
-- preview the page
-- check mobile and desktop
-- check keyboard access
-- check obvious accessibility issues
-- compare against the Pencil frame
-- call out any intentional deviation
-
-Work is not done until:
-- the goal is clear
-- the hierarchy is clear
-- the result is simple for the current scope
-- the page works on mobile and desktop
-- accessibility is acceptable at baseline
-- build passes
-- design and code have been compared
-- any deviation has been stated clearly
-
-## 10. Boundaries
-
-- Keep this repo focused on the frontend.
-- Do not move backend logic here.
-- Do not duplicate domain logic here.
-- Keep environment setup minimal.
-- Keep README short and practical.
-- No placeholder junk in user-facing pages.
+Keep this repo focused on the frontend. Do not move backend/domain logic here
+or duplicate backend decisions in the UI. Keep environment setup minimal and
+README short and practical. No placeholder junk in user-facing pages.
