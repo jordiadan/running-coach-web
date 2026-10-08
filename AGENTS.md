@@ -26,6 +26,24 @@ copy and clear UX. No overengineering, speculative abstractions or new heavy UI
 libraries without a concrete need. Reuse the existing foundation before adding
 dependencies or components; do not generalize until repetition is real.
 
+## Agent communication — Caveman Ultra
+
+Default to Caveman Ultra (`ultracave`, formerly `caveman ultra`) for all
+agent chat responses in this repository: plans, progress, implementation
+summaries, reviews and final handoffs. Invoke the `ultracave` skill when
+available. If it is not installed, still follow the ultra-concise style, but
+do not claim the skill was activated. `.caveman.json` sets the repo-local
+default for Caveman runtimes that support project configuration.
+
+Lead with the result. Keep prose terse, direct and non-repetitive; no
+greetings, unnecessary preambles or recap. Keep negations, conditions,
+identifiers, numbers, paths and commands precise. Do not shorten code,
+terminal output, literal errors, user-facing product copy or generated
+documentation just to satisfy this rule. Use complete, unambiguous prose
+for security, destructive or irreversible changes, important trade-offs
+and any explanation where compression could hide a critical detail.
+Follow explicit user instructions about response format or detail.
+
 ## Sources of truth
 
 - Product context: `PRODUCT.md`; open decisions are not approved preferences.
