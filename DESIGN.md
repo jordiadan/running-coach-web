@@ -1,6 +1,6 @@
 ---
 name: Running Coach
-description: "Registro del sistema visual existente; no establece una nueva dirección."
+description: "Record of the existing visual system; does not establish a new direction."
 colors:
   primary: "hsl(160 30% 28%)"
   primary-foreground: "hsl(40 20% 97%)"
@@ -161,160 +161,155 @@ components:
 
 ## Overview
 
-Captura descriptiva del código en el commit `46c8658`, sin rediseño ni metáfora
-creativa añadida. Las decisiones de trabajo siguen en AGENTS.md. El frame
-`design/running-coach.pen` y `src/styles/tokens.css`, designados allí, no están
-presentes en este commit: este documento no los sustituye ni acredita una
-comparación con Pencil. Las fuentes observables son `src/index.css`,
-`tailwind.config.ts`, `src/components/ui/` y las pantallas que los consumen.
+Descriptive capture of the code at commit `46c8658`, without a redesign or an
+added visual concept. Working conventions live in AGENTS.md and product context
+in PRODUCT.md. No canonical Pencil frame is tracked; this record does not claim
+a comparison with Pencil. Observable sources are `src/index.css`,
+`tailwind.config.ts`, `src/components/ui/` and their consuming screens.
 
-La implementación combina títulos serif, texto sans, superficies tonales,
-bordes suaves y controles redondeados. La landing incluye fotografía de running
-con overlays y movimiento; el portal usa listas, métricas y tarjetas de sesiones.
-No se convierte la composición de una pantalla en una regla global.
+The implementation combines serif headings, sans-serif text, tonal surfaces,
+soft borders and rounded controls. The landing page includes running photography
+with overlays and motion; the portal uses lists, metrics and session cards.
+A screen's composition is not promoted to a global rule.
 
-Los tokens de frontmatter registran valores existentes, con el tema warm como
-base y prefijos para las otras variantes declaradas. Son un índice de la fuente,
-no una autorización para cambiarla; ante diferencias, contrastar con el código y
-las instrucciones del proyecto antes de actualizar el registro.
+Frontmatter tokens record existing values, with warm as the base theme and
+prefixes for the other declared variants. They index the source rather than
+authorize changes. Check differences against the code and project instructions
+before updating this record.
 
 ## Colors
 
 ### Primary
 
-En el tema base, el verde apagado de `primary` aparece en acciones y énfasis,
-con `primary-foreground` para el contenido sobre ese fondo. `ring` sigue el color
-primario para el foco. Los valores HSL de la fuente se conservan en frontmatter.
+The base theme uses muted green `primary` for actions and emphasis, with
+`primary-foreground` for content over that background. `ring` follows the
+primary color for focus. Frontmatter preserves the source HSL values.
 
 ### Secondary
 
-`secondary` y `secondary-foreground` sirven para controles y fondos secundarios.
-`muted` y `muted-foreground` distinguen contenido de apoyo. `accent` es el acento
-cálido que usan detalles como los indicadores de sesiones clave; no inventar
-un reparto porcentual del color.
+`secondary` and `secondary-foreground` serve secondary controls and backgrounds.
+`muted` and `muted-foreground` distinguish supporting content. `accent` is the
+warm accent used in details such as key-session indicators; no fixed color
+distribution is established.
 
 ### Neutral
 
-`background` y `foreground` definen el documento; `card` y `popover` separan
-superficies. `border`, `input` y `divider` son roles distintos aunque algunos
-valores coincidan. `surface-elevated` y `text-subtle` tienen utilidades propias.
-`destructive` y su foreground presentan errores y acciones destructivas.
+`background` and `foreground` define the document; `card` and `popover` separate
+surfaces. `border`, `input` and `divider` have distinct roles even where their
+values coincide. `surface-elevated` and `text-subtle` have their own utilities.
+`destructive` and its foreground represent errors and destructive actions.
 
-`src/index.css` declara Warm & Earthy, Dark & Bold, Clean & Bright y Forest & Deep.
-`useTheme.tsx` elige warm por defecto y guarda la selección en `rc-theme`.
-Los prefijos `dark-`, `bright-` y `forest-` del frontmatter describen esas
-variantes, no colores independientes para mezclar en una misma pantalla.
-La captura calculada de esta inicialización confirma el tema base. El CSS
-compilado revisado contiene `.theme-warm` y no contiene los otros tres selectores;
-por tanto, las variantes declaradas no se presentan aquí como verificadas en
-renderizado. No se modifica ese comportamiento dentro de este setup.
+`src/index.css` declares Warm & Earthy, Dark & Bold, Clean & Bright and Forest &
+Deep. `useTheme.tsx` defaults to warm and stores the selection in `rc-theme`.
+The frontmatter's `dark-`, `bright-` and `forest-` prefixes describe those
+variants, not independent colors to mix on a screen. The initial setup's computed
+style capture confirmed the base theme. Its compiled CSS contained `.theme-warm`
+but not the other three selectors, so those declarations are not described here
+as verified rendering. This setup does not change that behavior.
 
 ## Typography
 
-DM Serif Display con Georgia/serif se usa en títulos y marca; DM Sans con
-system-ui/sans-serif en cuerpo y controles. Se cargan desde Google Fonts en
-`src/index.css`; no hay fuentes propias locales documentadas.
+DM Serif Display with Georgia/serif is used for headings and the brand; DM Sans
+with system-ui/sans-serif for body text and controls. They load from Google Fonts
+in `src/index.css`; no local proprietary fonts are documented.
 
-El frontmatter captura roles comunes, no todos los tamaños de Tailwind. La
-landing usa un h1 de 3rem, 4.5rem desde sm y 6rem desde lg, con tracking tight.
-`leading-[1.05]` se declara allí, pero `text-7xl`/`text-8xl` producen line-height
-1 en el CSS compilado revisado. La lectura calculada a 390px dio 48px/50.4px y a
-1440px 96px/96px. No convertir esta combinación en un nuevo `clamp()`.
+Frontmatter captures common roles rather than every Tailwind size. The landing
+h1 is 3rem, 4.5rem from sm and 6rem from lg, with tight tracking.
+`leading-[1.05]` is declared there, but `text-7xl`/`text-8xl` produce line-height
+1 in the initially inspected compiled CSS. That setup's computed capture at
+390px was 48px/50.4px and at 1440px was 96px/96px. Do not translate this combination
+into a new `clamp()` as part of documentation.
 
-Los títulos de portal usan habitualmente `text-2xl` y los cuerpos `text-sm` o
-`text-base`; la landing también usa `text-lg`/`text-xl`. Las métricas de sesiones
-usan números tabulares. El texto de cuerpo no tiene un límite global en ch;
-no imponer uno por defecto.
+Portal headings commonly use `text-2xl`, with `text-sm` or `text-base` body text;
+the landing also uses `text-lg`/`text-xl`. Session metrics use tabular numbers.
+There is no global body-text width limit in ch; do not impose one by default.
 
 ## Layout
 
-Layout mobile first a partir de las utilidades responsive de Tailwind. La
-landing usa contenedores `max-w-6xl` (72rem); el portal y privacidad `max-w-2xl`
-(42rem); el bloque de acceso `max-w-sm` (24rem). El padding lateral más repetido
-es `px-6` (24px). Espaciado basado en la escala de Tailwind, con pasos frecuentes
-recogidos en frontmatter y valores particulares conservados en cada pantalla.
+Mobile-first layout uses Tailwind's responsive utilities. Landing containers use
+`max-w-6xl` (72rem); portal and privacy use `max-w-2xl` (42rem); sign-in uses
+`max-w-sm` (24rem). The most common horizontal padding is `px-6` (24px).
+Spacing follows Tailwind's scale, with frequent steps captured in frontmatter
+and screen-specific values retained in their consumers.
 
-Los breakpoints por defecto son sm (640px), md (768px), lg (1024px), xl (1280px)
-y 2xl (1536px). El `container` de Tailwind configura un ancho de 1400px en 2xl;
-no confundirlo con el breakpoint. El acceso muestra el panel lateral desde lg;
-las filas del portal cambian de columna a fila desde sm. No hay sidebar global
-ni layout de dashboard multicolumna establecido por la presencia de componentes
-plantilla en `src/components/ui/`.
+Default breakpoints are sm (640px), md (768px), lg (1024px), xl (1280px) and
+2xl (1536px). Tailwind's `container` config sets a 1400px width at 2xl; that is
+not the breakpoint. Sign-in shows its side panel from lg; portal rows switch
+from columns to rows from sm. Template components in `src/components/ui/`
+do not establish a global sidebar or a multicolumn dashboard.
 
 ## Elevation & Depth
 
-Hay superficies tonales, bordes, sombras de Tailwind y blur en la navegación.
-Las tarjetas base usan `shadow-sm`; controles elevados o abiertos pueden usar
-sombras mayores. La clase `shadow-card` aparece en pantallas, pero no tiene un
-token propio definido en el CSS o el config revisados: no inventar su valor.
-Los overlays y degradados de la fotografía, las tarjetas Today y sus estados
-son comportamientos observados, no una receta universal ni una nueva prohibición.
+The implementation uses tonal surfaces, borders, Tailwind shadows and blurred
+navigation. Base cards use `shadow-sm`; raised or open controls can use larger
+shadows. Screens reference `shadow-card`, but the inspected CSS and config define
+no custom token for it; do not invent a value. Photo overlays and gradients,
+Today cards and their states are observed behavior rather than a universal recipe.
 
-El CSS anima el cambio de color del body durante 0.3s. El portal usa transiciones
-de opacidad y desplazamiento, springs y expansiones; algunas pantallas consultan
-`useReducedMotion`. La landing usa entrada escalonada y parallax. No se afirma
-que toda la aplicación tenga ya cobertura de movimiento reducido.
+CSS animates body color changes over 0.3s. The portal uses opacity and translation
+transitions, springs and expansions; some screens consult `useReducedMotion`.
+The landing uses staggered entrance motion and parallax. This record does not
+claim application-wide reduced-motion coverage.
 
 ## Shapes
 
-La variable base de radio es 0.625rem; `lg` usa esa variable y `md`/`sm` restan
-2px/4px. Bright declara 0.75rem. Las tarjetas de portal usan también `rounded-xl`
-y `rounded-2xl` de Tailwind; chips e indicadores usan formas circulares. Esas
-clases no dependen todas de la variable de radio. Mantener la diferencia entre
-radios semánticos y radios propios de un componente.
+The base radius variable is 0.625rem; `lg` uses it and `md`/`sm` subtract 2px/4px.
+Bright declares 0.75rem. Portal cards also use Tailwind's `rounded-xl` and
+`rounded-2xl`; chips and indicators use circular shapes. These classes do not
+all depend on the radius variable. Preserve the distinction between semantic
+radii and component-specific radii.
 
 ## Components
 
 ### Buttons
 
-`src/components/ui/button.tsx` define default, destructive, outline, secondary,
-ghost, link, hero y hero-outline. El tamaño base es 40px; sm 36px; lg 44px.
-Hero conserva el primario y eleva la tipografía a base, con tracking wide.
-Outline/ghost usan sus estados existentes; no sustituirlos por una nueva jerarquía.
+`src/components/ui/button.tsx` defines default, destructive, outline, secondary,
+ghost, link, hero and hero-outline. Base height is 40px; sm is 36px; lg is 44px.
+Hero retains the primary color and uses base text with wide tracking.
+Outline/ghost retain their existing states.
 
-El foco usa un ring de 2px con offset de 2px. Disabled baja la opacidad y bloquea
-interacción. `asChild` compone el elemento que aporta el consumidor; verificar
-la semántica al reutilizarlo. Algunos CTA tienen overrides locales de tamaño.
+Focus uses a 2px ring with a 2px offset. Disabled reduces opacity and blocks
+interaction. `asChild` composes the consumer's element; verify semantics when
+reusing it. Some CTAs have local size overrides.
 
 ### Cards / Containers
 
-Card base: radio lg, borde, fondo card, texto card-foreground y shadow-sm; los
-slots internos usan normalmente padding de 24px. Las tarjetas específicas del
-portal varían con padding de 16px/20px/24px y radios xl/2xl. No normalizar esos
-casos durante la documentación.
+The base Card has lg radius, a border, card background, card-foreground text and
+shadow-sm; internal slots generally use 24px padding. Portal-specific cards
+vary with 16px/20px/24px padding and xl/2xl radii. Documentation preserves them.
 
 ### Inputs / Fields
 
-Input base: borde input, fondo background, altura de 40px, padding de 12px/8px y
-radio md. Texto base con cambio a sm desde md; foco con ring y offset de 2px.
-El perfil compone labels, selects y calendar/popover existentes. Los errores se
-presentan en texto destructive y las operaciones pueden deshabilitar controles.
+The base Input uses input border, background fill, 40px height, 12px/8px padding
+and md radius. Base text switches to sm from md; focus has a 2px ring and offset.
+Profile composes existing labels, selects and calendar/popover controls. Errors
+use destructive text and operations can disable controls.
 
 ### Navigation
 
-Marca serif y enlaces/controles sans. La landing tiene navegación fija con
-transparencia y blur; el portal usa navegación sticky y pestañas Weekly Plan,
-Connect y Profile. El selector de tema es un dropdown de Radix. Su disponibilidad
-no justifica imponer un nuevo modo de navegación a otras páginas.
+Serif brand with sans-serif links and controls. The landing has fixed navigation
+with transparency and blur; the portal uses sticky navigation and Weekly Plan,
+Connect and Profile tabs. The theme selector is a Radix dropdown. Its availability
+does not establish a new navigation pattern for other pages.
 
 ### Weekly Plan
 
-Composición específica en `src/components/portal/WeeklyPlanScreen.tsx`: navegación
-semanal, métricas, estado del objetivo y sesiones. Today distingue la sesión de
-hoy y su finalización; las sesiones sincronizadas muestran procedencia y enlaces
-a Strava o Intervals cuando el contrato los aporta. La actividad emparejada
-permanece visible al cambiar la finalización manual; evidencia y checkbox son
-estados independientes. No promover los colores de modalidad, intensidades
-ni la composición completa a componentes compartidos sin repetición real.
+Screen-specific composition in `src/components/portal/WeeklyPlanScreen.tsx`:
+week navigation, metrics, goal state and sessions. Today distinguishes today's
+session and completion. Matched activities show provenance and Strava or
+Intervals links when the contract supplies them. The matched activity remains
+visible when manual completion changes; evidence and the checkbox are independent
+states. Do not extract modality colors, intensities or the entire composition
+into shared components without actual repetition.
 
 ## Do's and Don'ts
 
-- **Do** reutilizar los roles CSS y variantes existentes antes de añadir valores.
-- **Do** conservar los assets, tipografía y contenido observados al refinar.
-- **Do** seguir AGENTS.md y disponer del frame de Pencil antes de implementar
-  pantallas nuevas o cambios estructurales.
-- **Don't** confundir esta captura con un rebrand aprobado, una auditoría de UX o
-  la certificación de accesibilidad de todos los temas.
-- **Don't** crear componentes a partir de plantillas que aún no usa el producto.
-- **Don't** inventar sombras, reglas de porcentaje, una metáfora visual o una
-  preferencia de tema final que las fuentes no establecen.
+- **Do** reuse existing CSS roles and variants before adding values.
+- **Do** preserve observed assets, typography and content when refining.
+- **Do** follow AGENTS.md and define a mobile-first hierarchy before implementing
+  new screens or structural changes; compare with the agreed design or brief.
+- **Don't** treat this capture as an approved rebrand, a UX audit or accessibility
+  certification for every theme.
+- **Don't** create components from templates the product does not yet use.
+- **Don't** invent shadows, percentage rules, a visual concept or a preferred
+  final theme that the sources do not establish.
