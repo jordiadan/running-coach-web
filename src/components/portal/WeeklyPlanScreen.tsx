@@ -35,6 +35,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import WeekNavigator from "@/components/portal/WeekNavigator";
+import WorkoutExecutionFeedback from "@/components/portal/WorkoutExecutionFeedback";
+import { canShowExecutionFeedback, type ExecutionFeedback } from "@/lib/workout-feedback";
 
 type WeeklyPlanScreenProps = {
   athleteId: string;
@@ -42,6 +44,8 @@ type WeeklyPlanScreenProps = {
   isPreparing: boolean;
   onRefresh: () => void | Promise<unknown>;
   onSetNextGoal?: () => void;
+  executionFeedbackByDay?: Partial<Record<string, ExecutionFeedback>>;
+  onRetryExecutionFeedback?: (day: string) => void;
 };
 
 const weekDayOrder = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"] as const;
@@ -644,6 +648,19 @@ function TodayDoneCard({
           ) : null}
         </div>
 
+        {canShowExecutionFeedback(session) ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="mt-3 text-primary"
+            onClick={() => onJumpNext(session.day)}
+          >
+            View workout feedback{" "}
+            <ArrowRight aria-hidden="true" className="ml-2 h-3.5 w-3.5" />
+          </Button>
+        ) : null}
+
         {upNext ? (
           <motion.button
             type="button"
@@ -1003,6 +1020,8 @@ function RaceGoalCard({
 
 function ScheduleList({
   sessions,
+  executionFeedbackByDay,
+  onRetryExecutionFeedback,
   todayDay,
   isCurrentWeek,
   supportsCompletion,
@@ -1015,6 +1034,8 @@ function ScheduleList({
   setSessionRef,
 }: {
   sessions: WeeklyCoachSession[];
+  executionFeedbackByDay?: Partial<Record<string, ExecutionFeedback>>;
+  onRetryExecutionFeedback?: (day: string) => void;
   todayDay: string | undefined;
   isCurrentWeek: boolean;
   supportsCompletion: boolean;
@@ -1029,11 +1050,16 @@ function ScheduleList({
   return (
     <div className="space-y-2">
       <div className="px-1">
-        <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Schedule</span>
+        <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+          Schedule
+        </span>
       </div>
 
       <div className="relative">
-        <div className="absolute bottom-2 left-[1.05rem] top-2 w-px bg-border" aria-hidden />
+        <div
+          className="absolute bottom-2 left-[1.05rem] top-2 w-px bg-border"
+          aria-hidden
+        />
 
         <AnimatePresence mode="wait">
           <motion.div
@@ -1051,7 +1077,11 @@ function ScheduleList({
               const expanded = expandedDay === session.day;
               const config = typeConfig[session.modality] ?? typeConfig.RUN;
               const TypeIcon = config.icon;
-              const canToggle = supportsCompletion && isCurrentWeek && !completionPending && !isRest;
+              const canToggle =
+                supportsCompletion &&
+                isCurrentWeek &&
+                !completionPending &&
+                !isRest;
 
               return (
                 <motion.div
@@ -1074,10 +1104,17 @@ function ScheduleList({
                             ? "bg-primary/[0.03] hover:bg-primary/[0.06]"
                             : "hover:bg-card/80"
                     }`}
-                    onClick={() => {
-                      if (!isRest) onToggleExpanded(session.day);
-                    }}
                   >
+                    {!isRest ? (
+                      <button
+                        type="button"
+                        className="absolute inset-0 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                        onClick={() => onToggleExpanded(session.day)}
+                        aria-label={`View details for ${session.title}`}
+                        aria-expanded={expanded}
+                        aria-controls={`session-details-${session.day}`}
+                      />
+                    ) : null}
                     <motion.button
                       type="button"
                       className={`relative z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-all ${
@@ -1089,13 +1126,19 @@ function ScheduleList({
                               ? "border-border bg-background"
                               : "border-border bg-background hover:border-primary/40"
                       }`}
-                      whileTap={canToggle && !reduceMotion ? { scale: 0.85 } : undefined}
+                      whileTap={
+                        canToggle && !reduceMotion ? { scale: 0.85 } : undefined
+                      }
                       onClick={(event) => {
                         event.stopPropagation();
                         if (canToggle) onToggleComplete(session.day);
                       }}
                       disabled={!canToggle}
-                      aria-label={isDone ? `Mark ${session.title} as incomplete` : `Mark ${session.title} as complete`}
+                      aria-label={
+                        isDone
+                          ? `Mark ${session.title} as incomplete`
+                          : `Mark ${session.title} as complete`
+                      }
                     >
                       {isDone ? (
                         <>
@@ -1107,7 +1150,11 @@ function ScheduleList({
                               transition={{ duration: 0.7, ease: "easeOut" }}
                             />
                           ) : null}
-                          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", bounce: 0.5 }}>
+                          <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ type: "spring", bounce: 0.5 }}
+                          >
                             <Check className="h-3 w-3" strokeWidth={3} />
                           </motion.div>
                         </>
@@ -1117,22 +1164,28 @@ function ScheduleList({
                     </motion.button>
 
                     <div className="w-8 shrink-0">
-                      <span className={`text-[11px] font-medium tracking-wide ${isToday ? "text-primary" : "text-muted-foreground"}`}>
+                      <span
+                        className={`text-[11px] font-medium tracking-wide ${isToday ? "text-primary" : "text-muted-foreground"}`}
+                      >
                         {shortDayLabel(session.day)}
                       </span>
                     </div>
 
-                    <div className={`shrink-0 rounded-lg p-1.5 ${config.badgeClass}`}>
+                    <div
+                      className={`shrink-0 rounded-lg p-1.5 ${config.badgeClass}`}
+                    >
                       <TypeIcon className="h-3.5 w-3.5" />
                     </div>
 
                     <div className="min-w-0 flex-1">
-                      <span className={`block min-w-0 max-w-full truncate text-sm ${isDone ? "text-muted-foreground line-through" : "text-foreground"}`}>
+                      <span
+                        className={`block min-w-0 max-w-full truncate text-sm ${isDone ? "text-muted-foreground line-through" : "text-foreground"}`}
+                      >
                         {session.title}
                       </span>
                     </div>
 
-                    <div className="flex shrink-0 items-center gap-2">
+                    <div className="pointer-events-none relative z-10 flex shrink-0 items-center gap-2 [&_a]:pointer-events-auto">
                       <SessionRightSummary session={session} />
                       {isKey && !isDone ? (
                         <Badge
@@ -1156,31 +1209,70 @@ function ScheduleList({
                   </div>
 
                   <AnimatePresence>
-                    {expanded && (session.notes || session.strengthFocus?.length) ? (
+                    {expanded ? (
                       <motion.div
-                        initial={{ height: 0, opacity: 0 }}
+                        id={`session-details-${session.day}`}
+                        initial={
+                          reduceMotion ? false : { height: 0, opacity: 0 }
+                        }
                         animate={{ height: "auto", opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.22, ease: "easeOut" }}
+                        transition={{
+                          duration: reduceMotion ? 0 : 0.22,
+                          ease: "easeOut",
+                        }}
                         className="overflow-hidden"
                       >
-                        <div className="pb-3 pl-[4.5rem] pr-3 pt-1.5">
+                        <div
+                          className={
+                            canShowExecutionFeedback(session)
+                              ? "mb-3 ml-2 rounded-b-xl border-x border-b border-border bg-card px-4 pb-5 pt-5 sm:ml-10 sm:px-5"
+                              : "pb-3 pl-[4.5rem] pr-3 pt-1.5"
+                          }
+                        >
+                          {canShowExecutionFeedback(session) ? (
+                            <div className="mb-5">
+                              <WorkoutExecutionFeedback
+                                session={session}
+                                feedback={executionFeedbackByDay?.[session.day]}
+                                onRetry={
+                                  onRetryExecutionFeedback
+                                    ? () =>
+                                        onRetryExecutionFeedback(session.day)
+                                    : undefined
+                                }
+                              />
+                            </div>
+                          ) : null}
+                          {canShowExecutionFeedback(session) &&
+                          session.notes ? (
+                            <h4 className="mb-1.5 text-sm font-medium">
+                              Planned session
+                            </h4>
+                          ) : null}
                           {session.notes ? (
-                            <p className="text-[13px] leading-relaxed text-foreground/75">{session.notes}</p>
+                            <p className="text-[13px] leading-relaxed text-foreground/75">
+                              {session.notes}
+                            </p>
                           ) : null}
                           <div className="mt-2.5 flex flex-wrap items-center gap-2">
                             <div className="flex items-center gap-1 rounded-md bg-secondary/60 px-1.5 py-0.5">
                               <div
                                 className={`h-1.5 w-1.5 rounded-full ${
-                                  intensityDot[session.intensityCategory] ?? "bg-muted-foreground/30"
+                                  intensityDot[session.intensityCategory] ??
+                                  "bg-muted-foreground/30"
                                 }`}
                               />
                               <span className="text-[10px] text-muted-foreground">
-                                {intensityLabels[session.intensityCategory] ?? session.intensityCategory}
+                                {intensityLabels[session.intensityCategory] ??
+                                  session.intensityCategory}
                               </span>
                             </div>
                             {session.strengthFocus?.map((focus) => (
-                              <span key={focus} className="rounded-full bg-secondary px-2 py-0.5 text-[10px] text-muted-foreground">
+                              <span
+                                key={focus}
+                                className="rounded-full bg-secondary px-2 py-0.5 text-[10px] text-muted-foreground"
+                              >
                                 {focus}
                               </span>
                             ))}
@@ -1205,6 +1297,8 @@ export default function WeeklyPlanScreen({
   isPreparing,
   onRefresh,
   onSetNextGoal,
+  executionFeedbackByDay,
+  onRetryExecutionFeedback,
 }: WeeklyPlanScreenProps) {
   const [selectedWeekStartDate, setSelectedWeekStartDate] = useState(targetWeekStartDate);
   const [expandedDay, setExpandedDay] = useState<string | null>(null);
@@ -1643,6 +1737,8 @@ export default function WeeklyPlanScreen({
 
         <ScheduleList
           sessions={sessions}
+          executionFeedbackByDay={executionFeedbackByDay}
+          onRetryExecutionFeedback={onRetryExecutionFeedback}
           todayDay={todayDay}
           isCurrentWeek={isCurrentWeek}
           supportsCompletion={supportsCompletion}
