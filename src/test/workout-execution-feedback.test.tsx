@@ -33,9 +33,19 @@ describe("Workout execution feedback", () => {
     ).toBeInTheDocument();
     expect(screen.getByText(/doesn’t measure fitness/)).toBeInTheDocument();
     expect(
-      screen.getByText("45 min planned · 47 min recorded"),
+      screen.getByRole("table", { name: "Plan and recorded run comparison" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Higher than planned")).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: "Plan" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: "Your run" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("cell", { name: "45 min" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("cell", { name: "47 min On target" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Higher effort")).toBeInTheDocument();
     expect(screen.getByText("As planned")).toBeInTheDocument();
   });
 

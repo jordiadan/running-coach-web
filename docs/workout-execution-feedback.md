@@ -38,6 +38,12 @@ running sessions. Missing evidence has no score; unmatched manual completion
 does not fabricate an evaluation. Strength, mobility, rest and uncompleted
 unmatched runs do not receive feedback.
 
+The default evaluated view shows the supplied result and score, then a three-row
+**Plan / Your run** table for duration, intensity and structure. Optional
+`planned` and `recorded` strings are presentation values, not computed metrics.
+A single native **More details** disclosure holds the explanation and session
+notes. Unavailable states use shorter messages. The calendar is unchanged.
+
 The preview route and synthetic fixtures are excluded from the production build
 through the `import.meta.env.DEV` import guard. Existing API contracts are
 unchanged. Confirm the backend response and adapter in a later integration slice
@@ -45,20 +51,25 @@ after visual approval; do not treat the fixture vocabulary as a server schema.
 
 ## Validation
 
-Finish review disposition: ship at prototype scope. Twelve actual desktop/mobile
-captures were inspected. All eight selectable states, horizontal overflow,
-keyboard disclosure with Enter/Space, retry and Today navigation were checked.
-Preview interactions made no backend API requests.
+Finish review disposition: ship at frontend prototype scope. Twenty-one actual
+desktop, mobile and narrow-screen captures were inspected. All eight selectable
+states were checked at 1440px, 390px and 320px without overflow, browser errors or
+backend API requests. The outer disclosure works with Enter/Space; the native
+details disclosure works with Enter. Retry and Today navigation also pass.
+
+At 390px, the default feedback capture is 340px tall, down from 553px (39%
+shorter). The sole material review finding, wrapping of the planned structure
+value at 320px, was resolved with local cell padding and recaptured.
 
 `npm run lint` passes with nine existing warnings; all 69 tests pass;
 `npm run build` passes. A separate TypeScript check still reports the same eight
 baseline errors. The production output was checked for fixture exclusion.
 
 The implementation matches the scoped Weekly Plan brief: existing warm surfaces,
-green emphasis, DM Sans/tabular metrics, rounded disclosure, a one-column mobile
-layout and aligned evidence rows from `sm`. Feedback stays inside the session;
-prescription notes follow it. No durable design-system change is introduced, so
-`DESIGN.md` and `.impeccable/design.json` remain unchanged.
+green emphasis, DM Sans/tabular metrics, rounded disclosure and a compact
+comparison table on all checked widths. Feedback stays inside the session;
+explanation and notes sit behind one disclosure. No durable design-system change
+is introduced, so `DESIGN.md` and `.impeccable/design.json` remain unchanged.
 
 Pre-existing limitations remain: alternate theme selections render warm, and the
 design sidecar lags `DESIGN.md`. The unset Impeccable `buildPath` is a construction

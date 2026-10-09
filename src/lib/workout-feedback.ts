@@ -10,7 +10,8 @@ export type ExecutionDimension = {
     | "different"
     | "unavailable";
   label: string;
-  comparison?: string;
+  planned?: string;
+  recorded?: string;
 };
 
 export type ExecutionFeedback =

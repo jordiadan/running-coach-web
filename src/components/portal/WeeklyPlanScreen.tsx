@@ -1226,12 +1226,12 @@ function ScheduleList({
                         <div
                           className={
                             canShowExecutionFeedback(session)
-                              ? "mb-3 ml-2 rounded-b-xl border-x border-b border-border bg-card px-4 pb-5 pt-5 sm:ml-10 sm:px-5"
+                              ? "mb-3 ml-2 rounded-b-xl border-x border-b border-border bg-card px-4 pb-2 pt-4 sm:ml-10 sm:px-5"
                               : "pb-3 pl-[4.5rem] pr-3 pt-1.5"
                           }
                         >
                           {canShowExecutionFeedback(session) ? (
-                            <div className="mb-5">
+                            <div>
                               <WorkoutExecutionFeedback
                                 session={session}
                                 feedback={executionFeedbackByDay?.[session.day]}
@@ -1244,39 +1244,36 @@ function ScheduleList({
                               />
                             </div>
                           ) : null}
-                          {canShowExecutionFeedback(session) &&
+                          {!canShowExecutionFeedback(session) &&
                           session.notes ? (
-                            <h4 className="mb-1.5 text-sm font-medium">
-                              Planned session
-                            </h4>
-                          ) : null}
-                          {session.notes ? (
                             <p className="text-[13px] leading-relaxed text-foreground/75">
                               {session.notes}
                             </p>
                           ) : null}
-                          <div className="mt-2.5 flex flex-wrap items-center gap-2">
-                            <div className="flex items-center gap-1 rounded-md bg-secondary/60 px-1.5 py-0.5">
-                              <div
-                                className={`h-1.5 w-1.5 rounded-full ${
-                                  intensityDot[session.intensityCategory] ??
-                                  "bg-muted-foreground/30"
-                                }`}
-                              />
-                              <span className="text-[10px] text-muted-foreground">
-                                {intensityLabels[session.intensityCategory] ??
-                                  session.intensityCategory}
-                              </span>
+                          {!canShowExecutionFeedback(session) ? (
+                            <div className="mt-2.5 flex flex-wrap items-center gap-2">
+                              <div className="flex items-center gap-1 rounded-md bg-secondary/60 px-1.5 py-0.5">
+                                <div
+                                  className={`h-1.5 w-1.5 rounded-full ${
+                                    intensityDot[session.intensityCategory] ??
+                                    "bg-muted-foreground/30"
+                                  }`}
+                                />
+                                <span className="text-[10px] text-muted-foreground">
+                                  {intensityLabels[session.intensityCategory] ??
+                                    session.intensityCategory}
+                                </span>
+                              </div>
+                              {session.strengthFocus?.map((focus) => (
+                                <span
+                                  key={focus}
+                                  className="rounded-full bg-secondary px-2 py-0.5 text-[10px] text-muted-foreground"
+                                >
+                                  {focus}
+                                </span>
+                              ))}
                             </div>
-                            {session.strengthFocus?.map((focus) => (
-                              <span
-                                key={focus}
-                                className="rounded-full bg-secondary px-2 py-0.5 text-[10px] text-muted-foreground"
-                              >
-                                {focus}
-                              </span>
-                            ))}
-                          </div>
+                          ) : null}
                         </div>
                       </motion.div>
                     ) : null}
