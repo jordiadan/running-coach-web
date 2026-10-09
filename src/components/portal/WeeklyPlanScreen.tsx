@@ -166,55 +166,94 @@ function formatDecimal(value: number | undefined) {
   return value % 1 === 0 ? String(value) : value.toFixed(1);
 }
 
-function SyncedActivityBadge({ session }: { session: WeeklyCoachSession }) {
+function SyncedActivityLink({
+  session,
+  quiet = false,
+}: {
+  session: WeeklyCoachSession;
+  quiet?: boolean;
+}) {
   const activity = session.syncedActivity;
   if (!activity) return null;
   const provider = activity.provider;
   if (provider !== "STRAVA" && provider !== "INTERVALS") {
-    return <span className="text-[11px] text-muted-foreground">Synced activity{provider ? ` · ${provider}` : ""}</span>;
+    return (
+      <span className="text-[11px] text-muted-foreground">
+        Synced activity{provider ? ` · ${provider}` : ""}
+      </span>
+    );
   }
   const isStrava = provider === "STRAVA";
   const providerName = isStrava ? "Strava" : "Intervals";
 
-  const content = (
+  const content = quiet ? (
     <>
-      <span className={isStrava
-        ? "flex h-4 w-4 items-center justify-center rounded-full bg-[#FC5200]"
-        : "flex h-4 w-4 items-center justify-center rounded-full bg-sky-600 text-white"}>
-        {isStrava
-          ? <img src="/strava-echelon-white.svg" alt="" className="h-2.5 w-auto" />
-          : <Activity className="h-2.5 w-2.5" aria-hidden="true" />}
+      View on {providerName}
+      <ExternalLink aria-hidden="true" className="h-3 w-3" />
+    </>
+  ) : (
+    <>
+      <span
+        className={
+          isStrava
+            ? "flex h-4 w-4 items-center justify-center rounded-full bg-[#FC5200]"
+            : "flex h-4 w-4 items-center justify-center rounded-full bg-sky-600 text-white"
+        }
+      >
+        {isStrava ? (
+          <img
+            src="/strava-echelon-white.svg"
+            alt=""
+            className="h-2.5 w-auto"
+          />
+        ) : (
+          <Activity className="h-2.5 w-2.5" aria-hidden="true" />
+        )}
       </span>
       <span className="hidden sm:inline">View on {providerName}</span>
-      {activity.activityUrl ? <ExternalLink className="hidden h-2.5 w-2.5 sm:inline" aria-hidden="true" /> : null}
+      {activity.activityUrl ? (
+        <ExternalLink
+          className="hidden h-2.5 w-2.5 sm:inline"
+          aria-hidden="true"
+        />
+      ) : null}
     </>
   );
 
-  const className = isStrava
-    ? "inline-flex shrink-0 items-center gap-1 rounded-full border border-orange-500/25 bg-orange-500/10 p-0.5 text-[11px] font-medium text-orange-800 transition-colors hover:bg-orange-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 sm:pr-2 dark:text-orange-200"
-    : "inline-flex shrink-0 items-center gap-1 rounded-full border border-sky-500/25 bg-sky-500/10 p-0.5 text-[11px] font-medium text-sky-800 transition-colors hover:bg-sky-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 sm:pr-2 dark:text-sky-200";
+  const className = quiet
+    ? "inline-flex min-h-11 items-center gap-1.5 rounded-sm text-xs text-foreground/70 underline underline-offset-4 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    : isStrava
+      ? "inline-flex shrink-0 items-center gap-1 rounded-full border border-orange-500/25 bg-orange-500/10 p-0.5 text-[11px] font-medium text-orange-800 transition-colors hover:bg-orange-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 sm:pr-2 dark:text-orange-200"
+      : "inline-flex shrink-0 items-center gap-1 rounded-full border border-sky-500/25 bg-sky-500/10 p-0.5 text-[11px] font-medium text-sky-800 transition-colors hover:bg-sky-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 sm:pr-2 dark:text-sky-200";
 
   if (!activity.activityUrl) {
-    return <span aria-label={`Synced from ${providerName}`} title={`Synced from ${providerName}`} className={className}>{content}</span>;
+    if (quiet)
+      return (
+        <span className="text-xs text-foreground/70">
+          Synced activity · {providerName}
+        </span>
+      );
+    return (
+      <span
+        aria-label={`Synced from ${providerName}`}
+        title={`Synced from ${providerName}`}
+        className={className}
+      >
+        {content}
+      </span>
+    );
   }
 
   return (
-    <a href={activity.activityUrl} target="_blank" rel="noopener noreferrer" aria-label={`View on ${providerName} (opens in a new tab)`} className={className}>
+    <a
+      href={activity.activityUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={`View on ${providerName} (opens in a new tab)`}
+      className={className}
+    >
       {content}
     </a>
-  );
-}
-
-function SessionRightSummary({ session }: { session: WeeklyCoachSession }) {
-  if (session.durationMinutes <= 0 && !session.syncedActivity) return null;
-
-  return (
-    <div className="inline-flex items-center gap-2 whitespace-nowrap">
-      <SyncedActivityBadge session={session} />
-      {session.durationMinutes > 0 ? (
-        <span className="text-[11px] tabular-nums text-muted-foreground" title="Planned duration">{session.durationMinutes} min</span>
-      ) : null}
-    </div>
   );
 }
 
@@ -515,7 +554,7 @@ function TodayPendingCard({
                 <Clock className="h-3.5 w-3.5 text-muted-foreground" />
                 {session.durationMinutes} min
               </span>
-              <SyncedActivityBadge session={session} />
+              <SyncedActivityLink session={session} />
               <span className="inline-flex items-center gap-1.5 text-xs text-foreground/70">
                 <span
                   className={`h-1.5 w-1.5 rounded-full ${
@@ -624,7 +663,7 @@ function TodayDoneCard({
     >
       <div className="p-4">
         <div className="flex items-center justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-3">
+          <div className="flex min-w-0 flex-1 items-center gap-3">
             <motion.div
               initial={reduceMotion ? false : { scale: 0, rotate: -90 }}
               animate={{ scale: 1, rotate: 0 }}
@@ -637,7 +676,7 @@ function TodayDoneCard({
             >
               <Check className="h-4 w-4" strokeWidth={3} />
             </motion.div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5">
                 <Sparkles className="h-3 w-3 text-primary" />
                 <span className="text-[10px] font-semibold uppercase tracking-widest text-primary">
@@ -645,12 +684,14 @@ function TodayDoneCard({
                 </span>
               </div>
               <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
-                <p className="min-w-0 max-w-full truncate text-sm font-medium text-foreground/90 line-through decoration-muted-foreground/40">
+                <p className="break-words text-sm font-medium text-foreground">
                   {session.title}
                 </p>
               </div>
             </div>
-            <SessionRightSummary session={session} />
+            {canShowExecutionFeedback(session) ? (
+              <WorkoutExecutionScore feedback={feedback} />
+            ) : null}
           </div>
           {canToggleCompletion ? (
             <button
@@ -665,19 +706,11 @@ function TodayDoneCard({
 
         {canShowExecutionFeedback(session) ? (
           <div className="mt-3">
-            {evaluatedExecutionFeedback(feedback) ? (
-              <div className="mb-1 flex items-center gap-2">
-                <WorkoutExecutionScore feedback={feedback} compact />
-                <span className="text-xs leading-relaxed text-foreground/70">
-                  Plan match · {evaluatedExecutionFeedback(feedback)?.label}
-                </span>
-              </div>
-            ) : null}
             <Button
               type="button"
               variant="ghost"
               size="sm"
-              className="text-primary"
+              className="min-h-11 px-0 text-primary hover:bg-transparent hover:underline"
               onClick={() => onJumpNext(session.day)}
             >
               View workout feedback{" "}
@@ -1076,10 +1109,17 @@ function ScheduleList({
 }) {
   return (
     <div className="space-y-2">
-      <div className="px-1">
+      <div className="flex items-center justify-between px-3">
         <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
           Schedule
         </span>
+        {sessions.some(
+          (session) =>
+            canShowExecutionFeedback(session) &&
+            evaluatedExecutionFeedback(executionFeedbackByDay?.[session.day]),
+        ) ? (
+          <span className="pr-6 text-xs text-foreground/70">Plan match</span>
+        ) : null}
       </div>
 
       <div className="relative">
@@ -1107,8 +1147,6 @@ function ScheduleList({
                     executionFeedbackByDay?.[session.day],
                   )
                 : undefined;
-              const config = typeConfig[session.modality] ?? typeConfig.RUN;
-              const TypeIcon = config.icon;
               const canToggle =
                 supportsCompletion &&
                 isCurrentWeek &&
@@ -1129,13 +1167,13 @@ function ScheduleList({
                   className={`group relative ${isRest && !isDone ? "opacity-60" : ""}`}
                 >
                   <div
-                    className={`relative flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-xl py-2.5 pl-2 pr-3 transition-all ${
+                    className={`relative flex items-center gap-3 rounded-xl py-3 pl-2 pr-3 transition-colors motion-reduce:transition-none ${
                       !isRest ? "cursor-pointer select-none" : ""
                     } ${
                       isToday
                         ? "bg-primary/[0.06] ring-1 ring-primary/20"
                         : expanded
-                          ? "bg-card shadow-sm ring-1 ring-border"
+                          ? "bg-card"
                           : isDone
                             ? "bg-primary/[0.03] hover:bg-primary/[0.06]"
                             : "hover:bg-card/80"
@@ -1153,15 +1191,7 @@ function ScheduleList({
                     ) : null}
                     <motion.button
                       type="button"
-                      className={`relative z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-all ${
-                        isDone
-                          ? "border-primary bg-primary text-primary-foreground"
-                          : isToday
-                            ? "border-primary/60 bg-background hover:bg-primary/10"
-                            : isRest
-                              ? "border-border bg-background"
-                              : "border-border bg-background hover:border-primary/40"
-                      }`}
+                      className="relative z-10 -mx-2.5 -my-2.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full p-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                       whileTap={
                         canToggle && !reduceMotion ? { scale: 0.85 } : undefined
                       }
@@ -1176,83 +1206,78 @@ function ScheduleList({
                           : `Mark ${session.title} as complete`
                       }
                     >
-                      {isDone ? (
-                        <>
-                          {justCompletedDay === session.day && !reduceMotion ? (
-                            <motion.span
-                              className="absolute inset-0 rounded-full bg-primary"
-                              initial={{ opacity: 0.4, scale: 1 }}
-                              animate={{ opacity: 0, scale: 2.2 }}
-                              transition={{ duration: 0.7, ease: "easeOut" }}
-                            />
-                          ) : null}
-                          <motion.div
-                            initial={reduceMotion ? false : { scale: 0 }}
-                            animate={{ scale: 1 }}
-                            transition={
-                              reduceMotion
-                                ? { duration: 0 }
-                                : { type: "spring", bounce: 0.5 }
-                            }
-                          >
-                            <Check className="h-3 w-3" strokeWidth={3} />
-                          </motion.div>
-                        </>
-                      ) : isRest ? (
-                        <Moon className="h-2.5 w-2.5 text-muted-foreground/40" />
-                      ) : null}
+                      <span
+                        className={`relative flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-colors motion-reduce:transition-none ${
+                          isDone
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : isToday
+                              ? "border-primary/60 bg-background"
+                              : "border-border bg-background"
+                        }`}
+                      >
+                        {isDone ? (
+                          <>
+                            {justCompletedDay === session.day &&
+                            !reduceMotion ? (
+                              <motion.span
+                                className="absolute inset-0 rounded-full bg-primary"
+                                initial={{ opacity: 0.4, scale: 1 }}
+                                animate={{ opacity: 0, scale: 2.2 }}
+                                transition={{ duration: 0.7, ease: "easeOut" }}
+                              />
+                            ) : null}
+                            <motion.div
+                              initial={reduceMotion ? false : { scale: 0 }}
+                              animate={{ scale: 1 }}
+                              transition={
+                                reduceMotion
+                                  ? { duration: 0 }
+                                  : { type: "spring", bounce: 0.5 }
+                              }
+                            >
+                              <Check className="h-3 w-3" strokeWidth={3} />
+                            </motion.div>
+                          </>
+                        ) : isRest ? (
+                          <Moon className="h-2.5 w-2.5 text-muted-foreground/40" />
+                        ) : null}
+                      </span>
                     </motion.button>
 
-                    <div className="w-8 shrink-0">
-                      <span
-                        className={`text-[11px] font-medium tracking-wide ${isToday ? "text-primary" : "text-muted-foreground"}`}
-                      >
-                        {shortDayLabel(session.day)}
-                      </span>
-                    </div>
-
-                    <div
-                      className={`shrink-0 rounded-lg p-1.5 ${config.badgeClass}`}
-                    >
-                      <TypeIcon className="h-3.5 w-3.5" />
-                    </div>
-
-                    <div className="min-w-0 flex-1">
-                      <span
-                        className={`block min-w-0 max-w-full truncate text-sm ${isDone ? "text-muted-foreground line-through" : "text-foreground"}`}
-                      >
+                    <div className="pointer-events-none relative min-w-0 flex-1">
+                      <span className="block break-words text-sm font-medium text-foreground">
                         {session.title}
                       </span>
-                    </div>
-
-                    <div className="pointer-events-none relative z-10 flex shrink-0 items-center gap-2 [&_a]:pointer-events-auto">
-                      <SessionRightSummary session={session} />
-                      {isKey && !isDone ? (
-                        <Badge
-                          variant="outline"
-                          className="h-4 gap-0.5 border-accent/40 px-1.5 py-0 text-[9px] font-bold uppercase tracking-wider text-accent"
-                        >
-                          <Star className="h-2.5 w-2.5 fill-accent" />
-                          Key
-                        </Badge>
-                      ) : null}
-                      {!isRest ? (
-                        <motion.div
-                          animate={{ rotate: expanded ? 180 : 0 }}
-                          transition={{ duration: reduceMotion ? 0 : 0.2 }}
-                          className="text-muted-foreground/40 transition-colors group-hover:text-muted-foreground"
-                        >
-                          <ChevronDown className="h-3.5 w-3.5" />
-                        </motion.div>
-                      ) : null}
+                      <span className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs leading-relaxed text-foreground/70">
+                        <span className={isToday ? "text-primary" : ""}>
+                          {shortDayLabel(session.day)}
+                        </span>
+                        {session.durationMinutes > 0 ? (
+                          <span title="Planned duration">
+                            {session.durationMinutes} min
+                          </span>
+                        ) : null}
+                        {isKey && !isDone ? (
+                          <span className="font-medium text-primary">Key</span>
+                        ) : null}
+                      </span>
                     </div>
                     {feedback ? (
-                      <div className="pointer-events-none relative flex basis-full items-center gap-2 pl-9">
-                        <WorkoutExecutionScore feedback={feedback} compact />
-                        <span className="min-w-0 text-xs leading-relaxed text-foreground/70">
-                          Plan match · {feedback.label}
-                        </span>
+                      <div className="pointer-events-none relative">
+                        <WorkoutExecutionScore feedback={feedback} />
                       </div>
+                    ) : null}
+                    {!isRest ? (
+                      <motion.div
+                        animate={{ rotate: expanded ? 180 : 0 }}
+                        transition={{ duration: reduceMotion ? 0 : 0.2 }}
+                        className="pointer-events-none relative text-foreground/60"
+                      >
+                        <ChevronDown
+                          aria-hidden="true"
+                          className="h-3.5 w-3.5"
+                        />
+                      </motion.div>
                     ) : null}
                   </div>
 
@@ -1274,23 +1299,25 @@ function ScheduleList({
                         <div
                           className={
                             canShowExecutionFeedback(session)
-                              ? "mb-3 ml-2 rounded-b-xl border-x border-b border-border bg-card px-4 pb-2 pt-4 sm:ml-10 sm:px-5"
+                              ? "mb-2 ml-2 rounded-b-xl bg-card pb-1 pl-9 pr-3 pt-1"
                               : "pb-3 pl-[4.5rem] pr-3 pt-1.5"
                           }
                         >
                           {canShowExecutionFeedback(session) ? (
-                            <div>
-                              <WorkoutExecutionFeedback
-                                session={session}
-                                feedback={executionFeedbackByDay?.[session.day]}
-                                onRetry={
-                                  onRetryExecutionFeedback
-                                    ? () =>
-                                        onRetryExecutionFeedback(session.day)
-                                    : undefined
-                                }
-                              />
-                            </div>
+                            <WorkoutExecutionFeedback
+                              session={session}
+                              activitySource={
+                                session.syncedActivity ? (
+                                  <SyncedActivityLink session={session} quiet />
+                                ) : undefined
+                              }
+                              feedback={executionFeedbackByDay?.[session.day]}
+                              onRetry={
+                                onRetryExecutionFeedback
+                                  ? () => onRetryExecutionFeedback(session.day)
+                                  : undefined
+                              }
+                            />
                           ) : null}
                           {!canShowExecutionFeedback(session) &&
                           session.notes ? (
@@ -1300,6 +1327,9 @@ function ScheduleList({
                           ) : null}
                           {!canShowExecutionFeedback(session) ? (
                             <div className="mt-2.5 flex flex-wrap items-center gap-2">
+                              {session.syncedActivity ? (
+                                <SyncedActivityLink session={session} quiet />
+                              ) : null}
                               <div className="flex items-center gap-1 rounded-md bg-secondary/60 px-1.5 py-0.5">
                                 <div
                                   className={`h-1.5 w-1.5 rounded-full ${

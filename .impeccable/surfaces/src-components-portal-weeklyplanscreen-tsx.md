@@ -7,34 +7,32 @@ related_targets: ["src/components/portal/WorkoutExecutionFeedback.tsx"]
 
 # Workout Execution Feedback
 
-Scope: extend Weekly Plan schedule and session details; Operate mode. Athlete checks how a recorded run followed its prescription. Primary action: scan the visible score, open a run for a useful takeaway, and optionally compare it with the plan.
+Scope: simplify Weekly Plan schedule and run feedback; Operate mode. Athlete scans plan adherence and opens a run to understand what to keep or adjust. Frontend prototype only; real-data integration awaits user visual approval.
 
-Content: durable score, supplied interpretation, duration/intensity/structure outcomes, optional planned-versus-recorded evidence. Never derive scores, thresholds or intensity from activity metrics. Separate manual completion, activity matching and evaluation. No zones editor, workout-step prescription or coaching changes.
+Content: supplied score and interpretation, concise supplied explanation/advice, optional planned/recorded duration/intensity/structure evidence and session notes. Preserve scoring, completion, matching and APIs; no inferred grades, advice or domain calculations.
 
-States: evaluated, partial dimensions, insufficient evidence, no synced activity, unavailable result, loading and request error. No invented pending promise. No score for unavailable evidence. No feedback on uncompleted unmatched sessions or other modalities.
+States: evaluated, partial evidence, insufficient evidence, unavailable, manual unmatched, loading, retryable error. Never fabricate a score. No feedback on unmatched uncompleted runs or other modalities.
 
 ## Direction contract
 
-THESIS: a compact visible score answers how the run matched the plan; contextual feedback explains what to keep and adjust before offering evidence.
+THESIS: the workout name and one inline score are the interface; opening adds a useful explanation, not a second score dashboard.
 
-OWN-WORLD: inherit warm surfaces, green primary, DM Sans data, serif page headings and existing rounded schedule rows. Use foreground text and restrained status icons; no decorative score ring or competing calendar metrics.
+OWN-WORLD: retain warm surfaces, restrained green primary, DM Sans, existing serif page headings, existing controls and focus tokens. Typography and alignment carry hierarchy; unboxed score, no metric tiles, colored status groups or redundant row labels.
 
-STORY: athlete scans score and supplied interpretation without opening a row; inside, recognizes what matched and what differed, reads a short supplied next-time insight, and optionally inspects evidence.
+STORY: scan readable names and aligned scores, open a run, read what matched and one adjustment, optionally compare the evidence.
 
-FIRST VIEWPORT: keep Weekly Plan hierarchy. A single compact score line is visible below each evaluated run title and on Today done, labeled as plan match with its supplied interpretation. Expanded feedback groups duration/intensity/structure into Matched your plan, Worth adjusting and Not assessed, with text and restrained icons. A supplied, optional Next time insight is visible. Comparison, evaluation explanation and notes share one native Compare with plan disclosure. Missing evaluation remains neutral and unscored.
+FIRST VIEWPORT: consistent title-led schedule rows. Completion stays distinct; day and planned minutes are quiet secondary metadata; activity-source links move into details. One score sits at the right of the title; a single schedule-level Plan match label provides context. Names wrap when needed and remain readable after completion. Expanding keeps the row's score visible and adds a supplied explanation and one short actionable sentence; no repeated number, grouped dimensions or Next time heading. One Compare with plan disclosure holds evidence and notes. Today integrates the same unboxed score beside its readable title instead of adding a score stripe.
 
-FORM: local refinement. Reuse tokens, native details, existing row expansion and Lucide; no dependency, score thresholds or frontend coaching engine. Surface supplied insight only; comparison strings remain presentation data. Reuse one validated score component in the schedule, Today done and details. Preserve completion, activity matching and server workflows. No decorative motion; disclosure transitions respect reduced motion.
+FORM: replace prior feedback scaffolding, retaining product foundations. Use supplied summary and a concise supplied insight without generating or duplicating advice. Keep dimension evidence in a semantic three-row table behind native details. Flatten expanded session styling into the schedule, avoid a nested feedback card. Preserve provider links and completion controls. Existing reveal transitions respect reduced motion; no decorative animation.
 
-FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance.
+FINISH: independent review must judge the user rejection and actual before/after captures, not inherit prior approval. Final reviewer, screenshot evidence with provenance and developer documentation are required. Preserve DESIGN.md and sidecar because the product visual system is unchanged.
 
-Acceptance: isolated frontend preview with labeled synthetic fixtures; existing APIs unchanged; mobile/desktop and keyboard verification; lint, tests and build pass. Stop for user's visual approval before backend work. Preserve DESIGN.md and its sidecar because this extends the incumbent system.
+Acceptance: all affected Weekly Plan and Today states captured before PR update, desktop/mobile and narrow verification, readable completed names, exactly one score per schedule row when expanded, useful default explanation, accessible secondary comparison, unchanged evaluation logic, lint/tests/build. Backend remains stopped pending visual approval.
 
 ## Final validation
 
-Independent finish review: **SHIP at frontend prototype scope**, after default Today done screenshots were recaptured. No material scoped findings remain. No intentional deviations from this direction: collapsed run rows and Today done show a contextual score and supplied result; expanded feedback groups outcomes, shows an optional supplied Next time insight and keeps comparison, explanation and notes behind one native disclosure. Unscored copy and retry remain intact.
+Fresh finish review: SHIP at mock scope after fixing the 320px comparison wrapping; this resolves the scoped finding, not global recertification. Actual eight-state browser checks at 1440/390/320px passed overflow, console/API, keyboard expansion/disclosure, retry, Today navigation, readable completed names and single-score assertions. Schedule completion targets are 44px; checked feedback prose meets 4.5:1 contrast.
 
-Thirty actual desktop/mobile PNGs cover before/after collapsed, expanded and Today done views, comparison and all eight states. The screenshot README and provenance live in `docs/screenshots/workout-feedback/`; routes, viewports, source fingerprints and all 30 image hashes were verified. Fresh browser evidence in `.impeccable/review/browser-checks.json` checks eight states at 1440px, 390px and 320px without overflow, browser errors or backend requests. Row/native disclosure keyboard access, retry and Today feedback navigation pass. Captures use synthetic data and reduced motion. Review evidence accompanies draft PR #17.
+All 71 tests pass, including the Strength source-link regression. Lint: zero errors and nine baseline warnings; build passes with baseline chunk/Browserslist warnings. TypeScript retains eight byte-identical baseline errors. One manual detector run across three targets returned legacy font-ramp advisories; its truncated output is not a clean-scan claim.
 
-Lint: zero errors, nine existing warnings. Full suite: 70 tests pass; affected suite: 17 pass. Build passes with baseline chunk-size/Browserslist warnings. TypeScript diagnostics remain byte-identical to the eight-error root baseline. Production output excludes the development preview and mock strings.
-
-System preservation: existing warm surfaces, green emphasis, DM Sans/tabular metrics, serif headings, rounded rows and tokens remain intact. `DESIGN.md`, `.impeccable/design.json` and global configuration are unchanged. Pre-existing theme/sidecar drift is outside scope; no global recertification is claimed. The developer handoff is `docs/workout-execution-feedback.md`. Mock presentation data and the pending adapter are prototype limitations. Backend integration remains stopped until the user approves the visual result; optional supplied insight is not an API contract or frontend coaching algorithm.
+See [45 actual captures and provenance](../../docs/screenshots/workout-feedback/README.md) for rejected `6573f8f` versus current Weekly Plan/Today, collapsed/expanded desktop/mobile, default prose, comparison, alternate states, score/no-score rows and 320px comparison. Provider links intentionally require progressive disclosure; the default Today pending provider badge remains outside scope. Existing warm tokens, typography, rounded rows and focus treatment match the incumbent system; DESIGN.md, sidecar and global configuration remain preserved. Frontend mocks only; API adapter and backend remain stopped pending visual approval.

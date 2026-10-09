@@ -1,24 +1,23 @@
 # Workout feedback screenshot evidence
 
-Actual Chromium screenshots of `/dev/workout-feedback`, using synthetic runner,
-activity and evaluation data. No signed-in session or backend requests.
+Actual Chromium captures of the running Weekly Plan component at
+`/dev/workout-feedback`, using synthetic data and reduced motion. No signed-in
+session, personal information, tokens or backend requests. PNGs are PR evidence,
+not production application assets.
 
-- `before-*`: UI from commit `f7254f3`; previous score-hidden schedule and
-  comparison-first feedback. Today captures use that UI with the new preview-only
-  `?today` fixture selector so the same session can be compared.
-- `after-*`: the revised frontend on `feat/workout-execution-feedback`.
-- `desktop`: browser viewport 1440 × 1000.
-- `mobile`: browser viewport 390 × 844.
-- `collapsed`, `expanded`: historical Weekly Plan, Monday run.
-- `today`: `/dev/workout-feedback?today`, current week with completed Monday as
-  the explicitly seeded Today session.
-- `comparison`: expanded native **Compare with plan** disclosure, section crop.
-- `feedback`, `different`, `partial`: evaluated feedback, section crop.
-- `insufficient`, `unavailable`, `manual`, `loading`, `error`: unscored feedback,
-  section crop.
+- Before: rejected prototype commit `6573f8f`.
+- After: minimal revision on `feat/workout-execution-feedback`.
+- Desktop viewport: 1440 × 1000. Mobile: 390 × 844. Narrow comparison: 320 × 780.
+- `collapsed` / `expanded`: historical Weekly Plan, Monday run.
+- `today-collapsed` / `today-expanded`: `/dev/workout-feedback?today`, explicitly
+  seeded completed Monday as the Today session.
+- `feedback`: default feedback section crop.
+- `comparison`: native comparison open, section crop.
+- `row`: workout row crop; `different-row`, `partial-row`, `manual-row` show its
+  score or absence independently from the explanation.
+- Other state names: alternate feedback section crops.
 
-Full-page images can exceed the browser viewport height. Captures use reduced
-motion; keyboard focus outlines are retained where they document interaction.
-The development-only fixture page is excluded from the production bundle.
-These PNGs are PR evidence, not application assets. Before/after links and the
-screenshot checklist are included in PR #17's description.
+Full-page images can exceed the viewport height. Keyboard focus remains visible
+where it documents operation. `provenance.json` records origins, source revision
+or fingerprint, capture timestamps and image hashes for all 45 PNGs. Before/after
+links and the screenshot checklist accompany draft PR #17's description.

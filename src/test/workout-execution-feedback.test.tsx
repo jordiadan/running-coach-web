@@ -7,6 +7,7 @@ import {
   within,
 } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import WorkoutExecutionScore from "@/components/portal/WorkoutExecutionScore";
 import WorkoutExecutionFeedback from "@/components/portal/WorkoutExecutionFeedback";
 import WeeklyPlanScreen from "@/components/portal/WeeklyPlanScreen";
 import WorkoutFeedbackPreview from "@/dev/WorkoutFeedbackPreview";
@@ -27,23 +28,22 @@ vi.mock("@/lib/portal-api", async () => ({
 const session = workoutFeedbackScreen("evaluated").plan!.plan.sessions[0];
 
 describe("Workout execution feedback", () => {
-  it("explains adherence and shows supplied dimensions without computing a score", () => {
+  it("explains supplied feedback without repeating the row score", () => {
     render(
       <WorkoutExecutionFeedback
         session={session}
         feedback={feedbackExamples.evaluated.feedback}
       />,
     );
+    expect(screen.queryByLabelText(/Plan adherence:/)).not.toBeInTheDocument();
     expect(
-      screen.getByLabelText("Plan adherence: 86 out of 100"),
-    ).toBeInTheDocument();
+      screen.getByText(
+        "Duration and structure matched the plan. Your effort was higher than planned.",
+      ),
+    ).toBeVisible();
     expect(
-      screen.getByRole("list", { name: "Matched your plan" }),
-    ).toHaveTextContent("DurationStructure");
-    expect(
-      screen.getByRole("list", { name: "Worth adjusting" }),
-    ).toHaveTextContent("Intensity · Higher effort");
-    expect(screen.getByText(/Keep your next easy run/)).toBeVisible();
+      screen.getByText("Keep your next easy run at a conversational effort."),
+    ).toBeVisible();
     expect(screen.getByRole("table")).not.toBeVisible();
     fireEvent.click(screen.getByText("Compare with plan"));
     // jsdom does not emulate native summary toggling.
@@ -73,10 +73,15 @@ describe("Workout execution feedback", () => {
     (example) => {
       const item = workoutFeedbackScreen(example).plan!.plan.sessions[0];
       render(
-        <WorkoutExecutionFeedback
-          session={item}
-          feedback={feedbackExamples[example].feedback}
-        />,
+        <>
+          <WorkoutExecutionScore
+            feedback={feedbackExamples[example].feedback}
+          />
+          <WorkoutExecutionFeedback
+            session={item}
+            feedback={feedbackExamples[example].feedback}
+          />
+        </>,
       );
       expect(
         screen.queryByLabelText(/Plan adherence:/),
@@ -84,7 +89,9 @@ describe("Workout execution feedback", () => {
       expect(screen.queryByText("/ 100")).not.toBeInTheDocument();
       if (example === "manual")
         expect(
-          screen.getByText("A recorded run is needed"),
+          screen.getByText(
+            "Feedback needs a synced run matched to this session.",
+          ),
         ).toBeInTheDocument();
       if (example === "loading")
         expect(screen.getByRole("status")).toHaveAccessibleName(
@@ -101,11 +108,11 @@ describe("Workout execution feedback", () => {
       />,
     );
     expect(
-      screen.getByRole("list", { name: "Not assessed" }),
-    ).toHaveTextContent("Structure");
-    expect(
-      screen.getByLabelText("Plan adherence: 92 out of 100"),
-    ).toBeInTheDocument();
+      screen.getByText(
+        "Duration and intensity followed the plan. Structure couldn’t be assessed from the available data.",
+      ),
+    ).toBeVisible();
+    expect(screen.getByText("Not assessed")).not.toBeVisible();
   });
 
   it.each([NaN, Infinity, -1, 101])(
@@ -115,9 +122,7 @@ describe("Workout execution feedback", () => {
         ...feedbackExamples.evaluated.feedback,
         score,
       } as ExecutionFeedback;
-      render(
-        <WorkoutExecutionFeedback session={session} feedback={feedback} />,
-      );
+      render(<WorkoutExecutionScore feedback={feedback} />);
       expect(
         screen.queryByLabelText(/Plan adherence:/),
       ).not.toBeInTheDocument();
@@ -132,8 +137,10 @@ describe("Workout execution feedback", () => {
       />,
     );
     expect(
-      screen.getByLabelText("Plan adherence: 86 out of 100"),
-    ).toBeInTheDocument();
+      screen.getByText(
+        "Duration and structure matched the plan. Your effort was higher than planned.",
+      ),
+    ).toBeVisible();
   });
 
   it("does not show feedback for unmatched future runs or other modalities", () => {
@@ -203,17 +210,20 @@ describe("Weekly Plan feedback disclosure", () => {
         screen.getByLabelText("Plan adherence: 86 out of 100"),
       ).toBeVisible(),
     );
-    expect(screen.getByText("Plan match · Good execution")).toBeVisible();
+    expect(screen.getByText("Easy aerobic run")).toBeVisible();
     fireEvent.click(button);
     expect(button).toHaveAttribute("aria-expanded", "true");
     expect(
       document.getElementById(button.getAttribute("aria-controls")!),
     ).toBeInTheDocument();
     expect(
+      screen.getAllByLabelText("Plan adherence: 86 out of 100"),
+    ).toHaveLength(1);
+    expect(
       within(
         screen.getByRole("region", { name: "Workout feedback" }),
-      ).getByLabelText("Plan adherence: 86 out of 100"),
-    ).toBeInTheDocument();
+      ).queryByLabelText(/Plan adherence:/),
+    ).not.toBeInTheDocument();
     fireEvent.click(button);
     await waitFor(() =>
       expect(
@@ -276,15 +286,20 @@ describe("Mock preview isolation", () => {
       }),
     );
     expect(
+      screen.getAllByLabelText("Plan adherence: 86 out of 100"),
+    ).toHaveLength(1);
+    expect(
       within(
         screen.getByRole("region", { name: "Workout feedback" }),
-      ).getByLabelText("Plan adherence: 86 out of 100"),
-    ).toBeInTheDocument();
+      ).queryByLabelText(/Plan adherence:/),
+    ).not.toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("Preview a feedback state"), {
       target: { value: "manual" },
     });
     expect(
-      await screen.findByText("A recorded run is needed"),
+      await screen.findByText(
+        "Feedback needs a synced run matched to this session.",
+      ),
     ).toBeInTheDocument();
     expect(screen.queryByLabelText(/Plan adherence:/)).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Today" }));

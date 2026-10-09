@@ -1,463 +1,555 @@
 {
+  "origin": "Actual Chromium screenshots of the running React/Vite application, using only synthetic fixtures; no authenticated session or backend requests.",
   "sourceFingerprintFiles": [
     "src/components/portal/WeeklyPlanScreen.tsx",
     "src/components/portal/WorkoutExecutionFeedback.tsx",
     "src/components/portal/WorkoutExecutionScore.tsx",
     "src/lib/workout-feedback.ts",
     "src/dev/WorkoutFeedbackPreview.tsx",
-    "src/dev/workout-feedback-fixtures.ts"
+    "src/dev/workout-feedback-fixtures.ts",
+    "src/index.css"
   ],
-  "afterSourceSha256": "52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
+  "afterSourceSha256": "6589822682c213bcd79180d191020d4e5de86a8d4325706b3462d614c9b4fa8c",
   "screenshots": [
     {
-      "file": "after-desktop-collapsed.png",
-      "origin": "Chromium screenshot of locally running React/Vite application",
-      "route": "/dev/workout-feedback",
-      "viewport": {
-        "width": 1440,
-        "height": 1000
-      },
-      "state": "collapsed",
-      "capturedAtUTC": "2026-10-09T07:53:32.033936+00:00",
-      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
-      "imageSha256": "1e632c290d98eea1695944e01990b25d661e224f8ff53239c6bce0656346bca4",
-      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
-      "notes": ""
-    },
-    {
-      "file": "after-desktop-comparison.png",
-      "origin": "Chromium screenshot of locally running React/Vite application",
-      "route": "/dev/workout-feedback",
-      "viewport": {
-        "width": 1440,
-        "height": 1000
-      },
-      "state": "comparison",
-      "capturedAtUTC": "2026-10-09T07:53:32.034381+00:00",
-      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
-      "imageSha256": "e5072cb389569cc72ad961dc92b04ee102730f7f7b1daebd31d13a9d3a18e5b7",
-      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
-      "notes": ""
-    },
-    {
-      "file": "after-desktop-different.png",
-      "origin": "Chromium screenshot of locally running React/Vite application",
-      "route": "/dev/workout-feedback",
-      "viewport": {
-        "width": 1440,
-        "height": 1000
-      },
-      "state": "different",
-      "capturedAtUTC": "2026-10-09T07:53:32.034636+00:00",
-      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
-      "imageSha256": "669f38fb20228a68ae502a9d9012e35cb2e6e41a21b9303d9e8f0fde162d26b6",
-      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
-      "notes": ""
-    },
-    {
-      "file": "after-desktop-error.png",
-      "origin": "Chromium screenshot of locally running React/Vite application",
-      "route": "/dev/workout-feedback",
-      "viewport": {
-        "width": 1440,
-        "height": 1000
-      },
-      "state": "error",
-      "capturedAtUTC": "2026-10-09T07:53:32.035440+00:00",
-      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
-      "imageSha256": "39d1b0f12ebb2ee57c9feb0ed8f6c498acd11751674b935d78c1b4dae3bca1e9",
-      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
-      "notes": ""
-    },
-    {
-      "file": "after-desktop-expanded.png",
-      "origin": "Chromium screenshot of locally running React/Vite application",
-      "route": "/dev/workout-feedback",
-      "viewport": {
-        "width": 1440,
-        "height": 1000
-      },
-      "state": "expanded",
-      "capturedAtUTC": "2026-10-09T07:53:32.034102+00:00",
-      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
-      "imageSha256": "2fe9e50e869d45de3a9f2abe5cac738ab6292aa62a6f7b425d7467215b2e73c4",
-      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
-      "notes": ""
-    },
-    {
-      "file": "after-desktop-feedback.png",
-      "origin": "Chromium screenshot of locally running React/Vite application",
-      "route": "/dev/workout-feedback",
-      "viewport": {
-        "width": 1440,
-        "height": 1000
-      },
-      "state": "feedback",
-      "capturedAtUTC": "2026-10-09T07:53:32.034514+00:00",
-      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
-      "imageSha256": "b4a1ab2f02e53e648a086fa54ca7f839e3f2f3ac65800ca71cff70dff2ba2a65",
-      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
-      "notes": ""
-    },
-    {
-      "file": "after-desktop-insufficient.png",
-      "origin": "Chromium screenshot of locally running React/Vite application",
-      "route": "/dev/workout-feedback",
-      "viewport": {
-        "width": 1440,
-        "height": 1000
-      },
-      "state": "insufficient",
-      "capturedAtUTC": "2026-10-09T07:53:32.034898+00:00",
-      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
-      "imageSha256": "5563935a9a8c27f713cff68237aee3b1aea3bd0bb22db1ffce394a891f9d77ba",
-      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
-      "notes": ""
-    },
-    {
-      "file": "after-desktop-loading.png",
-      "origin": "Chromium screenshot of locally running React/Vite application",
-      "route": "/dev/workout-feedback",
-      "viewport": {
-        "width": 1440,
-        "height": 1000
-      },
-      "state": "loading",
-      "capturedAtUTC": "2026-10-09T07:53:32.035327+00:00",
-      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
-      "imageSha256": "d543e0f28d5cc011ed3f55f5d0e8245054dd8e4d59909b388d3d1048724c2603",
-      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
-      "notes": ""
-    },
-    {
-      "file": "after-desktop-manual.png",
-      "origin": "Chromium screenshot of locally running React/Vite application",
-      "route": "/dev/workout-feedback",
-      "viewport": {
-        "width": 1440,
-        "height": 1000
-      },
-      "state": "manual",
-      "capturedAtUTC": "2026-10-09T07:53:32.035156+00:00",
-      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
-      "imageSha256": "18f35719253cd199aa17671895eaf65199125ccfdb4c5bb3946f57245b172850",
-      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
-      "notes": ""
-    },
-    {
-      "file": "after-desktop-partial.png",
-      "origin": "Chromium screenshot of locally running React/Vite application",
-      "route": "/dev/workout-feedback",
-      "viewport": {
-        "width": 1440,
-        "height": 1000
-      },
-      "state": "partial",
-      "capturedAtUTC": "2026-10-09T07:53:32.034757+00:00",
-      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
-      "imageSha256": "20c2bcb0ac1f352e8f4dd87b826dd667f5980a2b1ad753ee9e000759f9574e9d",
-      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
-      "notes": ""
-    },
-    {
-      "file": "after-desktop-today.png",
-      "origin": "Chromium screenshot of locally running React/Vite application",
-      "route": "/dev/workout-feedback?today",
-      "viewport": {
-        "width": 1440,
-        "height": 1000
-      },
-      "state": "today",
-      "capturedAtUTC": "2026-10-09T07:55:37.533014+00:00",
-      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
-      "imageSha256": "84699d9004ed7b4d1c869611c900a641ceeb4f2b22322968d6bbb3dc2611ebb8",
-      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
-      "notes": ""
-    },
-    {
-      "file": "after-desktop-unavailable.png",
-      "origin": "Chromium screenshot of locally running React/Vite application",
-      "route": "/dev/workout-feedback",
-      "viewport": {
-        "width": 1440,
-        "height": 1000
-      },
-      "state": "unavailable",
-      "capturedAtUTC": "2026-10-09T07:53:32.035022+00:00",
-      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
-      "imageSha256": "a68ee60f1126a530c41faf5bf92d4630aadea2a1784d92073235154e9095cc0f",
-      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
-      "notes": ""
-    },
-    {
-      "file": "after-mobile-collapsed.png",
-      "origin": "Chromium screenshot of locally running React/Vite application",
-      "route": "/dev/workout-feedback",
-      "viewport": {
-        "width": 390,
-        "height": 844
-      },
-      "state": "collapsed",
-      "capturedAtUTC": "2026-10-09T07:53:32.035569+00:00",
-      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
-      "imageSha256": "8f7904b31cc017d5b4de6d712ba668a83d9529ca7be7fb2d4cd780db4dce4fe4",
-      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
-      "notes": ""
-    },
-    {
-      "file": "after-mobile-comparison.png",
-      "origin": "Chromium screenshot of locally running React/Vite application",
-      "route": "/dev/workout-feedback",
-      "viewport": {
-        "width": 390,
-        "height": 844
-      },
-      "state": "comparison",
-      "capturedAtUTC": "2026-10-09T07:53:32.035942+00:00",
-      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
-      "imageSha256": "860edacb935ed61a48b0714eb03c111ee3c8c80f505d28e1b58216408b656ac1",
-      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
-      "notes": ""
-    },
-    {
-      "file": "after-mobile-different.png",
-      "origin": "Chromium screenshot of locally running React/Vite application",
-      "route": "/dev/workout-feedback",
-      "viewport": {
-        "width": 390,
-        "height": 844
-      },
-      "state": "different",
-      "capturedAtUTC": "2026-10-09T07:53:32.036168+00:00",
-      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
-      "imageSha256": "83084ae6aaf6414c9d8ff5a7b8838701443d1cd967e2d11f30c4183f72c37ed4",
-      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
-      "notes": ""
-    },
-    {
-      "file": "after-mobile-error.png",
-      "origin": "Chromium screenshot of locally running React/Vite application",
-      "route": "/dev/workout-feedback",
-      "viewport": {
-        "width": 390,
-        "height": 844
-      },
-      "state": "error",
-      "capturedAtUTC": "2026-10-09T07:53:32.036973+00:00",
-      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
-      "imageSha256": "9549be62d6e5dedeec225c240490db36052c0ac804c83fc537c863e27bc2c832",
-      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
-      "notes": ""
-    },
-    {
-      "file": "after-mobile-expanded.png",
-      "origin": "Chromium screenshot of locally running React/Vite application",
-      "route": "/dev/workout-feedback",
-      "viewport": {
-        "width": 390,
-        "height": 844
-      },
-      "state": "expanded",
-      "capturedAtUTC": "2026-10-09T07:53:32.035697+00:00",
-      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
-      "imageSha256": "d011586c7b416bd77a29835c29951e89a626de5f2f56edca6376aba04e0bebb5",
-      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
-      "notes": ""
-    },
-    {
-      "file": "after-mobile-feedback.png",
-      "origin": "Chromium screenshot of locally running React/Vite application",
-      "route": "/dev/workout-feedback",
-      "viewport": {
-        "width": 390,
-        "height": 844
-      },
-      "state": "feedback",
-      "capturedAtUTC": "2026-10-09T07:53:32.036053+00:00",
-      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
-      "imageSha256": "3a1b28be6ad8c8145b6003b7feea2090b601095731c06f0f2aabbe09bdf4f958",
-      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
-      "notes": ""
-    },
-    {
-      "file": "after-mobile-insufficient.png",
-      "origin": "Chromium screenshot of locally running React/Vite application",
-      "route": "/dev/workout-feedback",
-      "viewport": {
-        "width": 390,
-        "height": 844
-      },
-      "state": "insufficient",
-      "capturedAtUTC": "2026-10-09T07:53:32.036407+00:00",
-      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
-      "imageSha256": "4cfaddd6ac869066338c6017b1cc03b810048c832d2a6af5af8eb4bfdf899c30",
-      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
-      "notes": ""
-    },
-    {
-      "file": "after-mobile-loading.png",
-      "origin": "Chromium screenshot of locally running React/Vite application",
-      "route": "/dev/workout-feedback",
-      "viewport": {
-        "width": 390,
-        "height": 844
-      },
-      "state": "loading",
-      "capturedAtUTC": "2026-10-09T07:53:32.036831+00:00",
-      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
-      "imageSha256": "57c5febcd19cbe3e9726bd8e385c997ef8ff5729708e8dff79985be90131771b",
-      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
-      "notes": ""
-    },
-    {
-      "file": "after-mobile-manual.png",
-      "origin": "Chromium screenshot of locally running React/Vite application",
-      "route": "/dev/workout-feedback",
-      "viewport": {
-        "width": 390,
-        "height": 844
-      },
-      "state": "manual",
-      "capturedAtUTC": "2026-10-09T07:53:32.036662+00:00",
-      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
-      "imageSha256": "8be5f5964f8c350ddb6526d31ed8771a1bced71966002f292809bc673c45e96b",
-      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
-      "notes": ""
-    },
-    {
-      "file": "after-mobile-partial.png",
-      "origin": "Chromium screenshot of locally running React/Vite application",
-      "route": "/dev/workout-feedback",
-      "viewport": {
-        "width": 390,
-        "height": 844
-      },
-      "state": "partial",
-      "capturedAtUTC": "2026-10-09T07:53:32.036284+00:00",
-      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
-      "imageSha256": "1457c09a6bb95b4616ebeede80ebc033b2c60637de28ef68821cb514798ff014",
-      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
-      "notes": ""
-    },
-    {
-      "file": "after-mobile-today.png",
-      "origin": "Chromium screenshot of locally running React/Vite application",
-      "route": "/dev/workout-feedback?today",
-      "viewport": {
-        "width": 390,
-        "height": 844
-      },
-      "state": "today",
-      "capturedAtUTC": "2026-10-09T07:55:37.533163+00:00",
-      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
-      "imageSha256": "bb184ca89f0e2426e3337051bba3908a25aabf0c7a6859a15530c525e446f62e",
-      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
-      "notes": ""
-    },
-    {
-      "file": "after-mobile-unavailable.png",
-      "origin": "Chromium screenshot of locally running React/Vite application",
-      "route": "/dev/workout-feedback",
-      "viewport": {
-        "width": 390,
-        "height": 844
-      },
-      "state": "unavailable",
-      "capturedAtUTC": "2026-10-09T07:53:32.036526+00:00",
-      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
-      "imageSha256": "209adc9b6292f14d72f1dd032b0894d31040c325537f7fee92a88ca004fe031e",
-      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
-      "notes": ""
-    },
-    {
       "file": "before-desktop-collapsed.png",
-      "origin": "Chromium screenshot of locally running React/Vite application",
       "route": "/dev/workout-feedback",
       "viewport": {
         "width": 1440,
         "height": 1000
       },
       "state": "collapsed",
-      "capturedAtUTC": "2026-10-09T07:45:32.133536+00:00",
-      "sourceRevision": "f7254f3b660b18bbd937f88a902a03f508986ef1",
-      "imageSha256": "898ac89c02d1d790fcc9d6a21d89934047d5d3bf3b1d010a6a9ceaa22fd6e08a",
-      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
-      "notes": ""
+      "capturedAtUTC": "2026-10-09T08:08:05.058635+00:00",
+      "sourceRevision": "6573f8f3f06fbd4a6ee4654d63eeee30b14bceec",
+      "imageSha256": "1e632c290d98eea1695944e01990b25d661e224f8ff53239c6bce0656346bca4"
     },
     {
       "file": "before-desktop-expanded.png",
-      "origin": "Chromium screenshot of locally running React/Vite application",
       "route": "/dev/workout-feedback",
       "viewport": {
         "width": 1440,
         "height": 1000
       },
       "state": "expanded",
-      "capturedAtUTC": "2026-10-09T07:45:32.133879+00:00",
-      "sourceRevision": "f7254f3b660b18bbd937f88a902a03f508986ef1",
-      "imageSha256": "ebcedbf5e8507d5fb7ed6ce0f4380189fa5053ebc3c9c4a00e5656e20cbfa436",
-      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
-      "notes": ""
+      "capturedAtUTC": "2026-10-09T08:08:05.508879+00:00",
+      "sourceRevision": "6573f8f3f06fbd4a6ee4654d63eeee30b14bceec",
+      "imageSha256": "2fe9e50e869d45de3a9f2abe5cac738ab6292aa62a6f7b425d7467215b2e73c4"
     },
     {
-      "file": "before-desktop-today.png",
-      "origin": "Chromium screenshot of locally running React/Vite application",
+      "file": "before-desktop-feedback.png",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "state": "feedback",
+      "capturedAtUTC": "2026-10-09T08:08:05.550377+00:00",
+      "sourceRevision": "6573f8f3f06fbd4a6ee4654d63eeee30b14bceec",
+      "imageSha256": "b4a1ab2f02e53e648a086fa54ca7f839e3f2f3ac65800ca71cff70dff2ba2a65"
+    },
+    {
+      "file": "before-desktop-today-collapsed.png",
       "route": "/dev/workout-feedback?today",
       "viewport": {
         "width": 1440,
         "height": 1000
       },
-      "state": "today",
-      "capturedAtUTC": "2026-10-09T07:51:24.016937+00:00",
-      "sourceRevision": "f7254f3b660b18bbd937f88a902a03f508986ef1",
-      "imageSha256": "65dde9aff0825cf2c7895c60117b9e57646ae85d4a7730e084c14fcc04b94c41",
-      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
-      "notes": "Baseline Today uses current development-only fixture selector with baseline product components."
+      "state": "today-collapsed",
+      "capturedAtUTC": "2026-10-09T08:08:08.832636+00:00",
+      "sourceRevision": "6573f8f3f06fbd4a6ee4654d63eeee30b14bceec",
+      "imageSha256": "34a08b44441128666e314c8d498ab002c717f196312d8b7f7560b0c3efcea2e5"
+    },
+    {
+      "file": "before-desktop-today-expanded.png",
+      "route": "/dev/workout-feedback?today",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "state": "today-expanded",
+      "capturedAtUTC": "2026-10-09T08:08:09.283912+00:00",
+      "sourceRevision": "6573f8f3f06fbd4a6ee4654d63eeee30b14bceec",
+      "imageSha256": "ee475ddd44cf12ce91698dbfa5d0eeea8c9530931caab7485225076894783097"
     },
     {
       "file": "before-mobile-collapsed.png",
-      "origin": "Chromium screenshot of locally running React/Vite application",
       "route": "/dev/workout-feedback",
       "viewport": {
         "width": 390,
         "height": 844
       },
       "state": "collapsed",
-      "capturedAtUTC": "2026-10-09T07:45:32.133712+00:00",
-      "sourceRevision": "f7254f3b660b18bbd937f88a902a03f508986ef1",
-      "imageSha256": "0d3876ef006b364124d145a100b152b84cad76e201c9f7986cd5ca139562ffc4",
-      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
-      "notes": ""
+      "capturedAtUTC": "2026-10-09T08:08:10.336410+00:00",
+      "sourceRevision": "6573f8f3f06fbd4a6ee4654d63eeee30b14bceec",
+      "imageSha256": "8f7904b31cc017d5b4de6d712ba668a83d9529ca7be7fb2d4cd780db4dce4fe4"
     },
     {
       "file": "before-mobile-expanded.png",
-      "origin": "Chromium screenshot of locally running React/Vite application",
       "route": "/dev/workout-feedback",
       "viewport": {
         "width": 390,
         "height": 844
       },
       "state": "expanded",
-      "capturedAtUTC": "2026-10-09T07:45:32.134049+00:00",
-      "sourceRevision": "f7254f3b660b18bbd937f88a902a03f508986ef1",
-      "imageSha256": "daf209edc43d188478d539844785893b9ceee4389a28b5777ce8a6d7c51d33c4",
-      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
-      "notes": ""
+      "capturedAtUTC": "2026-10-09T08:08:10.753423+00:00",
+      "sourceRevision": "6573f8f3f06fbd4a6ee4654d63eeee30b14bceec",
+      "imageSha256": "d011586c7b416bd77a29835c29951e89a626de5f2f56edca6376aba04e0bebb5"
     },
     {
-      "file": "before-mobile-today.png",
-      "origin": "Chromium screenshot of locally running React/Vite application",
+      "file": "before-mobile-feedback.png",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "state": "feedback",
+      "capturedAtUTC": "2026-10-09T08:08:10.792041+00:00",
+      "sourceRevision": "6573f8f3f06fbd4a6ee4654d63eeee30b14bceec",
+      "imageSha256": "3a1b28be6ad8c8145b6003b7feea2090b601095731c06f0f2aabbe09bdf4f958"
+    },
+    {
+      "file": "before-mobile-today-collapsed.png",
       "route": "/dev/workout-feedback?today",
       "viewport": {
         "width": 390,
         "height": 844
       },
-      "state": "today",
-      "capturedAtUTC": "2026-10-09T07:51:30.738464+00:00",
-      "sourceRevision": "f7254f3b660b18bbd937f88a902a03f508986ef1",
-      "imageSha256": "34ffa868669c40037e64b4fe9f6bd2d9bc601e80cecbe7bfc6437bbd6b76894f",
-      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
-      "notes": "Baseline Today uses current development-only fixture selector with baseline product components."
+      "state": "today-collapsed",
+      "capturedAtUTC": "2026-10-09T08:08:14.079077+00:00",
+      "sourceRevision": "6573f8f3f06fbd4a6ee4654d63eeee30b14bceec",
+      "imageSha256": "911b484061f4e9d305d9edb5c68ee537c10d29eb2fd6498f44b6cbde09d9c6c6"
+    },
+    {
+      "file": "before-mobile-today-expanded.png",
+      "route": "/dev/workout-feedback?today",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "state": "today-expanded",
+      "capturedAtUTC": "2026-10-09T08:08:14.491609+00:00",
+      "sourceRevision": "6573f8f3f06fbd4a6ee4654d63eeee30b14bceec",
+      "imageSha256": "76a88af8a0f0d659ac9f3c158e052f60b8a6a1e563d712ca3692382f6c3a0ef3"
+    },
+    {
+      "file": "after-desktop-collapsed.png",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "state": "collapsed",
+      "capturedAtUTC": "2026-10-09T08:33:49.881157+00:00",
+      "sourceRevision": "worktree-source-sha256:6589822682c213bcd79180d191020d4e5de86a8d4325706b3462d614c9b4fa8c",
+      "imageSha256": "8d6234b29c706979ccec10de9e03e0e5f29be0ccafcb1ace95a37a90c87b68af"
+    },
+    {
+      "file": "after-desktop-expanded.png",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "state": "expanded",
+      "capturedAtUTC": "2026-10-09T08:33:50.311367+00:00",
+      "sourceRevision": "worktree-source-sha256:6589822682c213bcd79180d191020d4e5de86a8d4325706b3462d614c9b4fa8c",
+      "imageSha256": "327ae144bc2c4eedba5348f3d4eb3ebac2db85ef84a1737f82db5cb47dc8bb61"
+    },
+    {
+      "file": "after-desktop-row.png",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "state": "row",
+      "capturedAtUTC": "2026-10-09T08:33:49.931651+00:00",
+      "sourceRevision": "worktree-source-sha256:6589822682c213bcd79180d191020d4e5de86a8d4325706b3462d614c9b4fa8c",
+      "imageSha256": "8f87b7a5400716846d8d098514b7a4c9bd6c30f99b33a11d107b82a71d07afea"
+    },
+    {
+      "file": "after-desktop-feedback.png",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "state": "feedback",
+      "capturedAtUTC": "2026-10-09T08:33:50.349581+00:00",
+      "sourceRevision": "worktree-source-sha256:6589822682c213bcd79180d191020d4e5de86a8d4325706b3462d614c9b4fa8c",
+      "imageSha256": "73e17e8d7766f20bb938be229fc38ca8e01433f06dcfc3f737d02bb6c6a3a067"
+    },
+    {
+      "file": "after-desktop-comparison.png",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "state": "comparison",
+      "capturedAtUTC": "2026-10-09T08:33:50.412418+00:00",
+      "sourceRevision": "worktree-source-sha256:6589822682c213bcd79180d191020d4e5de86a8d4325706b3462d614c9b4fa8c",
+      "imageSha256": "c78249aa518932cfa30c621b0358678d92a5d4083ec71e5e81fa7c57d6ef107e"
+    },
+    {
+      "file": "after-desktop-today-collapsed.png",
+      "route": "/dev/workout-feedback?today",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "state": "today-collapsed",
+      "capturedAtUTC": "2026-10-09T08:33:53.682864+00:00",
+      "sourceRevision": "worktree-source-sha256:6589822682c213bcd79180d191020d4e5de86a8d4325706b3462d614c9b4fa8c",
+      "imageSha256": "f38ec2f38532c89b6a09351b546260588ded1433cba9ac1fea7aa384eeeb4249"
+    },
+    {
+      "file": "after-desktop-today-expanded.png",
+      "route": "/dev/workout-feedback?today",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "state": "today-expanded",
+      "capturedAtUTC": "2026-10-09T08:33:54.109980+00:00",
+      "sourceRevision": "worktree-source-sha256:6589822682c213bcd79180d191020d4e5de86a8d4325706b3462d614c9b4fa8c",
+      "imageSha256": "95b3cd221175c9030e3e1fce1f3dc290efd47f1186e3accf6b06df79a850eb2d"
+    },
+    {
+      "file": "after-desktop-different.png",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "state": "different",
+      "capturedAtUTC": "2026-10-09T08:33:50.782645+00:00",
+      "sourceRevision": "worktree-source-sha256:6589822682c213bcd79180d191020d4e5de86a8d4325706b3462d614c9b4fa8c",
+      "imageSha256": "124a508caa895d32f590123dd7b871767e7ef0e549fd29ecb821a530655249a2"
+    },
+    {
+      "file": "after-desktop-partial.png",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "state": "partial",
+      "capturedAtUTC": "2026-10-09T08:33:51.165920+00:00",
+      "sourceRevision": "worktree-source-sha256:6589822682c213bcd79180d191020d4e5de86a8d4325706b3462d614c9b4fa8c",
+      "imageSha256": "2ab1a92b8681bef0cdea618d48af10f09e9b685f81d8ee118bde2fd241149e39"
+    },
+    {
+      "file": "after-desktop-insufficient.png",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "state": "insufficient",
+      "capturedAtUTC": "2026-10-09T08:33:51.548701+00:00",
+      "sourceRevision": "worktree-source-sha256:6589822682c213bcd79180d191020d4e5de86a8d4325706b3462d614c9b4fa8c",
+      "imageSha256": "7825668eb2c15cc1a981dbc6403b2f54520e617c4444858257971cab9d8ad979"
+    },
+    {
+      "file": "after-desktop-unavailable.png",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "state": "unavailable",
+      "capturedAtUTC": "2026-10-09T08:33:51.890316+00:00",
+      "sourceRevision": "worktree-source-sha256:6589822682c213bcd79180d191020d4e5de86a8d4325706b3462d614c9b4fa8c",
+      "imageSha256": "39e69e44c20904e27a63a92f544b0b152d0565e85dadcc128da7f0c91eb35a07"
+    },
+    {
+      "file": "after-desktop-manual.png",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "state": "manual",
+      "capturedAtUTC": "2026-10-09T08:33:52.232019+00:00",
+      "sourceRevision": "worktree-source-sha256:6589822682c213bcd79180d191020d4e5de86a8d4325706b3462d614c9b4fa8c",
+      "imageSha256": "0db1d98871f227d5b99c7471b9073935f6d1151ca26758daa7abb1dfaee66b2b"
+    },
+    {
+      "file": "after-desktop-loading.png",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "state": "loading",
+      "capturedAtUTC": "2026-10-09T08:33:52.615252+00:00",
+      "sourceRevision": "worktree-source-sha256:6589822682c213bcd79180d191020d4e5de86a8d4325706b3462d614c9b4fa8c",
+      "imageSha256": "1e19f35e6d79358dbeb8b835c1ea82d6307e4949e13cc14d3976a6722d4a1007"
+    },
+    {
+      "file": "after-desktop-error.png",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "state": "error",
+      "capturedAtUTC": "2026-10-09T08:33:52.969330+00:00",
+      "sourceRevision": "worktree-source-sha256:6589822682c213bcd79180d191020d4e5de86a8d4325706b3462d614c9b4fa8c",
+      "imageSha256": "7bfc7efc0319ed73f0c35424239bef533a9cc96ae3cf49427d0f75d57d3019f7"
+    },
+    {
+      "file": "after-desktop-different-row.png",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "state": "different-row",
+      "capturedAtUTC": "2026-10-09T08:33:50.822380+00:00",
+      "sourceRevision": "worktree-source-sha256:6589822682c213bcd79180d191020d4e5de86a8d4325706b3462d614c9b4fa8c",
+      "imageSha256": "7124832a84122f03286600ded5890433d2e44c8901436bac959fb144c51fe4a0"
+    },
+    {
+      "file": "after-desktop-partial-row.png",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "state": "partial-row",
+      "capturedAtUTC": "2026-10-09T08:33:51.206820+00:00",
+      "sourceRevision": "worktree-source-sha256:6589822682c213bcd79180d191020d4e5de86a8d4325706b3462d614c9b4fa8c",
+      "imageSha256": "1cff176d4812068d0f50b564bdd7d1feaafee9f00028556ca06d6f311b223877"
+    },
+    {
+      "file": "after-desktop-manual-row.png",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "state": "manual-row",
+      "capturedAtUTC": "2026-10-09T08:33:52.273555+00:00",
+      "sourceRevision": "worktree-source-sha256:6589822682c213bcd79180d191020d4e5de86a8d4325706b3462d614c9b4fa8c",
+      "imageSha256": "42ed0d61d8be5b0ce4b3a5423d832bd35589e8c5bb772650f5b6300a22e568f7"
+    },
+    {
+      "file": "after-mobile-collapsed.png",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "state": "collapsed",
+      "capturedAtUTC": "2026-10-09T08:33:55.119049+00:00",
+      "sourceRevision": "worktree-source-sha256:6589822682c213bcd79180d191020d4e5de86a8d4325706b3462d614c9b4fa8c",
+      "imageSha256": "37ec769f3caae603d5026cdf07ee2f310b84550a954052d7be6448955c016fb8"
+    },
+    {
+      "file": "after-mobile-expanded.png",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "state": "expanded",
+      "capturedAtUTC": "2026-10-09T08:33:55.548301+00:00",
+      "sourceRevision": "worktree-source-sha256:6589822682c213bcd79180d191020d4e5de86a8d4325706b3462d614c9b4fa8c",
+      "imageSha256": "181a01fed7b67d70f0bb37a88050982ea47d830ee4c0ab09e799078a257dba82"
+    },
+    {
+      "file": "after-mobile-row.png",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "state": "row",
+      "capturedAtUTC": "2026-10-09T08:33:55.169140+00:00",
+      "sourceRevision": "worktree-source-sha256:6589822682c213bcd79180d191020d4e5de86a8d4325706b3462d614c9b4fa8c",
+      "imageSha256": "f20460012d7a45bd2f870e14d0d52b923774b6e0ba14090bac482d3f7bcac630"
+    },
+    {
+      "file": "after-mobile-feedback.png",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "state": "feedback",
+      "capturedAtUTC": "2026-10-09T08:33:55.586868+00:00",
+      "sourceRevision": "worktree-source-sha256:6589822682c213bcd79180d191020d4e5de86a8d4325706b3462d614c9b4fa8c",
+      "imageSha256": "7e530cd26cc7bee0d336125376c660e8c4d871e436ffcc8c742734b773d08799"
+    },
+    {
+      "file": "after-mobile-comparison.png",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "state": "comparison",
+      "capturedAtUTC": "2026-10-09T08:33:55.642332+00:00",
+      "sourceRevision": "worktree-source-sha256:6589822682c213bcd79180d191020d4e5de86a8d4325706b3462d614c9b4fa8c",
+      "imageSha256": "0cd135e78218a7ab790aa9b7eadeb7d28d30a34ad132afdc36d8fd15cc2dbd91"
+    },
+    {
+      "file": "after-mobile-today-collapsed.png",
+      "route": "/dev/workout-feedback?today",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "state": "today-collapsed",
+      "capturedAtUTC": "2026-10-09T08:33:58.944792+00:00",
+      "sourceRevision": "worktree-source-sha256:6589822682c213bcd79180d191020d4e5de86a8d4325706b3462d614c9b4fa8c",
+      "imageSha256": "44a5aaec2c31b81b9541378cd284afb6a8f95fc7d1eb72c21f0e140cebb27935"
+    },
+    {
+      "file": "after-mobile-today-expanded.png",
+      "route": "/dev/workout-feedback?today",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "state": "today-expanded",
+      "capturedAtUTC": "2026-10-09T08:33:59.349439+00:00",
+      "sourceRevision": "worktree-source-sha256:6589822682c213bcd79180d191020d4e5de86a8d4325706b3462d614c9b4fa8c",
+      "imageSha256": "ed9dfc814acabb803276784c245d0b42078dfbf4f29c9ce98971965e2f1e38b6"
+    },
+    {
+      "file": "after-mobile-different.png",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "state": "different",
+      "capturedAtUTC": "2026-10-09T08:33:56.014043+00:00",
+      "sourceRevision": "worktree-source-sha256:6589822682c213bcd79180d191020d4e5de86a8d4325706b3462d614c9b4fa8c",
+      "imageSha256": "bcfb0bed9d092dd941d5810bbc42405a8f001fc62cb4f1949c4c035ef213953e"
+    },
+    {
+      "file": "after-mobile-partial.png",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "state": "partial",
+      "capturedAtUTC": "2026-10-09T08:33:56.405364+00:00",
+      "sourceRevision": "worktree-source-sha256:6589822682c213bcd79180d191020d4e5de86a8d4325706b3462d614c9b4fa8c",
+      "imageSha256": "02a167d45212e67dd30e0499e87e9ce07fad468acb00df08653eee99ab3424b3"
+    },
+    {
+      "file": "after-mobile-insufficient.png",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "state": "insufficient",
+      "capturedAtUTC": "2026-10-09T08:33:56.796297+00:00",
+      "sourceRevision": "worktree-source-sha256:6589822682c213bcd79180d191020d4e5de86a8d4325706b3462d614c9b4fa8c",
+      "imageSha256": "ba12d8803a0d275c3c2f1ae72aa2c20703106c5f6284db5070e50e1da9fdd667"
+    },
+    {
+      "file": "after-mobile-unavailable.png",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "state": "unavailable",
+      "capturedAtUTC": "2026-10-09T08:33:57.154410+00:00",
+      "sourceRevision": "worktree-source-sha256:6589822682c213bcd79180d191020d4e5de86a8d4325706b3462d614c9b4fa8c",
+      "imageSha256": "15caf1b7f1fe2179b89d4987281afae38d29500b34a605772c1c36c50639b45b"
+    },
+    {
+      "file": "after-mobile-manual.png",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "state": "manual",
+      "capturedAtUTC": "2026-10-09T08:33:57.504747+00:00",
+      "sourceRevision": "worktree-source-sha256:6589822682c213bcd79180d191020d4e5de86a8d4325706b3462d614c9b4fa8c",
+      "imageSha256": "2a97b5ce508e96bc440294683bf7be1404818a79d91d86d970a31c9d36f76a9f"
+    },
+    {
+      "file": "after-mobile-loading.png",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "state": "loading",
+      "capturedAtUTC": "2026-10-09T08:33:57.895545+00:00",
+      "sourceRevision": "worktree-source-sha256:6589822682c213bcd79180d191020d4e5de86a8d4325706b3462d614c9b4fa8c",
+      "imageSha256": "c43c6107f50d21d7bba42157eec9e9a03421032e5d2377bdaaecb84a414ad8ac"
+    },
+    {
+      "file": "after-mobile-error.png",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "state": "error",
+      "capturedAtUTC": "2026-10-09T08:33:58.246710+00:00",
+      "sourceRevision": "worktree-source-sha256:6589822682c213bcd79180d191020d4e5de86a8d4325706b3462d614c9b4fa8c",
+      "imageSha256": "de21fb1e21219ad86e0e54b5039048e341accfd3aac831ae5c117cff01895bb3"
+    },
+    {
+      "file": "after-mobile-different-row.png",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "state": "different-row",
+      "capturedAtUTC": "2026-10-09T08:33:56.053084+00:00",
+      "sourceRevision": "worktree-source-sha256:6589822682c213bcd79180d191020d4e5de86a8d4325706b3462d614c9b4fa8c",
+      "imageSha256": "d56b986b6933ba169efacbcf13bb9c40771d577234330d07b115d6b5393a4f5a"
+    },
+    {
+      "file": "after-mobile-partial-row.png",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "state": "partial-row",
+      "capturedAtUTC": "2026-10-09T08:33:56.444798+00:00",
+      "sourceRevision": "worktree-source-sha256:6589822682c213bcd79180d191020d4e5de86a8d4325706b3462d614c9b4fa8c",
+      "imageSha256": "881e7c3663793bfa3e927f70236312353ce853db0a2782d0d7bf2e3dd724836a"
+    },
+    {
+      "file": "after-mobile-manual-row.png",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "state": "manual-row",
+      "capturedAtUTC": "2026-10-09T08:33:57.548681+00:00",
+      "sourceRevision": "worktree-source-sha256:6589822682c213bcd79180d191020d4e5de86a8d4325706b3462d614c9b4fa8c",
+      "imageSha256": "8989ac3a05a5c4f7edd851deb8a0d4b7d16696eb07fe6cefbc3b152a5becda11"
+    },
+    {
+      "file": "after-narrow-comparison.png",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 320,
+        "height": 780
+      },
+      "state": "comparison",
+      "capturedAtUTC": "2026-10-09T08:34:00.891731+00:00",
+      "sourceRevision": "worktree-source-sha256:6589822682c213bcd79180d191020d4e5de86a8d4325706b3462d614c9b4fa8c",
+      "imageSha256": "99fb528a8ee84f71b9d3637233f63e0b2419a8a0a495bfe9d4f8ede833ef278e"
     }
   ]
 }
