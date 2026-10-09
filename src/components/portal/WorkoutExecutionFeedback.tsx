@@ -7,10 +7,12 @@ import {
   MoveDownRight,
   MoveUpRight,
 } from "lucide-react";
+import WorkoutExecutionScore from "./WorkoutExecutionScore";
 import { Button } from "@/components/ui/button";
 import type { WeeklyCoachSession } from "@/lib/portal-api";
 import {
   canShowExecutionFeedback,
+  evaluatedExecutionFeedback,
   type ExecutionDimension,
   type ExecutionFeedback,
 } from "@/lib/workout-feedback";
@@ -76,67 +78,102 @@ export default function WorkoutExecutionFeedback({
   onRetry?: () => void;
 }) {
   if (!canShowExecutionFeedback(session)) return null;
-  const evaluated =
-    feedback?.status === "evaluated" &&
-    Number.isFinite(feedback.score) &&
-    feedback.score >= 0 &&
-    feedback.score <= 100;
+  const result = evaluatedExecutionFeedback(feedback);
+  const dimensions = result
+    ? [
+        { name: "Duration", dimension: result.duration },
+        { name: "Intensity", dimension: result.intensity },
+        { name: "Structure", dimension: result.structure },
+      ]
+    : [];
+  const groups = [
+    {
+      title: "Matched your plan",
+      Icon: Check,
+      tone: "bg-primary/10 text-primary",
+      items: dimensions.filter(
+        ({ dimension }) =>
+          dimension.outcome === "on_target" ||
+          dimension.outcome === "as_planned",
+      ),
+      matched: true,
+    },
+    {
+      title: "Worth adjusting",
+      Icon: ArrowRightLeft,
+      tone: "bg-accent/10 text-foreground",
+      items: dimensions.filter(
+        ({ dimension }) =>
+          !["on_target", "as_planned", "unavailable"].includes(
+            dimension.outcome,
+          ),
+      ),
+      matched: false,
+    },
+    {
+      title: "Not assessed",
+      Icon: Minus,
+      tone: "bg-secondary text-foreground/70",
+      items: dimensions.filter(
+        ({ dimension }) => dimension.outcome === "unavailable",
+      ),
+      matched: true,
+    },
+  ];
 
   return (
     <section
       aria-label="Workout feedback"
       className="selection:bg-primary/15 selection:text-foreground"
     >
-      {evaluated ? (
+      {result ? (
         <>
           <div className="flex items-center justify-between gap-3">
             <div>
-              <h4 className="text-base font-semibold">{feedback.label}</h4>
+              <h4 className="text-base font-semibold">{result.label}</h4>
               <p className="mt-1 text-xs text-foreground/70">
                 Match to your plan
               </p>
             </div>
-            <p
-              className="shrink-0 tabular-nums"
-              aria-label={`Plan adherence: ${feedback.score} out of 100`}
-            >
-              <span className="text-3xl font-semibold tracking-tight text-primary">
-                {feedback.score}
-              </span>
-              <span className="ml-1 text-sm text-foreground/70">/ 100</span>
-            </p>
+            <WorkoutExecutionScore feedback={result} />
           </div>
-          <table
-            className="mt-4 w-full table-fixed"
-            aria-label="Plan and recorded run comparison"
-          >
-            <colgroup>
-              <col className="w-1/3" />
-              <col className="w-1/3" />
-              <col className="w-1/3" />
-            </colgroup>
-            <thead>
-              <tr>
-                <th scope="col" className="pb-2 text-left">
-                  <span className="sr-only">Dimension</span>
-                </th>
-                <th
-                  scope="col"
-                  className="pb-2 pr-2 text-left text-xs font-normal text-foreground/70"
-                >
-                  Plan
-                </th>
-                <th scope="col" className="pb-2 text-left text-xs font-medium">
-                  Your run
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <DimensionRow name="Duration" dimension={feedback.duration} />
-              <DimensionRow name="Intensity" dimension={feedback.intensity} />
-              <DimensionRow name="Structure" dimension={feedback.structure} />
-            </tbody>
-          </table>
+          <div className="my-4 space-y-3">
+            {groups
+              .filter((group) => group.items.length > 0)
+              .map(({ title, Icon, tone, items, matched }) => (
+                <div key={title} className="flex items-start gap-2.5">
+                  <span
+                    className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${tone}`}
+                  >
+                    <Icon aria-hidden="true" className="h-3.5 w-3.5" />
+                  </span>
+                  <div>
+                    <h5 className="text-xs leading-relaxed text-foreground/70">
+                      {title}
+                    </h5>
+                    <ul
+                      aria-label={title}
+                      className="flex flex-wrap gap-x-3 gap-y-1 text-sm font-medium"
+                    >
+                      {items.map(({ name, dimension }) => (
+                        <li key={name}>
+                          {name}
+                          {matched ? "" : ` · ${dimension.label}`}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              ))}
+          </div>
+          {result.insight ? (
+            <div className="mb-3 border-t border-border pt-3">
+              <p className="text-sm leading-relaxed">
+                <span className="font-semibold">Next time: </span>
+                {result.insight}
+              </p>
+            </div>
+          ) : null}
         </>
       ) : feedback?.status === "loading" ? (
         <div
@@ -188,20 +225,60 @@ export default function WorkoutExecutionFeedback({
           </div>
         </div>
       )}
-      {evaluated || session.notes ? (
+      {result || session.notes ? (
         <details className="group mt-1 border-t border-border">
           <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-sm text-xs font-medium text-foreground/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
-            {evaluated ? "More details" : "Session notes"}
+            {result ? "Compare with plan" : "Session notes"}
             <ChevronDown
               aria-hidden="true"
               className="h-3.5 w-3.5 transition-transform group-open:rotate-180 motion-reduce:transition-none"
             />
           </summary>
           <div className="space-y-3 pb-1 text-sm leading-relaxed text-foreground/70">
-            {evaluated ? (
+            {result ? (
               <>
-                {feedback.summary ? (
-                  <p className="text-foreground">{feedback.summary}</p>
+                <table
+                  className="w-full table-fixed"
+                  aria-label="Plan and recorded run comparison"
+                >
+                  <colgroup>
+                    <col className="w-1/3" />
+                    <col className="w-1/3" />
+                    <col className="w-1/3" />
+                  </colgroup>
+                  <thead>
+                    <tr>
+                      <th scope="col" className="pb-2 text-left">
+                        <span className="sr-only">Dimension</span>
+                      </th>
+                      <th
+                        scope="col"
+                        className="pb-2 pr-2 text-left text-xs font-normal text-foreground/70"
+                      >
+                        Plan
+                      </th>
+                      <th
+                        scope="col"
+                        className="pb-2 text-left text-xs font-medium"
+                      >
+                        Your run
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <DimensionRow name="Duration" dimension={result.duration} />
+                    <DimensionRow
+                      name="Intensity"
+                      dimension={result.intensity}
+                    />
+                    <DimensionRow
+                      name="Structure"
+                      dimension={result.structure}
+                    />
+                  </tbody>
+                </table>
+                {result.summary ? (
+                  <p className="text-foreground">{result.summary}</p>
                 ) : null}
                 <p>
                   The score measures how closely you followed the plan. It

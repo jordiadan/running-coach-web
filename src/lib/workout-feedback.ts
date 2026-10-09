@@ -20,6 +20,7 @@ export type ExecutionFeedback =
       score: number;
       label: string;
       summary?: string;
+      insight?: string;
       duration: ExecutionDimension;
       intensity: ExecutionDimension;
       structure: ExecutionDimension;
@@ -34,4 +35,13 @@ export function canShowExecutionFeedback(session: WeeklyCoachSession) {
     session.modality === "RUN" &&
     (session.completed === true || Boolean(session.syncedActivity))
   );
+}
+
+export function evaluatedExecutionFeedback(feedback?: ExecutionFeedback) {
+  return feedback?.status === "evaluated" &&
+    Number.isFinite(feedback.score) &&
+    feedback.score >= 0 &&
+    feedback.score <= 100
+    ? feedback
+    : undefined;
 }

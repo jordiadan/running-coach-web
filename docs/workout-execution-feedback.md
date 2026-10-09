@@ -1,10 +1,10 @@
 # Workout Execution Feedback prototype
 
-This frontend prototype adds plan-adherence feedback inside Weekly Plan run
-details. It keeps manual completion, the matched activity and evaluation separate.
-Scores and duration, intensity and structure results are supplied examples; the
-frontend does not calculate them. Backend integration awaits the user's visual
-approval.
+This frontend prototype shows a compact plan-adherence score and supplied result
+in evaluated Weekly Plan run rows and Today done. Opening a run explains what
+matched, what differed and any supplied next-time insight. Manual completion,
+the matched activity and evaluation remain separate. Backend integration is
+stopped pending the user's visual approval.
 
 ## Run the preview
 
@@ -25,53 +25,79 @@ synthetic states:
 - Loading
 - Request error
 
-The error state's **Try again** button switches to the evaluated example. **Today**
-opens a seeded empty week; **Previous week** returns to the fixture week. These
-interactions use the preview's local query cache rather than backend requests.
-All displayed athletes, activities, metrics and evaluations are mock data.
+The error state's **Try again** button switches to the evaluated example. In this
+historical preview, **Today** opens a seeded empty week; **Previous week** returns
+to the fixture week. Visit `http://localhost:5174/dev/workout-feedback?today` to
+inspect Today done: it seeds the current week and explicitly sets
+`todaySessionDay` to `MON`. **View workout feedback** opens that run's details.
+These interactions use the preview's local query cache rather than backend
+requests. All athletes, activities, metrics, evaluations and insights are mock
+data.
 
 ## Implementation boundary
 
 `src/lib/workout-feedback.ts` is a presentation model, not an API contract.
-`WorkoutExecutionFeedback.tsx` renders supplied results for completed or matched
-running sessions. Missing evidence has no score; unmatched manual completion
-does not fabricate an evaluation. Strength, mobility, rest and uncompleted
-unmatched runs do not receive feedback.
+Scores, labels, insights and duration/intensity/structure outcomes are supplied
+data. The frontend does not calculate scores, infer intensity, generate coaching
+advice or change the plan. The optional `insight` field demonstrates presentation
+only; its mock examples do not establish a backend response field.
 
-The default evaluated view shows the supplied result and score, then a three-row
-**Plan / Your run** table for duration, intensity and structure. Optional
-`planned` and `recorded` strings are presentation values, not computed metrics.
-A single native **More details** disclosure holds the explanation and session
-notes. Unavailable states use shorter messages. The calendar is unchanged.
+`WorkoutExecutionScore.tsx` renders valid supplied scores in the schedule, Today
+done and expanded feedback. `WorkoutExecutionFeedback.tsx` renders feedback for
+completed or matched running sessions. Missing evidence has no score; unmatched
+manual completion does not fabricate an evaluation. Strength, mobility, rest and
+uncompleted unmatched runs do not receive feedback.
+
+Expanded feedback groups supplied outcomes under **Matched your plan**, **Worth
+adjusting** and **Not assessed**, omitting empty groups. An optional actionable
+**Next time** insight follows. One native **Compare with plan** disclosure holds
+the three-row **Plan / Your run** table, supplied summary, score explanation and
+session notes. Optional `planned` and `recorded` strings are presentation values,
+not computed metrics. Unscored states retain neutral copy, loading feedback and
+error retry; their notes use a **Session notes** disclosure when present.
 
 The preview route and synthetic fixtures are excluded from the production build
-through the `import.meta.env.DEV` import guard. Existing API contracts are
-unchanged. Confirm the backend response and adapter in a later integration slice
-after visual approval; do not treat the fixture vocabulary as a server schema.
+through the `import.meta.env.DEV` import guard. Existing APIs, calculations,
+completion workflows and dependencies are unchanged. After visual approval,
+confirm the backend response and implement the adapter in a separate integration
+slice. Do not treat the fixture vocabulary as a server schema.
 
 ## Validation
 
-Finish review disposition: ship at frontend prototype scope. Twenty-one actual
-desktop, mobile and narrow-screen captures were inspected. All eight selectable
-states were checked at 1440px, 390px and 320px without overflow, browser errors or
-backend API requests. The outer disclosure works with Enter/Space; the native
-details disclosure works with Enter. Retry and Today navigation also pass.
+Independent finish review disposition: **SHIP at frontend prototype scope**,
+after recapturing the default Today done screenshots. No material scoped findings
+remain. This verdict does not authorize backend integration.
 
-At 390px, the default feedback capture is 340px tall, down from 553px (39%
-shorter). The sole material review finding, wrapping of the planned structure
-value at 320px, was resolved with local cell padding and recaptured.
+[Screenshot evidence](screenshots/workout-feedback/README.md) contains 30 actual
+Chromium PNGs at desktop 1440 × 1000 and mobile 390 × 844. Before/after captures
+cover collapsed rows, expanded feedback and Today done; additional captures show
+the comparison disclosure and all eight states. The baseline is commit
+`f7254f3`; baseline Today captures use the current preview-only fixture selector
+with baseline product components. [Provenance](screenshots/workout-feedback/provenance.json)
+records routes, states, source fingerprints and image hashes; the reviewer
+verified all 30 hashes. Evidence is linked for review in
+[draft PR #17](https://github.com/jordiadan/running-coach-web/pull/17).
 
-`npm run lint` passes with nine existing warnings; all 69 tests pass;
-`npm run build` passes. A separate TypeScript check still reports the same eight
-baseline errors. The production output was checked for fixture exclusion.
+All eight states passed browser checks at 1440px, 390px and 320px without
+horizontal overflow, browser errors or backend requests. Row expansion and the
+native disclosure support keyboard operation; retry, Today navigation and the
+Today feedback link pass. Captures use synthetic data and reduced motion.
 
-The implementation matches the scoped Weekly Plan brief: existing warm surfaces,
-green emphasis, DM Sans/tabular metrics, rounded disclosure and a compact
-comparison table on all checked widths. Feedback stays inside the session;
-explanation and notes sit behind one disclosure. No durable design-system change
-is introduced, so `DESIGN.md` and `.impeccable/design.json` remain unchanged.
+`npm run lint` reports zero errors and nine existing warnings. All 70 tests pass;
+the 17 affected tests also pass after the test typing adjustment.
+`npm run build` passes with baseline chunk-size and Browserslist warnings.
+Separate TypeScript diagnostics are byte-identical to the root baseline's eight
+errors. Production output excludes the preview and mock strings.
 
-Pre-existing limitations remain: alternate theme selections render warm, and the
-design sidecar lags `DESIGN.md`. The unset Impeccable `buildPath` is a construction
-preference, not a prerequisite for this extension. These findings do not imply
-theme coverage or a full accessibility certification.
+The implementation matches the scoped Weekly Plan direction with no intentional
+deviations: visible contextual scores, grouped feedback, optional supplied
+insight and one comparison disclosure. Existing warm surfaces, green emphasis,
+DM Sans/tabular metrics, serif headings and rounded rows remain intact. No global
+design change is introduced; `DESIGN.md`, `.impeccable/design.json`, theme tokens
+and global configuration remain unchanged.
+
+Pre-existing theme rendering drift and the stale design sidecar remain outside
+this slice. The unset Impeccable `buildPath` remains a construction preference.
+Validation covers the scoped warm implementation; it does not recertify global
+themes or application-wide accessibility. Mock data and the pending API adapter
+are the remaining prototype limitations.

@@ -10,6 +10,8 @@ export const feedbackExamples: Record<
     feedback: {
       status: "evaluated",
       score: 86,
+      insight:
+        "Your effort was higher than planned. Keep your next easy run at a conversational effort.",
       label: "Good execution",
       summary:
         "You followed the planned duration and structure. The effort was higher than prescribed.",
@@ -38,6 +40,8 @@ export const feedbackExamples: Record<
     feedback: {
       status: "evaluated",
       score: 48,
+      insight:
+        "This run was shorter and harder than planned. Aim for the planned easy duration next time.",
       label: "Different from plan",
       summary:
         "This run was shorter and harder than prescribed. Your recorded activity remains linked to the session.",
@@ -66,6 +70,8 @@ export const feedbackExamples: Record<
     feedback: {
       status: "evaluated",
       score: 92,
+      insight:
+        "Duration and effort matched the plan. Keep that easy rhythm next time.",
       label: "Close to the plan",
       summary:
         "Duration and intensity followed the plan. Structure couldn’t be assessed from the available data.",

@@ -35,8 +35,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import WeekNavigator from "@/components/portal/WeekNavigator";
+import WorkoutExecutionScore from "@/components/portal/WorkoutExecutionScore";
 import WorkoutExecutionFeedback from "@/components/portal/WorkoutExecutionFeedback";
-import { canShowExecutionFeedback, type ExecutionFeedback } from "@/lib/workout-feedback";
+import { canShowExecutionFeedback, evaluatedExecutionFeedback, type ExecutionFeedback } from "@/lib/workout-feedback";
 
 type WeeklyPlanScreenProps = {
   athleteId: string;
@@ -597,7 +598,11 @@ function TodayDoneCard({
   canToggleCompletion,
   onUndo,
   onJumpNext,
+  feedback,
+  reduceMotion,
 }: {
+  reduceMotion: boolean;
+  feedback?: ExecutionFeedback;
   session: WeeklyCoachSession;
   upNext: WeeklyCoachSession | undefined;
   canToggleCompletion: boolean;
@@ -606,20 +611,28 @@ function TodayDoneCard({
 }) {
   return (
     <motion.div
-      layout
-      initial={{ opacity: 0, y: 10, scale: 0.98 }}
+      layout={!reduceMotion}
+      initial={reduceMotion ? false : { opacity: 0, y: 10, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.98 }}
-      transition={{ type: "spring", bounce: 0.25, duration: 0.5 }}
+      exit={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.98 }}
+      transition={
+        reduceMotion
+          ? { duration: 0 }
+          : { type: "spring", bounce: 0.25, duration: 0.5 }
+      }
       className="relative overflow-hidden rounded-2xl border border-border bg-card"
     >
       <div className="p-4">
         <div className="flex items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
             <motion.div
-              initial={{ scale: 0, rotate: -90 }}
+              initial={reduceMotion ? false : { scale: 0, rotate: -90 }}
               animate={{ scale: 1, rotate: 0 }}
-              transition={{ type: "spring", bounce: 0.5, delay: 0.1 }}
+              transition={
+                reduceMotion
+                  ? { duration: 0 }
+                  : { type: "spring", bounce: 0.5, delay: 0.1 }
+              }
               className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground"
             >
               <Check className="h-4 w-4" strokeWidth={3} />
@@ -627,7 +640,9 @@ function TodayDoneCard({
             <div className="min-w-0">
               <div className="flex items-center gap-1.5">
                 <Sparkles className="h-3 w-3 text-primary" />
-                <span className="text-[10px] font-semibold uppercase tracking-widest text-primary">Today done</span>
+                <span className="text-[10px] font-semibold uppercase tracking-widest text-primary">
+                  Today done
+                </span>
               </div>
               <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
                 <p className="min-w-0 max-w-full truncate text-sm font-medium text-foreground/90 line-through decoration-muted-foreground/40">
@@ -649,26 +664,36 @@ function TodayDoneCard({
         </div>
 
         {canShowExecutionFeedback(session) ? (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="mt-3 text-primary"
-            onClick={() => onJumpNext(session.day)}
-          >
-            View workout feedback{" "}
-            <ArrowRight aria-hidden="true" className="ml-2 h-3.5 w-3.5" />
-          </Button>
+          <div className="mt-3">
+            {evaluatedExecutionFeedback(feedback) ? (
+              <div className="mb-1 flex items-center gap-2">
+                <WorkoutExecutionScore feedback={feedback} compact />
+                <span className="text-xs leading-relaxed text-foreground/70">
+                  Plan match · {evaluatedExecutionFeedback(feedback)?.label}
+                </span>
+              </div>
+            ) : null}
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="text-primary"
+              onClick={() => onJumpNext(session.day)}
+            >
+              View workout feedback{" "}
+              <ArrowRight aria-hidden="true" className="ml-2 h-3.5 w-3.5" />
+            </Button>
+          </div>
         ) : null}
 
         {upNext ? (
           <motion.button
             type="button"
-            initial={{ opacity: 0, y: 6 }}
+            initial={reduceMotion ? false : { opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25 }}
+            transition={reduceMotion ? { duration: 0 } : { delay: 0.25 }}
             onClick={() => onJumpNext(upNext.day)}
-            whileHover={{ x: 2 }}
+            whileHover={reduceMotion ? undefined : { x: 2 }}
             className="group mt-4 flex w-full items-center gap-3 border-t border-border pt-3 text-left"
           >
             <div
@@ -677,7 +702,9 @@ function TodayDoneCard({
               } ${(typeConfig[upNext.modality] ?? typeConfig.RUN).tileClass}`}
             >
               {(() => {
-                const UpNextIcon = (typeConfig[upNext.modality] ?? typeConfig.RUN).icon;
+                const UpNextIcon = (
+                  typeConfig[upNext.modality] ?? typeConfig.RUN
+                ).icon;
                 return <UpNextIcon className="h-3.5 w-3.5" />;
               })()}
             </div>
@@ -699,7 +726,7 @@ function TodayDoneCard({
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.25 }}
+            transition={reduceMotion ? { duration: 0 } : { delay: 0.25 }}
             className="mt-4 flex items-center gap-2 border-t border-border pt-3 text-[12px] text-muted-foreground"
           >
             <TrendingUp className="h-3.5 w-3.5 text-primary" />
@@ -1067,7 +1094,7 @@ function ScheduleList({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: reduceMotion ? 0 : 0.2 }}
           >
             {sessions.map((session, index) => {
               const isDone = session.completed === true;
@@ -1075,6 +1102,11 @@ function ScheduleList({
               const isKey = session.role === "KEY";
               const isToday = isCurrentWeek && session.day === todayDay;
               const expanded = expandedDay === session.day;
+              const feedback = canShowExecutionFeedback(session)
+                ? evaluatedExecutionFeedback(
+                    executionFeedbackByDay?.[session.day],
+                  )
+                : undefined;
               const config = typeConfig[session.modality] ?? typeConfig.RUN;
               const TypeIcon = config.icon;
               const canToggle =
@@ -1087,13 +1119,17 @@ function ScheduleList({
                 <motion.div
                   key={session.day}
                   ref={(element) => setSessionRef(session.day, element)}
-                  initial={{ opacity: 0, x: -6 }}
+                  initial={reduceMotion ? false : { opacity: 0, x: -6 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.04, duration: 0.3 }}
+                  transition={
+                    reduceMotion
+                      ? { duration: 0 }
+                      : { delay: index * 0.04, duration: 0.3 }
+                  }
                   className={`group relative ${isRest && !isDone ? "opacity-60" : ""}`}
                 >
                   <div
-                    className={`relative flex items-center gap-3 rounded-xl py-2.5 pl-2 pr-3 transition-all ${
+                    className={`relative flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-xl py-2.5 pl-2 pr-3 transition-all ${
                       !isRest ? "cursor-pointer select-none" : ""
                     } ${
                       isToday
@@ -1151,9 +1187,13 @@ function ScheduleList({
                             />
                           ) : null}
                           <motion.div
-                            initial={{ scale: 0 }}
+                            initial={reduceMotion ? false : { scale: 0 }}
                             animate={{ scale: 1 }}
-                            transition={{ type: "spring", bounce: 0.5 }}
+                            transition={
+                              reduceMotion
+                                ? { duration: 0 }
+                                : { type: "spring", bounce: 0.5 }
+                            }
                           >
                             <Check className="h-3 w-3" strokeWidth={3} />
                           </motion.div>
@@ -1199,13 +1239,21 @@ function ScheduleList({
                       {!isRest ? (
                         <motion.div
                           animate={{ rotate: expanded ? 180 : 0 }}
-                          transition={{ duration: 0.2 }}
+                          transition={{ duration: reduceMotion ? 0 : 0.2 }}
                           className="text-muted-foreground/40 transition-colors group-hover:text-muted-foreground"
                         >
                           <ChevronDown className="h-3.5 w-3.5" />
                         </motion.div>
                       ) : null}
                     </div>
+                    {feedback ? (
+                      <div className="pointer-events-none relative flex basis-full items-center gap-2 pl-9">
+                        <WorkoutExecutionScore feedback={feedback} compact />
+                        <span className="min-w-0 text-xs leading-relaxed text-foreground/70">
+                          Plan match · {feedback.label}
+                        </span>
+                      </div>
+                    ) : null}
                   </div>
 
                   <AnimatePresence>
@@ -1684,6 +1732,8 @@ export default function WeeklyPlanScreen({
               <TodayDoneCard
                 key="today-done"
                 session={todaySession}
+                feedback={executionFeedbackByDay?.[todaySession.day]}
+                reduceMotion={Boolean(reduceMotion)}
                 upNext={upNextSession}
                 canToggleCompletion={supportsCompletion}
                 onUndo={() => toggleComplete(todaySession.day)}

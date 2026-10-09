@@ -1,0 +1,463 @@
+{
+  "sourceFingerprintFiles": [
+    "src/components/portal/WeeklyPlanScreen.tsx",
+    "src/components/portal/WorkoutExecutionFeedback.tsx",
+    "src/components/portal/WorkoutExecutionScore.tsx",
+    "src/lib/workout-feedback.ts",
+    "src/dev/WorkoutFeedbackPreview.tsx",
+    "src/dev/workout-feedback-fixtures.ts"
+  ],
+  "afterSourceSha256": "52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
+  "screenshots": [
+    {
+      "file": "after-desktop-collapsed.png",
+      "origin": "Chromium screenshot of locally running React/Vite application",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "state": "collapsed",
+      "capturedAtUTC": "2026-10-09T07:53:32.033936+00:00",
+      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
+      "imageSha256": "1e632c290d98eea1695944e01990b25d661e224f8ff53239c6bce0656346bca4",
+      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
+      "notes": ""
+    },
+    {
+      "file": "after-desktop-comparison.png",
+      "origin": "Chromium screenshot of locally running React/Vite application",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "state": "comparison",
+      "capturedAtUTC": "2026-10-09T07:53:32.034381+00:00",
+      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
+      "imageSha256": "e5072cb389569cc72ad961dc92b04ee102730f7f7b1daebd31d13a9d3a18e5b7",
+      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
+      "notes": ""
+    },
+    {
+      "file": "after-desktop-different.png",
+      "origin": "Chromium screenshot of locally running React/Vite application",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "state": "different",
+      "capturedAtUTC": "2026-10-09T07:53:32.034636+00:00",
+      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
+      "imageSha256": "669f38fb20228a68ae502a9d9012e35cb2e6e41a21b9303d9e8f0fde162d26b6",
+      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
+      "notes": ""
+    },
+    {
+      "file": "after-desktop-error.png",
+      "origin": "Chromium screenshot of locally running React/Vite application",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "state": "error",
+      "capturedAtUTC": "2026-10-09T07:53:32.035440+00:00",
+      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
+      "imageSha256": "39d1b0f12ebb2ee57c9feb0ed8f6c498acd11751674b935d78c1b4dae3bca1e9",
+      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
+      "notes": ""
+    },
+    {
+      "file": "after-desktop-expanded.png",
+      "origin": "Chromium screenshot of locally running React/Vite application",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "state": "expanded",
+      "capturedAtUTC": "2026-10-09T07:53:32.034102+00:00",
+      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
+      "imageSha256": "2fe9e50e869d45de3a9f2abe5cac738ab6292aa62a6f7b425d7467215b2e73c4",
+      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
+      "notes": ""
+    },
+    {
+      "file": "after-desktop-feedback.png",
+      "origin": "Chromium screenshot of locally running React/Vite application",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "state": "feedback",
+      "capturedAtUTC": "2026-10-09T07:53:32.034514+00:00",
+      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
+      "imageSha256": "b4a1ab2f02e53e648a086fa54ca7f839e3f2f3ac65800ca71cff70dff2ba2a65",
+      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
+      "notes": ""
+    },
+    {
+      "file": "after-desktop-insufficient.png",
+      "origin": "Chromium screenshot of locally running React/Vite application",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "state": "insufficient",
+      "capturedAtUTC": "2026-10-09T07:53:32.034898+00:00",
+      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
+      "imageSha256": "5563935a9a8c27f713cff68237aee3b1aea3bd0bb22db1ffce394a891f9d77ba",
+      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
+      "notes": ""
+    },
+    {
+      "file": "after-desktop-loading.png",
+      "origin": "Chromium screenshot of locally running React/Vite application",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "state": "loading",
+      "capturedAtUTC": "2026-10-09T07:53:32.035327+00:00",
+      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
+      "imageSha256": "d543e0f28d5cc011ed3f55f5d0e8245054dd8e4d59909b388d3d1048724c2603",
+      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
+      "notes": ""
+    },
+    {
+      "file": "after-desktop-manual.png",
+      "origin": "Chromium screenshot of locally running React/Vite application",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "state": "manual",
+      "capturedAtUTC": "2026-10-09T07:53:32.035156+00:00",
+      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
+      "imageSha256": "18f35719253cd199aa17671895eaf65199125ccfdb4c5bb3946f57245b172850",
+      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
+      "notes": ""
+    },
+    {
+      "file": "after-desktop-partial.png",
+      "origin": "Chromium screenshot of locally running React/Vite application",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "state": "partial",
+      "capturedAtUTC": "2026-10-09T07:53:32.034757+00:00",
+      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
+      "imageSha256": "20c2bcb0ac1f352e8f4dd87b826dd667f5980a2b1ad753ee9e000759f9574e9d",
+      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
+      "notes": ""
+    },
+    {
+      "file": "after-desktop-today.png",
+      "origin": "Chromium screenshot of locally running React/Vite application",
+      "route": "/dev/workout-feedback?today",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "state": "today",
+      "capturedAtUTC": "2026-10-09T07:55:37.533014+00:00",
+      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
+      "imageSha256": "84699d9004ed7b4d1c869611c900a641ceeb4f2b22322968d6bbb3dc2611ebb8",
+      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
+      "notes": ""
+    },
+    {
+      "file": "after-desktop-unavailable.png",
+      "origin": "Chromium screenshot of locally running React/Vite application",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "state": "unavailable",
+      "capturedAtUTC": "2026-10-09T07:53:32.035022+00:00",
+      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
+      "imageSha256": "a68ee60f1126a530c41faf5bf92d4630aadea2a1784d92073235154e9095cc0f",
+      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
+      "notes": ""
+    },
+    {
+      "file": "after-mobile-collapsed.png",
+      "origin": "Chromium screenshot of locally running React/Vite application",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "state": "collapsed",
+      "capturedAtUTC": "2026-10-09T07:53:32.035569+00:00",
+      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
+      "imageSha256": "8f7904b31cc017d5b4de6d712ba668a83d9529ca7be7fb2d4cd780db4dce4fe4",
+      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
+      "notes": ""
+    },
+    {
+      "file": "after-mobile-comparison.png",
+      "origin": "Chromium screenshot of locally running React/Vite application",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "state": "comparison",
+      "capturedAtUTC": "2026-10-09T07:53:32.035942+00:00",
+      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
+      "imageSha256": "860edacb935ed61a48b0714eb03c111ee3c8c80f505d28e1b58216408b656ac1",
+      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
+      "notes": ""
+    },
+    {
+      "file": "after-mobile-different.png",
+      "origin": "Chromium screenshot of locally running React/Vite application",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "state": "different",
+      "capturedAtUTC": "2026-10-09T07:53:32.036168+00:00",
+      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
+      "imageSha256": "83084ae6aaf6414c9d8ff5a7b8838701443d1cd967e2d11f30c4183f72c37ed4",
+      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
+      "notes": ""
+    },
+    {
+      "file": "after-mobile-error.png",
+      "origin": "Chromium screenshot of locally running React/Vite application",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "state": "error",
+      "capturedAtUTC": "2026-10-09T07:53:32.036973+00:00",
+      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
+      "imageSha256": "9549be62d6e5dedeec225c240490db36052c0ac804c83fc537c863e27bc2c832",
+      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
+      "notes": ""
+    },
+    {
+      "file": "after-mobile-expanded.png",
+      "origin": "Chromium screenshot of locally running React/Vite application",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "state": "expanded",
+      "capturedAtUTC": "2026-10-09T07:53:32.035697+00:00",
+      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
+      "imageSha256": "d011586c7b416bd77a29835c29951e89a626de5f2f56edca6376aba04e0bebb5",
+      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
+      "notes": ""
+    },
+    {
+      "file": "after-mobile-feedback.png",
+      "origin": "Chromium screenshot of locally running React/Vite application",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "state": "feedback",
+      "capturedAtUTC": "2026-10-09T07:53:32.036053+00:00",
+      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
+      "imageSha256": "3a1b28be6ad8c8145b6003b7feea2090b601095731c06f0f2aabbe09bdf4f958",
+      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
+      "notes": ""
+    },
+    {
+      "file": "after-mobile-insufficient.png",
+      "origin": "Chromium screenshot of locally running React/Vite application",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "state": "insufficient",
+      "capturedAtUTC": "2026-10-09T07:53:32.036407+00:00",
+      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
+      "imageSha256": "4cfaddd6ac869066338c6017b1cc03b810048c832d2a6af5af8eb4bfdf899c30",
+      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
+      "notes": ""
+    },
+    {
+      "file": "after-mobile-loading.png",
+      "origin": "Chromium screenshot of locally running React/Vite application",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "state": "loading",
+      "capturedAtUTC": "2026-10-09T07:53:32.036831+00:00",
+      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
+      "imageSha256": "57c5febcd19cbe3e9726bd8e385c997ef8ff5729708e8dff79985be90131771b",
+      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
+      "notes": ""
+    },
+    {
+      "file": "after-mobile-manual.png",
+      "origin": "Chromium screenshot of locally running React/Vite application",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "state": "manual",
+      "capturedAtUTC": "2026-10-09T07:53:32.036662+00:00",
+      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
+      "imageSha256": "8be5f5964f8c350ddb6526d31ed8771a1bced71966002f292809bc673c45e96b",
+      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
+      "notes": ""
+    },
+    {
+      "file": "after-mobile-partial.png",
+      "origin": "Chromium screenshot of locally running React/Vite application",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "state": "partial",
+      "capturedAtUTC": "2026-10-09T07:53:32.036284+00:00",
+      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
+      "imageSha256": "1457c09a6bb95b4616ebeede80ebc033b2c60637de28ef68821cb514798ff014",
+      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
+      "notes": ""
+    },
+    {
+      "file": "after-mobile-today.png",
+      "origin": "Chromium screenshot of locally running React/Vite application",
+      "route": "/dev/workout-feedback?today",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "state": "today",
+      "capturedAtUTC": "2026-10-09T07:55:37.533163+00:00",
+      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
+      "imageSha256": "bb184ca89f0e2426e3337051bba3908a25aabf0c7a6859a15530c525e446f62e",
+      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
+      "notes": ""
+    },
+    {
+      "file": "after-mobile-unavailable.png",
+      "origin": "Chromium screenshot of locally running React/Vite application",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "state": "unavailable",
+      "capturedAtUTC": "2026-10-09T07:53:32.036526+00:00",
+      "sourceRevision": "worktree-source-sha256:52a889626dfb869f6cd7c897c9ada0f10d8c9a7d4372fbd004b58e6445a86204",
+      "imageSha256": "209adc9b6292f14d72f1dd032b0894d31040c325537f7fee92a88ca004fe031e",
+      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
+      "notes": ""
+    },
+    {
+      "file": "before-desktop-collapsed.png",
+      "origin": "Chromium screenshot of locally running React/Vite application",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "state": "collapsed",
+      "capturedAtUTC": "2026-10-09T07:45:32.133536+00:00",
+      "sourceRevision": "f7254f3b660b18bbd937f88a902a03f508986ef1",
+      "imageSha256": "898ac89c02d1d790fcc9d6a21d89934047d5d3bf3b1d010a6a9ceaa22fd6e08a",
+      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
+      "notes": ""
+    },
+    {
+      "file": "before-desktop-expanded.png",
+      "origin": "Chromium screenshot of locally running React/Vite application",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "state": "expanded",
+      "capturedAtUTC": "2026-10-09T07:45:32.133879+00:00",
+      "sourceRevision": "f7254f3b660b18bbd937f88a902a03f508986ef1",
+      "imageSha256": "ebcedbf5e8507d5fb7ed6ce0f4380189fa5053ebc3c9c4a00e5656e20cbfa436",
+      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
+      "notes": ""
+    },
+    {
+      "file": "before-desktop-today.png",
+      "origin": "Chromium screenshot of locally running React/Vite application",
+      "route": "/dev/workout-feedback?today",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "state": "today",
+      "capturedAtUTC": "2026-10-09T07:51:24.016937+00:00",
+      "sourceRevision": "f7254f3b660b18bbd937f88a902a03f508986ef1",
+      "imageSha256": "65dde9aff0825cf2c7895c60117b9e57646ae85d4a7730e084c14fcc04b94c41",
+      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
+      "notes": "Baseline Today uses current development-only fixture selector with baseline product components."
+    },
+    {
+      "file": "before-mobile-collapsed.png",
+      "origin": "Chromium screenshot of locally running React/Vite application",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "state": "collapsed",
+      "capturedAtUTC": "2026-10-09T07:45:32.133712+00:00",
+      "sourceRevision": "f7254f3b660b18bbd937f88a902a03f508986ef1",
+      "imageSha256": "0d3876ef006b364124d145a100b152b84cad76e201c9f7986cd5ca139562ffc4",
+      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
+      "notes": ""
+    },
+    {
+      "file": "before-mobile-expanded.png",
+      "origin": "Chromium screenshot of locally running React/Vite application",
+      "route": "/dev/workout-feedback",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "state": "expanded",
+      "capturedAtUTC": "2026-10-09T07:45:32.134049+00:00",
+      "sourceRevision": "f7254f3b660b18bbd937f88a902a03f508986ef1",
+      "imageSha256": "daf209edc43d188478d539844785893b9ceee4389a28b5777ce8a6d7c51d33c4",
+      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
+      "notes": ""
+    },
+    {
+      "file": "before-mobile-today.png",
+      "origin": "Chromium screenshot of locally running React/Vite application",
+      "route": "/dev/workout-feedback?today",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "state": "today",
+      "capturedAtUTC": "2026-10-09T07:51:30.738464+00:00",
+      "sourceRevision": "f7254f3b660b18bbd937f88a902a03f508986ef1",
+      "imageSha256": "34ffa868669c40037e64b4fe9f6bd2d9bc601e80cecbe7bfc6437bbd6b76894f",
+      "data": "Synthetic fixtures only; no authenticated session or backend API requests",
+      "notes": "Baseline Today uses current development-only fixture selector with baseline product components."
+    }
+  ]
+}

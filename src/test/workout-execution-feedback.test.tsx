@@ -1,5 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import WorkoutExecutionFeedback from "@/components/portal/WorkoutExecutionFeedback";
 import WeeklyPlanScreen from "@/components/portal/WeeklyPlanScreen";
@@ -31,7 +37,18 @@ describe("Workout execution feedback", () => {
     expect(
       screen.getByLabelText("Plan adherence: 86 out of 100"),
     ).toBeInTheDocument();
-    expect(screen.getByText(/doesn’t measure fitness/)).toBeInTheDocument();
+    expect(
+      screen.getByRole("list", { name: "Matched your plan" }),
+    ).toHaveTextContent("DurationStructure");
+    expect(
+      screen.getByRole("list", { name: "Worth adjusting" }),
+    ).toHaveTextContent("Intensity · Higher effort");
+    expect(screen.getByText(/Keep your next easy run/)).toBeVisible();
+    expect(screen.getByRole("table")).not.toBeVisible();
+    fireEvent.click(screen.getByText("Compare with plan"));
+    // jsdom does not emulate native summary toggling.
+    screen.getByText("Compare with plan").closest("details")!.open = true;
+    expect(screen.getByText(/doesn’t measure fitness/)).toBeVisible();
     expect(
       screen.getByRole("table", { name: "Plan and recorded run comparison" }),
     ).toBeInTheDocument();
@@ -45,7 +62,9 @@ describe("Workout execution feedback", () => {
     expect(
       screen.getByRole("cell", { name: "47 min On target" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Higher effort")).toBeInTheDocument();
+    expect(
+      screen.getByRole("cell", { name: "Moderate Higher effort" }),
+    ).toBeInTheDocument();
     expect(screen.getByText("As planned")).toBeInTheDocument();
   });
 
@@ -81,7 +100,9 @@ describe("Workout execution feedback", () => {
         feedback={feedbackExamples.partial.feedback}
       />,
     );
-    expect(screen.getByText("Not assessed")).toBeInTheDocument();
+    expect(
+      screen.getByRole("list", { name: "Not assessed" }),
+    ).toHaveTextContent("Structure");
     expect(
       screen.getByLabelText("Plan adherence: 92 out of 100"),
     ).toBeInTheDocument();
@@ -177,13 +198,21 @@ describe("Weekly Plan feedback disclosure", () => {
     expect(
       screen.queryByRole("region", { name: "Workout feedback" }),
     ).not.toBeInTheDocument();
+    await waitFor(() =>
+      expect(
+        screen.getByLabelText("Plan adherence: 86 out of 100"),
+      ).toBeVisible(),
+    );
+    expect(screen.getByText("Plan match · Good execution")).toBeVisible();
     fireEvent.click(button);
     expect(button).toHaveAttribute("aria-expanded", "true");
     expect(
       document.getElementById(button.getAttribute("aria-controls")!),
     ).toBeInTheDocument();
     expect(
-      screen.getByLabelText("Plan adherence: 86 out of 100"),
+      within(
+        screen.getByRole("region", { name: "Workout feedback" }),
+      ).getByLabelText("Plan adherence: 86 out of 100"),
     ).toBeInTheDocument();
     fireEvent.click(button);
     await waitFor(() =>
@@ -191,6 +220,45 @@ describe("Weekly Plan feedback disclosure", () => {
         screen.queryByRole("region", { name: "Workout feedback" }),
       ).not.toBeInTheDocument(),
     );
+  });
+
+  it("shows the score on Today done and opens the corresponding workout", async () => {
+    const data = {
+      ...workoutFeedbackScreen("evaluated"),
+      todaySessionDay: "MON",
+    };
+    data.selectedWeekStartDate = data.todayWeekStartDate;
+    vi.mocked(getCurrentUserWeeklyCoachScreen).mockResolvedValue(
+      data as Awaited<ReturnType<typeof getCurrentUserWeeklyCoachScreen>>,
+    );
+    render(
+      <QueryClientProvider
+        client={
+          new QueryClient({ defaultOptions: { queries: { retry: false } } })
+        }
+      >
+        <WeeklyPlanScreen
+          athleteId="demo"
+          targetWeekStartDate={data.selectedWeekStartDate}
+          isPreparing={false}
+          onRefresh={() => {}}
+          executionFeedbackByDay={{ MON: feedbackExamples.evaluated.feedback }}
+        />
+      </QueryClientProvider>,
+    );
+    const open = await screen.findByRole("button", {
+      name: "View workout feedback",
+    });
+    expect(
+      screen.getAllByLabelText("Plan adherence: 86 out of 100"),
+    ).toHaveLength(2);
+    fireEvent.click(open);
+    expect(
+      screen.getByRole("region", { name: "Workout feedback" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "View details for Easy aerobic run" }),
+    ).toHaveAttribute("aria-expanded", "true");
   });
 });
 
@@ -208,7 +276,9 @@ describe("Mock preview isolation", () => {
       }),
     );
     expect(
-      screen.getByLabelText("Plan adherence: 86 out of 100"),
+      within(
+        screen.getByRole("region", { name: "Workout feedback" }),
+      ).getByLabelText("Plan adherence: 86 out of 100"),
     ).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("Preview a feedback state"), {
       target: { value: "manual" },

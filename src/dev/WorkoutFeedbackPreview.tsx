@@ -6,12 +6,25 @@ import {
   workoutFeedbackScreen,
 } from "./workout-feedback-fixtures";
 
-function seedPreview(client: QueryClient, example: string) {
+function previewScreen(example: string, showToday: boolean) {
   const screen = workoutFeedbackScreen(example);
+  return showToday
+    ? {
+        ...screen,
+        selectedWeekStartDate: screen.todayWeekStartDate,
+        todaySessionDay: "MON",
+        canGoPrevious: false,
+      }
+    : screen;
+}
+
+function seedPreview(client: QueryClient, example: string, showToday = false) {
+  const screen = previewScreen(example, showToday);
   client.setQueryData(
     ["portal", "weekly-coach-screen", screen.selectedWeekStartDate],
     screen,
   );
+  if (showToday) return;
   client.setQueryData(
     ["portal", "weekly-coach-screen", screen.todayWeekStartDate],
     {
@@ -28,17 +41,18 @@ function seedPreview(client: QueryClient, example: string) {
 
 export default function WorkoutFeedbackPreview() {
   const [example, setExample] = useState("evaluated");
-  const data = workoutFeedbackScreen(example);
+  const showToday = new URLSearchParams(window.location.search).has("today");
+  const data = previewScreen(example, showToday);
   const [queryClient] = useState(() => {
     const client = new QueryClient({
       defaultOptions: { queries: { staleTime: Infinity } },
     });
-    seedPreview(client, "evaluated");
+    seedPreview(client, "evaluated", showToday);
     return client;
   });
   useEffect(() => {
-    seedPreview(queryClient, example);
-  }, [example, queryClient]);
+    seedPreview(queryClient, example, showToday);
+  }, [example, queryClient, showToday]);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -71,8 +85,8 @@ export default function WorkoutFeedbackPreview() {
             ))}
           </select>
           <p className="text-sm text-foreground/70">
-            Open Monday’s run to see the feedback. All activities and
-            evaluations on this page are examples.
+            Scores show how each run matched the plan. Open a run for feedback.
+            All activities and evaluations here are examples.
           </p>
         </div>
         <WeeklyPlanScreen
