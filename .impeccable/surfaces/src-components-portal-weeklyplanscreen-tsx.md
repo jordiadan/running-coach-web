@@ -1,0 +1,71 @@
+---
+version: 1
+slug: "src-components-portal-weeklyplanscreen-tsx"
+primary_target: "src/components/portal/WeeklyPlanScreen.tsx"
+related_targets: ["src/components/portal/WorkoutExecutionFeedback.tsx"]
+---
+
+# Workout Execution Feedback
+
+Scope: simplify Weekly Plan schedule and run feedback; Operate mode. Athlete scans plan adherence and opens a run to understand what to keep or adjust. Frontend prototype only; real-data integration awaits user visual approval.
+
+Content: supplied score and interpretation, concise supplied explanation/advice, optional planned/recorded duration/intensity/structure evidence and session notes. Preserve scoring, completion, matching and APIs; no inferred grades, advice or domain calculations.
+
+States: evaluated, partial evidence, insufficient evidence, unavailable, manual unmatched, loading, retryable error. Never fabricate a score. No feedback on unmatched uncompleted runs or other modalities.
+
+## Direction contract
+
+THESIS: the workout name and one inline score are the interface; opening adds a useful explanation, not a second score dashboard.
+
+OWN-WORLD: retain warm surfaces, restrained green primary, DM Sans, existing serif page headings, existing controls and focus tokens. Typography and alignment carry hierarchy; unboxed score, no metric tiles, colored status groups or redundant row labels.
+
+STORY: scan readable names and aligned scores, open a run, read what matched and one adjustment, optionally compare the evidence.
+
+FIRST VIEWPORT: consistent title-led schedule rows. Completion stays distinct; day and planned minutes are quiet secondary metadata; activity-source links appear after one workout expansion, outside the secondary comparison disclosure. One neutral score number sits at the right of the title, without a duplicate meter; a single schedule-level Plan match label provides context. Names wrap when needed and remain readable after completion. Expanding keeps the row's score visible and adds a supplied explanation and one short actionable sentence; no repeated number, grouped dimensions or Next time heading. One Compare with plan disclosure holds evidence and notes. Today integrates the same unboxed score beside its readable title and exposes provider links directly. Its feedback action requires a valid supplied evaluation, independently of manual or automatic completion. Desktop day and duration columns align across rows, including rest and unscored sessions; mobile keeps them below the title. Comparison columns use content-driven widths and explicit spacing at narrow sizes.
+
+FORM: replace prior feedback scaffolding, retaining product foundations. Use supplied summary and a concise supplied insight without generating or duplicating advice. Keep dimension evidence in a semantic three-row table behind native details. Flatten expanded session styling into the schedule, avoid a nested feedback card. Preserve provider links and completion controls. Existing reveal transitions respect reduced motion; no decorative animation.
+
+FINISH: independent review must judge the user rejection and actual before/after captures, not inherit prior approval. Final reviewer, screenshot evidence with provenance and developer documentation are required. Preserve DESIGN.md and sidecar because the product visual system is unchanged.
+
+Acceptance: all affected Weekly Plan and Today states captured before PR update, desktop/mobile and narrow verification, readable completed names, exactly one score per schedule row when expanded, useful default explanation, accessible secondary comparison, unchanged evaluation logic, lint/tests/build. Backend remains stopped pending visual approval.
+
+## Previous prototype validation
+
+Fresh finish review: SHIP at mock scope after fixing the 320px comparison wrapping; this resolves the scoped finding, not global recertification. Actual eight-state browser checks at 1440/390/320px passed overflow, console/API, keyboard expansion/disclosure, retry, Today navigation, readable completed names and single-score assertions. Schedule completion targets are 44px; checked feedback prose meets 4.5:1 contrast.
+
+All 71 tests pass, including the Strength source-link regression. Lint: zero errors and nine baseline warnings; build passes with baseline chunk/Browserslist warnings. TypeScript retains eight byte-identical baseline errors. One manual detector run across three targets returned legacy font-ramp advisories; its truncated output is not a clean-scan claim.
+
+See the focused GitHub-hosted attachments in [PR #17](https://github.com/jordiadan/running-coach-web/pull/17) for rejected `6573f8f` versus current Weekly Plan/Today, desktop/mobile, default prose, comparison, alternate states and 320px comparison. Review media and capture metadata stay in temporary storage outside the repository. Provider links intentionally require progressive disclosure; the default Today pending provider badge remains outside scope. Existing warm tokens, typography, rounded rows and focus treatment match the incumbent system; DESIGN.md, sidecar and global configuration remain preserved. Frontend mocks only; API adapter and backend remain stopped pending visual approval.
+
+## Previous four-requirement follow-up
+
+The refinement implements compact workout rows, provider links outside secondary
+disclosures, neutral proportional scores without frontend thresholds, and Today
+feedback gated by valid evaluation. The fixture row measures 44px on desktop and
+57.5px on mobile, versus 65.5px before; completion targets retain 44px. Long titles
+may wrap. Score transitions suppress motion under reduced-motion preferences.
+
+All 99 tests pass. Lint/build pass with existing warnings. TypeScript retains the
+same eight baseline errors. Browser checks cover 1440/390/320px and both motion
+preferences, keyboard activation/focus, native comparison, retry and Today
+navigation, with no overflow, page errors or fetch/XHR requests. Inspected raw
+before/after captures use baseline 378afd7 and identical synthetic fixture URLs
+and manual-evaluation data; review media remains outside the repository.
+
+The final independent Impeccable critique awaits sub-agent permission required
+by the installed critique workflow. No fresh independent SHIP verdict is claimed.
+Backend integration and real screen-reader validation remain separate.
+
+## Minimal-information refinement
+
+The user explicitly prefers clean screens with minimal useful information and
+strong visual hierarchy. This refinement keeps one supplied numeric score,
+removes its duplicate meter, aligns desktop metadata, and separates comparison
+cells at 320px. No new score label, coaching copy, feature or backend behavior is
+introduced. Explanation and advice remain one expansion away; evidence and score
+meaning remain behind Compare with plan. Today feedback retains its primary color
+on hover for readable contrast.
+
+Scoped browser validation uses identical synthetic fixtures against 84f900b at
+1440px, 390px and 320px. Captures stay outside the repository and are embedded in
+PR #17. This is a manual refinement pass, not a fresh independent critique verdict.

@@ -9,6 +9,11 @@ import PrivacyPage from "./pages/PrivacyPage";
 import LoginPage from "./pages/LoginPage";
 import PortalPage from "./pages/PortalPage";
 import NotFound from "./pages/NotFound";
+import { lazy, Suspense } from "react";
+
+const WorkoutFeedbackPreview = import.meta.env.DEV
+  ? lazy(() => import("./dev/WorkoutFeedbackPreview"))
+  : null;
 
 const queryClient = new QueryClient();
 
@@ -20,6 +25,16 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
+            {WorkoutFeedbackPreview ? (
+              <Route
+                path="/dev/workout-feedback"
+                element={
+                  <Suspense fallback={<p role="status">Loading preview…</p>}>
+                    <WorkoutFeedbackPreview />
+                  </Suspense>
+                }
+              />
+            ) : null}
             <Route path="/" element={<LandingPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/login" element={<LoginPage />} />

@@ -131,14 +131,26 @@ function renderWeeklyPlanWithoutSetNextGoal(screenData: CurrentUserWeeklyCoachSc
   );
 }
 
+async function openWorkoutEvidence() {
+  fireEvent.click(
+    await screen.findByRole("button", { name: "View details for Easy run" }),
+  );
+  const summary = screen.queryByText(/^(Session notes|Recorded activity)$/);
+  if (summary) {
+    fireEvent.click(summary);
+    summary.closest("details")!.open = true;
+  }
+}
+
 describe("WeeklyPlanScreen race goal outcome", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.spyOn(window, "scrollTo").mockImplementation(() => {});
     setCurrentUserRaceGoalOutcomeMock.mockResolvedValue(undefined);
     setCurrentUserWeeklyCoachSessionCompletionMock.mockResolvedValue(undefined);
   });
 
-  it("shows a compact link to the synced Strava activity beside planned duration", async () => {
+  it("keeps the synced Strava link accessible in workout evidence", async () => {
     const data = weeklyCoachScreen({ goalTimelineState: "POST_GOAL", goalOutcomeStatus: "UNKNOWN" });
     data.plan!.plan.sessions = [{
       day: "MON", modality: "RUN", type: "EASY", title: "Easy run", durationMinutes: 45,
@@ -149,9 +161,9 @@ describe("WeeklyPlanScreen race goal outcome", () => {
       },
     }];
     renderWeeklyPlan(data);
+    await openWorkoutEvidence();
 
     expect((await screen.findAllByText("View on Strava")).length).toBeGreaterThan(0);
-    expect(document.querySelector('img[src="/strava-echelon-white.svg"]')).toBeInTheDocument();
     expect(screen.getAllByText("45 min").length).toBeGreaterThan(0);
     expect(screen.getAllByRole("link", { name: "View on Strava (opens in a new tab)" })[0]).toHaveAttribute(
       "href", "https://www.strava.com/activities/12345",
@@ -159,7 +171,7 @@ describe("WeeklyPlanScreen race goal outcome", () => {
     expect(screen.getAllByRole("link", { name: "View on Strava (opens in a new tab)" })[0]).toHaveAttribute("target", "_blank");
   });
 
-  it("shows a compact link to the synced Intervals activity beside planned duration", async () => {
+  it("keeps the synced Intervals link accessible in workout evidence", async () => {
     const data = weeklyCoachScreen({ goalTimelineState: "POST_GOAL", goalOutcomeStatus: "UNKNOWN" });
     data.plan!.plan.sessions = [{
       day: "MON", modality: "RUN", type: "EASY", title: "Easy run", durationMinutes: 45,
@@ -170,6 +182,7 @@ describe("WeeklyPlanScreen race goal outcome", () => {
       },
     }];
     renderWeeklyPlan(data);
+    await openWorkoutEvidence();
 
     expect((await screen.findAllByText("View on Intervals")).length).toBeGreaterThan(0);
     expect(screen.getAllByText("45 min").length).toBeGreaterThan(0);
@@ -179,10 +192,10 @@ describe("WeeklyPlanScreen race goal outcome", () => {
     expect(link).toHaveAttribute("rel", "noopener noreferrer");
   });
 
-  it("keeps a matched activity visible with manual completion", async () => {
+  it.each(["RUN", "STRENGTH"] as const)("keeps a matched activity accessible with manual completion for %s", async (modality) => {
     const data = weeklyCoachScreen({ goalTimelineState: "POST_GOAL", goalOutcomeStatus: "UNKNOWN" });
     data.plan!.plan.sessions = [{
-      day: "MON", modality: "RUN", type: "EASY", title: "Easy run", durationMinutes: 45,
+      day: "MON", modality, type: "EASY", title: "Easy run", durationMinutes: 45,
       completed: true, completionSource: "MANUAL", intensityCategory: "LOW", placementReason: "Aerobic work",
       syncedActivity: {
         activityId: "i12345", provider: "INTERVALS", activityUrl: "https://intervals.icu/activities/i12345",
@@ -190,6 +203,7 @@ describe("WeeklyPlanScreen race goal outcome", () => {
       },
     }];
     renderWeeklyPlan(data);
+    await openWorkoutEvidence();
 
     expect((await screen.findAllByRole("link", { name: "View on Intervals (opens in a new tab)" })).length).toBeGreaterThan(0);
     expect(screen.getByRole("button", { name: "Mark Easy run as incomplete" })).toBeInTheDocument();
@@ -207,6 +221,7 @@ describe("WeeklyPlanScreen race goal outcome", () => {
       },
     }];
     renderWeeklyPlan(data);
+    await openWorkoutEvidence();
 
     expect(await screen.findAllByRole("link", { name: "View on Intervals (opens in a new tab)" })).toHaveLength(2);
     expect(screen.getByRole("button", { name: "Mark Easy run as complete" })).toBeInTheDocument();
@@ -252,6 +267,7 @@ describe("WeeklyPlanScreen race goal outcome", () => {
       });
       expect(cached?.plan?.plan.sessions[0].syncedActivity).toBe(syncedActivity);
     });
+    await openWorkoutEvidence();
     expect(screen.getAllByRole("link", { name: "View on Intervals (opens in a new tab)" }).length).toBeGreaterThan(0);
   });
 
@@ -266,6 +282,7 @@ describe("WeeklyPlanScreen race goal outcome", () => {
       },
     }];
     renderWeeklyPlan(data);
+    await openWorkoutEvidence();
 
     expect((await screen.findAllByText("Synced activity · OTHER")).length).toBeGreaterThan(0);
     expect(screen.queryByRole("link", { name: /view on/i })).not.toBeInTheDocument();

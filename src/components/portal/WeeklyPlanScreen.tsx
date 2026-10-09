@@ -35,6 +35,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import WeekNavigator from "@/components/portal/WeekNavigator";
+import WorkoutExecutionScore from "@/components/portal/WorkoutExecutionScore";
+import WorkoutExecutionFeedback from "@/components/portal/WorkoutExecutionFeedback";
+import { canShowExecutionFeedback, evaluatedExecutionFeedback, type ExecutionFeedback } from "@/lib/workout-feedback";
 
 type WeeklyPlanScreenProps = {
   athleteId: string;
@@ -42,6 +45,8 @@ type WeeklyPlanScreenProps = {
   isPreparing: boolean;
   onRefresh: () => void | Promise<unknown>;
   onSetNextGoal?: () => void;
+  executionFeedbackByDay?: Partial<Record<string, ExecutionFeedback>>;
+  onRetryExecutionFeedback?: (day: string) => void;
 };
 
 const weekDayOrder = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"] as const;
@@ -161,55 +166,94 @@ function formatDecimal(value: number | undefined) {
   return value % 1 === 0 ? String(value) : value.toFixed(1);
 }
 
-function SyncedActivityBadge({ session }: { session: WeeklyCoachSession }) {
+function SyncedActivityLink({
+  session,
+  quiet = false,
+}: {
+  session: WeeklyCoachSession;
+  quiet?: boolean;
+}) {
   const activity = session.syncedActivity;
   if (!activity) return null;
   const provider = activity.provider;
   if (provider !== "STRAVA" && provider !== "INTERVALS") {
-    return <span className="text-[11px] text-muted-foreground">Synced activity{provider ? ` · ${provider}` : ""}</span>;
+    return (
+      <span className="text-[11px] text-muted-foreground">
+        Synced activity{provider ? ` · ${provider}` : ""}
+      </span>
+    );
   }
   const isStrava = provider === "STRAVA";
   const providerName = isStrava ? "Strava" : "Intervals";
 
-  const content = (
+  const content = quiet ? (
     <>
-      <span className={isStrava
-        ? "flex h-4 w-4 items-center justify-center rounded-full bg-[#FC5200]"
-        : "flex h-4 w-4 items-center justify-center rounded-full bg-sky-600 text-white"}>
-        {isStrava
-          ? <img src="/strava-echelon-white.svg" alt="" className="h-2.5 w-auto" />
-          : <Activity className="h-2.5 w-2.5" aria-hidden="true" />}
+      View on {providerName}
+      <ExternalLink aria-hidden="true" className="h-3 w-3" />
+    </>
+  ) : (
+    <>
+      <span
+        className={
+          isStrava
+            ? "flex h-4 w-4 items-center justify-center rounded-full bg-[#FC5200]"
+            : "flex h-4 w-4 items-center justify-center rounded-full bg-sky-600 text-white"
+        }
+      >
+        {isStrava ? (
+          <img
+            src="/strava-echelon-white.svg"
+            alt=""
+            className="h-2.5 w-auto"
+          />
+        ) : (
+          <Activity className="h-2.5 w-2.5" aria-hidden="true" />
+        )}
       </span>
       <span className="hidden sm:inline">View on {providerName}</span>
-      {activity.activityUrl ? <ExternalLink className="hidden h-2.5 w-2.5 sm:inline" aria-hidden="true" /> : null}
+      {activity.activityUrl ? (
+        <ExternalLink
+          className="hidden h-2.5 w-2.5 sm:inline"
+          aria-hidden="true"
+        />
+      ) : null}
     </>
   );
 
-  const className = isStrava
-    ? "inline-flex shrink-0 items-center gap-1 rounded-full border border-orange-500/25 bg-orange-500/10 p-0.5 text-[11px] font-medium text-orange-800 transition-colors hover:bg-orange-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 sm:pr-2 dark:text-orange-200"
-    : "inline-flex shrink-0 items-center gap-1 rounded-full border border-sky-500/25 bg-sky-500/10 p-0.5 text-[11px] font-medium text-sky-800 transition-colors hover:bg-sky-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 sm:pr-2 dark:text-sky-200";
+  const className = quiet
+    ? "inline-flex min-h-11 items-center gap-1.5 rounded-sm text-xs text-foreground/70 underline underline-offset-4 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    : isStrava
+      ? "inline-flex shrink-0 items-center gap-1 rounded-full border border-orange-500/25 bg-orange-500/10 p-0.5 text-[11px] font-medium text-orange-800 transition-colors hover:bg-orange-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 sm:pr-2 dark:text-orange-200"
+      : "inline-flex shrink-0 items-center gap-1 rounded-full border border-sky-500/25 bg-sky-500/10 p-0.5 text-[11px] font-medium text-sky-800 transition-colors hover:bg-sky-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 sm:pr-2 dark:text-sky-200";
 
   if (!activity.activityUrl) {
-    return <span aria-label={`Synced from ${providerName}`} title={`Synced from ${providerName}`} className={className}>{content}</span>;
+    if (quiet)
+      return (
+        <span className="text-xs text-foreground/70">
+          Synced activity · {providerName}
+        </span>
+      );
+    return (
+      <span
+        aria-label={`Synced from ${providerName}`}
+        title={`Synced from ${providerName}`}
+        className={className}
+      >
+        {content}
+      </span>
+    );
   }
 
   return (
-    <a href={activity.activityUrl} target="_blank" rel="noopener noreferrer" aria-label={`View on ${providerName} (opens in a new tab)`} className={className}>
+    <a
+      href={activity.activityUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={`View on ${providerName} (opens in a new tab)`}
+      className={className}
+    >
       {content}
     </a>
-  );
-}
-
-function SessionRightSummary({ session }: { session: WeeklyCoachSession }) {
-  if (session.durationMinutes <= 0 && !session.syncedActivity) return null;
-
-  return (
-    <div className="inline-flex items-center gap-2 whitespace-nowrap">
-      <SyncedActivityBadge session={session} />
-      {session.durationMinutes > 0 ? (
-        <span className="text-[11px] tabular-nums text-muted-foreground" title="Planned duration">{session.durationMinutes} min</span>
-      ) : null}
-    </div>
   );
 }
 
@@ -510,7 +554,7 @@ function TodayPendingCard({
                 <Clock className="h-3.5 w-3.5 text-muted-foreground" />
                 {session.durationMinutes} min
               </span>
-              <SyncedActivityBadge session={session} />
+              <SyncedActivityLink session={session} />
               <span className="inline-flex items-center gap-1.5 text-xs text-foreground/70">
                 <span
                   className={`h-1.5 w-1.5 rounded-full ${
@@ -593,7 +637,11 @@ function TodayDoneCard({
   canToggleCompletion,
   onUndo,
   onJumpNext,
+  feedback,
+  reduceMotion,
 }: {
+  reduceMotion: boolean;
+  feedback?: ExecutionFeedback;
   session: WeeklyCoachSession;
   upNext: WeeklyCoachSession | undefined;
   canToggleCompletion: boolean;
@@ -602,36 +650,48 @@ function TodayDoneCard({
 }) {
   return (
     <motion.div
-      layout
-      initial={{ opacity: 0, y: 10, scale: 0.98 }}
+      layout={!reduceMotion}
+      initial={reduceMotion ? false : { opacity: 0, y: 10, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.98 }}
-      transition={{ type: "spring", bounce: 0.25, duration: 0.5 }}
+      exit={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.98 }}
+      transition={
+        reduceMotion
+          ? { duration: 0 }
+          : { type: "spring", bounce: 0.25, duration: 0.5 }
+      }
       className="relative overflow-hidden rounded-2xl border border-border bg-card"
     >
       <div className="p-4">
         <div className="flex items-center justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-3">
+          <div className="flex min-w-0 flex-1 items-center gap-3">
             <motion.div
-              initial={{ scale: 0, rotate: -90 }}
+              initial={reduceMotion ? false : { scale: 0, rotate: -90 }}
               animate={{ scale: 1, rotate: 0 }}
-              transition={{ type: "spring", bounce: 0.5, delay: 0.1 }}
+              transition={
+                reduceMotion
+                  ? { duration: 0 }
+                  : { type: "spring", bounce: 0.5, delay: 0.1 }
+              }
               className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground"
             >
               <Check className="h-4 w-4" strokeWidth={3} />
             </motion.div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5">
                 <Sparkles className="h-3 w-3 text-primary" />
-                <span className="text-[10px] font-semibold uppercase tracking-widest text-primary">Today done</span>
+                <span className="text-[10px] font-semibold uppercase tracking-widest text-primary">
+                  Today done
+                </span>
               </div>
               <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
-                <p className="min-w-0 max-w-full truncate text-sm font-medium text-foreground/90 line-through decoration-muted-foreground/40">
+                <p className="break-words text-sm font-medium text-foreground">
                   {session.title}
                 </p>
               </div>
             </div>
-            <SessionRightSummary session={session} />
+            {canShowExecutionFeedback(session) ? (
+              <WorkoutExecutionScore feedback={feedback} />
+            ) : null}
           </div>
           {canToggleCompletion ? (
             <button
@@ -644,14 +704,31 @@ function TodayDoneCard({
           ) : null}
         </div>
 
+        <div className="mt-2 flex flex-wrap items-center gap-x-5">
+          <SyncedActivityLink session={session} quiet />
+          {canShowExecutionFeedback(session) &&
+          evaluatedExecutionFeedback(feedback) ? (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="min-h-11 px-0 text-primary hover:bg-transparent hover:text-primary hover:underline"
+              onClick={() => onJumpNext(session.day)}
+            >
+              View workout feedback{" "}
+              <ArrowRight aria-hidden="true" className="ml-2 h-3.5 w-3.5" />
+            </Button>
+          ) : null}
+        </div>
+
         {upNext ? (
           <motion.button
             type="button"
-            initial={{ opacity: 0, y: 6 }}
+            initial={reduceMotion ? false : { opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25 }}
+            transition={reduceMotion ? { duration: 0 } : { delay: 0.25 }}
             onClick={() => onJumpNext(upNext.day)}
-            whileHover={{ x: 2 }}
+            whileHover={reduceMotion ? undefined : { x: 2 }}
             className="group mt-4 flex w-full items-center gap-3 border-t border-border pt-3 text-left"
           >
             <div
@@ -660,7 +737,9 @@ function TodayDoneCard({
               } ${(typeConfig[upNext.modality] ?? typeConfig.RUN).tileClass}`}
             >
               {(() => {
-                const UpNextIcon = (typeConfig[upNext.modality] ?? typeConfig.RUN).icon;
+                const UpNextIcon = (
+                  typeConfig[upNext.modality] ?? typeConfig.RUN
+                ).icon;
                 return <UpNextIcon className="h-3.5 w-3.5" />;
               })()}
             </div>
@@ -682,7 +761,7 @@ function TodayDoneCard({
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.25 }}
+            transition={reduceMotion ? { duration: 0 } : { delay: 0.25 }}
             className="mt-4 flex items-center gap-2 border-t border-border pt-3 text-[12px] text-muted-foreground"
           >
             <TrendingUp className="h-3.5 w-3.5 text-primary" />
@@ -1003,6 +1082,8 @@ function RaceGoalCard({
 
 function ScheduleList({
   sessions,
+  executionFeedbackByDay,
+  onRetryExecutionFeedback,
   todayDay,
   isCurrentWeek,
   supportsCompletion,
@@ -1015,6 +1096,8 @@ function ScheduleList({
   setSessionRef,
 }: {
   sessions: WeeklyCoachSession[];
+  executionFeedbackByDay?: Partial<Record<string, ExecutionFeedback>>;
+  onRetryExecutionFeedback?: (day: string) => void;
   todayDay: string | undefined;
   isCurrentWeek: boolean;
   supportsCompletion: boolean;
@@ -1026,14 +1109,28 @@ function ScheduleList({
   onToggleExpanded: (day: string) => void;
   setSessionRef: (day: string, element: HTMLDivElement | null) => void;
 }) {
+  const hasExecutionScores = sessions.some(
+    (session) =>
+      canShowExecutionFeedback(session) &&
+      evaluatedExecutionFeedback(executionFeedbackByDay?.[session.day]),
+  );
+
   return (
     <div className="space-y-2">
-      <div className="px-1">
-        <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Schedule</span>
+      <div className="flex items-center justify-between px-3">
+        <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+          Schedule
+        </span>
+        {hasExecutionScores ? (
+          <span className="pr-6 text-xs text-foreground/70">Plan match</span>
+        ) : null}
       </div>
 
       <div className="relative">
-        <div className="absolute bottom-2 left-[1.05rem] top-2 w-px bg-border" aria-hidden />
+        <div
+          className="absolute bottom-2 left-[1.05rem] top-2 w-px bg-border"
+          aria-hidden
+        />
 
         <AnimatePresence mode="wait">
           <motion.div
@@ -1041,7 +1138,7 @@ function ScheduleList({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: reduceMotion ? 0 : 0.2 }}
           >
             {sessions.map((session, index) => {
               const isDone = session.completed === true;
@@ -1049,142 +1146,227 @@ function ScheduleList({
               const isKey = session.role === "KEY";
               const isToday = isCurrentWeek && session.day === todayDay;
               const expanded = expandedDay === session.day;
-              const config = typeConfig[session.modality] ?? typeConfig.RUN;
-              const TypeIcon = config.icon;
-              const canToggle = supportsCompletion && isCurrentWeek && !completionPending && !isRest;
+              const feedback = canShowExecutionFeedback(session)
+                ? evaluatedExecutionFeedback(
+                    executionFeedbackByDay?.[session.day],
+                  )
+                : undefined;
+              const canToggle =
+                supportsCompletion &&
+                isCurrentWeek &&
+                !completionPending &&
+                !isRest;
 
               return (
                 <motion.div
                   key={session.day}
                   ref={(element) => setSessionRef(session.day, element)}
-                  initial={{ opacity: 0, x: -6 }}
+                  initial={reduceMotion ? false : { opacity: 0, x: -6 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.04, duration: 0.3 }}
+                  transition={
+                    reduceMotion
+                      ? { duration: 0 }
+                      : { delay: index * 0.04, duration: 0.3 }
+                  }
                   className={`group relative ${isRest && !isDone ? "opacity-60" : ""}`}
                 >
                   <div
-                    className={`relative flex items-center gap-3 rounded-xl py-2.5 pl-2 pr-3 transition-all ${
+                    className={`relative flex min-h-11 items-center gap-3 rounded-xl py-2 pl-2 pr-3 transition-colors motion-reduce:transition-none sm:py-1.5 ${
                       !isRest ? "cursor-pointer select-none" : ""
                     } ${
                       isToday
                         ? "bg-primary/[0.06] ring-1 ring-primary/20"
                         : expanded
-                          ? "bg-card shadow-sm ring-1 ring-border"
+                          ? "bg-card"
                           : isDone
                             ? "bg-primary/[0.03] hover:bg-primary/[0.06]"
                             : "hover:bg-card/80"
                     }`}
-                    onClick={() => {
-                      if (!isRest) onToggleExpanded(session.day);
-                    }}
                   >
+                    {!isRest ? (
+                      <button
+                        type="button"
+                        className="absolute inset-0 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                        onClick={() => onToggleExpanded(session.day)}
+                        aria-label={`View details for ${session.title}`}
+                        aria-expanded={expanded}
+                        aria-controls={`session-details-${session.day}`}
+                      />
+                    ) : null}
                     <motion.button
                       type="button"
-                      className={`relative z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-all ${
-                        isDone
-                          ? "border-primary bg-primary text-primary-foreground"
-                          : isToday
-                            ? "border-primary/60 bg-background hover:bg-primary/10"
-                            : isRest
-                              ? "border-border bg-background"
-                              : "border-border bg-background hover:border-primary/40"
-                      }`}
-                      whileTap={canToggle && !reduceMotion ? { scale: 0.85 } : undefined}
+                      className="relative z-10 -mx-2.5 -my-2.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full p-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      whileTap={
+                        canToggle && !reduceMotion ? { scale: 0.85 } : undefined
+                      }
                       onClick={(event) => {
                         event.stopPropagation();
                         if (canToggle) onToggleComplete(session.day);
                       }}
                       disabled={!canToggle}
-                      aria-label={isDone ? `Mark ${session.title} as incomplete` : `Mark ${session.title} as complete`}
+                      aria-label={
+                        isDone
+                          ? `Mark ${session.title} as incomplete`
+                          : `Mark ${session.title} as complete`
+                      }
                     >
-                      {isDone ? (
-                        <>
-                          {justCompletedDay === session.day && !reduceMotion ? (
-                            <motion.span
-                              className="absolute inset-0 rounded-full bg-primary"
-                              initial={{ opacity: 0.4, scale: 1 }}
-                              animate={{ opacity: 0, scale: 2.2 }}
-                              transition={{ duration: 0.7, ease: "easeOut" }}
-                            />
-                          ) : null}
-                          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", bounce: 0.5 }}>
-                            <Check className="h-3 w-3" strokeWidth={3} />
-                          </motion.div>
-                        </>
-                      ) : isRest ? (
-                        <Moon className="h-2.5 w-2.5 text-muted-foreground/40" />
-                      ) : null}
+                      <span
+                        className={`relative flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-colors motion-reduce:transition-none ${
+                          isDone
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : isToday
+                              ? "border-primary/60 bg-background"
+                              : "border-border bg-background"
+                        }`}
+                      >
+                        {isDone ? (
+                          <>
+                            {justCompletedDay === session.day &&
+                            !reduceMotion ? (
+                              <motion.span
+                                className="absolute inset-0 rounded-full bg-primary"
+                                initial={{ opacity: 0.4, scale: 1 }}
+                                animate={{ opacity: 0, scale: 2.2 }}
+                                transition={{ duration: 0.7, ease: "easeOut" }}
+                              />
+                            ) : null}
+                            <motion.div
+                              initial={reduceMotion ? false : { scale: 0 }}
+                              animate={{ scale: 1 }}
+                              transition={
+                                reduceMotion
+                                  ? { duration: 0 }
+                                  : { type: "spring", bounce: 0.5 }
+                              }
+                            >
+                              <Check className="h-3 w-3" strokeWidth={3} />
+                            </motion.div>
+                          </>
+                        ) : isRest ? (
+                          <Moon className="h-2.5 w-2.5 text-muted-foreground/40" />
+                        ) : null}
+                      </span>
                     </motion.button>
 
-                    <div className="w-8 shrink-0">
-                      <span className={`text-[11px] font-medium tracking-wide ${isToday ? "text-primary" : "text-muted-foreground"}`}>
-                        {shortDayLabel(session.day)}
-                      </span>
-                    </div>
-
-                    <div className={`shrink-0 rounded-lg p-1.5 ${config.badgeClass}`}>
-                      <TypeIcon className="h-3.5 w-3.5" />
-                    </div>
-
-                    <div className="min-w-0 flex-1">
-                      <span className={`block min-w-0 max-w-full truncate text-sm ${isDone ? "text-muted-foreground line-through" : "text-foreground"}`}>
+                    <div className="pointer-events-none relative min-w-0 flex-1 sm:flex sm:items-baseline sm:gap-x-3">
+                      <span className="block min-w-0 break-words text-sm font-medium leading-5 text-foreground sm:flex-1">
                         {session.title}
                       </span>
-                    </div>
-
-                    <div className="flex shrink-0 items-center gap-2">
-                      <SessionRightSummary session={session} />
-                      {isKey && !isDone ? (
-                        <Badge
-                          variant="outline"
-                          className="h-4 gap-0.5 border-accent/40 px-1.5 py-0 text-[9px] font-bold uppercase tracking-wider text-accent"
+                      <span className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs leading-relaxed text-foreground/70 sm:mt-0 sm:w-32 sm:shrink-0">
+                        <span
+                          className={`sm:w-7 ${isToday ? "text-primary" : ""}`}
                         >
-                          <Star className="h-2.5 w-2.5 fill-accent" />
-                          Key
-                        </Badge>
-                      ) : null}
-                      {!isRest ? (
-                        <motion.div
-                          animate={{ rotate: expanded ? 180 : 0 }}
-                          transition={{ duration: 0.2 }}
-                          className="text-muted-foreground/40 transition-colors group-hover:text-muted-foreground"
-                        >
-                          <ChevronDown className="h-3.5 w-3.5" />
-                        </motion.div>
-                      ) : null}
+                          {shortDayLabel(session.day)}
+                        </span>
+                        {session.durationMinutes > 0 ? (
+                          <span title="Planned duration" className="sm:w-12">
+                            {session.durationMinutes} min
+                          </span>
+                        ) : null}
+                        {isKey && !isDone ? (
+                          <span className="font-medium text-primary">Key</span>
+                        ) : null}
+                      </span>
                     </div>
+                    {hasExecutionScores ? (
+                      <div
+                        className={`pointer-events-none relative w-16 shrink-0 ${feedback ? "" : "hidden sm:block"}`}
+                      >
+                        {feedback ? (
+                          <WorkoutExecutionScore feedback={feedback} />
+                        ) : null}
+                      </div>
+                    ) : null}
+                    {!isRest ? (
+                      <motion.div
+                        animate={{ rotate: expanded ? 180 : 0 }}
+                        transition={{ duration: reduceMotion ? 0 : 0.2 }}
+                        className="pointer-events-none relative text-foreground/60"
+                      >
+                        <ChevronDown
+                          aria-hidden="true"
+                          className="h-3.5 w-3.5"
+                        />
+                      </motion.div>
+                    ) : (
+                      <span
+                        aria-hidden="true"
+                        className="hidden w-3.5 shrink-0 sm:block"
+                      />
+                    )}
                   </div>
 
                   <AnimatePresence>
-                    {expanded && (session.notes || session.strengthFocus?.length) ? (
+                    {expanded ? (
                       <motion.div
-                        initial={{ height: 0, opacity: 0 }}
+                        id={`session-details-${session.day}`}
+                        initial={
+                          reduceMotion ? false : { height: 0, opacity: 0 }
+                        }
                         animate={{ height: "auto", opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.22, ease: "easeOut" }}
+                        transition={{
+                          duration: reduceMotion ? 0 : 0.22,
+                          ease: "easeOut",
+                        }}
                         className="overflow-hidden"
                       >
-                        <div className="pb-3 pl-[4.5rem] pr-3 pt-1.5">
-                          {session.notes ? (
-                            <p className="text-[13px] leading-relaxed text-foreground/75">{session.notes}</p>
+                        <div
+                          className={
+                            canShowExecutionFeedback(session)
+                              ? "mb-2 ml-2 rounded-b-xl bg-card pb-1 pl-9 pr-3 pt-1"
+                              : "pb-3 pl-[4.5rem] pr-3 pt-1.5"
+                          }
+                        >
+                          {canShowExecutionFeedback(session) ? (
+                            <WorkoutExecutionFeedback
+                              session={session}
+                              activitySource={
+                                session.syncedActivity ? (
+                                  <SyncedActivityLink session={session} quiet />
+                                ) : undefined
+                              }
+                              feedback={executionFeedbackByDay?.[session.day]}
+                              onRetry={
+                                onRetryExecutionFeedback
+                                  ? () => onRetryExecutionFeedback(session.day)
+                                  : undefined
+                              }
+                            />
                           ) : null}
-                          <div className="mt-2.5 flex flex-wrap items-center gap-2">
-                            <div className="flex items-center gap-1 rounded-md bg-secondary/60 px-1.5 py-0.5">
-                              <div
-                                className={`h-1.5 w-1.5 rounded-full ${
-                                  intensityDot[session.intensityCategory] ?? "bg-muted-foreground/30"
-                                }`}
-                              />
-                              <span className="text-[10px] text-muted-foreground">
-                                {intensityLabels[session.intensityCategory] ?? session.intensityCategory}
-                              </span>
+                          {!canShowExecutionFeedback(session) &&
+                          session.notes ? (
+                            <p className="text-[13px] leading-relaxed text-foreground/75">
+                              {session.notes}
+                            </p>
+                          ) : null}
+                          {!canShowExecutionFeedback(session) ? (
+                            <div className="mt-2.5 flex flex-wrap items-center gap-2">
+                              {session.syncedActivity ? (
+                                <SyncedActivityLink session={session} quiet />
+                              ) : null}
+                              <div className="flex items-center gap-1 rounded-md bg-secondary/60 px-1.5 py-0.5">
+                                <div
+                                  className={`h-1.5 w-1.5 rounded-full ${
+                                    intensityDot[session.intensityCategory] ??
+                                    "bg-muted-foreground/30"
+                                  }`}
+                                />
+                                <span className="text-[10px] text-muted-foreground">
+                                  {intensityLabels[session.intensityCategory] ??
+                                    session.intensityCategory}
+                                </span>
+                              </div>
+                              {session.strengthFocus?.map((focus) => (
+                                <span
+                                  key={focus}
+                                  className="rounded-full bg-secondary px-2 py-0.5 text-[10px] text-muted-foreground"
+                                >
+                                  {focus}
+                                </span>
+                              ))}
                             </div>
-                            {session.strengthFocus?.map((focus) => (
-                              <span key={focus} className="rounded-full bg-secondary px-2 py-0.5 text-[10px] text-muted-foreground">
-                                {focus}
-                              </span>
-                            ))}
-                          </div>
+                          ) : null}
                         </div>
                       </motion.div>
                     ) : null}
@@ -1205,6 +1387,8 @@ export default function WeeklyPlanScreen({
   isPreparing,
   onRefresh,
   onSetNextGoal,
+  executionFeedbackByDay,
+  onRetryExecutionFeedback,
 }: WeeklyPlanScreenProps) {
   const [selectedWeekStartDate, setSelectedWeekStartDate] = useState(targetWeekStartDate);
   const [expandedDay, setExpandedDay] = useState<string | null>(null);
@@ -1593,6 +1777,8 @@ export default function WeeklyPlanScreen({
               <TodayDoneCard
                 key="today-done"
                 session={todaySession}
+                feedback={executionFeedbackByDay?.[todaySession.day]}
+                reduceMotion={Boolean(reduceMotion)}
                 upNext={upNextSession}
                 canToggleCompletion={supportsCompletion}
                 onUndo={() => toggleComplete(todaySession.day)}
@@ -1643,6 +1829,8 @@ export default function WeeklyPlanScreen({
 
         <ScheduleList
           sessions={sessions}
+          executionFeedbackByDay={executionFeedbackByDay}
+          onRetryExecutionFeedback={onRetryExecutionFeedback}
           todayDay={todayDay}
           isCurrentWeek={isCurrentWeek}
           supportsCompletion={supportsCompletion}
