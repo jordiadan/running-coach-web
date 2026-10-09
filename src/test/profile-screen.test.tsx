@@ -1,5 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import type React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import ProfileScreen from "@/components/portal/ProfileScreen";
@@ -10,7 +16,10 @@ import {
 } from "@/lib/portal-api";
 
 vi.mock("@/lib/portal-api", async () => {
-  const actual = await vi.importActual<typeof import("@/lib/portal-api")>("@/lib/portal-api");
+  const actual =
+    await vi.importActual<typeof import("@/lib/portal-api")>(
+      "@/lib/portal-api",
+    );
 
   return {
     ...actual,
@@ -36,19 +45,20 @@ const athleteProfile: AthleteProfile = {
   targetPaceSecondsPerKm: "",
 };
 
-function renderWithQueryClient(ui: React.ReactElement, queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
+function renderWithQueryClient(
+  ui: React.ReactElement,
+  queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
     },
-  },
-})) {
+  }),
+) {
   return {
     queryClient,
     ...render(
-      <QueryClientProvider client={queryClient}>
-        {ui}
-      </QueryClientProvider>,
+      <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>,
     ),
   };
 }
@@ -85,11 +95,16 @@ describe("ProfileScreen race goal focus", () => {
       expect(raceNameInput).toHaveFocus();
     });
 
-    expect(screen.getByText("Goal race / event").closest("#goal-race-section")).toHaveClass("ring-primary/60");
+    expect(
+      screen.getByText("Goal race / event").closest("#goal-race-section"),
+    ).toHaveClass("ring-primary/60");
 
-    await waitFor(() => {
-      expect(onFocusTargetHandled).toHaveBeenCalledTimes(1);
-    }, { timeout: 2500 });
+    await waitFor(
+      () => {
+        expect(onFocusTargetHandled).toHaveBeenCalledTimes(1);
+      },
+      { timeout: 2500 },
+    );
   });
 
   it("waits for profile data before focusing the goal race section", async () => {
@@ -109,7 +124,9 @@ describe("ProfileScreen race goal focus", () => {
       />,
     );
 
-    expect(await screen.findByText("Loading your profile…")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Loading your profile…"),
+    ).toBeInTheDocument();
     expect(HTMLElement.prototype.scrollIntoView).not.toHaveBeenCalled();
     expect(onFocusTargetHandled).not.toHaveBeenCalled();
 
@@ -127,27 +144,43 @@ describe("ProfileScreen race goal focus", () => {
       expect(raceNameInput).toHaveFocus();
     });
 
-    expect(screen.getByText("Goal race / event").closest("#goal-race-section")).toHaveClass("ring-primary/60");
+    expect(
+      screen.getByText("Goal race / event").closest("#goal-race-section"),
+    ).toHaveClass("ring-primary/60");
 
-    await waitFor(() => {
-      expect(onFocusTargetHandled).toHaveBeenCalledTimes(1);
-    }, { timeout: 2500 });
+    await waitFor(
+      () => {
+        expect(onFocusTargetHandled).toHaveBeenCalledTimes(1);
+      },
+      { timeout: 2500 },
+    );
   });
 
   it("invalidates bootstrap, athlete, and weekly coach screen queries after saving", async () => {
-    const { queryClient } = renderWithQueryClient(<ProfileScreen athleteId="athlete-1" />);
+    const { queryClient } = renderWithQueryClient(
+      <ProfileScreen athleteId="athlete-1" />,
+    );
     const invalidateQueriesSpy = vi.spyOn(queryClient, "invalidateQueries");
 
     await screen.findByDisplayValue("Mediterrani Half");
     fireEvent.click(screen.getByRole("button", { name: /save changes/i }));
 
     await waitFor(() => {
-      expect(updateAthleteProfileMock).toHaveBeenCalledWith("athlete-1", expect.objectContaining({
-        goalRaceEventName: "Mediterrani Half",
-      }));
-      expect(invalidateQueriesSpy).toHaveBeenCalledWith({ queryKey: ["portal", "bootstrap"] });
-      expect(invalidateQueriesSpy).toHaveBeenCalledWith({ queryKey: ["portal", "athlete", "athlete-1"] });
-      expect(invalidateQueriesSpy).toHaveBeenCalledWith({ queryKey: ["portal", "weekly-coach-screen"] });
+      expect(updateAthleteProfileMock).toHaveBeenCalledWith(
+        "athlete-1",
+        expect.objectContaining({
+          goalRaceEventName: "Mediterrani Half",
+        }),
+      );
+      expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+        queryKey: ["portal", "bootstrap"],
+      });
+      expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+        queryKey: ["portal", "athlete", "athlete-1"],
+      });
+      expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+        queryKey: ["portal", "weekly-coach-screen"],
+      });
     });
   });
 
@@ -178,7 +211,7 @@ describe("ProfileScreen race goal focus", () => {
 
     expect(screen.getByLabelText("Equivalent pace / km")).toHaveValue("5:00");
 
-    fireEvent.change(screen.getByLabelText("Race distance in kilometres"), {
+    fireEvent.change(screen.getByLabelText("Distance (km)"), {
       target: { value: "10" },
     });
 
@@ -190,7 +223,9 @@ describe("ProfileScreen race goal focus", () => {
 
     await screen.findByDisplayValue("Mediterrani Half");
     fireEvent.click(screen.getByRole("radio", { name: "Target pace" }));
-    fireEvent.change(screen.getByLabelText("Target pace / km"), { target: { value: "5:00" } });
+    fireEvent.change(screen.getByLabelText("Target pace / km"), {
+      target: { value: "5:00" },
+    });
 
     expect(screen.getByLabelText("Equivalent time")).toHaveValue("1:45:30");
   });

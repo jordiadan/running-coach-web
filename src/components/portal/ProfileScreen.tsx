@@ -1,13 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { format, parseISO, startOfToday } from "date-fns";
 import { motion, useReducedMotion } from "framer-motion";
-import { CalendarIcon, MessageSquareMore, RefreshCcw } from "lucide-react";
+import { CalendarIcon, RefreshCcw } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -118,11 +122,18 @@ export default function ProfileScreen({
   }, [profileQuery.data]);
 
   const saveMutation = useMutation({
-    mutationFn: (values: AthleteProfileUpdate) => updateAthleteProfile(athleteId, values),
+    mutationFn: (values: AthleteProfileUpdate) =>
+      updateAthleteProfile(athleteId, values),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["portal", "bootstrap"] });
-      await queryClient.invalidateQueries({ queryKey: ["portal", "athlete", athleteId] });
-      await queryClient.invalidateQueries({ queryKey: ["portal", "weekly-coach-screen"] });
+      await queryClient.invalidateQueries({
+        queryKey: ["portal", "bootstrap"],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["portal", "athlete", athleteId],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["portal", "weekly-coach-screen"],
+      });
       await onComplete?.();
     },
   });
@@ -175,7 +186,8 @@ export default function ProfileScreen({
           runningDays,
           longRunPreferredDay:
             prev.longRunPreferredDay === day
-              ? runningDays[runningDays.length - 1] ?? emptyForm.longRunPreferredDay
+              ? (runningDays[runningDays.length - 1] ??
+                emptyForm.longRunPreferredDay)
               : prev.longRunPreferredDay,
         };
       }
@@ -224,7 +236,10 @@ export default function ProfileScreen({
       return;
     }
 
-    setForm((previous) => ({ ...previous, goalRaceEventDistanceKm: distanceKm }));
+    setForm((previous) => ({
+      ...previous,
+      goalRaceEventDistanceKm: distanceKm,
+    }));
   };
 
   const handleRaceTargetTypeChange = (raceTargetType: RaceTargetType) => {
@@ -243,7 +258,10 @@ export default function ProfileScreen({
     if (raceTargetType === "TIME") {
       const targetTimeSeconds =
         form.targetTimeSeconds ||
-        equivalentTimeSeconds(form.targetPaceSecondsPerKm, form.goalRaceEventDistanceKm);
+        equivalentTimeSeconds(
+          form.targetPaceSecondsPerKm,
+          form.goalRaceEventDistanceKm,
+        );
       const targetPaceSecondsPerKm = equivalentPaceSeconds(
         targetTimeSeconds,
         form.goalRaceEventDistanceKm,
@@ -261,7 +279,10 @@ export default function ProfileScreen({
 
     const targetPaceSecondsPerKm =
       form.targetPaceSecondsPerKm ||
-      equivalentPaceSeconds(form.targetTimeSeconds, form.goalRaceEventDistanceKm);
+      equivalentPaceSeconds(
+        form.targetTimeSeconds,
+        form.goalRaceEventDistanceKm,
+      );
     const targetTimeSeconds = equivalentTimeSeconds(
       targetPaceSecondsPerKm,
       form.goalRaceEventDistanceKm,
@@ -321,7 +342,13 @@ export default function ProfileScreen({
 
   if (profileQuery.isLoading) {
     return (
-      <div className={isOnboarding ? "rounded-2xl border border-divider bg-card p-6 shadow-card" : "max-w-2xl mx-auto rounded-2xl border border-divider bg-card p-6 shadow-card"}>
+      <div
+        className={
+          isOnboarding
+            ? "rounded-2xl border border-divider bg-card p-6 shadow-card"
+            : "max-w-2xl mx-auto rounded-2xl border border-divider bg-card p-6 shadow-card"
+        }
+      >
         <p className="text-sm text-muted-foreground">Loading your profile…</p>
       </div>
     );
@@ -329,136 +356,175 @@ export default function ProfileScreen({
 
   if (profileQuery.isError) {
     return (
-      <div className={isOnboarding ? "rounded-2xl border border-divider bg-card p-6 shadow-card" : "max-w-2xl mx-auto rounded-2xl border border-divider bg-card p-6 shadow-card"}>
-        <h2 className="font-serif text-2xl text-foreground">We couldn't load your profile</h2>
+      <div
+        className={
+          isOnboarding
+            ? "rounded-2xl border border-divider bg-card p-6 shadow-card"
+            : "max-w-2xl mx-auto rounded-2xl border border-divider bg-card p-6 shadow-card"
+        }
+      >
+        <h2 className="font-display text-2xl text-foreground">
+          We couldn't load your profile
+        </h2>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-          Refresh the page or try again in a moment. The portal still needs your athlete context before the plan can stay in sync.
+          Your profile could not be loaded. Please try again.
         </p>
+        <Button className="mt-5" onClick={() => profileQuery.refetch()}>
+          Try again
+        </Button>
       </div>
     );
   }
 
   return (
-    <div className={isOnboarding ? "" : "max-w-2xl mx-auto"}>
+    <div className={isOnboarding ? "" : "mx-auto max-w-3xl"}>
       {!isOnboarding ? (
         <>
-          <h2 className="mb-2 font-serif text-2xl">Your profile</h2>
+          <h1 className="page-title mb-3">Your profile</h1>
           <p className="mb-8 text-sm text-muted-foreground">
-            Update your running context to keep your plan relevant.
+            Your goals and your available days. The starting point for every
+            plan.
           </p>
         </>
       ) : null}
 
       <form className="space-y-6" onSubmit={handleSubmit}>
-        <div className="space-y-2">
-          <Label htmlFor="display-name">Display name</Label>
-          <Input
-            id="display-name"
-            value={form.displayName}
-            maxLength={120}
-            required
-            onChange={(event) => setForm((prev) => ({ ...prev, displayName: event.target.value }))}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="training-goal">Training goal</Label>
-          <Select
-            value={form.trainingGoal}
-            onValueChange={(value) => setForm((prev) => ({ ...prev, trainingGoal: value as AthleteProfileUpdate["trainingGoal"] }))}
-          >
-            <SelectTrigger id="training-goal">
-              <SelectValue placeholder="Choose a training goal" />
-            </SelectTrigger>
-            <SelectContent>
-              {trainingGoalOptions.map((option) => (
-                <SelectItem key={option.code} value={option.code}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label>
-            Running days <span className="font-normal text-muted-foreground">(min. 4)</span>
-          </Label>
-          <div className="flex gap-2">
-            {allDays.map((day) => {
-              const active = form.runningDays.includes(day.value);
-              const locked = active && form.runningDays.length === 4;
-
-              return (
-                <button
-                  key={day.value}
-                  type="button"
-                  onClick={() => toggleDay(day.value)}
-                  className={cn(
-                    "flex-1 rounded-lg border px-0 py-2.5 text-sm font-medium transition-colors",
-                    active
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-divider text-muted-foreground hover:border-foreground/20 hover:text-foreground",
-                    locked && "cursor-default"
-                  )}
-                >
-                  {day.label}
-                </button>
-              );
-            })}
+        <fieldset className="profile-section">
+          <legend>About your running</legend>
+          <div className="space-y-2">
+            <Label htmlFor="display-name">Display name</Label>
+            <Input
+              id="display-name"
+              value={form.displayName}
+              maxLength={120}
+              required
+              onChange={(event) =>
+                setForm((prev) => ({
+                  ...prev,
+                  displayName: event.target.value,
+                }))
+              }
+            />
           </div>
-          <p className="text-xs text-muted-foreground">{form.runningDays.length} days selected</p>
-        </div>
 
-        <div className="space-y-2">
-          <Label>
-            Preferred long run day <span className="font-normal text-muted-foreground">(anchor)</span>
-          </Label>
-          <div className="flex gap-2">
-            {allDays.map((day) => {
-              const isRunDay = form.runningDays.includes(day.value);
-              const isLongRun = form.longRunPreferredDay === day.value;
-
-              return (
-                <button
-                  key={day.value}
-                  type="button"
-                  onClick={() =>
-                    isRunDay &&
-                    setForm((prev) => ({
-                      ...prev,
-                      longRunPreferredDay: day.value,
-                    }))
-                  }
-                  disabled={!isRunDay}
-                  className={cn(
-                    "flex-1 rounded-lg border px-0 py-2.5 text-sm font-medium transition-colors",
-                    !isRunDay
-                      ? "cursor-not-allowed border-border bg-muted/30 text-muted-foreground opacity-30"
-                      : isLongRun
-                        ? "border-accent bg-accent text-accent-foreground shadow-sm"
-                        : "border-divider text-muted-foreground hover:border-foreground/20 hover:text-foreground"
-                  )}
-                >
-                  {day.label}
-                </button>
-              );
-            })}
+          <div className="space-y-2">
+            <Label htmlFor="training-goal">Training goal</Label>
+            <Select
+              value={form.trainingGoal}
+              onValueChange={(value) =>
+                setForm((prev) => ({
+                  ...prev,
+                  trainingGoal: value as AthleteProfileUpdate["trainingGoal"],
+                }))
+              }
+            >
+              <SelectTrigger id="training-goal">
+                <SelectValue placeholder="Choose a training goal" />
+              </SelectTrigger>
+              <SelectContent>
+                {trainingGoalOptions.map((option) => (
+                  <SelectItem key={option.code} value={option.code}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-          <p className="text-xs text-muted-foreground">
-            Long run scheduled on{" "}
-            <span className="font-medium text-foreground">
-              {allDays.find((day) => day.value === form.longRunPreferredDay)?.label ?? form.longRunPreferredDay}
-            </span>
-          </p>
-        </div>
+        </fieldset>
+        <fieldset className="profile-section">
+          <legend>Your training rhythm</legend>
+          <div className="space-y-2">
+            <Label>
+              Running days{" "}
+              <span className="font-normal text-muted-foreground">
+                (min. 4)
+              </span>
+            </Label>
+            <div className="grid grid-cols-7 gap-1.5">
+              {allDays.map((day) => {
+                const active = form.runningDays.includes(day.value);
+                const locked = active && form.runningDays.length === 4;
 
+                return (
+                  <button
+                    key={day.value}
+                    type="button"
+                    aria-pressed={active}
+                    aria-disabled={locked}
+                    onClick={() => toggleDay(day.value)}
+                    className={cn(
+                      "flex-1 rounded-lg border px-0 py-2.5 text-sm font-medium transition-colors",
+                      active
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-divider text-muted-foreground hover:border-foreground/20 hover:text-foreground",
+                      locked && "cursor-default",
+                    )}
+                  >
+                    {day.label}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {form.runningDays.length} days selected. Select at least four
+              days; your long run must be on a running day.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label>
+              Preferred long run day{" "}
+              <span className="font-normal text-muted-foreground">
+                (choose one)
+              </span>
+            </Label>
+            <div className="grid grid-cols-7 gap-1.5">
+              {allDays.map((day) => {
+                const isRunDay = form.runningDays.includes(day.value);
+                const isLongRun = form.longRunPreferredDay === day.value;
+
+                return (
+                  <button
+                    key={day.value}
+                    type="button"
+                    onClick={() =>
+                      isRunDay &&
+                      setForm((prev) => ({
+                        ...prev,
+                        longRunPreferredDay: day.value,
+                      }))
+                    }
+                    aria-pressed={isLongRun}
+                    disabled={!isRunDay}
+                    className={cn(
+                      "flex-1 rounded-lg border px-0 py-2.5 text-sm font-medium transition-colors",
+                      !isRunDay
+                        ? "cursor-not-allowed border-border bg-muted/30 text-muted-foreground opacity-30"
+                        : isLongRun
+                          ? "border-accent bg-accent text-accent-foreground shadow-sm"
+                          : "border-divider text-muted-foreground hover:border-foreground/20 hover:text-foreground",
+                    )}
+                  >
+                    {day.label}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Long run scheduled on{" "}
+              <span className="font-medium text-foreground">
+                {allDays.find((day) => day.value === form.longRunPreferredDay)
+                  ?.label ?? form.longRunPreferredDay}
+              </span>
+            </p>
+          </div>
+        </fieldset>
         {form.trainingGoal === "prepare_for_race" ? (
           <motion.div
             ref={raceGoalSectionRef}
             id="goal-race-section"
             className={cn(
-              "-mx-3 space-y-5 rounded-lg px-3 py-3 transition-all duration-500",
+              "profile-section transition-colors",
               highlightRaceGoal
                 ? "bg-primary/5 shadow-sm ring-2 ring-primary/60"
                 : "ring-0 ring-transparent",
@@ -470,6 +536,7 @@ export default function ProfileScreen({
             }
             transition={{ duration: 0.45, ease: "easeOut" }}
           >
+            <h2 className="section-title">Your next start line</h2>
             <div className="space-y-3">
               <Label htmlFor="goal-race-event-name">Goal race / event</Label>
               <Input
@@ -480,50 +547,65 @@ export default function ProfileScreen({
                 maxLength={120}
                 required
                 onChange={(event) =>
-                  setForm((prev) => ({ ...prev, goalRaceEventName: event.target.value }))
+                  setForm((prev) => ({
+                    ...prev,
+                    goalRaceEventName: event.target.value,
+                  }))
                 }
               />
               <div className="grid gap-3 sm:grid-cols-[minmax(8rem,0.75fr)_minmax(0,1.25fr)]">
-                <Input
-                  aria-label="Race distance in kilometres"
-                  type="number"
-                  min="1"
-                  max="250"
-                  step="0.1"
-                  value={form.goalRaceEventDistanceKm}
-                  placeholder="Distance (km)"
-                  required
-                  onChange={(event) => handleDistanceChange(event.target.value)}
-                />
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !raceDate && "text-muted-foreground",
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {raceDate ? format(raceDate, "PPP") : "Pick a date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={raceDate}
-                      disabled={(date) => date < startOfToday()}
-                      onSelect={(value) =>
-                        setForm((prev) => ({
-                          ...prev,
-                          goalRaceEventDate: value ? format(value, "yyyy-MM-dd") : "",
-                        }))
-                      }
-                      initialFocus
-                      className={cn("pointer-events-auto p-3")}
-                    />
-                  </PopoverContent>
-                </Popover>
+                <div className="space-y-2">
+                  <Label htmlFor="goal-race-distance">Distance (km)</Label>
+                  <Input
+                    id="goal-race-distance"
+                    type="number"
+                    min="1"
+                    max="250"
+                    step="0.1"
+                    value={form.goalRaceEventDistanceKm}
+                    placeholder="Distance (km)"
+                    required
+                    onChange={(event) =>
+                      handleDistanceChange(event.target.value)
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="goal-race-date">Race date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        id="goal-race-date"
+                        type="button"
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !raceDate && "text-muted-foreground",
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {raceDate ? format(raceDate, "PPP") : "Pick a date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={raceDate}
+                        disabled={(date) => date < startOfToday()}
+                        onSelect={(value) =>
+                          setForm((prev) => ({
+                            ...prev,
+                            goalRaceEventDate: value
+                              ? format(value, "yyyy-MM-dd")
+                              : "",
+                          }))
+                        }
+                        initialFocus
+                        className={cn("pointer-events-auto p-3")}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
               </div>
             </div>
 
@@ -557,13 +639,16 @@ export default function ProfileScreen({
 
               {form.raceTargetType === "FINISH_ONLY" ? (
                 <p className="text-xs leading-relaxed text-muted-foreground">
-                  No finish time target. Your plan will focus on getting you race-ready.
+                  No finish time target. Your plan will focus on getting you
+                  race-ready.
                 </p>
               ) : (
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="target-time">
-                      {form.raceTargetType === "TIME" ? "Target time" : "Equivalent time"}
+                      {form.raceTargetType === "TIME"
+                        ? "Target time"
+                        : "Equivalent time"}
                     </Label>
                     <Input
                       id="target-time"
@@ -575,7 +660,8 @@ export default function ProfileScreen({
                       aria-invalid={invalidTime}
                       aria-describedby="target-format-hint"
                       className={cn(
-                        form.raceTargetType !== "TIME" && "bg-muted/40 text-muted-foreground",
+                        form.raceTargetType !== "TIME" &&
+                          "bg-muted/40 text-muted-foreground",
                       )}
                       onChange={(event) => handleTimeChange(event.target.value)}
                     />
@@ -596,7 +682,8 @@ export default function ProfileScreen({
                       aria-invalid={invalidPace}
                       aria-describedby="target-format-hint"
                       className={cn(
-                        form.raceTargetType !== "PACE" && "bg-muted/40 text-muted-foreground",
+                        form.raceTargetType !== "PACE" &&
+                          "bg-muted/40 text-muted-foreground",
                       )}
                       onChange={(event) => handlePaceChange(event.target.value)}
                     />
@@ -605,8 +692,8 @@ export default function ProfileScreen({
                     id="target-format-hint"
                     className="text-xs leading-relaxed text-muted-foreground sm:col-span-2"
                   >
-                    Enter time as h:mm:ss or mm:ss, and pace as mm:ss. The equivalent
-                    updates from the race distance.
+                    Enter time as h:mm:ss or mm:ss, and pace as mm:ss. The
+                    equivalent updates from the race distance.
                   </p>
                 </div>
               )}
@@ -614,40 +701,31 @@ export default function ProfileScreen({
           </motion.div>
         ) : null}
 
-        <div className="space-y-2">
-          <Label>Notes for your coach</Label>
-          <div className="rounded-xl border border-divider bg-card px-4 py-4">
-            <div className="flex items-start gap-3">
-              <div className="rounded-lg bg-secondary p-2 text-muted-foreground">
-                <MessageSquareMore className="h-4 w-4" />
-              </div>
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-foreground">Coming soon</p>
-                <p className="text-sm text-muted-foreground">
-                  Soon you'll be able to add context for your coach, like race constraints, recovery notes, or travel.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {saveMutation.isError && (
-          <p className="text-sm text-destructive">We couldn't save your profile. Try again.</p>
+          <p role="alert" className="text-sm text-destructive">
+            We couldn't save your profile. Try again.
+          </p>
         )}
 
         {saveMutation.isSuccess && (
-          <p className="text-sm text-primary">Profile saved.</p>
+          <p role="status" className="text-sm text-accent">
+            Profile saved.
+          </p>
         )}
 
         <Button
           variant="hero"
-          className="mt-2"
+          className="mt-2 w-full sm:w-auto"
           disabled={saveMutation.isPending || !isFormComplete}
         >
           {saveMutation.isPending ? (
-            <><RefreshCcw className="mr-2 h-4 w-4 animate-spin" /> Saving</>
+            <>
+              <RefreshCcw className="mr-2 h-4 w-4 animate-spin" /> Saving
+            </>
+          ) : isOnboarding ? (
+            "Save & continue"
           ) : (
-            isOnboarding ? "Save & continue" : "Save changes"
+            "Save changes"
           )}
         </Button>
       </form>

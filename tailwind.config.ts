@@ -3,8 +3,14 @@ import tailwindcssAnimate from "tailwindcss-animate";
 
 export default {
   darkMode: ["class"],
-  content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
+  content: [
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
+  ],
   prefix: "",
+  safelist: ["theme-warm", "theme-dark", "theme-bright", "theme-forest"],
   theme: {
     container: {
       center: true,
@@ -15,8 +21,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['"DM Sans"', 'system-ui', 'sans-serif'],
-        serif: ['"DM Serif Display"', 'Georgia', 'serif'],
+        sans: ["Manrope", "system-ui", "sans-serif"],
+        display: ['"Barlow Condensed"', "sans-serif"],
+        serif: ['"Barlow Condensed"', "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",

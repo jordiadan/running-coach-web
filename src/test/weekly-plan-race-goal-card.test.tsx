@@ -13,7 +13,10 @@ import {
 } from "@/lib/portal-api";
 
 vi.mock("@/lib/portal-api", async () => {
-  const actual = await vi.importActual<typeof import("@/lib/portal-api")>("@/lib/portal-api");
+  const actual =
+    await vi.importActual<typeof import("@/lib/portal-api")>(
+      "@/lib/portal-api",
+    );
 
   return {
     ...actual,
@@ -23,9 +26,15 @@ vi.mock("@/lib/portal-api", async () => {
   };
 });
 
-const getCurrentUserWeeklyCoachScreenMock = vi.mocked(getCurrentUserWeeklyCoachScreen);
-const setCurrentUserRaceGoalOutcomeMock = vi.mocked(setCurrentUserRaceGoalOutcome);
-const setCurrentUserWeeklyCoachSessionCompletionMock = vi.mocked(setCurrentUserWeeklyCoachSessionCompletion);
+const getCurrentUserWeeklyCoachScreenMock = vi.mocked(
+  getCurrentUserWeeklyCoachScreen,
+);
+const setCurrentUserRaceGoalOutcomeMock = vi.mocked(
+  setCurrentUserRaceGoalOutcome,
+);
+const setCurrentUserWeeklyCoachSessionCompletionMock = vi.mocked(
+  setCurrentUserWeeklyCoachSessionCompletion,
+);
 
 function renderWithQueryClient(ui: React.ReactElement) {
   const queryClient = new QueryClient({
@@ -36,11 +45,7 @@ function renderWithQueryClient(ui: React.ReactElement) {
     },
   });
 
-  render(
-    <QueryClientProvider client={queryClient}>
-      {ui}
-    </QueryClientProvider>,
-  );
+  render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>);
 
   return queryClient;
 }
@@ -66,11 +71,23 @@ function weeklyCoachScreen({
         eventDate: "2026-04-26",
         distanceKm: 21.1,
       },
-      phase: goalTimelineState === "UPCOMING" || goalTimelineState === "RACE_WEEK" ? "BUILD" : "POST_GOAL",
-      daysToGoal: goalTimelineState === "UPCOMING" || goalTimelineState === "RACE_WEEK" ? 7 : 0,
+      phase:
+        goalTimelineState === "UPCOMING" || goalTimelineState === "RACE_WEEK"
+          ? "BUILD"
+          : "POST_GOAL",
+      daysToGoal:
+        goalTimelineState === "UPCOMING" || goalTimelineState === "RACE_WEEK"
+          ? 7
+          : 0,
       goalTimelineState,
-      daysUntilGoal: goalTimelineState === "UPCOMING" || goalTimelineState === "RACE_WEEK" ? 7 : undefined,
-      daysSinceGoal: goalTimelineState === "POST_GOAL" || goalTimelineState === "EXPIRED" ? 1 : undefined,
+      daysUntilGoal:
+        goalTimelineState === "UPCOMING" || goalTimelineState === "RACE_WEEK"
+          ? 7
+          : undefined,
+      daysSinceGoal:
+        goalTimelineState === "POST_GOAL" || goalTimelineState === "EXPIRED"
+          ? 1
+          : undefined,
       postGoalWindowDays: 14,
       postGoalRecoveryDay: goalTimelineState === "POST_GOAL" ? 1 : undefined,
       goalOutcomeStatus,
@@ -102,7 +119,10 @@ function weeklyCoachScreen({
   };
 }
 
-function renderWeeklyPlan(screenData: CurrentUserWeeklyCoachScreen, onSetNextGoal = vi.fn()) {
+function renderWeeklyPlan(
+  screenData: CurrentUserWeeklyCoachScreen,
+  onSetNextGoal = vi.fn(),
+) {
   getCurrentUserWeeklyCoachScreenMock.mockResolvedValue(screenData);
 
   const queryClient = renderWithQueryClient(
@@ -118,7 +138,9 @@ function renderWeeklyPlan(screenData: CurrentUserWeeklyCoachScreen, onSetNextGoa
   return { onSetNextGoal, queryClient };
 }
 
-function renderWeeklyPlanWithoutSetNextGoal(screenData: CurrentUserWeeklyCoachScreen) {
+function renderWeeklyPlanWithoutSetNextGoal(
+  screenData: CurrentUserWeeklyCoachScreen,
+) {
   getCurrentUserWeeklyCoachScreenMock.mockResolvedValue(screenData);
 
   renderWithQueryClient(
@@ -139,161 +161,432 @@ describe("WeeklyPlanScreen race goal outcome", () => {
   });
 
   it("shows a compact link to the synced Strava activity beside planned duration", async () => {
-    const data = weeklyCoachScreen({ goalTimelineState: "POST_GOAL", goalOutcomeStatus: "UNKNOWN" });
-    data.plan!.plan.sessions = [{
-      day: "MON", modality: "RUN", type: "EASY", title: "Easy run", durationMinutes: 45,
-      completed: true, completionSource: "SYNCED_ACTIVITY", intensityCategory: "LOW",
-      placementReason: "Aerobic work", syncedActivity: {
-        activityId: "12345", provider: "STRAVA", activityUrl: "https://www.strava.com/activities/12345",
-        durationMinutes: 47, distanceKm: 8.2,
+    const data = weeklyCoachScreen({
+      goalTimelineState: "POST_GOAL",
+      goalOutcomeStatus: "UNKNOWN",
+    });
+    data.plan!.plan.sessions = [
+      {
+        day: "MON",
+        modality: "RUN",
+        type: "EASY",
+        title: "Easy run",
+        durationMinutes: 45,
+        completed: true,
+        completionSource: "SYNCED_ACTIVITY",
+        intensityCategory: "LOW",
+        placementReason: "Aerobic work",
+        syncedActivity: {
+          activityId: "12345",
+          provider: "STRAVA",
+          activityUrl: "https://www.strava.com/activities/12345",
+          durationMinutes: 47,
+          distanceKm: 8.2,
+        },
       },
-    }];
+    ];
     renderWeeklyPlan(data);
 
-    expect((await screen.findAllByText("View on Strava")).length).toBeGreaterThan(0);
-    expect(document.querySelector('img[src="/strava-echelon-white.svg"]')).toBeInTheDocument();
+    expect(
+      (await screen.findAllByText("View on Strava")).length,
+    ).toBeGreaterThan(0);
+    expect(
+      document.querySelector('img[src="/strava-echelon-white.svg"]'),
+    ).toBeInTheDocument();
     expect(screen.getAllByText("45 min").length).toBeGreaterThan(0);
-    expect(screen.getAllByRole("link", { name: "View on Strava (opens in a new tab)" })[0]).toHaveAttribute(
-      "href", "https://www.strava.com/activities/12345",
-    );
-    expect(screen.getAllByRole("link", { name: "View on Strava (opens in a new tab)" })[0]).toHaveAttribute("target", "_blank");
+    expect(
+      screen.getAllByRole("link", {
+        name: "View on Strava (opens in a new tab)",
+      })[0],
+    ).toHaveAttribute("href", "https://www.strava.com/activities/12345");
+    expect(
+      screen.getAllByRole("link", {
+        name: "View on Strava (opens in a new tab)",
+      })[0],
+    ).toHaveAttribute("target", "_blank");
   });
 
   it("shows a compact link to the synced Intervals activity beside planned duration", async () => {
-    const data = weeklyCoachScreen({ goalTimelineState: "POST_GOAL", goalOutcomeStatus: "UNKNOWN" });
-    data.plan!.plan.sessions = [{
-      day: "MON", modality: "RUN", type: "EASY", title: "Easy run", durationMinutes: 45,
-      completed: true, completionSource: "SYNCED_ACTIVITY", intensityCategory: "LOW",
-      placementReason: "Aerobic work", syncedActivity: {
-        activityId: "i12345", provider: "INTERVALS", activityUrl: "https://intervals.icu/activities/i12345",
-        durationMinutes: 47, distanceKm: 8.2,
+    const data = weeklyCoachScreen({
+      goalTimelineState: "POST_GOAL",
+      goalOutcomeStatus: "UNKNOWN",
+    });
+    data.plan!.plan.sessions = [
+      {
+        day: "MON",
+        modality: "RUN",
+        type: "EASY",
+        title: "Easy run",
+        durationMinutes: 45,
+        completed: true,
+        completionSource: "SYNCED_ACTIVITY",
+        intensityCategory: "LOW",
+        placementReason: "Aerobic work",
+        syncedActivity: {
+          activityId: "i12345",
+          provider: "INTERVALS",
+          activityUrl: "https://intervals.icu/activities/i12345",
+          durationMinutes: 47,
+          distanceKm: 8.2,
+        },
       },
-    }];
+    ];
     renderWeeklyPlan(data);
 
-    expect((await screen.findAllByText("View on Intervals")).length).toBeGreaterThan(0);
+    expect(
+      (await screen.findAllByText("View on Intervals")).length,
+    ).toBeGreaterThan(0);
     expect(screen.getAllByText("45 min").length).toBeGreaterThan(0);
-    const link = screen.getAllByRole("link", { name: "View on Intervals (opens in a new tab)" })[0];
-    expect(link).toHaveAttribute("href", "https://intervals.icu/activities/i12345");
+    const link = screen.getAllByRole("link", {
+      name: "View on Intervals (opens in a new tab)",
+    })[0];
+    expect(link).toHaveAttribute(
+      "href",
+      "https://intervals.icu/activities/i12345",
+    );
     expect(link).toHaveAttribute("target", "_blank");
     expect(link).toHaveAttribute("rel", "noopener noreferrer");
   });
 
   it("keeps a matched activity visible with manual completion", async () => {
-    const data = weeklyCoachScreen({ goalTimelineState: "POST_GOAL", goalOutcomeStatus: "UNKNOWN" });
-    data.plan!.plan.sessions = [{
-      day: "MON", modality: "RUN", type: "EASY", title: "Easy run", durationMinutes: 45,
-      completed: true, completionSource: "MANUAL", intensityCategory: "LOW", placementReason: "Aerobic work",
-      syncedActivity: {
-        activityId: "i12345", provider: "INTERVALS", activityUrl: "https://intervals.icu/activities/i12345",
-        durationMinutes: 47, distanceKm: 8.2,
+    const data = weeklyCoachScreen({
+      goalTimelineState: "POST_GOAL",
+      goalOutcomeStatus: "UNKNOWN",
+    });
+    data.plan!.plan.sessions = [
+      {
+        day: "MON",
+        modality: "RUN",
+        type: "EASY",
+        title: "Easy run",
+        durationMinutes: 45,
+        completed: true,
+        completionSource: "MANUAL",
+        intensityCategory: "LOW",
+        placementReason: "Aerobic work",
+        syncedActivity: {
+          activityId: "i12345",
+          provider: "INTERVALS",
+          activityUrl: "https://intervals.icu/activities/i12345",
+          durationMinutes: 47,
+          distanceKm: 8.2,
+        },
       },
-    }];
+    ];
     renderWeeklyPlan(data);
 
-    expect((await screen.findAllByRole("link", { name: "View on Intervals (opens in a new tab)" })).length).toBeGreaterThan(0);
-    expect(screen.getByRole("button", { name: "Mark Easy run as incomplete" })).toBeInTheDocument();
+    expect(
+      (
+        await screen.findAllByRole("link", {
+          name: "View on Intervals (opens in a new tab)",
+        })
+      ).length,
+    ).toBeGreaterThan(0);
+    expect(
+      screen.getByRole("button", { name: "Mark Easy run as incomplete" }),
+    ).toBeInTheDocument();
   });
 
   it("keeps a matched activity visible after manual uncompletion", async () => {
-    const data = weeklyCoachScreen({ goalTimelineState: "POST_GOAL", goalOutcomeStatus: "UNKNOWN" });
+    const data = weeklyCoachScreen({
+      goalTimelineState: "POST_GOAL",
+      goalOutcomeStatus: "UNKNOWN",
+    });
     data.todaySessionDay = "MON";
-    data.plan!.plan.sessions = [{
-      day: "MON", modality: "RUN", type: "EASY", title: "Easy run", durationMinutes: 45,
-      completed: false, intensityCategory: "LOW", placementReason: "Aerobic work",
-      syncedActivity: {
-        activityId: "i12345", provider: "INTERVALS", activityUrl: "https://intervals.icu/activities/i12345",
-        durationMinutes: 47, distanceKm: 8.2,
+    data.plan!.plan.sessions = [
+      {
+        day: "MON",
+        modality: "RUN",
+        type: "EASY",
+        title: "Easy run",
+        durationMinutes: 45,
+        completed: false,
+        intensityCategory: "LOW",
+        placementReason: "Aerobic work",
+        syncedActivity: {
+          activityId: "i12345",
+          provider: "INTERVALS",
+          activityUrl: "https://intervals.icu/activities/i12345",
+          durationMinutes: 47,
+          distanceKm: 8.2,
+        },
       },
-    }];
+    ];
     renderWeeklyPlan(data);
 
-    expect(await screen.findAllByRole("link", { name: "View on Intervals (opens in a new tab)" })).toHaveLength(2);
-    expect(screen.getByRole("button", { name: "Mark Easy run as complete" })).toBeInTheDocument();
+    expect(
+      await screen.findAllByRole("link", {
+        name: "View on Intervals (opens in a new tab)",
+      }),
+    ).toHaveLength(2);
+    expect(
+      screen.getByRole("button", { name: "Mark Easy run as complete" }),
+    ).toBeInTheDocument();
   });
 
   it("shows no matched activity for a session without one", async () => {
-    const data = weeklyCoachScreen({ goalTimelineState: "POST_GOAL", goalOutcomeStatus: "UNKNOWN" });
-    data.plan!.plan.sessions = [{
-      day: "MON", modality: "RUN", type: "EASY", title: "Easy run", durationMinutes: 45,
-      completed: true, completionSource: "SYNCED_ACTIVITY", intensityCategory: "LOW", placementReason: "Aerobic work",
-    }];
+    const data = weeklyCoachScreen({
+      goalTimelineState: "POST_GOAL",
+      goalOutcomeStatus: "UNKNOWN",
+    });
+    data.plan!.plan.sessions = [
+      {
+        day: "MON",
+        modality: "RUN",
+        type: "EASY",
+        title: "Easy run",
+        durationMinutes: 45,
+        completed: true,
+        completionSource: "SYNCED_ACTIVITY",
+        intensityCategory: "LOW",
+        placementReason: "Aerobic work",
+      },
+    ];
     renderWeeklyPlan(data);
 
     expect((await screen.findAllByText("Easy run")).length).toBeGreaterThan(0);
-    expect(screen.queryByRole("link", { name: /view on/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: /view on/i }),
+    ).not.toBeInTheDocument();
     expect(screen.queryByText(/Synced activity/)).not.toBeInTheDocument();
   });
 
-  it.each([true, false])("preserves the activity during an optimistic completion toggle from %s", async (completed) => {
-    const data = weeklyCoachScreen({ goalTimelineState: "UPCOMING", goalOutcomeStatus: "UNKNOWN" });
-    data.todaySessionDay = "MON";
-    const syncedActivity = {
-      activityId: "i12345", provider: "INTERVALS", activityUrl: "https://intervals.icu/activities/i12345",
-      durationMinutes: 47, distanceKm: 8.2,
-    };
-    data.plan!.plan.sessions = [{
-      day: "MON", modality: "RUN", type: "EASY", title: "Easy run", durationMinutes: 45,
-      completed, completionSource: completed ? "SYNCED_ACTIVITY" : undefined,
-      intensityCategory: "LOW", placementReason: "Aerobic work", syncedActivity,
-    }];
-    setCurrentUserWeeklyCoachSessionCompletionMock.mockImplementation(() => new Promise(() => {}));
-    const { queryClient } = renderWeeklyPlan(data);
-
-    fireEvent.click(await screen.findByRole("button", {
-      name: completed ? "Mark Easy run as incomplete" : "Mark Easy run as complete",
-    }));
-
-    await waitFor(() => {
-      const cached = queryClient.getQueryData<CurrentUserWeeklyCoachScreen>(["portal", "weekly-coach-screen", "2026-04-27"]);
-      expect(cached?.plan?.plan.sessions[0]).toMatchObject({
-        completed: !completed,
-        completionSource: !completed ? "MANUAL" : undefined,
+  it.each([true, false])(
+    "preserves the activity during an optimistic completion toggle from %s",
+    async (completed) => {
+      const data = weeklyCoachScreen({
+        goalTimelineState: "UPCOMING",
+        goalOutcomeStatus: "UNKNOWN",
       });
-      expect(cached?.plan?.plan.sessions[0].syncedActivity).toBe(syncedActivity);
-    });
-    expect(screen.getAllByRole("link", { name: "View on Intervals (opens in a new tab)" }).length).toBeGreaterThan(0);
-  });
+      data.todaySessionDay = "MON";
+      const syncedActivity = {
+        activityId: "i12345",
+        provider: "INTERVALS",
+        activityUrl: "https://intervals.icu/activities/i12345",
+        durationMinutes: 47,
+        distanceKm: 8.2,
+      };
+      data.plan!.plan.sessions = [
+        {
+          day: "MON",
+          modality: "RUN",
+          type: "EASY",
+          title: "Easy run",
+          durationMinutes: 45,
+          completed,
+          completionSource: completed ? "SYNCED_ACTIVITY" : undefined,
+          intensityCategory: "LOW",
+          placementReason: "Aerobic work",
+          syncedActivity,
+        },
+      ];
+      setCurrentUserWeeklyCoachSessionCompletionMock.mockImplementation(
+        () => new Promise(() => {}),
+      );
+      const { queryClient } = renderWeeklyPlan(data);
+
+      fireEvent.click(
+        await screen.findByRole("button", {
+          name: completed
+            ? "Mark Easy run as incomplete"
+            : "Mark Easy run as complete",
+        }),
+      );
+
+      await waitFor(() => {
+        const cached = queryClient.getQueryData<CurrentUserWeeklyCoachScreen>([
+          "portal",
+          "weekly-coach-screen",
+          "2026-04-27",
+        ]);
+        expect(cached?.plan?.plan.sessions[0]).toMatchObject({
+          completed: !completed,
+          completionSource: !completed ? "MANUAL" : undefined,
+        });
+        expect(cached?.plan?.plan.sessions[0].syncedActivity).toBe(
+          syncedActivity,
+        );
+      });
+      expect(
+        screen.getAllByRole("link", {
+          name: "View on Intervals (opens in a new tab)",
+        }).length,
+      ).toBeGreaterThan(0);
+    },
+  );
 
   it("shows generic synced activity text for an unknown provider", async () => {
-    const data = weeklyCoachScreen({ goalTimelineState: "POST_GOAL", goalOutcomeStatus: "UNKNOWN" });
-    data.plan!.plan.sessions = [{
-      day: "MON", modality: "RUN", type: "EASY", title: "Easy run", durationMinutes: 45,
-      completed: true, completionSource: "SYNCED_ACTIVITY", intensityCategory: "LOW",
-      placementReason: "Aerobic work", syncedActivity: {
-        activityId: "12345", provider: "OTHER", activityUrl: "https://example.com/activities/12345",
-        durationMinutes: 47, distanceKm: 8.2,
+    const data = weeklyCoachScreen({
+      goalTimelineState: "POST_GOAL",
+      goalOutcomeStatus: "UNKNOWN",
+    });
+    data.plan!.plan.sessions = [
+      {
+        day: "MON",
+        modality: "RUN",
+        type: "EASY",
+        title: "Easy run",
+        durationMinutes: 45,
+        completed: true,
+        completionSource: "SYNCED_ACTIVITY",
+        intensityCategory: "LOW",
+        placementReason: "Aerobic work",
+        syncedActivity: {
+          activityId: "12345",
+          provider: "OTHER",
+          activityUrl: "https://example.com/activities/12345",
+          durationMinutes: 47,
+          distanceKm: 8.2,
+        },
       },
-    }];
+    ];
     renderWeeklyPlan(data);
 
-    expect((await screen.findAllByText("Synced activity · OTHER")).length).toBeGreaterThan(0);
-    expect(screen.queryByRole("link", { name: /view on/i })).not.toBeInTheDocument();
+    expect(
+      (await screen.findAllByText("Synced activity · OTHER")).length,
+    ).toBeGreaterThan(0);
+    expect(
+      screen.queryByRole("link", { name: /view on/i }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("opens a semantic workout disclosure and separates planned from recorded work", async () => {
+    const data = weeklyCoachScreen({ goalTimelineState: "UPCOMING" });
+    data.plan!.plan.sessions = [
+      {
+        day: "TUE",
+        modality: "RUN",
+        type: "EASY",
+        title: "Easy run",
+        durationMinutes: 40,
+        completed: false,
+        intensityCategory: "LOW",
+        placementReason: "Recovery between harder days",
+        notes: "Keep a conversational effort",
+        syncedActivity: {
+          activityId: "test",
+          provider: "STRAVA",
+          durationMinutes: 43,
+          distanceKm: 7.2,
+        },
+      },
+    ];
+    renderWeeklyPlan(data);
+    const disclosure = await screen.findByRole("button", {
+      name: /Tue Easy run 40 min/,
+    });
+    expect(disclosure).toHaveAttribute("aria-expanded", "false");
+    fireEvent.click(disclosure);
+    expect(disclosure).toHaveAttribute("aria-expanded", "true");
+    expect(
+      screen.getByRole("region", { name: /Tue Easy run/ }),
+    ).toHaveTextContent("7.2 km · 43 min");
+    expect(
+      screen.getByText("Recovery between harder days"),
+    ).toBeInTheDocument();
+    expect(
+      setCurrentUserWeeklyCoachSessionCompletionMock,
+    ).not.toHaveBeenCalled();
+  });
+
+  it("never offers completion for a rest day, including today's featured session", async () => {
+    const data = weeklyCoachScreen({ goalTimelineState: "UPCOMING" });
+    data.todaySessionDay = "MON";
+    data.plan!.plan.sessions = [
+      {
+        day: "MON",
+        modality: "REST",
+        type: "REST",
+        title: "Rest day",
+        durationMinutes: 0,
+        completed: false,
+        intensityCategory: "REST",
+        placementReason: "Recover",
+      },
+    ];
+    renderWeeklyPlan(data);
+    await screen.findAllByText("Rest day");
+    expect(
+      screen.queryByRole("button", { name: /mark.*complete/i }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("restores completion and explains a failed save", async () => {
+    const data = weeklyCoachScreen({ goalTimelineState: "UPCOMING" });
+    data.plan!.plan.sessions = [
+      {
+        day: "TUE",
+        modality: "RUN",
+        type: "EASY",
+        title: "Easy run",
+        durationMinutes: 40,
+        completed: false,
+        intensityCategory: "LOW",
+        placementReason: "Recover",
+      },
+    ];
+    setCurrentUserWeeklyCoachSessionCompletionMock.mockRejectedValueOnce(
+      new Error("Unavailable"),
+    );
+    renderWeeklyPlan(data);
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Mark Easy run as complete" }),
+    );
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "previous completion state has been restored",
+    );
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: "Mark Easy run as complete" }),
+      ).toHaveAttribute("aria-pressed", "false"),
+    );
   });
 
   it("shows outcome actions for unknown post-goal races", async () => {
-    renderWeeklyPlan(weeklyCoachScreen({ goalTimelineState: "POST_GOAL", goalOutcomeStatus: "UNKNOWN" }));
+    renderWeeklyPlan(
+      weeklyCoachScreen({
+        goalTimelineState: "POST_GOAL",
+        goalOutcomeStatus: "UNKNOWN",
+      }),
+    );
 
-    expect(await screen.findByRole("button", { name: /mark completed/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /skip goal/i })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("button", { name: /mark completed/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /skip goal/i }),
+    ).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /mark completed/i }));
 
     await waitFor(() => {
-      expect(setCurrentUserRaceGoalOutcomeMock).toHaveBeenCalledWith("COMPLETED");
+      expect(setCurrentUserRaceGoalOutcomeMock).toHaveBeenCalledWith(
+        "COMPLETED",
+      );
     });
   });
 
   it("shows completed outcome copy and hides actions", async () => {
     const { onSetNextGoal } = renderWeeklyPlan(
-      weeklyCoachScreen({ goalTimelineState: "POST_GOAL", goalOutcomeStatus: "COMPLETED" }),
+      weeklyCoachScreen({
+        goalTimelineState: "POST_GOAL",
+        goalOutcomeStatus: "COMPLETED",
+      }),
     );
 
     expect(await screen.findByText("Completed")).toBeInTheDocument();
-    expect(screen.getByText("Race completed. Recovery-first training can continue.")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /plan next race/i })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /mark completed/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /skip goal/i })).not.toBeInTheDocument();
+    expect(
+      screen.getByText("Race completed. Recovery-first training can continue."),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /plan next race/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /mark completed/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /skip goal/i }),
+    ).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /plan next race/i }));
 
@@ -302,64 +595,144 @@ describe("WeeklyPlanScreen race goal outcome", () => {
 
   it("does not render a next-goal CTA without a handler", async () => {
     renderWeeklyPlanWithoutSetNextGoal(
-      weeklyCoachScreen({ goalTimelineState: "POST_GOAL", goalOutcomeStatus: "COMPLETED" }),
+      weeklyCoachScreen({
+        goalTimelineState: "POST_GOAL",
+        goalOutcomeStatus: "COMPLETED",
+      }),
     );
 
     expect(await screen.findByText("Completed")).toBeInTheDocument();
-    expect(screen.getByText("Race completed. Recovery-first training can continue.")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /plan next race/i })).not.toBeInTheDocument();
+    expect(
+      screen.getByText("Race completed. Recovery-first training can continue."),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /plan next race/i }),
+    ).not.toBeInTheDocument();
   });
 
   it("shows skipped outcome copy and hides actions", async () => {
-    renderWeeklyPlan(weeklyCoachScreen({ goalTimelineState: "POST_GOAL", goalOutcomeStatus: "SKIPPED" }));
+    renderWeeklyPlan(
+      weeklyCoachScreen({
+        goalTimelineState: "POST_GOAL",
+        goalOutcomeStatus: "SKIPPED",
+      }),
+    );
 
     expect(await screen.findByText("Skipped")).toBeInTheDocument();
     expect(
-      screen.getByText("Goal skipped. This race will not guide recovery or race preparation."),
+      screen.getByText(
+        "Goal skipped. This race will not guide recovery or race preparation.",
+      ),
     ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /set new goal/i })).toBeInTheDocument();
-    expect(screen.queryByText("Race completed. Recovery-first training can continue.")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /set new goal/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(
+        "Race completed. Recovery-first training can continue.",
+      ),
+    ).not.toBeInTheDocument();
     expect(screen.queryByText(/day 1 of 14/i)).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /mark completed/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /skip goal/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /mark completed/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /skip goal/i }),
+    ).not.toBeInTheDocument();
   });
 
   it("shows the next-goal CTA for expired goals", async () => {
-    renderWeeklyPlan(weeklyCoachScreen({ goalTimelineState: "EXPIRED", goalOutcomeStatus: "UNKNOWN" }));
+    renderWeeklyPlan(
+      weeklyCoachScreen({
+        goalTimelineState: "EXPIRED",
+        goalOutcomeStatus: "UNKNOWN",
+      }),
+    );
 
     expect(await screen.findByText("Expired")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /set next goal/i })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /mark completed/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /skip goal/i })).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /set next goal/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /mark completed/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /skip goal/i }),
+    ).not.toBeInTheDocument();
   });
 
   it("does not show next-goal CTA before a goal is closed or expired", async () => {
-    renderWeeklyPlan(weeklyCoachScreen({ goalTimelineState: "UPCOMING", goalOutcomeStatus: "UNKNOWN" }));
+    renderWeeklyPlan(
+      weeklyCoachScreen({
+        goalTimelineState: "UPCOMING",
+        goalOutcomeStatus: "UNKNOWN",
+      }),
+    );
 
     expect(await screen.findByText("Upcoming")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /plan next race/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /set new goal/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /set next goal/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /mark completed/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /skip goal/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /plan next race/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /set new goal/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /set next goal/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /mark completed/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /skip goal/i }),
+    ).not.toBeInTheDocument();
 
     vi.clearAllMocks();
-    renderWeeklyPlan(weeklyCoachScreen({ goalTimelineState: "RACE_WEEK", goalOutcomeStatus: "UNKNOWN" }));
+    renderWeeklyPlan(
+      weeklyCoachScreen({
+        goalTimelineState: "RACE_WEEK",
+        goalOutcomeStatus: "UNKNOWN",
+      }),
+    );
 
     expect(await screen.findByText("Race week")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /plan next race/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /set new goal/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /set next goal/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /mark completed/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /skip goal/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /plan next race/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /set new goal/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /set next goal/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /mark completed/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /skip goal/i }),
+    ).not.toBeInTheDocument();
 
     vi.clearAllMocks();
-    renderWeeklyPlan(weeklyCoachScreen({ goalTimelineState: "POST_GOAL", goalOutcomeStatus: "UNKNOWN" }));
+    renderWeeklyPlan(
+      weeklyCoachScreen({
+        goalTimelineState: "POST_GOAL",
+        goalOutcomeStatus: "UNKNOWN",
+      }),
+    );
 
-    expect(await screen.findByRole("button", { name: /mark completed/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /skip goal/i })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /plan next race/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /set new goal/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /set next goal/i })).not.toBeInTheDocument();
+    expect(
+      await screen.findByRole("button", { name: /mark completed/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /skip goal/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /plan next race/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /set new goal/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /set next goal/i }),
+    ).not.toBeInTheDocument();
   });
 });

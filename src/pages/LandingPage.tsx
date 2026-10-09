@@ -1,335 +1,255 @@
 import { Link } from "react-router-dom";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { ArrowRight, Zap, Calendar, Brain, Timer, TrendingUp, Heart } from "lucide-react";
+import { ArrowRight, ArrowDown, Check, MoveUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Brand from "@/components/Brand";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
-import { useRef } from "react";
 import heroImage from "@/assets/hero-running.jpg";
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 30 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay: i * 0.15, duration: 0.7, ease: [0.22, 1, 0.36, 1] },
-  }),
-};
-
-const features = [
+const exampleWeek = [
   {
-    icon: Brain,
-    title: "Context-aware",
-    description: "Share your goals, fitness level, and schedule. The plan adapts to you — not the other way around.",
+    day: "Mon",
+    title: "Easy aerobic run",
+    detail: "40 min · Easy",
+    done: true,
   },
   {
-    icon: Calendar,
-    title: "Weekly clarity",
-    description: "Every run mapped out with pace, distance, and purpose. No guesswork, just structure.",
+    day: "Tue",
+    title: "Threshold intervals",
+    detail: "50 min · Quality",
+    done: true,
   },
   {
-    icon: Zap,
-    title: "Lightweight",
-    description: "No bloat. No social feed. No noise. Just your plan, ready when you lace up.",
+    day: "Wed",
+    title: "Rest & recover",
+    detail: "Room to recharge",
+    done: false,
   },
-];
-
-const stats = [
-  { value: "30km", label: "avg weekly plan", icon: TrendingUp },
-  { value: "4:52", label: "avg pace /km", icon: Timer },
-  { value: "142", label: "avg heart rate", icon: Heart },
+  {
+    day: "Thu",
+    title: "Runner strength",
+    detail: "30 min · Strength",
+    done: false,
+  },
+  {
+    day: "Fri",
+    title: "Easy run + strides",
+    detail: "45 min · Easy",
+    done: false,
+  },
+  { day: "Sat", title: "Rest day", detail: "Take it easy", done: false },
+  {
+    day: "Sun",
+    title: "Long aerobic run",
+    detail: "80 min · Endurance",
+    done: false,
+  },
 ];
 
 export default function LandingPage() {
-  const heroRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: heroRef,
-    offset: ["start start", "end start"],
-  });
-  const heroY = useTransform(scrollYProgress, [0, 1], [0, 150]);
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
-
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden">
-      {/* Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-background/60 backdrop-blur-xl">
-        <div className="max-w-6xl mx-auto flex items-center justify-between px-6 h-16">
-          <Link to="/" className="font-serif text-xl tracking-tight text-foreground">
-            Running Coach
-          </Link>
-          <div className="flex items-center gap-6">
-            <Link to="/privacy" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              Privacy
-            </Link>
-            <ThemeSwitcher />
-            <Link to="/login">
-              <Button variant="ghost" size="sm">Log in</Button>
-            </Link>
-          </div>
-        </div>
-      </nav>
-
-      {/* Hero with image */}
-      <section ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Background image with parallax */}
-        <motion.div
-          style={{ y: heroY }}
-          className="absolute inset-0 -top-20"
+    <div className="min-h-screen bg-background">
+      <a href="#main-content" className="skip-link">
+        Skip to content
+      </a>
+      <header className="border-b border-border bg-card">
+        <nav
+          aria-label="Main navigation"
+          className="public-shell flex min-h-20 items-center justify-between gap-3"
         >
-          <img
-            src={heroImage}
-            alt="Runner on mountain trail at golden hour"
-            className="w-full h-[120%] object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/40 to-background" />
-          <div className="absolute inset-0 bg-gradient-to-r from-background/60 via-transparent to-background/60" />
-        </motion.div>
-
-        {/* Hero content */}
-        <motion.div style={{ opacity: heroOpacity }} className="relative z-10 max-w-4xl mx-auto text-center px-6 pt-16">
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            custom={0}
-            variants={fadeUp}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/15 text-primary text-sm font-medium mb-8 backdrop-blur-sm"
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-            Your personal running plan
-          </motion.div>
-
-          <motion.h1
-            initial="hidden"
-            animate="visible"
-            custom={1}
-            variants={fadeUp}
-            className="text-5xl sm:text-7xl lg:text-8xl font-serif leading-[1.05] tracking-tight text-foreground mb-8"
-          >
-            Run with
-            <br />
-            <span className="text-primary">purpose</span>
-          </motion.h1>
-
-          <motion.p
-            initial="hidden"
-            animate="visible"
-            custom={2}
-            variants={fadeUp}
-            className="text-lg sm:text-xl text-foreground/70 max-w-xl mx-auto mb-12 leading-relaxed"
-          >
-            Connect your training context. Get a clear weekly plan built around your goals, your body, and your life.
-          </motion.p>
-
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            custom={3}
-            variants={fadeUp}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4"
-          >
-            <Link to="/login">
-              <Button variant="hero" size="lg" className="min-w-[200px] h-13 text-base">
-                Start training <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
-            <a href="#how-it-works">
-              <Button variant="hero-outline" size="lg" className="min-w-[200px] h-13 text-base">
-                See how it works
-              </Button>
-            </a>
-          </motion.div>
-        </motion.div>
-
-        {/* Scroll indicator */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.5 }}
-          className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10"
-        >
-          <motion.div
-            animate={{ y: [0, 8, 0] }}
-            transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-            className="w-5 h-8 rounded-full border-2 border-foreground/30 flex items-start justify-center p-1"
-          >
-            <div className="w-1 h-2 rounded-full bg-foreground/40" />
-          </motion.div>
-        </motion.div>
-      </section>
-
-      {/* Stats bar */}
-      <section className="relative z-10 -mt-1 bg-background">
-        <div className="max-w-4xl mx-auto px-6 py-16">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            className="grid grid-cols-3 gap-8"
-          >
-            {stats.map((stat, i) => (
-              <motion.div
-                key={stat.label}
-                custom={i}
-                variants={fadeUp}
-                className="text-center"
-              >
-                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary mb-3">
-                  <stat.icon className="w-4 h-4" />
-                </div>
-                <p className="text-3xl sm:text-4xl font-serif text-foreground mb-1">{stat.value}</p>
-                <p className="text-sm text-muted-foreground">{stat.label}</p>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Features */}
-      <section id="how-it-works" className="py-24 px-6 bg-card">
-        <div className="max-w-5xl mx-auto">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            className="text-center mb-20"
-          >
-            <motion.p custom={0} variants={fadeUp} className="text-sm uppercase tracking-[0.2em] text-primary mb-4">
+          <Brand />
+          <div className="flex items-center gap-2 sm:gap-5">
+            <a
+              href="#how-it-works"
+              className="hidden text-sm font-medium hover:text-primary sm:inline"
+            >
               How it works
-            </motion.p>
-            <motion.h2 custom={1} variants={fadeUp} className="text-4xl sm:text-5xl font-serif mb-4">
-              Three steps. Zero friction.
-            </motion.h2>
-            <motion.p custom={2} variants={fadeUp} className="text-muted-foreground max-w-md mx-auto text-lg">
-              From setup to your first run in under two minutes.
-            </motion.p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            {features.map((feature, i) => (
-              <motion.div
-                key={feature.title}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                custom={i + 3}
-                variants={fadeUp}
-                className="group relative bg-background rounded-2xl p-8 border border-divider hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5"
-              >
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
-                    <feature.icon className="w-5 h-5" />
-                  </div>
-                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-widest">
-                    Step {i + 1}
-                  </span>
-                </div>
-                <h3 className="font-serif text-2xl mb-3">{feature.title}</h3>
-                <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
-              </motion.div>
-            ))}
+            </a>
+            <ThemeSwitcher />
+            <Button asChild variant="outline" size="sm">
+              <Link to="/login">
+                Log in <ArrowRight className="hidden h-4 w-4 sm:block" />
+              </Link>
+            </Button>
           </div>
-        </div>
-      </section>
-
-      {/* Plan preview */}
-      <section className="py-24 px-6">
-        <div className="max-w-4xl mx-auto">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            className="text-center mb-14"
-          >
-            <motion.h2 custom={0} variants={fadeUp} className="text-4xl sm:text-5xl font-serif mb-4">
-              Your week, structured
-            </motion.h2>
-            <motion.p custom={1} variants={fadeUp} className="text-muted-foreground text-lg">
-              Here's what a typical training week looks like.
-            </motion.p>
-          </motion.div>
-
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            custom={2}
-            variants={fadeUp}
-            className="bg-card rounded-2xl border border-divider overflow-hidden"
-          >
-            {[
-              { day: "Mon", type: "Easy Run", dist: "5 km", pace: "6:00", color: "bg-primary/10 text-primary" },
-              { day: "Tue", type: "Rest", dist: "—", pace: "—", color: "bg-muted text-muted-foreground" },
-              { day: "Wed", type: "Tempo", dist: "7 km", pace: "5:15", color: "bg-accent/15 text-accent" },
-              { day: "Thu", type: "Easy Run", dist: "5 km", pace: "6:10", color: "bg-primary/10 text-primary" },
-              { day: "Fri", type: "Rest", dist: "—", pace: "—", color: "bg-muted text-muted-foreground" },
-              { day: "Sat", type: "Long Run", dist: "13 km", pace: "6:20", color: "bg-primary/15 text-primary" },
-              { day: "Sun", type: "Recovery", dist: "3 km", pace: "6:45", color: "bg-secondary text-muted-foreground" },
-            ].map((row, i) => (
-              <div
-                key={row.day}
-                className={`flex items-center px-6 py-4 ${i < 6 ? "border-b border-divider" : ""} ${row.type === "Rest" ? "opacity-50" : ""}`}
-              >
-                <span className="w-12 text-sm font-medium text-foreground">{row.day}</span>
-                <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${row.color} mr-4`}>{row.type}</span>
-                <span className="text-sm text-muted-foreground ml-auto tabular-nums">
-                  {row.dist !== "—" ? `${row.dist} · ${row.pace} /km` : ""}
+        </nav>
+      </header>
+      <main id="main-content">
+        <section className="brand-field">
+          <div className="public-shell grid lg:min-h-[640px] lg:grid-cols-[1.1fr_0.9fr]">
+            <div className="flex flex-col items-start justify-center py-14 sm:py-20 lg:pr-16">
+              <h1 className="max-w-xl font-display text-6xl font-semibold leading-[0.98] sm:text-7xl lg:text-8xl">
+                A clear plan.
+                <br />A purpose for
+                <br />
+                <span className="text-[hsl(var(--brand-lime))]">
+                  every run.
                 </span>
-              </div>
-            ))}
-          </motion.div>
-
-          <motion.p
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            custom={3}
-            variants={fadeUp}
-            className="text-center text-sm text-muted-foreground mt-6"
-          >
-            33 km total · Adapted to your half-marathon goal
-          </motion.p>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="py-24 px-6">
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          custom={0}
-          variants={fadeUp}
-          className="max-w-3xl mx-auto relative overflow-hidden rounded-3xl bg-primary p-14 sm:p-20 text-center"
-        >
-          <div className="absolute top-0 right-0 w-64 h-64 bg-primary-foreground/5 rounded-full -translate-y-1/2 translate-x-1/2" />
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-primary-foreground/5 rounded-full translate-y-1/2 -translate-x-1/2" />
-          <div className="relative z-10">
-            <h2 className="text-3xl sm:text-5xl font-serif mb-5 text-primary-foreground">
-              Ready to run smarter?
-            </h2>
-            <p className="text-primary-foreground/70 mb-10 max-w-md mx-auto text-lg">
-              Set up in two minutes. Your first plan is waiting.
-            </p>
-            <Link to="/login">
+              </h1>
+              <p className="mt-7 max-w-md text-base leading-7 text-[hsl(var(--brand-paper))] sm:text-lg">
+                Your training, your schedule, your next goal. Bring them
+                together in a weekly running plan that tells you what to do and
+                why.
+              </p>
               <Button
-                variant="hero-outline"
+                asChild
                 size="lg"
-                className="min-w-[220px] h-13 text-base border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
+                className="brand-action mt-8 hover:opacity-90"
               >
-                Create your plan <ArrowRight className="ml-2 h-4 w-4" />
+                <Link to="/login">
+                  Build my running plan <ArrowRight className="h-4 w-4" />
+                </Link>
               </Button>
+              <p className="mt-4 text-xs text-[hsl(var(--brand-paper))]">
+                Connect with Strava or Intervals.icu
+              </p>
+              <a
+                href="#your-week"
+                className="mt-10 flex min-h-11 items-center gap-2 text-sm underline underline-offset-4"
+              >
+                Take a look inside <ArrowDown className="h-4 w-4" />
+              </a>
+            </div>
+            <figure className="relative -mx-5 sm:-mx-8 lg:mx-0 lg:-mr-12">
+              <img
+                src={heroImage}
+                alt="Runner following a mountain trail in the evening light"
+                className="h-72 w-full object-cover sm:h-96 lg:absolute lg:inset-0 lg:h-full"
+                fetchPriority="high"
+              />
+              <figcaption className="absolute bottom-0 left-0 right-0 flex items-center justify-between bg-[hsl(var(--brand-ink))] px-5 py-4 text-sm lg:bottom-6 lg:left-6 lg:right-6 lg:rounded-lg">
+                <span>Make room for the run.</span>
+                <MoveUpRight className="h-5 w-5" aria-hidden="true" />
+              </figcaption>
+            </figure>
+          </div>
+        </section>
+        <section
+          id="your-week"
+          className="public-shell grid gap-10 py-16 sm:py-24 lg:grid-cols-[0.8fr_1.2fr] lg:gap-24"
+        >
+          <div className="lg:pt-6">
+            <h2 className="font-display text-5xl leading-none sm:text-6xl">
+              Less deciding.
+              <br />
+              More running.
+            </h2>
+            <p className="mt-6 max-w-md text-base leading-7 text-muted-foreground">
+              Open your week and know where to begin. See the purpose of each
+              session, make time for recovery, and keep your goal in view.
+            </p>
+            <ul className="mt-8 space-y-5 text-sm">
+              {[
+                "Workouts built around your available days",
+                "Clear instructions for each session",
+                "Your recorded activities alongside your plan",
+              ].map((text) => (
+                <li key={text} className="flex items-start gap-3">
+                  <Check
+                    className="h-5 w-5 shrink-0 text-accent"
+                    aria-hidden="true"
+                  />
+                  {text}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="surface overflow-hidden">
+            <div className="flex items-baseline justify-between gap-3 border-b border-border px-5 py-5 sm:px-7">
+              <h3 className="section-title">A week with Running Coach</h3>
+              <span className="text-xs text-muted-foreground">
+                Illustrative plan
+              </span>
+            </div>
+            <ol className="divide-y divide-border">
+              {exampleWeek.map((session, i) => (
+                <li
+                  key={session.day}
+                  className={`flex items-center gap-4 px-5 py-4 sm:px-7 ${i === 4 ? "bg-primary/5" : ""}`}
+                >
+                  <span className="w-8 shrink-0 text-xs font-semibold text-muted-foreground">
+                    {session.day}
+                  </span>
+                  <span className="flex-1">
+                    <span className="block text-sm font-semibold">
+                      {session.title}
+                    </span>
+                    <span className="mt-1 block text-xs text-muted-foreground">
+                      {session.detail}
+                    </span>
+                  </span>
+                  {session.done ? (
+                    <Check
+                      className="h-4 w-4 text-accent"
+                      aria-label="Complete"
+                    />
+                  ) : i === 4 ? (
+                    <span className="rounded-md bg-primary px-2 py-1 text-xs text-primary-foreground">
+                      Today
+                    </span>
+                  ) : null}
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+        <section id="how-it-works" className="border-y border-border bg-card">
+          <div className="public-shell py-16 sm:py-24">
+            <h2 className="font-display text-4xl sm:text-5xl">
+              From your training to your next run.
+            </h2>
+            <ol className="mt-10 grid gap-8 md:grid-cols-3 md:gap-12">
+              {[
+                [
+                  "Connect your training",
+                  "Choose Strava or Intervals.icu to bring your activity history into your plan. One source, one place to start.",
+                ],
+                [
+                  "Make it yours",
+                  "Choose your running days and long-run day. Set a race goal or focus on improving your running.",
+                ],
+                [
+                  "Run your week",
+                  "Get your weekly plan, explore each workout, and check off your sessions as you go.",
+                ],
+              ].map(([title, description], i) => (
+                <li key={title} className="border-t border-border pt-5">
+                  <h3 className="mb-3 font-display text-3xl">
+                    <span className="mr-2 text-primary">{i + 1}.</span>
+                    {title}
+                  </h3>
+                  <p className="text-sm leading-7 text-muted-foreground">
+                    {description}
+                  </p>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+        <section className="public-shell flex flex-col items-start justify-between gap-7 py-16 sm:py-20 md:flex-row md:items-center">
+          <div>
+            <h2 className="font-display text-5xl">
+              Give your next run a plan.
+            </h2>
+            <p className="mt-4 text-muted-foreground">
+              Start with your goals. Take it one week at a time.
+            </p>
+          </div>
+          <Button asChild size="lg">
+            <Link to="/login">
+              Start training <ArrowRight className="h-4 w-4" />
             </Link>
-          </div>
-        </motion.div>
-      </section>
-
-      {/* Footer */}
-      <footer className="border-t border-divider py-12 px-6">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <span className="font-serif text-lg text-foreground">Running Coach</span>
-          <div className="flex items-center gap-6 text-sm text-muted-foreground">
-            <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
-            <span>© {new Date().getFullYear()}</span>
-          </div>
+          </Button>
+        </section>
+      </main>
+      <footer className="border-t border-border">
+        <div className="public-shell flex flex-wrap items-center justify-between gap-5 py-8">
+          <Brand />
+          <Link
+            to="/privacy"
+            className="flex min-h-11 items-center text-sm text-muted-foreground hover:underline"
+          >
+            Privacy policy
+          </Link>
         </div>
       </footer>
     </div>
