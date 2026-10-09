@@ -24,7 +24,8 @@ export default function WeekNavigator({
   showReturnToCurrent,
 }: WeekNavigatorProps) {
   const isCurrentWeek =
-    currentWeekOffsetLabel === "Current" || currentWeekOffsetLabel === "This week";
+    currentWeekOffsetLabel === "Current" ||
+    currentWeekOffsetLabel === "This week";
   const secondaryLabel = isCurrentWeek
     ? "This week"
     : currentWeekOffsetLabel === "Future"
@@ -42,14 +43,15 @@ export default function WeekNavigator({
         type="button"
         variant="ghost"
         size="icon"
-        className="h-8 w-8 rounded-lg"
+        className="h-11 w-11 rounded-lg"
+        aria-label="Previous week"
         onClick={onPrevious}
         disabled={!canGoPrevious}
       >
         <ChevronLeft className="h-4 w-4" />
       </Button>
 
-      <div className="flex min-w-0 items-center gap-2 text-[13px]">
+      <div className="flex min-w-0 flex-col items-center gap-0.5 sm:flex-row sm:gap-2 text-sm">
         <span
           className={`truncate font-medium tabular-nums ${
             isCurrentWeek ? "text-foreground" : "text-muted-foreground"
@@ -58,11 +60,13 @@ export default function WeekNavigator({
           {weekLabel}
         </span>
         <span
-          className={`inline-flex shrink-0 items-center gap-1 text-[10px] font-semibold uppercase tracking-widest ${
+          className={`inline-flex shrink-0 items-center gap-1 text-xs font-semibold uppercase tracking-widest ${
             isCurrentWeek ? "text-primary" : "text-muted-foreground"
           }`}
         >
-          {isCurrentWeek ? <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" /> : null}
+          {isCurrentWeek ? (
+            <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+          ) : null}
           {secondaryLabel}
         </span>
       </div>
@@ -73,7 +77,7 @@ export default function WeekNavigator({
             type="button"
             variant="ghost"
             size="sm"
-            className="h-8 px-2 text-xs text-primary"
+            className="h-11 px-2 text-xs text-primary"
             onClick={onCurrent}
           >
             <CalendarDays className="mr-1 h-3.5 w-3.5" />
@@ -84,7 +88,8 @@ export default function WeekNavigator({
           type="button"
           variant="ghost"
           size="icon"
-          className="h-8 w-8 rounded-lg"
+          className="h-11 w-11 rounded-lg"
+          aria-label="Next week"
           onClick={onNext}
           disabled={!canGoNext}
         >

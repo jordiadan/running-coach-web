@@ -1,9 +1,15 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 
 export type ThemeId = "warm" | "dark" | "bright" | "forest";
 
 export const themes: { id: ThemeId; label: string }[] = [
-  { id: "warm", label: "Warm & Earthy" },
+  { id: "warm", label: "Track · Light" },
   { id: "dark", label: "Dark & Bold" },
   { id: "bright", label: "Clean & Bright" },
   { id: "forest", label: "Forest & Deep" },
@@ -36,7 +42,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     themeIds.forEach((themeId) => root.classList.remove(`theme-${themeId}`));
     root.classList.add(`theme-${theme}`);
 
-    if (theme === "dark") {
+    if (theme === "dark" || theme === "forest") {
       root.classList.add("dark");
       root.style.colorScheme = "dark";
     } else {

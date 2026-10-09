@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const themePreviewColors: Record<string, string> = {
-  warm: "bg-[hsl(160,30%,28%)]",
+  warm: "bg-[hsl(225,66%,43%)]",
   dark: "bg-[hsl(15,90%,55%)]",
   bright: "bg-[hsl(220,85%,55%)]",
   forest: "bg-[hsl(145,50%,45%)]",
@@ -23,21 +23,39 @@ export default function ThemeSwitcher() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-9 w-9">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-11 w-11"
+          aria-label="Choose appearance"
+        >
           <Palette className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
-        <DropdownMenuRadioGroup value={theme} onValueChange={(value) => setTheme(value as typeof theme)}>
+        <DropdownMenuRadioGroup
+          value={theme}
+          onValueChange={(value) => setTheme(value as typeof theme)}
+        >
           {themes.map((t) => (
             <DropdownMenuRadioItem
               key={t.id}
               value={t.id}
-              className={cn("flex items-center gap-3 cursor-pointer", theme === t.id && "font-medium")}
+              className={cn(
+                "flex items-center gap-3 cursor-pointer",
+                theme === t.id && "font-medium",
+              )}
             >
-              <span className={cn("w-3 h-3 rounded-full shrink-0", themePreviewColors[t.id])} />
+              <span
+                className={cn(
+                  "w-3 h-3 rounded-full shrink-0",
+                  themePreviewColors[t.id],
+                )}
+              />
               {t.label}
-              {theme === t.id && <span className="ml-auto text-xs text-primary">✓</span>}
+              {theme === t.id && (
+                <span className="ml-auto text-xs text-primary">✓</span>
+              )}
             </DropdownMenuRadioItem>
           ))}
         </DropdownMenuRadioGroup>

@@ -50,17 +50,21 @@ not evidence of improved performance or a validated commercial promise.
 - `/`: public product page. `/privacy`: trust/privacy information. `/login`:
   Google sign-in. `/portal`: session-gated onboarding and the Weekly Plan,
   Connect and Profile tabs. There are no separate calendar or session-detail
-  routes; sessions expand within the weekly plan.
+  routes; sessions expand within the weekly plan. The portal uses a desktop
+  navigation rail and mobile bottom navigation. The public page labels its
+  example week as illustrative and explains the three-step setup.
 - Profile: display name, training goal, running days and preferred long-run day.
   The current UI requires at least four running days; the long-run day must be
   one of them. A race goal adds name, date, distance and a finish-only, target-time
-  or target-pace objective. Context notes shown as coming soon are not editable.
+  or target-pace objective. Fields are grouped into running context, schedule
+  and race target; there is no editable context-notes field.
 - Weekly plan: week navigation, objective, goal timeline, today's
   session, remaining sessions, long-run highlight and completed-distance summary
   when supplied by the API. Session details include modality, intensity,
   prescribed duration, notes and strength focus when supplied. The API also
-  carries plan justification and placement rationale; the current screen does
-  not render those fields.
+  carries plan justification and placement rationale, shown in the “Why this
+  plan” disclosure and session details when supplied. The seven-day strip opens
+  and focuses the selected session's disclosure.
 - Current-week non-rest sessions support manual completion when the API supplies
   completion state. A matched activity, its recorded metrics and provider link
   remain separate from manual completion: clearing a checkbox does not erase
@@ -113,13 +117,17 @@ options do not establish a preferred future direction.
 
 ## Evidence on Hand
 
-Frontend baseline: `running-coach-web` commit
-`46c86587557a02ee2883795540b0e1b3be364dbf` (PR #15's base). Sources:
+Frontend redesign baseline: `running-coach-web` commit `7dced9f`.
+Current descriptions were reconciled with the redesign working tree on
+2026-10-09. Sources:
 `src/App.tsx`, `src/pages/LoginPage.tsx`, `src/pages/PortalPage.tsx`,
 `src/components/portal/`, `src/lib/portal-api.ts`, `src/lib/portal-onboarding.ts`
 and the portal tests in `src/test/`. Visual assets include
-`src/assets/hero-running.jpg`; tokens live in `src/index.css` and
-`tailwind.config.ts`.
+`src/assets/hero-running.jpg`; self-hosted fonts and their licenses live in
+`public/fonts/`. Tokens live in `src/index.css` and `tailwind.config.ts`, with
+the implemented system recorded in `DESIGN.md` and `.impeccable/design.json`.
+The redesign review records checks from 320px through 1440px, four appearance
+choices and 56 passing tests. These are implementation checks, not certification.
 
 Backend evidence: [springboot-running-coach at
 ae083420](https://github.com/jordiadan/springboot-running-coach/tree/ae083420ab401378d86c2c3acb106146788e2559),
@@ -128,7 +136,7 @@ especially `docs/product/initiatives.md`,
 `docs/weekly-coach-generation-flow.md`, and controllers under
 `src/main/kotlin/com/runningcoach/infrastructure/identityaccess/web/currentuser/`.
 
-This record was checked against those sources on 2026-10-08. It describes
+Backend sources were checked on 2026-10-08. This record describes
 implemented code, not production deployment verification. Marketing sample
 metrics, session examples and setup-time claims are not validated customer
 results. Do not invent testimonials, performance claims, pricing or adoption
