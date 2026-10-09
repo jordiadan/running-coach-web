@@ -1,10 +1,7 @@
 # Workout Execution Feedback prototype
 
-Frontend prototype only. Weekly Plan uses readable names and one unboxed score
-per evaluated running row, under **Plan match**. Completed names wrap without
-strikethrough or ellipsis; day and planned minutes are secondary. Today done keeps
-its score beside the name, navigation and undo. API adapter and backend work
-remain stopped pending the user's visual approval.
+Frontend prototype only. Weekly Plan and Today use supplied evaluations; API
+adaptation and backend integration remain separate work before merge.
 
 ## Run the preview
 
@@ -12,61 +9,55 @@ remain stopped pending the user's visual approval.
 npm run dev -- --port 5175
 ```
 
-Visit `http://localhost:5175/dev/workout-feedback`, open Monday's run and use the
-selector: Good adherence, Different from plan, Partial evaluation, Insufficient
-evidence, No evaluation, Manually completed, Loading and Request error.
-**Try again** switches the error to an evaluated example. **Today** opens a seeded
-empty week; **Previous week** returns to the historical fixture. Visit
-`http://localhost:5175/dev/workout-feedback?today` for a completed Monday in the
-current week; **View workout feedback** opens its schedule details. All data is
-synthetic, cached locally, and requires no authentication or backend requests.
-The `import.meta.env.DEV` import guard excludes the route and mocks in production.
+Visit `http://localhost:5175/dev/workout-feedback` and open a workout. The selector
+covers evaluated, different, partial, insufficient, unavailable, manual, loading,
+error and manually completed with evaluation. Add `?today` to inspect Today.
+**Try again** switches the error example to an evaluation. All data is synthetic;
+the preview needs no authentication or backend requests. The DEV import guard
+excludes the route and mock fixtures from production.
 
 ## Presentation and boundary
 
-Opening a run adds its supplied summary and short advice in plain prose, keeping
-one score in the row. No duplicate score, interpretation heading, outcome groups,
-**Next time** label or bordered feedback card. One native
-**Compare with plan** disclosure contains planned/recorded duration, intensity and
-structure, supplied outcomes, score meaning, provider link and session notes.
-The score describes plan adherence, not fitness or race performance.
+Compact desktop rows place day and planned minutes beside the title; mobile
+keeps them below. Names wrap and remain readable after completion. Completion
+controls retain 44px targets. A single neutral score and proportional meter show
+plan adherence without assigning a grade or inventing thresholds. The score
+measures plan match, not fitness or race performance. Meter transitions respect
+reduced motion.
 
-Missing evidence never receives a score. Loading/error states support status and
-retry; unscored details retain supplied links and notes. Manual completion stays
-separate from matched activity and evaluation. Other modalities keep their source
-link in expanded details without run feedback. Uncompleted, unmatched runs receive
-no feedback.
+Opening a run shows supplied explanation and advice. Its provider link appears
+immediately, outside **Compare with plan** or **Session notes**. Today shows the
+provider link directly, independently of evaluation availability. Missing URLs
+remain plain source text; the frontend never invents activity URLs.
 
-`src/lib/workout-feedback.ts` holds supplied presentation values, not a server
-contract or domain calculations. Shorter mock prose preserves scores and outcomes;
-`insight` does not establish a backend field. API contracts, completion, matching
-and dependencies stay unchanged; integration needs separate contract review.
+One native comparison disclosure retains duration, intensity, structure, supplied
+outcomes, score meaning and session notes. Missing evidence receives no score;
+loading and retryable errors keep their existing behavior. **View workout feedback**
+appears on Today only for a valid supplied running evaluation, for either manual
+or automatic completion. It opens the matching workout. Completing a run alone
+never creates an evaluation.
 
-## Validation and limits
+`src/lib/workout-feedback.ts` remains a presentation model, not a server contract
+or scoring calculation. Existing score validation, matching, completion and API
+behavior are preserved. No new dependencies or backend requests are introduced.
 
-Fresh finish review: **SHIP at mock scope**, after fixing 320px comparison wrapping.
-The 28% / 35% / 37% table columns preserve “Continuous” there. This scoped verdict
-does not certify the whole application.
-Focused before/after captures are embedded as GitHub-hosted attachments in
-[PR #17](https://github.com/jordiadan/running-coach-web/pull/17): rejected baseline
-`6573f8f` versus the current Weekly Plan and Today, desktop/mobile, comparison,
-alternate feedback states and narrow comparison. Review media and capture
-metadata stay in temporary storage outside the repository.
+## Verification and limitations
 
-All eight states passed browser checks at 1440px, 390px and 320px without overflow,
-console errors or API requests. Keyboard row expansion (Enter/Space), native
-disclosure (Enter), retry and Today navigation passed; completed titles remained
-readable and expanded rows kept one score. Schedule completion targets are 44px;
-checked feedback body contrast meets 4.5:1. All 71 tests pass, including the added
-Strength regression. Lint: zero errors, nine baseline warnings. Build passes with
-baseline chunk/Browserslist warnings. TypeScript still has eight baseline errors,
-byte-identical to the earlier baseline; it does not fully pass. One manual
-three-target detector run reported legacy font-ramp advisories; truncated output
-does not establish a clean scan.
+The full suite passes 99 tests, including both completion sources, valid/absent/
+invalid evaluation gating, provider disclosure access and proportional scores at
+0, 48, 92 and 100. Lint reports zero errors and nine existing warnings; production
+build passes. TypeScript retains the same eight baseline errors, so it does not
+fully pass.
 
-The brief matches existing warm surfaces, green primary, DM Sans/tabular scores,
-serif headings, rounded rows and focus tokens. Provider links require an extra
-disclosure action for quieter rows. Default Today pending provider badge stays
-outside this revision. `DESIGN.md`, sidecar, theme tokens and global configuration
-remain preserved. Existing theme/sidecar drift, unset `buildPath` and global
-accessibility remain outside validation; mocks and the adapter remain limitations.
+Actual Chromium checks cover 1440px, 390px and 320px with both motion preferences,
+keyboard focus and activation, native comparison, retry and Today navigation.
+No horizontal overflow, page errors or fetch/XHR requests were observed. The
+fixture row measures 44px on desktop and 57.5px on mobile, versus 65.5px before.
+Long titles can increase height. Score numbers, explanations, theme tokens and
+matching logic remain authoritative; real-data and screen-reader validation are
+still outside this prototype.
+
+Fresh, inspected before/after screenshots are embedded in
+[PR #17](https://github.com/jordiadan/running-coach-web/pull/17). The baseline is
+`378afd7`, with the same synthetic fixture URLs and manual-evaluation example
+used on both sides. Captures and their metadata stay outside the repository.

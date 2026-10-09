@@ -28,6 +28,45 @@ vi.mock("@/lib/portal-api", async () => ({
 const session = workoutFeedbackScreen("evaluated").plan!.plan.sessions[0];
 
 describe("Workout execution feedback", () => {
+  it.each([0, 48, 92, 100])(
+    "shows score %s proportionally without assigning a quality category",
+    (score) => {
+      const feedback = {
+        ...feedbackExamples.evaluated.feedback,
+        score,
+      } as ExecutionFeedback;
+      const { container } = render(
+        <WorkoutExecutionScore feedback={feedback} />,
+      );
+      expect(
+        screen.getByLabelText(`Plan adherence: ${score} out of 100`),
+      ).toBeVisible();
+      expect(container.querySelector("[style]")).toHaveStyle({
+        width: `${score}%`,
+      });
+      expect(container.querySelector("[style]")).toHaveClass(
+        "motion-reduce:transition-none",
+      );
+    },
+  );
+
+  it("keeps the activity source outside the comparison disclosure", () => {
+    render(
+      <WorkoutExecutionFeedback
+        session={session}
+        feedback={feedbackExamples.evaluated.feedback}
+        activitySource={
+          <a href="https://intervals.icu/activities/demo-run">
+            View on Intervals
+          </a>
+        }
+      />,
+    );
+    const source = screen.getByRole("link", { name: "View on Intervals" });
+    expect(source).toBeVisible();
+    expect(source.closest("details")).toBeNull();
+    expect(screen.getByRole("table")).not.toBeVisible();
+  });
   it("explains supplied feedback without repeating the row score", () => {
     render(
       <WorkoutExecutionFeedback
@@ -175,7 +214,133 @@ describe("Workout execution feedback", () => {
 });
 
 describe("Weekly Plan feedback disclosure", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.spyOn(window, "scrollTo").mockImplementation(() => {});
+    Element.prototype.scrollIntoView = vi.fn();
+  });
+
+  function renderToday(manual: boolean, feedback?: ExecutionFeedback) {
+    const data = {
+      ...workoutFeedbackScreen(manual ? "manual" : "evaluated"),
+      todaySessionDay: "MON",
+    };
+    data.selectedWeekStartDate = data.todayWeekStartDate;
+    vi.mocked(getCurrentUserWeeklyCoachScreen).mockResolvedValue(
+      data as Awaited<ReturnType<typeof getCurrentUserWeeklyCoachScreen>>,
+    );
+    return render(
+      <QueryClientProvider
+        client={
+          new QueryClient({ defaultOptions: { queries: { retry: false } } })
+        }
+      >
+        <WeeklyPlanScreen
+          athleteId="demo"
+          targetWeekStartDate={data.selectedWeekStartDate}
+          isPreparing={false}
+          onRefresh={() => {}}
+          executionFeedbackByDay={{ MON: feedback }}
+        />
+      </QueryClientProvider>,
+    );
+  }
+
+  describe.each([true, false])("Today completion manual=%s", (manual) => {
+    it("opens feedback when a valid evaluation exists", async () => {
+      renderToday(manual, feedbackExamples.evaluated.feedback);
+      const action = await screen.findByRole("button", {
+        name: "View workout feedback",
+      });
+      fireEvent.click(action);
+      await waitFor(() =>
+        expect(
+          screen.getByRole("region", { name: "Workout feedback" }),
+        ).toBeVisible(),
+      );
+      expect(
+        screen.getByRole("button", {
+          name: "View details for Easy aerobic run",
+        }),
+      ).toHaveAttribute("aria-expanded", "true");
+    });
+
+    it.each([
+      undefined,
+      ...["unavailable", "insufficient", "loading", "error"].map(
+        (key) => feedbackExamples[key].feedback,
+      ),
+      ...[NaN, Infinity, -1, 101].map(
+        (score) =>
+          ({
+            ...feedbackExamples.evaluated.feedback,
+            score,
+          }) as ExecutionFeedback,
+      ),
+    ])(
+      "hides feedback action without a valid evaluation (%j)",
+      async (feedback) => {
+        renderToday(manual, feedback);
+        await screen.findByText("Today done");
+        expect(
+          screen.queryByRole("button", { name: "View workout feedback" }),
+        ).not.toBeInTheDocument();
+      },
+    );
+  });
+
+  it.each([
+    ["MON", "Intervals", "Easy aerobic run"],
+    ["WED", "Strava", "Controlled tempo"],
+  ])(
+    "exposes %s source after one workout disclosure",
+    async (_day, provider, title) => {
+      const data = workoutFeedbackScreen("evaluated");
+      vi.mocked(getCurrentUserWeeklyCoachScreen).mockResolvedValue(
+        data as Awaited<ReturnType<typeof getCurrentUserWeeklyCoachScreen>>,
+      );
+      render(
+        <QueryClientProvider
+          client={
+            new QueryClient({ defaultOptions: { queries: { retry: false } } })
+          }
+        >
+          <WeeklyPlanScreen
+            athleteId="demo"
+            targetWeekStartDate={data.selectedWeekStartDate}
+            isPreparing={false}
+            onRefresh={() => {}}
+            executionFeedbackByDay={{
+              MON: feedbackExamples.evaluated.feedback,
+            }}
+          />
+        </QueryClientProvider>,
+      );
+      fireEvent.click(
+        await screen.findByRole("button", {
+          name: `View details for ${title}`,
+        }),
+      );
+      const link = screen.getByRole("link", {
+        name: `View on ${provider} (opens in a new tab)`,
+      });
+      await waitFor(() => expect(link).toBeVisible());
+      expect(link.closest("details")).toBeNull();
+      expect(link).toHaveAttribute("target", "_blank");
+      expect(link).toHaveAttribute("rel", "noopener noreferrer");
+    },
+  );
+
+  it("exposes Today activity independently of evaluation availability", async () => {
+    renderToday(false, { status: "unavailable" });
+    const source = await screen.findByRole("link", {
+      name: "View on Intervals (opens in a new tab)",
+    });
+    await waitFor(() => expect(source).toBeVisible());
+    expect(
+      screen.queryByRole("button", { name: "View workout feedback" }),
+    ).not.toBeInTheDocument();
+  });
 
   it("keeps calendar rows compact and exposes feedback through an accessible disclosure", async () => {
     const data = workoutFeedbackScreen("evaluated");

@@ -125,7 +125,8 @@ export default function WorkoutExecutionFeedback({
           ) : null}
         </div>
       )}
-      {result || session.notes || activitySource ? (
+      {activitySource ? <div>{activitySource}</div> : null}
+      {result || session.notes ? (
         <details className="group mt-1">
           <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-sm text-xs font-medium text-foreground/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
             {result
@@ -187,7 +188,6 @@ export default function WorkoutExecutionFeedback({
                 </p>
               </>
             ) : null}
-            {activitySource ? <div>{activitySource}</div> : null}
             {session.notes ? (
               <div>
                 <h5 className="mb-1 font-medium text-foreground">

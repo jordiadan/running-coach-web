@@ -101,6 +101,12 @@ export const feedbackExamples: Record<
   error: { label: "Request error", feedback: { status: "error" } },
 };
 
+feedbackExamples.manual_evaluated = {
+  label: "Manually completed with evaluation",
+  manual: true,
+  feedback: feedbackExamples.evaluated.feedback,
+};
+
 export function workoutFeedbackScreen(
   example: string,
 ): CurrentUserWeeklyCoachScreen {
@@ -152,6 +158,7 @@ export function workoutFeedbackScreen(
               : {
                   activityId: "demo-run",
                   provider: "INTERVALS",
+                  activityUrl: "https://intervals.icu/activities/demo-run",
                   durationMinutes: duration,
                   distanceKm: example === "different" ? 5.2 : 8.2,
                 },
@@ -182,6 +189,7 @@ export function workoutFeedbackScreen(
             syncedActivity: {
               activityId: "demo-tempo",
               provider: "STRAVA",
+              activityUrl: "https://www.strava.com/activities/demo-tempo",
               durationMinutes: 51,
               distanceKm: 10.1,
             },
@@ -209,6 +217,7 @@ export function workoutFeedbackScreen(
             syncedActivity: {
               activityId: "demo-recovery",
               provider: "INTERVALS",
+              activityUrl: "https://intervals.icu/activities/demo-recovery",
               durationMinutes: 39,
               distanceKm: 8.1,
             },

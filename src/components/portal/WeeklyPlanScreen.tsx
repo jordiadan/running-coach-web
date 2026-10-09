@@ -704,8 +704,10 @@ function TodayDoneCard({
           ) : null}
         </div>
 
-        {canShowExecutionFeedback(session) ? (
-          <div className="mt-3">
+        <div className="mt-2 flex flex-wrap items-center gap-x-5">
+          <SyncedActivityLink session={session} quiet />
+          {canShowExecutionFeedback(session) &&
+          evaluatedExecutionFeedback(feedback) ? (
             <Button
               type="button"
               variant="ghost"
@@ -716,8 +718,8 @@ function TodayDoneCard({
               View workout feedback{" "}
               <ArrowRight aria-hidden="true" className="ml-2 h-3.5 w-3.5" />
             </Button>
-          </div>
-        ) : null}
+          ) : null}
+        </div>
 
         {upNext ? (
           <motion.button
@@ -1167,7 +1169,7 @@ function ScheduleList({
                   className={`group relative ${isRest && !isDone ? "opacity-60" : ""}`}
                 >
                   <div
-                    className={`relative flex items-center gap-3 rounded-xl py-3 pl-2 pr-3 transition-colors motion-reduce:transition-none ${
+                    className={`relative flex min-h-11 items-center gap-3 rounded-xl py-2 pl-2 pr-3 transition-colors motion-reduce:transition-none sm:py-1.5 ${
                       !isRest ? "cursor-pointer select-none" : ""
                     } ${
                       isToday
@@ -1244,11 +1246,11 @@ function ScheduleList({
                       </span>
                     </motion.button>
 
-                    <div className="pointer-events-none relative min-w-0 flex-1">
-                      <span className="block break-words text-sm font-medium text-foreground">
+                    <div className="pointer-events-none relative min-w-0 flex-1 sm:flex sm:flex-wrap sm:items-baseline sm:gap-x-3">
+                      <span className="block break-words text-sm font-medium leading-5 text-foreground">
                         {session.title}
                       </span>
-                      <span className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs leading-relaxed text-foreground/70">
+                      <span className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs leading-relaxed text-foreground/70 sm:mt-0">
                         <span className={isToday ? "text-primary" : ""}>
                           {shortDayLabel(session.day)}
                         </span>
