@@ -12,6 +12,38 @@ npm test
 npm run build
 ```
 
+## Caveman Ultra in Codex
+
+`AGENTS.md` instructs Codex to read and apply `ultracave` at session start,
+or the older `caveman` skill at level `ultra`. User overrides take precedence.
+This changes chat style only. Code, commands and literal errors stay exact;
+product text, documentation, commits and PR descriptions retain normal prose.
+Impeccable workflows remain unchanged.
+
+For the upstream Codex skill, install it if it is not already available:
+
+```sh
+npx skills add JuliusBrussee/caveman --skill ultracave -a codex -g
+```
+
+Check `/skills` in a new Codex session: installation makes a skill available,
+not necessarily active. This machine's Codex 0.162.0 `skills/list` returned an
+enabled `caveman` with an `ultra` level, but no `ultracave`; the
+[upstream](https://github.com/JuliusBrussee/caveman/blob/main/skills/ultracave/SKILL.md)
+provides the separate `ultracave` skill. Read the installed `SKILL.md` to verify
+its supported mode. Restart Codex if the skill or updated instructions do not
+appear. To invoke explicitly, use `$ultracave`, or `$caveman` with a request to
+use its `ultra` level on older installations.
+
+[Codex skills](https://learn.chatgpt.com/docs/build-skills) use explicit
+invocation or model selection by description;
+[AGENTS.md](https://learn.chatgpt.com/docs/agent-configuration/agents-md)
+supplies persistent project instructions. The automatic request here depends
+on Codex following those instructions and an enabled, installed skill; it is
+not a guaranteed runtime activation. Plain Codex has no documented
+`.caveman.json` activation mechanism, so this repo uses no Caveman config or
+extra hook. An already-running session may need to restart to load the rule.
+
 ## Impeccable in Codex
 
 Reuse the global skill at `~/.agents/skills/impeccable`; this setup was verified
