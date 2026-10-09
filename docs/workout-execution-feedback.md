@@ -47,10 +47,11 @@ and dependencies stay unchanged; integration needs separate contract review.
 Fresh finish review: **SHIP at mock scope**, after fixing 320px comparison wrapping.
 The 28% / 35% / 37% table columns preserve “Continuous” there. This scoped verdict
 does not certify the whole application.
-[Evidence](screenshots/workout-feedback/README.md) contains 45 actual PNGs with
-[verified hashes and provenance](screenshots/workout-feedback/provenance.json):
-rejected baseline `6573f8f` versus current Weekly Plan and Today, desktop/mobile,
-default prose, comparison, alternate states, row crops and narrow comparison.
+Focused before/after captures are embedded as GitHub-hosted attachments in
+[PR #17](https://github.com/jordiadan/running-coach-web/pull/17): rejected baseline
+`6573f8f` versus the current Weekly Plan and Today, desktop/mobile, comparison,
+alternate feedback states and narrow comparison. Review media and capture
+metadata stay in temporary storage outside the repository.
 
 All eight states passed browser checks at 1440px, 390px and 320px without overflow,
 console errors or API requests. Keyboard row expansion (Enter/Space), native
