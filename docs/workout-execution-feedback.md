@@ -18,12 +18,12 @@ excludes the route and mock fixtures from production.
 
 ## Presentation and boundary
 
-Compact desktop rows place day and planned minutes beside the title; mobile
-keeps them below. Names wrap and remain readable after completion. Completion
-controls retain 44px targets. A single neutral score and proportional meter show
-plan adherence without assigning a grade or inventing thresholds. The score
-measures plan match, not fitness or race performance. Meter transitions respect
-reduced motion.
+Compact desktop rows align day and planned minutes in consistent columns; mobile
+keeps them below the title. Names wrap and remain readable after completion.
+Completion controls retain 44px targets. A single neutral number shows the supplied
+plan-match score, without a duplicate meter, grade or invented threshold. The
+schedule names the score once; its meaning remains available within the comparison
+details. The score measures plan match, not fitness or race performance.
 
 Opening a run shows supplied explanation and advice. Its provider link appears
 immediately, outside **Compare with plan** or **Session notes**. Today shows the
@@ -44,12 +44,12 @@ behavior are preserved. No new dependencies or backend requests are introduced.
 ## Verification and limitations
 
 The full suite passes 99 tests, including both completion sources, valid/absent/
-invalid evaluation gating, provider disclosure access and proportional scores at
+invalid evaluation gating, provider disclosure access and single score displays at
 0, 48, 92 and 100. Lint reports zero errors and nine existing warnings; production
 build passes. TypeScript retains the same eight baseline errors, so it does not
 fully pass.
 
-Actual Chromium checks cover 1440px, 390px and 320px with both motion preferences,
+Actual Chromium checks cover 1440px, 390px and 320px with reduced motion,
 keyboard focus and activation, native comparison, retry and Today navigation.
 No horizontal overflow, page errors or fetch/XHR requests were observed. The
 fixture row measures 44px on desktop and 57.5px on mobile, versus 65.5px before.
@@ -59,5 +59,8 @@ still outside this prototype.
 
 Fresh, inspected before/after screenshots are embedded in
 [PR #17](https://github.com/jordiadan/running-coach-web/pull/17). The baseline is
-`378afd7`, with the same synthetic fixture URLs and manual-evaluation example
-used on both sides. Captures and their metadata stay outside the repository.
+`84f900b`, with identical synthetic fixtures on both sides. Captures and their
+metadata stay outside the repository. The latest refinement removes the duplicate
+meter, aligns desktop metadata even when rows have no evaluation, and gives
+comparison cells natural widths and explicit spacing. Today feedback keeps a
+readable primary color on hover.

@@ -21,7 +21,7 @@ OWN-WORLD: retain warm surfaces, restrained green primary, DM Sans, existing ser
 
 STORY: scan readable names and aligned scores, open a run, read what matched and one adjustment, optionally compare the evidence.
 
-FIRST VIEWPORT: consistent title-led schedule rows. Completion stays distinct; day and planned minutes are quiet secondary metadata; activity-source links appear after one workout expansion, outside the secondary comparison disclosure. One neutral score with a proportional meter sits at the right of the title; a single schedule-level Plan match label provides context. Names wrap when needed and remain readable after completion. Expanding keeps the row's score visible and adds a supplied explanation and one short actionable sentence; no repeated number, grouped dimensions or Next time heading. One Compare with plan disclosure holds evidence and notes. Today integrates the same unboxed score beside its readable title and exposes provider links directly. Its feedback action requires a valid supplied evaluation, independently of manual or automatic completion. Desktop rows align secondary metadata beside the title; mobile keeps it below.
+FIRST VIEWPORT: consistent title-led schedule rows. Completion stays distinct; day and planned minutes are quiet secondary metadata; activity-source links appear after one workout expansion, outside the secondary comparison disclosure. One neutral score number sits at the right of the title, without a duplicate meter; a single schedule-level Plan match label provides context. Names wrap when needed and remain readable after completion. Expanding keeps the row's score visible and adds a supplied explanation and one short actionable sentence; no repeated number, grouped dimensions or Next time heading. One Compare with plan disclosure holds evidence and notes. Today integrates the same unboxed score beside its readable title and exposes provider links directly. Its feedback action requires a valid supplied evaluation, independently of manual or automatic completion. Desktop day and duration columns align across rows, including rest and unscored sessions; mobile keeps them below the title. Comparison columns use content-driven widths and explicit spacing at narrow sizes.
 
 FORM: replace prior feedback scaffolding, retaining product foundations. Use supplied summary and a concise supplied insight without generating or duplicating advice. Keep dimension evidence in a semantic three-row table behind native details. Flatten expanded session styling into the schedule, avoid a nested feedback card. Preserve provider links and completion controls. Existing reveal transitions respect reduced motion; no decorative animation.
 
@@ -37,7 +37,7 @@ All 71 tests pass, including the Strength source-link regression. Lint: zero err
 
 See the focused GitHub-hosted attachments in [PR #17](https://github.com/jordiadan/running-coach-web/pull/17) for rejected `6573f8f` versus current Weekly Plan/Today, desktop/mobile, default prose, comparison, alternate states and 320px comparison. Review media and capture metadata stay in temporary storage outside the repository. Provider links intentionally require progressive disclosure; the default Today pending provider badge remains outside scope. Existing warm tokens, typography, rounded rows and focus treatment match the incumbent system; DESIGN.md, sidecar and global configuration remain preserved. Frontend mocks only; API adapter and backend remain stopped pending visual approval.
 
-## Four-requirement follow-up
+## Previous four-requirement follow-up
 
 The refinement implements compact workout rows, provider links outside secondary
 disclosures, neutral proportional scores without frontend thresholds, and Today
@@ -55,3 +55,17 @@ and manual-evaluation data; review media remains outside the repository.
 The final independent Impeccable critique awaits sub-agent permission required
 by the installed critique workflow. No fresh independent SHIP verdict is claimed.
 Backend integration and real screen-reader validation remain separate.
+
+## Minimal-information refinement
+
+The user explicitly prefers clean screens with minimal useful information and
+strong visual hierarchy. This refinement keeps one supplied numeric score,
+removes its duplicate meter, aligns desktop metadata, and separates comparison
+cells at 320px. No new score label, coaching copy, feature or backend behavior is
+introduced. Explanation and advice remain one expansion away; evidence and score
+meaning remain behind Compare with plan. Today feedback retains its primary color
+on hover for readable contrast.
+
+Scoped browser validation uses identical synthetic fixtures against 84f900b at
+1440px, 390px and 320px. Captures stay outside the repository and are embedded in
+PR #17. This is a manual refinement pass, not a fresh independent critique verdict.

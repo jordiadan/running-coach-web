@@ -712,7 +712,7 @@ function TodayDoneCard({
               type="button"
               variant="ghost"
               size="sm"
-              className="min-h-11 px-0 text-primary hover:bg-transparent hover:underline"
+              className="min-h-11 px-0 text-primary hover:bg-transparent hover:text-primary hover:underline"
               onClick={() => onJumpNext(session.day)}
             >
               View workout feedback{" "}
@@ -1109,17 +1109,19 @@ function ScheduleList({
   onToggleExpanded: (day: string) => void;
   setSessionRef: (day: string, element: HTMLDivElement | null) => void;
 }) {
+  const hasExecutionScores = sessions.some(
+    (session) =>
+      canShowExecutionFeedback(session) &&
+      evaluatedExecutionFeedback(executionFeedbackByDay?.[session.day]),
+  );
+
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between px-3">
         <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
           Schedule
         </span>
-        {sessions.some(
-          (session) =>
-            canShowExecutionFeedback(session) &&
-            evaluatedExecutionFeedback(executionFeedbackByDay?.[session.day]),
-        ) ? (
+        {hasExecutionScores ? (
           <span className="pr-6 text-xs text-foreground/70">Plan match</span>
         ) : null}
       </div>
@@ -1246,16 +1248,18 @@ function ScheduleList({
                       </span>
                     </motion.button>
 
-                    <div className="pointer-events-none relative min-w-0 flex-1 sm:flex sm:flex-wrap sm:items-baseline sm:gap-x-3">
-                      <span className="block break-words text-sm font-medium leading-5 text-foreground">
+                    <div className="pointer-events-none relative min-w-0 flex-1 sm:flex sm:items-baseline sm:gap-x-3">
+                      <span className="block min-w-0 break-words text-sm font-medium leading-5 text-foreground sm:flex-1">
                         {session.title}
                       </span>
-                      <span className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs leading-relaxed text-foreground/70 sm:mt-0">
-                        <span className={isToday ? "text-primary" : ""}>
+                      <span className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs leading-relaxed text-foreground/70 sm:mt-0 sm:w-32 sm:shrink-0">
+                        <span
+                          className={`sm:w-7 ${isToday ? "text-primary" : ""}`}
+                        >
                           {shortDayLabel(session.day)}
                         </span>
                         {session.durationMinutes > 0 ? (
-                          <span title="Planned duration">
+                          <span title="Planned duration" className="sm:w-12">
                             {session.durationMinutes} min
                           </span>
                         ) : null}
@@ -1264,9 +1268,13 @@ function ScheduleList({
                         ) : null}
                       </span>
                     </div>
-                    {feedback ? (
-                      <div className="pointer-events-none relative">
-                        <WorkoutExecutionScore feedback={feedback} />
+                    {hasExecutionScores ? (
+                      <div
+                        className={`pointer-events-none relative w-16 shrink-0 ${feedback ? "" : "hidden sm:block"}`}
+                      >
+                        {feedback ? (
+                          <WorkoutExecutionScore feedback={feedback} />
+                        ) : null}
                       </div>
                     ) : null}
                     {!isRest ? (
@@ -1280,7 +1288,12 @@ function ScheduleList({
                           className="h-3.5 w-3.5"
                         />
                       </motion.div>
-                    ) : null}
+                    ) : (
+                      <span
+                        aria-hidden="true"
+                        className="hidden w-3.5 shrink-0 sm:block"
+                      />
+                    )}
                   </div>
 
                   <AnimatePresence>

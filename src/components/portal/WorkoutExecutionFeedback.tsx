@@ -40,11 +40,11 @@ function DimensionRow({
     <tr className="border-t border-border">
       <th
         scope="row"
-        className="py-3 pr-1 text-left align-top text-sm font-medium"
+        className="py-3 pr-2 text-left align-top text-sm font-medium"
       >
         {name}
       </th>
-      <td className="break-words py-3 pr-1 align-top text-sm text-foreground/70">
+      <td className="break-words py-3 pr-2 align-top text-sm text-foreground/70">
         {dimension.planned ?? <span aria-label="Not available">—</span>}
       </td>
       <td className="break-words py-3 align-top">
@@ -143,14 +143,9 @@ export default function WorkoutExecutionFeedback({
             {result ? (
               <>
                 <table
-                  className="w-full table-fixed"
+                  className="w-full"
                   aria-label="Plan and recorded run comparison"
                 >
-                  <colgroup>
-                    <col className="w-[28%]" />
-                    <col className="w-[35%]" />
-                    <col className="w-[37%]" />
-                  </colgroup>
                   <thead>
                     <tr>
                       <th scope="col" className="pb-2 text-left">

@@ -29,7 +29,7 @@ const session = workoutFeedbackScreen("evaluated").plan!.plan.sessions[0];
 
 describe("Workout execution feedback", () => {
   it.each([0, 48, 92, 100])(
-    "shows score %s proportionally without assigning a quality category",
+    "shows supplied score %s once without a duplicate meter or quality category",
     (score) => {
       const feedback = {
         ...feedbackExamples.evaluated.feedback,
@@ -38,15 +38,12 @@ describe("Workout execution feedback", () => {
       const { container } = render(
         <WorkoutExecutionScore feedback={feedback} />,
       );
-      expect(
-        screen.getByLabelText(`Plan adherence: ${score} out of 100`),
-      ).toBeVisible();
-      expect(container.querySelector("[style]")).toHaveStyle({
-        width: `${score}%`,
-      });
-      expect(container.querySelector("[style]")).toHaveClass(
-        "motion-reduce:transition-none",
+      const scoreDisplay = screen.getByLabelText(
+        `Plan adherence: ${score} out of 100`,
       );
+      expect(scoreDisplay).toBeVisible();
+      expect(scoreDisplay).toHaveTextContent(`${score}/ 100`);
+      expect(container.querySelector('[aria-hidden="true"]')).toBeNull();
     },
   );
 
