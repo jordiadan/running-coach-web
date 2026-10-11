@@ -21,9 +21,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Manrope", "system-ui", "sans-serif"],
-        display: ['"Barlow Condensed"', "sans-serif"],
-        serif: ['"Barlow Condensed"', "sans-serif"],
+        sans: ["Figtree", "system-ui", "sans-serif"],
+        display: ['"Archivo Black"', "sans-serif"],
+        serif: ['"Archivo Black"', "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",

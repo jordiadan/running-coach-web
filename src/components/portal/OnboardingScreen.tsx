@@ -196,7 +196,7 @@ export default function OnboardingScreen({
       >
         {effectiveBootstrap.nextStep !== "prepare_weekly_plan" && (
           <div className="mb-7">
-            <h2 className="font-display text-3xl">{currentStep.title}</h2>
+            <h2 className="section-title">{currentStep.title}</h2>
             <p className="mt-2 text-sm leading-6 text-muted-foreground">
               {currentStep.subtitle}
             </p>

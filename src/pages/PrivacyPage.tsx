@@ -48,7 +48,9 @@ export default function PrivacyPage() {
               id="privacy-0"
               className="scroll-mt-8 border-b border-border pb-8 last:border-0"
             >
-              <h2 className="text-3xl font-display mb-3">What we collect</h2>
+              <h2 className="text-2xl font-sans font-bold mb-3">
+                What we collect
+              </h2>
               <p>
                 We collect the minimum information needed to generate your
                 training plan: your running goals, fitness level, available
@@ -61,7 +63,9 @@ export default function PrivacyPage() {
               id="privacy-1"
               className="scroll-mt-8 border-b border-border pb-8 last:border-0"
             >
-              <h2 className="text-3xl font-display mb-3">How we use it</h2>
+              <h2 className="text-2xl font-sans font-bold mb-3">
+                How we use it
+              </h2>
               <p>
                 Your data is used solely to generate and refine your weekly
                 running plan. We do not sell, share, or monetize your personal
@@ -73,7 +77,9 @@ export default function PrivacyPage() {
               id="privacy-2"
               className="scroll-mt-8 border-b border-border pb-8 last:border-0"
             >
-              <h2 className="text-3xl font-display mb-3">Data storage</h2>
+              <h2 className="text-2xl font-sans font-bold mb-3">
+                Data storage
+              </h2>
               <p>
                 Your information is stored securely and encrypted at rest. You
                 can request deletion of all your data at any time by contacting
@@ -85,7 +91,7 @@ export default function PrivacyPage() {
               id="privacy-3"
               className="scroll-mt-8 border-b border-border pb-8 last:border-0"
             >
-              <h2 className="text-3xl font-display mb-3">Cookies</h2>
+              <h2 className="text-2xl font-sans font-bold mb-3">Cookies</h2>
               <p>
                 We use only essential cookies required for authentication and
                 session management. No tracking or advertising cookies are used.
@@ -96,7 +102,7 @@ export default function PrivacyPage() {
               id="privacy-4"
               className="scroll-mt-8 border-b border-border pb-8 last:border-0"
             >
-              <h2 className="text-3xl font-display mb-3">Contact</h2>
+              <h2 className="text-2xl font-sans font-bold mb-3">Contact</h2>
               <p>
                 Questions about your privacy? Reach out at{" "}
                 <span className="text-primary">privacy@runningcoach.app</span>

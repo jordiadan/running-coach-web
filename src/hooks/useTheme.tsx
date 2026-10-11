@@ -9,10 +9,10 @@ import {
 export type ThemeId = "warm" | "dark" | "bright" | "forest";
 
 export const themes: { id: ThemeId; label: string }[] = [
-  { id: "warm", label: "Track · Light" },
-  { id: "dark", label: "Dark & Bold" },
-  { id: "bright", label: "Clean & Bright" },
-  { id: "forest", label: "Forest & Deep" },
+  { id: "warm", label: "Race Rhythm · Light" },
+  { id: "dark", label: "Night · Dark" },
+  { id: "bright", label: "Daylight · Bright" },
+  { id: "forest", label: "Trail · Forest" },
 ];
 
 const themeIds = themes.map((item) => item.id);

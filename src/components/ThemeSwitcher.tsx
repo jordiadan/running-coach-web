@@ -1,4 +1,4 @@
-import { Palette } from "lucide-react";
+import { Check, Palette } from "lucide-react";
 import { themes, useTheme } from "@/hooks/useTheme";
 import {
   DropdownMenu,
@@ -11,10 +11,10 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const themePreviewColors: Record<string, string> = {
-  warm: "bg-[hsl(225,66%,43%)]",
-  dark: "bg-[hsl(15,90%,55%)]",
-  bright: "bg-[hsl(220,85%,55%)]",
-  forest: "bg-[hsl(145,50%,45%)]",
+  warm: "bg-[hsl(330,24%,16%)]",
+  dark: "bg-[hsl(10,95%,74%)]",
+  bright: "bg-[hsl(330,12%,96%)]",
+  forest: "bg-[hsl(158,17%,18%)]",
 };
 
 export default function ThemeSwitcher() {
@@ -32,7 +32,7 @@ export default function ThemeSwitcher() {
           <Palette className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
+      <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuRadioGroup
           value={theme}
           onValueChange={(value) => setTheme(value as typeof theme)}
@@ -48,13 +48,16 @@ export default function ThemeSwitcher() {
             >
               <span
                 className={cn(
-                  "w-3 h-3 rounded-full shrink-0",
+                  "w-3 h-3 rounded-full shrink-0 border border-input",
                   themePreviewColors[t.id],
                 )}
               />
               {t.label}
               {theme === t.id && (
-                <span className="ml-auto text-xs text-primary">✓</span>
+                <Check
+                  className="ml-auto h-3 w-3 text-primary"
+                  aria-hidden="true"
+                />
               )}
             </DropdownMenuRadioItem>
           ))}

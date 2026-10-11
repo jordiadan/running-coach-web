@@ -1,155 +1,166 @@
 ---
 name: Running Coach
-description: "Athletics wayfinding for a clear running week."
+description: "Race Rhythm: athletic energy, clear daily training."
 colors:
-  brand-ink: "hsl(224 48% 16%)"
-  brand-paper: "hsl(220 30% 96%)"
-  brand-lime: "hsl(70 86% 70%)"
-  background: "hsl(220 24% 97%)"
-  foreground: "hsl(224 38% 16%)"
+  brand-ink: "hsl(330 28% 12%)"
+  brand-paper: "hsl(330 12% 96%)"
+  brand-signal: "hsl(8 85% 57%)"
+  background: "hsl(330 12% 96%)"
+  foreground: "hsl(330 24% 16%)"
   card: "hsl(0 0% 100%)"
-  card-foreground: "hsl(224 38% 16%)"
+  card-foreground: "hsl(330 24% 16%)"
   popover: "hsl(0 0% 100%)"
-  popover-foreground: "hsl(224 38% 16%)"
-  primary: "hsl(225 66% 43%)"
+  popover-foreground: "hsl(330 24% 16%)"
+  primary: "hsl(330 24% 16%)"
   primary-foreground: "hsl(0 0% 100%)"
-  secondary: "hsl(222 25% 92%)"
-  secondary-foreground: "hsl(224 38% 22%)"
-  muted: "hsl(220 22% 94%)"
-  muted-foreground: "hsl(222 14% 40%)"
-  accent: "hsl(168 62% 27%)"
+  secondary: "hsl(330 10% 90%)"
+  secondary-foreground: "hsl(330 24% 16%)"
+  muted: "hsl(330 10% 93%)"
+  muted-foreground: "hsl(330 9% 39%)"
+  accent: "hsl(160 43% 28%)"
   accent-foreground: "hsl(0 0% 100%)"
-  destructive: "hsl(0 68% 43%)"
+  destructive: "hsl(5 72% 39%)"
   destructive-foreground: "hsl(0 0% 100%)"
-  border: "hsl(222 20% 85%)"
-  input: "hsl(222 20% 55%)"
-  ring: "hsl(225 66% 43%)"
+  border: "hsl(330 10% 80%)"
+  input: "hsl(330 9% 52%)"
+  ring: "hsl(8 76% 38%)"
   surface-elevated: "hsl(0 0% 100%)"
-  text-subtle: "hsl(222 14% 40%)"
-  divider: "hsl(222 20% 85%)"
-  sidebar-background: "hsl(224 48% 16%)"
-  sidebar-foreground: "hsl(220 30% 96%)"
-  sidebar-primary: "hsl(70 86% 70%)"
-  sidebar-primary-foreground: "hsl(224 48% 16%)"
-  sidebar-accent: "hsl(224 32% 25%)"
-  sidebar-accent-foreground: "hsl(0 0% 100%)"
-  sidebar-border: "hsl(224 28% 31%)"
-  sidebar-ring: "hsl(70 86% 70%)"
-  dark-background: "hsl(0 0% 6%)"
-  dark-foreground: "hsl(0 0% 95%)"
-  dark-card: "hsl(0 0% 9%)"
-  dark-card-foreground: "hsl(0 0% 95%)"
-  dark-popover: "hsl(0 0% 8%)"
-  dark-popover-foreground: "hsl(0 0% 95%)"
-  dark-primary: "hsl(15 90% 55%)"
-  dark-primary-foreground: "hsl(0 0% 6%)"
-  dark-secondary: "hsl(0 0% 14%)"
-  dark-secondary-foreground: "hsl(0 0% 90%)"
-  dark-muted: "hsl(0 0% 14%)"
-  dark-muted-foreground: "hsl(0 0% 70%)"
-  dark-accent: "hsl(15 90% 55%)"
-  dark-accent-foreground: "hsl(0 0% 6%)"
-  dark-destructive: "hsl(0 72% 51%)"
-  dark-destructive-foreground: "hsl(0 0% 100%)"
-  dark-border: "hsl(0 0% 16%)"
-  dark-input: "hsl(0 0% 48%)"
-  dark-ring: "hsl(15 90% 55%)"
-  dark-surface-elevated: "hsl(0 0% 10%)"
-  dark-text-subtle: "hsl(0 0% 70%)"
-  dark-divider: "hsl(0 0% 16%)"
-  dark-sidebar-background: "hsl(0 0% 8%)"
-  dark-sidebar-foreground: "hsl(0 0% 95%)"
-  dark-sidebar-primary: "hsl(15 90% 55%)"
-  dark-sidebar-primary-foreground: "hsl(0 0% 6%)"
-  dark-sidebar-accent: "hsl(0 0% 12%)"
-  dark-sidebar-accent-foreground: "hsl(0 0% 95%)"
-  dark-sidebar-border: "hsl(0 0% 16%)"
-  dark-sidebar-ring: "hsl(15 90% 55%)"
+  text-subtle: "hsl(330 9% 39%)"
+  divider: "hsl(330 10% 80%)"
+  sidebar-background: "hsl(330 12% 96%)"
+  sidebar-foreground: "hsl(330 24% 16%)"
+  sidebar-primary: "hsl(330 24% 16%)"
+  sidebar-primary-foreground: "hsl(0 0% 100%)"
+  sidebar-accent: "hsl(330 10% 90%)"
+  sidebar-accent-foreground: "hsl(330 24% 16%)"
+  sidebar-border: "hsl(330 10% 80%)"
+  sidebar-ring: "hsl(8 76% 38%)"
+  session-surface: "hsl(10 72% 93%)"
+  chart-bar: "hsl(330 9% 56%)"
+  chart-active: "hsl(8 76% 43%)"
+  dark-background: "hsl(330 18% 10%)"
+  dark-foreground: "hsl(330 14% 94%)"
+  dark-card: "hsl(330 16% 14%)"
+  dark-card-foreground: "hsl(330 14% 94%)"
+  dark-popover: "hsl(330 16% 14%)"
+  dark-popover-foreground: "hsl(330 14% 94%)"
+  dark-primary: "hsl(10 95% 74%)"
+  dark-primary-foreground: "hsl(330 24% 12%)"
+  dark-secondary: "hsl(330 12% 22%)"
+  dark-secondary-foreground: "hsl(330 14% 94%)"
+  dark-muted: "hsl(330 12% 18%)"
+  dark-muted-foreground: "hsl(330 10% 73%)"
+  dark-accent: "hsl(153 38% 67%)"
+  dark-accent-foreground: "hsl(330 24% 12%)"
+  dark-destructive: "hsl(4 90% 77%)"
+  dark-destructive-foreground: "hsl(330 24% 12%)"
+  dark-border: "hsl(330 10% 31%)"
+  dark-input: "hsl(330 8% 56%)"
+  dark-ring: "hsl(10 95% 74%)"
+  dark-surface-elevated: "hsl(330 16% 14%)"
+  dark-text-subtle: "hsl(330 10% 73%)"
+  dark-divider: "hsl(330 10% 31%)"
+  dark-sidebar-background: "hsl(330 18% 10%)"
+  dark-sidebar-foreground: "hsl(330 14% 94%)"
+  dark-sidebar-primary: "hsl(10 95% 74%)"
+  dark-sidebar-primary-foreground: "hsl(330 24% 12%)"
+  dark-sidebar-accent: "hsl(330 12% 22%)"
+  dark-sidebar-accent-foreground: "hsl(330 14% 94%)"
+  dark-sidebar-border: "hsl(330 10% 31%)"
+  dark-sidebar-ring: "hsl(10 95% 74%)"
+  dark-session-surface: "hsl(330 19% 19%)"
+  dark-chart-bar: "hsl(330 10% 59%)"
+  dark-chart-active: "hsl(10 95% 74%)"
   bright-background: "hsl(0 0% 100%)"
-  bright-foreground: "hsl(220 20% 10%)"
-  bright-card: "hsl(220 20% 97%)"
-  bright-card-foreground: "hsl(220 20% 10%)"
-  bright-popover: "hsl(0 0% 100%)"
-  bright-popover-foreground: "hsl(220 20% 10%)"
-  bright-primary: "hsl(220 80% 43%)"
+  bright-foreground: "hsl(330 24% 16%)"
+  bright-card: "hsl(330 10% 98%)"
+  bright-card-foreground: "hsl(330 24% 16%)"
+  bright-popover: "hsl(330 10% 98%)"
+  bright-popover-foreground: "hsl(330 24% 16%)"
+  bright-primary: "hsl(330 24% 16%)"
   bright-primary-foreground: "hsl(0 0% 100%)"
-  bright-secondary: "hsl(220 15% 94%)"
-  bright-secondary-foreground: "hsl(220 20% 10%)"
-  bright-muted: "hsl(220 15% 95%)"
-  bright-muted-foreground: "hsl(220 10% 40%)"
-  bright-accent: "hsl(350 70% 42%)"
+  bright-secondary: "hsl(330 10% 90%)"
+  bright-secondary-foreground: "hsl(330 24% 16%)"
+  bright-muted: "hsl(330 10% 93%)"
+  bright-muted-foreground: "hsl(330 9% 39%)"
+  bright-accent: "hsl(160 43% 28%)"
   bright-accent-foreground: "hsl(0 0% 100%)"
-  bright-destructive: "hsl(0 72% 51%)"
+  bright-destructive: "hsl(5 72% 39%)"
   bright-destructive-foreground: "hsl(0 0% 100%)"
-  bright-border: "hsl(220 15% 90%)"
-  bright-input: "hsl(220 15% 55%)"
-  bright-ring: "hsl(220 80% 43%)"
-  bright-surface-elevated: "hsl(0 0% 100%)"
-  bright-text-subtle: "hsl(220 10% 40%)"
-  bright-divider: "hsl(220 15% 92%)"
-  bright-sidebar-background: "hsl(220 20% 97%)"
-  bright-sidebar-foreground: "hsl(220 20% 10%)"
-  bright-sidebar-primary: "hsl(220 80% 43%)"
+  bright-border: "hsl(330 10% 80%)"
+  bright-input: "hsl(330 9% 52%)"
+  bright-ring: "hsl(8 76% 38%)"
+  bright-surface-elevated: "hsl(330 10% 98%)"
+  bright-text-subtle: "hsl(330 9% 39%)"
+  bright-divider: "hsl(330 10% 80%)"
+  bright-sidebar-background: "hsl(0 0% 100%)"
+  bright-sidebar-foreground: "hsl(330 24% 16%)"
+  bright-sidebar-primary: "hsl(330 24% 16%)"
   bright-sidebar-primary-foreground: "hsl(0 0% 100%)"
-  bright-sidebar-accent: "hsl(220 15% 94%)"
-  bright-sidebar-accent-foreground: "hsl(220 20% 10%)"
-  bright-sidebar-border: "hsl(220 15% 90%)"
-  bright-sidebar-ring: "hsl(220 80% 43%)"
-  forest-background: "hsl(150 15% 8%)"
-  forest-foreground: "hsl(140 10% 90%)"
-  forest-card: "hsl(150 12% 11%)"
-  forest-card-foreground: "hsl(140 10% 90%)"
-  forest-popover: "hsl(150 15% 8%)"
-  forest-popover-foreground: "hsl(140 10% 90%)"
-  forest-primary: "hsl(145 50% 45%)"
-  forest-primary-foreground: "hsl(150 15% 5%)"
-  forest-secondary: "hsl(150 10% 16%)"
-  forest-secondary-foreground: "hsl(140 10% 85%)"
-  forest-muted: "hsl(150 8% 16%)"
-  forest-muted-foreground: "hsl(140 8% 68%)"
-  forest-accent: "hsl(35 70% 55%)"
-  forest-accent-foreground: "hsl(150 15% 5%)"
-  forest-destructive: "hsl(0 70% 65%)"
-  forest-destructive-foreground: "hsl(140 10% 90%)"
-  forest-border: "hsl(150 8% 18%)"
-  forest-input: "hsl(150 8% 48%)"
-  forest-ring: "hsl(145 50% 45%)"
-  forest-surface-elevated: "hsl(150 12% 10%)"
-  forest-text-subtle: "hsl(140 8% 68%)"
-  forest-divider: "hsl(150 8% 18%)"
-  forest-sidebar-background: "hsl(150 12% 10%)"
-  forest-sidebar-foreground: "hsl(140 10% 90%)"
-  forest-sidebar-primary: "hsl(145 50% 45%)"
-  forest-sidebar-primary-foreground: "hsl(150 15% 5%)"
-  forest-sidebar-accent: "hsl(150 10% 14%)"
-  forest-sidebar-accent-foreground: "hsl(140 10% 90%)"
-  forest-sidebar-border: "hsl(150 8% 18%)"
-  forest-sidebar-ring: "hsl(145 50% 45%)"
+  bright-sidebar-accent: "hsl(330 10% 90%)"
+  bright-sidebar-accent-foreground: "hsl(330 24% 16%)"
+  bright-sidebar-border: "hsl(330 10% 80%)"
+  bright-sidebar-ring: "hsl(8 76% 38%)"
+  bright-session-surface: "hsl(10 72% 93%)"
+  bright-chart-bar: "hsl(330 9% 56%)"
+  bright-chart-active: "hsl(8 76% 43%)"
+  forest-background: "hsl(158 17% 10%)"
+  forest-foreground: "hsl(150 12% 94%)"
+  forest-card: "hsl(158 14% 14%)"
+  forest-card-foreground: "hsl(150 12% 94%)"
+  forest-popover: "hsl(158 14% 14%)"
+  forest-popover-foreground: "hsl(150 12% 94%)"
+  forest-primary: "hsl(22 85% 76%)"
+  forest-primary-foreground: "hsl(158 25% 10%)"
+  forest-secondary: "hsl(158 12% 22%)"
+  forest-secondary-foreground: "hsl(150 12% 94%)"
+  forest-muted: "hsl(158 12% 18%)"
+  forest-muted-foreground: "hsl(150 10% 72%)"
+  forest-accent: "hsl(150 40% 70%)"
+  forest-accent-foreground: "hsl(158 25% 10%)"
+  forest-destructive: "hsl(4 90% 77%)"
+  forest-destructive-foreground: "hsl(158 25% 10%)"
+  forest-border: "hsl(158 10% 31%)"
+  forest-input: "hsl(158 8% 56%)"
+  forest-ring: "hsl(22 85% 76%)"
+  forest-surface-elevated: "hsl(158 14% 14%)"
+  forest-text-subtle: "hsl(150 10% 72%)"
+  forest-divider: "hsl(158 10% 31%)"
+  forest-sidebar-background: "hsl(158 17% 10%)"
+  forest-sidebar-foreground: "hsl(150 12% 94%)"
+  forest-sidebar-primary: "hsl(22 85% 76%)"
+  forest-sidebar-primary-foreground: "hsl(158 25% 10%)"
+  forest-sidebar-accent: "hsl(158 12% 22%)"
+  forest-sidebar-accent-foreground: "hsl(150 12% 94%)"
+  forest-sidebar-border: "hsl(158 10% 31%)"
+  forest-sidebar-ring: "hsl(22 85% 76%)"
+  forest-session-surface: "hsl(158 17% 18%)"
+  forest-chart-bar: "hsl(150 10% 58%)"
+  forest-chart-active: "hsl(22 85% 76%)"
 typography:
   display:
-    fontFamily: "Barlow Condensed, sans-serif"
-    fontSize: "3.75rem"
-    fontWeight: 600
-    lineHeight: 0.98
-    letterSpacing: "-0.015em"
+    fontFamily: "Archivo Black, sans-serif"
+    fontSize: "clamp(2.6rem, 7vw, 6rem)"
+    fontWeight: 400
+    lineHeight: 1.02
+    letterSpacing: "-0.04em"
   headline:
-    fontFamily: "Barlow Condensed, sans-serif"
-    fontSize: "2.25rem"
-    fontWeight: 600
-    lineHeight: 1
-    letterSpacing: "-0.015em"
-  title:
-    fontFamily: "Barlow Condensed, sans-serif"
-    fontSize: "1.5rem"
-    fontWeight: 600
+    fontFamily: "Archivo Black, sans-serif"
+    fontSize: "1.875rem"
+    fontWeight: 400
     lineHeight: 1.25
     letterSpacing: "-0.015em"
+  title:
+    fontFamily: "Figtree, system-ui, sans-serif"
+    fontSize: "1.25rem"
+    fontWeight: 700
+    lineHeight: 1.25
   body:
-    fontFamily: "Manrope, system-ui, sans-serif"
+    fontFamily: "Figtree, system-ui, sans-serif"
     fontSize: "1rem"
     lineHeight: 1.5
   label:
-    fontFamily: "Manrope, system-ui, sans-serif"
+    fontFamily: "Figtree, system-ui, sans-serif"
     fontSize: "0.875rem"
     fontWeight: 500
     lineHeight: "1.25rem"
@@ -231,9 +242,9 @@ components:
     padding: "8px 12px"
     height: "48px"
   navigation-item:
-    backgroundColor: "{colors.sidebar-primary}"
-    textColor: "{colors.sidebar-primary-foreground}"
-    rounded: "{rounded.lg}"
+    backgroundColor: "{colors.primary}"
+    textColor: "{colors.primary-foreground}"
+    rounded: "{rounded.md}"
     padding: "12px 16px"
   today-tag:
     backgroundColor: "{colors.primary}"
@@ -250,210 +261,175 @@ components:
 
 ## Overview
 
-**Creative North Star: "Athletics wayfinding"**
+**Creative North Star: "Race Rhythm"**
 
-A training companion with the clarity of athletics wayfinding. Condensed headings,
-legible reading text and clear surface boundaries put the next action within reach.
-Ink-blue brand fields and restrained citron establish the public identity; semantic
-colors keep the working interface consistent across four appearance choices.
+Race Rhythm brings the energy of a running campaign into a precise daily training
+companion. Broad, weighty display typography and vermilion fields establish the
+public identity. Figtree, open schedule rows and measured color keep the working
+interface calm and readable.
 
-The portal serves an Operate mode: scan today, inspect the schedule and record
-completion. The landing serves Persuade mode through a labeled illustrative week
-and the real setup sequence. Privacy serves Read mode with a section index and
-quiet text column. These modes share primitives without sharing one page layout.
+The signature seven-day chart expresses the actual distribution of planned
+minutes. The same visual language connects an explicitly illustrative landing
+example to the athlete's own week. Photography conveys the physical experience
+of running; it does not stand in for evidence of customer outcomes.
 
 **Key Characteristics:**
 
-- Condensed athletic headings with calm, legible body text.
-- Ink-blue brand fields, cool pale surfaces and cobalt selection in the default theme.
-- Flat bordered work surfaces and clearly labeled interactive states.
-- A complete weekly schedule with recorded activity distinct from planned work.
+- Athletic poster typography paired with clear operational text.
+- Vermilion, deep plum and pale blush, with semantic appearance variants.
+- Open horizontal composition, ruled schedules and square session fields.
+- Planned-minute bars with labeled recovery, strength and completion states.
 
-This record replaces the previous visual system under the authorized redesign.
-Code is the visual authority: `src/index.css`, `tailwind.config.ts`, shared
-controls, page components and portal screens. The scoped direction contract is
-`.impeccable/surfaces/src-pages-portalpage-tsx.md`; product facts remain in
-`PRODUCT.md`. This record does not establish market positioning or a global
-Impeccable construction preference.
+This record replaces the incumbent Athletics wayfinding system under the explicitly
+authorized identity redesign. Code remains authoritative: `src/index.css`,
+`tailwind.config.ts` and rendered components. The scoped exploration and rationale
+live in `.impeccable/surfaces/src-pages-portalpage-tsx.md`; product facts remain in
+`PRODUCT.md`. No global Impeccable construction preference is established.
 
 ## Colors
 
-The default palette uses cool pale ground, white work surfaces, ink text, cobalt
-actions and green supporting states. Frontmatter preserves the source HSL values.
-Unprefixed semantic tokens describe Track · Light; `dark-`, `bright-` and `forest-`
-prefixes capture the corresponding CSS theme overrides. Runtime components use
-semantic CSS variables, not those documentation prefixes.
+Vermilion creates energy, deep plum anchors the identity and pale blush marks the
+current session. The public campaign uses fixed `brand-signal`, `brand-ink` and
+`brand-paper` roles across appearance choices. Operational content uses semantic
+theme pairs. Unprefixed frontmatter tokens describe the default; `dark-`, `bright-`
+and `forest-` document the CSS overrides, not runtime variable names.
 
-### Primary and supporting colors
+- **Primary:** plum actions on light surfaces; salmon or apricot on dark themes.
+- **Secondary:** quiet tonal interaction surfaces; green `accent` marks completion.
+- **Chart:** muted bars show planned duration; `chart-active` identifies today or
+  selection. `session-surface` connects the selected work to its detail panel.
+- **Neutral:** `background` is the page ground; `card` and `popover` separate
+  contained content. `input` is stronger than decorative `border` and `divider`.
+- **Destructive:** errors retain explicit supporting text and retry actions.
 
-- **Cobalt (`primary`, `ring`):** default primary actions, selected days and focus.
-- **Training green (`accent`):** completion and supporting training states; always
-  paired with a label or icon where meaning matters.
-- **Ink, paper and citron (`brand-ink`, `brand-paper`, `brand-lime`):** fixed public
-  brand fields and inverse brand marks. They remain stable across appearance choices.
-- **Destructive:** errors and destructive actions, with explicit supporting copy.
+| Label               | Stored ID / root class    | Character                                           |
+| ------------------- | ------------------------- | --------------------------------------------------- |
+| Race Rhythm · Light | `warm` / `theme-warm`     | Pale blush ground, plum actions, track-red emphasis |
+| Night · Dark        | `dark` / `theme-dark`     | Aubergine ground and salmon actions                 |
+| Daylight · Bright   | `bright` / `theme-bright` | White ground and plum actions                       |
+| Trail · Forest      | `forest` / `theme-forest` | Pine ground and apricot actions                     |
 
-### Neutral and navigation roles
-
-`background` is the page ground; `card` and `popover` are content surfaces.
-`foreground` and their paired foreground roles carry readable content.
-`muted-foreground` and `text-subtle` carry secondary text. `input` is intentionally
-stronger than decorative `border` and `divider`. Sidebar roles belong to portal
-navigation; do not substitute main-content colors for them.
-
-### Appearance compatibility
-
-| Label          | Stored ID / root class    | Character                                  |
-| -------------- | ------------------------- | ------------------------------------------ |
-| Track · Light  | `warm` / `theme-warm`     | Cool pale ground, cobalt, ink-blue rail    |
-| Dark & Bold    | `dark` / `theme-dark`     | Near-black ground and orange accent        |
-| Clean & Bright | `bright` / `theme-bright` | White ground, blue and rose accents        |
-| Forest & Deep  | `forest` / `theme-forest` | Deep green ground, green and amber accents |
-
-`rc-theme` remains the local-storage key. An absent or invalid value defaults to
-`warm`; the historical ID does not imply a warm palette. Dark and Forest add the
-`dark` class and dark native color scheme. Theme choices do not change routes,
-content hierarchy or the selected training source.
+`rc-theme` and all stored IDs remain compatible. An absent or invalid value defaults
+to `warm`; Dark and Forest retain a dark native color scheme.
 
 **The Semantic Pair Rule.** Use a surface's foreground role with that surface;
-check actual text and control states across all four themes.
+verify text, focus and controls across all four themes. Labels and icons accompany
+meaningful color states.
 
 ## Typography
 
-**Display font:** Barlow Condensed, sans-serif, self-hosted at weights 600 and 700.
-**Body font:** Manrope, system-ui, sans-serif, self-hosted variable weights 200–800.
-The WOFF2 files and separate font licenses live in `public/fonts/`; all faces use
-`font-display: swap`. Tailwind's legacy `font-serif` alias now resolves to Barlow
-Condensed for compatibility; it is not a second type direction.
+**Display:** Archivo Black, sans-serif, weight 400. **Body:** Figtree, system-ui,
+sans-serif, variable weights 300–900. Both are self-hosted TrueType faces with
+`font-display: swap`; the font files and OFL licenses live in `public/fonts/`.
+Figtree is preloaded. The legacy Tailwind `font-serif` alias resolves to Archivo
+Black for compatibility, not to an additional typographic direction.
 
-- **Landing display:** 60px, 72px from sm, 96px from lg; weight 600, line-height
-  0.98. This large treatment belongs to the public hero.
-- **Page heading:** `.page-title`, 36px then 48px from sm; weight 600, line-height 1.
-- **Section heading:** `.section-title`, 24px, weight 600, line-height 1.25.
-  Some public sections use 48–60px, and onboarding subsection titles use 30px.
-- **Body:** 16px by default; portal copy commonly uses 14px with 20px, 24px or
-  relaxed leading. Public supporting prose often uses 28px leading.
-- **Labels and measures:** 12–14px Manrope; 500–600 weight for emphasis. Session
-  measures use tabular numbers. Operational badges can use uppercase; section
-  titles use real headings instead of decorative eyebrows.
+- Campaign display scales to 96px. Below 640px it uses
+  `clamp(2.25rem, 10.7vw, 4rem)` and 1.06 line height.
+- Page titles use Archivo Black at 30px, increasing to 36px at 640px.
+- Section titles use Figtree 20px/700; the selected workout leads at 32px/800,
+  reducing to 28px on mobile. Public section display scales from 32px to 52px.
+- Body copy defaults to 16px; compact portal copy is commonly 14px. Public
+  supporting copy uses generous 1.6–1.8 leading and intentional reading widths.
+- Labels and measures use Figtree. Duration labels use tabular numbers; chart
+  state labels are secondary to readable day names and minute values.
 
-Global h1–h3 use balanced wrapping, weight 600 and -0.015em tracking. There is no
-universal character-count width constraint: reading widths come from the surface.
+Global headings use balanced wrapping and -0.015em tracking; the campaign headline
+uses tighter -0.04em tracking. Status follows the workout title instead of becoming
+a decorative eyebrow.
 
 ## Layout
 
-The minimum supported CSS viewport is 320px. Tailwind breakpoints are sm 640px,
-md 768px, lg 1024px, xl 1280px and 2xl 1536px. The separate configured container
-width at 2xl is 1400px; it is not a breakpoint.
+The minimum supported CSS viewport is 320px. Tailwind breakpoints remain 640, 768,
+1024, 1280 and 1536px. Public and portal shells use an 80rem maximum with 20px
+horizontal padding, increasing to 32px at sm and 48px at lg.
 
-Public shells use max-width 80rem with 20px horizontal padding, 32px from sm and
-48px from lg. The landing becomes a split hero at lg; its seven-day illustrative
-plan and three-step setup are explanatory content, not live account data.
-Sign-in has one main action in a 24rem column; its photo/brand panel appears at lg.
-Privacy adds a 14rem section-index column at md and keeps its article within 42rem.
+The landing opens with a full-width campaign field and headline, then panoramic
+track photography with an adjacent plum note. Below 640px these stack, keeping
+the primary action before the image. The illustrative week, setup sequence and
+trust information have distinct compositions rather than a repeated card grid.
+Login keeps one Google action in a 24rem column; the campaign panel appears at lg.
+Privacy retains its quiet reading column and section index.
 
-The ready portal uses a fixed 15rem rail from lg and an 80rem content maximum.
-Content padding is 16px, 32px from sm and 40px from lg. Below lg, branding sits
-above content and three fixed bottom navigation items include safe-area padding;
-112px bottom content padding keeps the final content clear. The weekly schedule
-and context become two columns at xl, with an 18rem context column. Before that,
-today precedes the schedule, then context. Profile and onboarding use 48rem maxima.
-
-Spacing follows Tailwind's existing scale. Bordered form groups use 20px padding,
-28px from sm. Repeated schedule rows share one surface and dividers. Connection
-choices use their own surfaces without an enclosing onboarding card.
+The portal uses a horizontal 92px masthead. From 1024px the weekly work and context
+form two columns with an 18rem context column and 48px gap. On smaller screens,
+today precedes the schedule and context; fixed bottom navigation includes safe-area
+padding and 112px content clearance. Profile and onboarding retain 48rem maxima.
+Profile groups are open ruled sections, not stacked cards.
 
 ## Elevation & Depth
 
-Tonal separation and borders establish most depth. `.surface` is flat at rest;
-base library Card retains Tailwind `shadow-sm` (`0 1px 2px 0 rgb(0 0 0 / 0.05)`).
-Dialogs and popovers retain the existing Radix/shadcn elevation. An undefined
-`shadow-card` class remains in older state containers; it contributes no custom
-shadow and is not a design token.
-
-Motion supports state changes: body colors transition over 0.3s; portal tab
-opacity changes take 0.12s; profile goal highlighting takes 0.45s. Some retained
-weekly context/progress elements use short entrance and width animations.
-`MotionConfig reducedMotion="user"` suppresses Framer Motion transforms/layout
-motion when requested; opacity can remain. The global reduced-motion query limits
-CSS animation/transition duration to 0.01ms, one animation iteration, and automatic
-scrolling. Targeted profile and week interactions also use `useReducedMotion`.
-The public hero has no parallax or animated entrance.
+Color fields, space and rules establish depth. The campaign, current-session field
+and schedule are flat. Retained library cards may use Tailwind `shadow-sm`
+(`0 1px 2px 0 rgb(0 0 0 / 0.05)`); overlays retain library elevation. Do not add
+ambient glows or floating panels to explain ordinary hierarchy.
 
 ## Shapes
 
-The base `--radius` is 12px. Semantic lg/md/sm radii use that value, minus 2px and
-minus 4px respectively. Forest keeps a 10px base radius. Tailwind xl is a fixed
-12px and 2xl a fixed 16px, so those surfaces do not inherit theme radius changes.
-Circular marks and status indicators use full rounding. Most surfaces use a 1px
-border. Lucide SVG icons provide navigation/action cues; the brand combines a
-rounded square and northeast arrow with the condensed wordmark.
+The brand mark is three forward diagonal strokes paired with a stacked wordmark.
+Square campaign and session fields carry the strongest identity. The shared radius
+is 6px, producing 4px controls; chart hit areas also use 4px. Retained contextual
+cards use 12px and state badges may be fully rounded. Thin shared rules organize
+schedule rows, provider choices and profile groups.
 
 ## Components
 
-### Buttons and fields
+### Buttons and inputs
 
-Shared Button variants are default, destructive, outline, secondary, ghost, link,
-hero and hero-outline. Default and small sizes are 44px high; large is 48px;
-icon controls are 44px square. Default horizontal padding is 20px, small 12px,
-large 24px. Hero variants raise weight to 600 without changing the type family.
-Primary hover uses 90% primary; outline/ghost use secondary fill. Disabled controls
-block interaction and reduce opacity. Some existing local race actions retain
-smaller height overrides; 44px is the shared control default, not a universal claim.
+Shared buttons are 44px high with 20px horizontal padding; larger actions and inputs
+are 48px. The public campaign action is at least 54px with plum/paper colors.
+Primary, destructive, outline, secondary, ghost and link variants retain their
+semantic roles. Hover changes color; button press moves down 1px. Visible keyboard
+focus uses the semantic ring and an offset. Disabled controls retain labels and
+reduced opacity. Inputs have visible labels, a strong border and native semantics.
 
-Input is 48px high with 12px horizontal and 8px vertical padding, an input-color
-border and semantic md radius. Text is 16px, 14px from md. Placeholder text is
-supplementary; persistent visible labels identify editable fields, including race
-distance and date. Profile uses fieldsets and legends for identity and schedule;
-pressed day buttons expose selection and preserve minimum-day validation.
+### Navigation and containers
 
-Shared buttons/inputs use a 2px focus ring and 2px offset. Other focusable elements
-inherit a 2px outline with 4px offset. Loading disables the relevant action;
-errors include plain recovery copy, and critical errors use alert semantics.
+Desktop navigation sits within the masthead; active tabs use the primary pair.
+Mobile navigation stays fixed below content with visible icon-and-text labels.
+The account and theme controls remain available in the header. Provider choices
+use open bordered rows. The weekly schedule uses shared dividers; the selected
+session uses a square tonal field, and the completed state uses a green tint with
+an explicit status and Undo action. Loading preserves the expected chart/session
+structure; empty and error states explain the next available action.
 
-### Navigation and status
+### Week rhythm
 
-The ready portal's desktop rail uses semantic sidebar colors; the selected item
-uses sidebar-primary. Mobile bottom items use primary text and a faint primary
-fill. Items expose `aria-current="page"`. The appearance picker uses Radix radio
-menu items. Landing and portal provide keyboard-visible skip links; the portal
-main landmark accepts focus. Onboarding progress retains all three labels on
-mobile and marks the current step with `aria-current="step"`.
+Seven native buttons represent the week. Bar height is proportional to planned
+minutes against that week's largest non-rest session; a rest day has no bar.
+Strength uses an outline. Text labels and completion checks preserve meaning
+without color. Selecting a day on the landing changes the example detail; in the
+portal it opens and focuses the matching session disclosure. The chart shows
+prescription, never a fabricated distance or performance score.
 
-Status tags pair text with restrained color. Preparation and failure have different
-headings and actions; the preparation region announces updates politely. Connected
-provider status and its disconnect action remain separate. Replacing a source uses
-an explicit confirmation dialog. Ready setup offers entry to the weekly plan.
+### Imagery and motion
 
-### Weekly plan and workout disclosure
+`src/assets/running-track.webp` is an original generated fictional runner on a
+red track, compressed to approximately 241kB. Its prompt provenance is stored in
+the adjacent `.webp.json`. The image is campaign atmosphere, not a testimonial.
+Its daylight, lane geometry and vermilion surface reinforce the brand palette.
 
-The seven-day strip includes an explicit state legend. Choosing a day opens its
-workout details, focuses the disclosure and scrolls to it. Each schedule row uses
-a real button with `aria-expanded` and `aria-controls`, beside an independent
-completion button with `aria-pressed`. Inline detail regions remain associated
-with their trigger. Today has pending, rest and completed presentations.
-
-Prescribed duration, actual matched activity and manual completion are separate.
-Provider links and recorded metrics stay visible when manual completion changes.
-Details include placement rationale when supplied, and the context column includes
-native “Why this plan” disclosure when justification exists. Week navigation and
-future/empty states follow backend availability; no new calendar route is implied.
-
-### Verification scope
-
-The redesign's review records viewport checks from 320px through 1440px, four
-themes and 56 passing tests, with visual baseline commit `7dced9f`. Follow the
-external evidence and review record for exact captured states. These checks are
-not WCAG certification, proof of every color pairing or production verification.
+Motion explains interaction: campaign arrows move toward their destination in
+200ms; chart bars narrow subtly on hover in 220ms; session details reveal through
+a 5px translation and short clip in 200–220ms; completion draws a check in 350ms.
+There is no ambient animation loop. Portal tabs retain a short opacity transition;
+targeted profile guidance retains its existing emphasis. Reduced-motion preference
+collapses CSS animations/transitions to 0.01ms and removes smooth scrolling;
+Framer Motion respects the same preference.
 
 ## Do's and Don'ts
 
-- **Do** use semantic color pairs and verify all four appearance choices.
-- **Do** use condensed headings for hierarchy and Manrope for controls and reading.
-- **Do** keep planned work, recorded activity and manual completion distinct.
-- **Do** retain visible labels, keyboard focus, state text and reduced-motion behavior.
-- **Do** build related schedule rows within one surface and use spacing for grouping.
-- **Don't** restore the previous serif and warm palette as the default system.
-- **Don't** turn decorative eyebrows, undefined shadows or isolated overrides into shared rules.
-- **Don't** present illustrative plans or example metrics as customer results.
-- **Don't** infer approved business decisions, roadmap scope or build preferences from this record.
+### Do:
+
+- Do use semantic color pairs and verify all four appearance choices.
+- Do reserve Archivo Black for display and page hierarchy; use Figtree for tasks and reading.
+- Do keep planned work, recorded activity and manual completion distinct.
+- Do retain visible labels, keyboard focus, state text and reduced-motion behavior.
+- Do use space and shared dividers to group related schedule and form content.
+
+### Don't:
+
+- Don't turn every section into a rounded dashboard card.
+- Don't place small decorative eyebrows above a larger title; give meaningful status its own place below or alongside the title.
+- Don't present illustrative plans or generated photography as customer results.
+- Don't infer approved business decisions, roadmap scope or global build preferences from this record.

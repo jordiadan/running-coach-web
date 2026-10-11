@@ -51,7 +51,7 @@ not evidence of improved performance or a validated commercial promise.
   Google sign-in. `/portal`: session-gated onboarding and the Weekly Plan,
   Connect and Profile tabs. There are no separate calendar or session-detail
   routes; sessions expand within the weekly plan. The portal uses a desktop
-  navigation rail and mobile bottom navigation. The public page labels its
+  masthead navigation and mobile bottom navigation. The public page labels its
   example week as illustrative and explains the three-step setup.
 - Profile: display name, training goal, running days and preferred long-run day.
   The current UI requires at least four running days; the long-run day must be
@@ -63,7 +63,7 @@ not evidence of improved performance or a validated commercial promise.
   when supplied by the API. Session details include modality, intensity,
   prescribed duration, notes and strength focus when supplied. The API also
   carries plan justification and placement rationale, shown in the “Why this
-  plan” disclosure and session details when supplied. The seven-day strip opens
+  plan” disclosure and session details when supplied. The seven-day planned-minute chart opens
   and focuses the selected session's disclosure.
 - Current-week non-rest sessions support manual completion when the API supplies
   completion state. A matched activity, its recorded metrics and provider link
@@ -117,17 +117,18 @@ options do not establish a preferred future direction.
 
 ## Evidence on Hand
 
-Frontend redesign baseline: `running-coach-web` commit `7dced9f`.
+Current creative-direction baseline: `running-coach-web` commit `e6d81b9`.
 Current descriptions were reconciled with the redesign working tree on
-2026-10-09. Sources:
+2026-10-11. Sources:
 `src/App.tsx`, `src/pages/LoginPage.tsx`, `src/pages/PortalPage.tsx`,
 `src/components/portal/`, `src/lib/portal-api.ts`, `src/lib/portal-onboarding.ts`
 and the portal tests in `src/test/`. Visual assets include
-`src/assets/hero-running.jpg`; self-hosted fonts and their licenses live in
+`src/assets/running-track.webp` (original generated campaign image with adjacent
+prompt provenance); self-hosted fonts and their licenses live in
 `public/fonts/`. Tokens live in `src/index.css` and `tailwind.config.ts`, with
 the implemented system recorded in `DESIGN.md` and `.impeccable/design.json`.
 The redesign review records checks from 320px through 1440px, four appearance
-choices and 56 passing tests. These are implementation checks, not certification.
+choices and 59 passing tests. These are implementation checks, not certification.
 
 Backend evidence: [springboot-running-coach at
 ae083420](https://github.com/jordiadan/springboot-running-coach/tree/ae083420ab401378d86c2c3acb106146788e2559),

@@ -1,203 +1,216 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, ArrowDown, Check, MoveUpRight } from "lucide-react";
+import { ArrowRight, ArrowUpRight, ArrowDown, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Brand from "@/components/Brand";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
-import heroImage from "@/assets/hero-running.jpg";
+import WeekRhythm from "@/components/WeekRhythm";
+import heroImage from "@/assets/running-track.webp";
 
 const exampleWeek = [
   {
-    day: "Mon",
+    day: "MON",
     title: "Easy aerobic run",
-    detail: "40 min · Easy",
-    done: true,
+    modality: "RUN",
+    durationMinutes: 40,
+    notes: "Find a conversational effort and settle into a comfortable rhythm.",
   },
   {
-    day: "Tue",
+    day: "TUE",
     title: "Threshold intervals",
-    detail: "50 min · Quality",
-    done: true,
+    modality: "RUN",
+    durationMinutes: 50,
+    notes:
+      "A focused quality session. Keep your effort controlled, with recovery between intervals.",
   },
   {
-    day: "Wed",
+    day: "WED",
     title: "Rest & recover",
-    detail: "Room to recharge",
-    done: false,
+    modality: "REST",
+    durationMinutes: 0,
+    notes:
+      "Take a break from structured training. Recovery has a place in your plan, too.",
   },
   {
-    day: "Thu",
+    day: "THU",
     title: "Runner strength",
-    detail: "30 min · Strength",
-    done: false,
+    modality: "STRENGTH",
+    durationMinutes: 30,
+    notes:
+      "Make time for single-leg stability, core work and your posterior chain.",
   },
   {
-    day: "Fri",
+    day: "FRI",
     title: "Easy run + strides",
-    detail: "45 min · Easy",
-    done: false,
+    modality: "RUN",
+    durationMinutes: 45,
+    notes:
+      "Run at a conversational effort. Finish with a few short, relaxed strides.",
   },
-  { day: "Sat", title: "Rest day", detail: "Take it easy", done: false },
   {
-    day: "Sun",
+    day: "SAT",
+    title: "Rest day",
+    modality: "REST",
+    durationMinutes: 0,
+    notes: "A little space before the long run. Take it easy today.",
+  },
+  {
+    day: "SUN",
     title: "Long aerobic run",
-    detail: "80 min · Endurance",
-    done: false,
+    modality: "RUN",
+    durationMinutes: 80,
+    notes:
+      "More time on your feet, at an easy effort. Keep it comfortable from start to finish.",
   },
 ];
 
 export default function LandingPage() {
+  const [selectedDay, setSelectedDay] = useState("FRI");
+  const session = exampleWeek.find((item) => item.day === selectedDay)!;
   return (
-    <div className="min-h-screen bg-background">
+    <div className="landing-page">
       <a href="#main-content" className="skip-link">
         Skip to content
       </a>
-      <header className="border-b border-border bg-card">
+      <header className="campaign-header">
         <nav
           aria-label="Main navigation"
           className="public-shell flex min-h-20 items-center justify-between gap-3"
         >
           <Brand />
-          <div className="flex items-center gap-2 sm:gap-5">
+          <div className="flex items-center gap-2 sm:gap-7">
             <a
               href="#how-it-works"
-              className="hidden text-sm font-medium hover:text-primary sm:inline"
+              className="hidden text-sm font-semibold hover:underline sm:inline"
             >
               How it works
             </a>
             <ThemeSwitcher />
-            <Button asChild variant="outline" size="sm">
-              <Link to="/login">
-                Log in <ArrowRight className="hidden h-4 w-4 sm:block" />
-              </Link>
-            </Button>
+            <Link to="/login" className="campaign-login">
+              Log in <ArrowUpRight className="h-4 w-4" />
+            </Link>
           </div>
         </nav>
       </header>
       <main id="main-content">
-        <section className="brand-field">
-          <div className="public-shell grid lg:min-h-[640px] lg:grid-cols-[1.1fr_0.9fr]">
-            <div className="flex flex-col items-start justify-center py-14 sm:py-20 lg:pr-16">
-              <h1 className="max-w-xl font-display text-6xl font-semibold leading-[0.98] sm:text-7xl lg:text-8xl">
-                A clear plan.
-                <br />A purpose for
-                <br />
-                <span className="text-[hsl(var(--brand-lime))]">
-                  every run.
-                </span>
-              </h1>
-              <p className="mt-7 max-w-md text-base leading-7 text-[hsl(var(--brand-paper))] sm:text-lg">
-                Your training, your schedule, your next goal. Bring them
-                together in a weekly running plan that tells you what to do and
-                why.
+        <section className="campaign-hero" aria-labelledby="campaign-title">
+          <div className="public-shell campaign-heading">
+            <h1 id="campaign-title">
+              Your week.
+              <br />
+              With purpose.
+            </h1>
+            <div className="campaign-offer">
+              <p>
+                A personal running plan, built around your training, your
+                schedule and your next goal.
               </p>
-              <Button
-                asChild
-                size="lg"
-                className="brand-action mt-8 hover:opacity-90"
-              >
+              <Button asChild size="lg" className="campaign-button">
                 <Link to="/login">
-                  Build my running plan <ArrowRight className="h-4 w-4" />
+                  Build my running plan <ArrowUpRight />
                 </Link>
               </Button>
-              <p className="mt-4 text-xs text-[hsl(var(--brand-paper))]">
-                Connect with Strava or Intervals.icu
+            </div>
+          </div>
+          <div className="campaign-scene">
+            <img
+              src={heroImage}
+              alt="Runner in stride on a sunlit red athletics track"
+              width="1536"
+              height="1024"
+              fetchPriority="high"
+            />
+            <div className="campaign-note">
+              <h2>
+                Make room
+                <br />
+                for the run.
+              </h2>
+              <p>
+                A little structure.
+                <br />A clear next step.
+                <br />A week that works for you.
               </p>
-              <a
-                href="#your-week"
-                className="mt-10 flex min-h-11 items-center gap-2 text-sm underline underline-offset-4"
-              >
-                Take a look inside <ArrowDown className="h-4 w-4" />
+              <a href="#your-week">
+                Take a look inside <ArrowDown className="h-5 w-5" />
               </a>
             </div>
-            <figure className="relative -mx-5 sm:-mx-8 lg:mx-0 lg:-mr-12">
-              <img
-                src={heroImage}
-                alt="Runner following a mountain trail in the evening light"
-                className="h-72 w-full object-cover sm:h-96 lg:absolute lg:inset-0 lg:h-full"
-                fetchPriority="high"
-              />
-              <figcaption className="absolute bottom-0 left-0 right-0 flex items-center justify-between bg-[hsl(var(--brand-ink))] px-5 py-4 text-sm lg:bottom-6 lg:left-6 lg:right-6 lg:rounded-lg">
-                <span>Make room for the run.</span>
-                <MoveUpRight className="h-5 w-5" aria-hidden="true" />
-              </figcaption>
-            </figure>
           </div>
         </section>
-        <section
-          id="your-week"
-          className="public-shell grid gap-10 py-16 sm:py-24 lg:grid-cols-[0.8fr_1.2fr] lg:gap-24"
-        >
-          <div className="lg:pt-6">
-            <h2 className="font-display text-5xl leading-none sm:text-6xl">
-              Less deciding.
+        <div className="connection-band public-shell">
+          <p>Your training. Connected.</p>
+          <span>
+            Strava <span className="mx-3 opacity-50">/</span> Intervals.icu
+          </span>
+          <span className="hidden text-sm sm:block">
+            One source. Your choice.
+          </span>
+        </div>
+        <section id="your-week" className="public-shell week-story">
+          <div className="story-heading">
+            <h2>
+              Find your
               <br />
-              More running.
+              running rhythm.
             </h2>
-            <p className="mt-6 max-w-md text-base leading-7 text-muted-foreground">
-              Open your week and know where to begin. See the purpose of each
-              session, make time for recovery, and keep your goal in view.
+            <p>
+              Easy days. Focused efforts. Room to recover. See how it all fits
+              together, then know exactly what comes next.
             </p>
-            <ul className="mt-8 space-y-5 text-sm">
-              {[
-                "Workouts built around your available days",
-                "Clear instructions for each session",
-                "Your recorded activities alongside your plan",
-              ].map((text) => (
-                <li key={text} className="flex items-start gap-3">
-                  <Check
-                    className="h-5 w-5 shrink-0 text-accent"
-                    aria-hidden="true"
-                  />
-                  {text}
-                </li>
-              ))}
-            </ul>
           </div>
-          <div className="surface overflow-hidden">
-            <div className="flex items-baseline justify-between gap-3 border-b border-border px-5 py-5 sm:px-7">
-              <h3 className="section-title">A week with Running Coach</h3>
-              <span className="text-xs text-muted-foreground">
-                Illustrative plan
-              </span>
+          <div className="example-plan">
+            <div className="example-label">
+              <h3>A week with Running Coach</h3>
+              <span>Illustrative plan</span>
             </div>
-            <ol className="divide-y divide-border">
-              {exampleWeek.map((session, i) => (
-                <li
-                  key={session.day}
-                  className={`flex items-center gap-4 px-5 py-4 sm:px-7 ${i === 4 ? "bg-primary/5" : ""}`}
-                >
-                  <span className="w-8 shrink-0 text-xs font-semibold text-muted-foreground">
-                    {session.day}
-                  </span>
-                  <span className="flex-1">
-                    <span className="block text-sm font-semibold">
-                      {session.title}
-                    </span>
-                    <span className="mt-1 block text-xs text-muted-foreground">
-                      {session.detail}
-                    </span>
-                  </span>
-                  {session.done ? (
-                    <Check
-                      className="h-4 w-4 text-accent"
-                      aria-label="Complete"
-                    />
-                  ) : i === 4 ? (
-                    <span className="rounded-md bg-primary px-2 py-1 text-xs text-primary-foreground">
-                      Today
-                    </span>
-                  ) : null}
-                </li>
-              ))}
-            </ol>
+            <WeekRhythm
+              sessions={exampleWeek}
+              selectedDay={selectedDay}
+              onSelectDay={setSelectedDay}
+            />
+            <div
+              className="example-session"
+              aria-live="polite"
+              aria-atomic="true"
+            >
+              <div key={session.day} className="example-session-content">
+                <div>
+                  <h3>{session.title}</h3>
+                  <p>{session.notes}</p>
+                </div>
+                <span className="example-duration">
+                  {session.modality === "REST" ? (
+                    "Rest day"
+                  ) : (
+                    <>
+                      {session.durationMinutes}
+                      <small>min planned</small>
+                    </>
+                  )}
+                </span>
+              </div>
+            </div>
+            <p className="example-help">
+              Select a day to explore. Your own plan will reflect your profile
+              and training.
+            </p>
           </div>
         </section>
-        <section id="how-it-works" className="border-y border-border bg-card">
-          <div className="public-shell py-16 sm:py-24">
-            <h2 className="font-display text-4xl sm:text-5xl">
-              From your training to your next run.
-            </h2>
-            <ol className="mt-10 grid gap-8 md:grid-cols-3 md:gap-12">
+        <section id="how-it-works" className="setup-story">
+          <div className="public-shell setup-layout">
+            <div>
+              <h2>
+                Your running.
+                <br />A little more
+                <br />
+                connected.
+              </h2>
+              <p>
+                No blank calendar to fill. Start with the training you already
+                do and the days you can run.
+              </p>
+            </div>
+            <ol className="setup-steps">
               {[
                 [
                   "Connect your training",
@@ -209,48 +222,64 @@ export default function LandingPage() {
                 ],
                 [
                   "Run your week",
-                  "Get your weekly plan, explore each workout, and check off your sessions as you go.",
+                  "Get your weekly plan, explore the purpose of each workout, and check off your sessions as you go.",
                 ],
-              ].map(([title, description], i) => (
-                <li key={title} className="border-t border-border pt-5">
-                  <h3 className="mb-3 font-display text-3xl">
-                    <span className="mr-2 text-primary">{i + 1}.</span>
-                    {title}
-                  </h3>
-                  <p className="text-sm leading-7 text-muted-foreground">
-                    {description}
-                  </p>
+              ].map(([title, description], index) => (
+                <li key={title}>
+                  <span className="setup-number" aria-hidden="true">
+                    {index + 1}
+                  </span>
+                  <div>
+                    <h3>{title}</h3>
+                    <p>{description}</p>
+                  </div>
                 </li>
               ))}
             </ol>
           </div>
         </section>
-        <section className="public-shell flex flex-col items-start justify-between gap-7 py-16 sm:py-20 md:flex-row md:items-center">
-          <div>
-            <h2 className="font-display text-5xl">
-              Give your next run a plan.
+        <section className="public-shell training-principle">
+          <h2>
+            The plan is personal.
+            <br />
+            The next step is clear.
+          </h2>
+          <ul>
+            {[
+              "Workouts built around your available days",
+              "Clear instructions for each session",
+              "Recorded activities alongside your plan",
+            ].map((text) => (
+              <li key={text}>
+                <Check className="h-5 w-5" aria-hidden="true" />
+                {text}
+              </li>
+            ))}
+          </ul>
+        </section>
+        <section className="closing-field">
+          <div className="public-shell">
+            <h2>
+              Let’s make
+              <br />
+              this your week.
             </h2>
-            <p className="mt-4 text-muted-foreground">
-              Start with your goals. Take it one week at a time.
-            </p>
+            <Button asChild size="lg" className="campaign-button">
+              <Link to="/login">
+                Start training <ArrowRight />
+              </Link>
+            </Button>
           </div>
-          <Button asChild size="lg">
-            <Link to="/login">
-              Start training <ArrowRight className="h-4 w-4" />
-            </Link>
-          </Button>
         </section>
       </main>
-      <footer className="border-t border-border">
-        <div className="public-shell flex flex-wrap items-center justify-between gap-5 py-8">
-          <Brand />
-          <Link
-            to="/privacy"
-            className="flex min-h-11 items-center text-sm text-muted-foreground hover:underline"
-          >
-            Privacy policy
-          </Link>
-        </div>
+      <footer className="public-shell flex flex-wrap items-center justify-between gap-5 py-8">
+        <Brand />
+        <Link
+          to="/privacy"
+          className="flex min-h-11 items-center text-sm text-muted-foreground hover:underline"
+        >
+          Privacy policy
+        </Link>
       </footer>
     </div>
   );

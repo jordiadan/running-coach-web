@@ -201,54 +201,18 @@ export default function PortalPage() {
       <a href="#portal-main" className="skip-link">
         Skip to content
       </a>
-      {isReady && (
-        <aside className="portal-rail">
-          <Brand inverse />
-          <nav aria-label="Main navigation" className="mt-14 space-y-2">
-            {navItems()}
-          </nav>
-          <div className="mt-auto space-y-5 border-t border-sidebar-border pt-6">
-            <div className="flex items-center gap-3">
-              <span
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-sidebar-accent text-sm font-semibold"
-                aria-hidden="true"
-              >
-                {bootstrapQuery.data.user.displayName?.slice(0, 1) || "R"}
-              </span>
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold">
-                  {bootstrapQuery.data.user.displayName || "Runner"}
-                </p>
-                <p className="mt-1 text-xs text-sidebar-foreground/75">
-                  Your training space
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <button
-                onClick={handleLogout}
-                className="flex min-h-11 items-center gap-2 text-sm hover:underline"
-              >
-                <LogOut className="h-4 w-4" aria-hidden="true" />
-                Log out
-              </button>
-              <ThemeSwitcher />
-            </div>
-            <Link
-              to="/privacy"
-              className="inline-flex min-h-11 items-center text-xs text-sidebar-foreground/75 hover:underline"
-            >
-              Privacy
-            </Link>
-          </div>
-        </aside>
-      )}
-      <header
-        className={`border-b border-border bg-card ${isReady ? "lg:hidden" : ""}`}
-      >
-        <div className="mx-auto flex min-h-20 max-w-7xl items-center justify-between gap-3 px-4 sm:px-8">
+      <header className="portal-topbar">
+        <div className="public-shell portal-topbar-inner">
           <Brand />
-          <div className="flex items-center gap-1">
+          {isReady && (
+            <nav aria-label="Main navigation" className="hidden lg:flex">
+              {navItems()}
+            </nav>
+          )}
+          <div className="portal-account">
+            <span className="portal-account-name hidden sm:block">
+              {bootstrapQuery.data.user.displayName || "Runner"}
+            </span>
             <ThemeSwitcher />
             <Button
               variant="ghost"
@@ -274,7 +238,7 @@ export default function PortalPage() {
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={activeTab}
-              initial={{ opacity: 0.7 }}
+              initial={false}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0.7 }}
               transition={{ duration: 0.12 }}
@@ -313,6 +277,12 @@ export default function PortalPage() {
           />
         )}
       </main>
+      <footer className="public-shell portal-footer">
+        <span>One week. One run at a time.</span>
+        <Link to="/privacy" className="hover:underline">
+          Privacy
+        </Link>
+      </footer>
       {isReady && (
         <nav aria-label="Mobile navigation" className="portal-mobile-nav">
           {navItems(true)}

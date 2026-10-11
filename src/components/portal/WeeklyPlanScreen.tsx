@@ -1,3 +1,4 @@
+import WeekRhythm from "@/components/WeekRhythm";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { differenceInCalendarWeeks, format, parseISO } from "date-fns";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
@@ -371,56 +372,6 @@ function goalOutcomeErrorMessage(error: unknown) {
   return "Could not update race outcome. Try again.";
 }
 
-function WeekPulse({
-  sessions,
-  todayDay,
-  isCurrentWeek,
-  onSelectDay,
-}: {
-  sessions: WeeklyCoachSession[];
-  todayDay: string | undefined;
-  isCurrentWeek: boolean;
-  isPastWeek: boolean;
-  onSelectDay: (day: string) => void;
-  reduceMotion: boolean;
-}) {
-  return (
-    <nav
-      aria-label="Days in your plan"
-      className="surface grid grid-cols-7 gap-1 p-2"
-    >
-      {sessions.map((session) => {
-        const today = isCurrentWeek && session.day === todayDay;
-        const Icon = (typeConfig[session.modality] ?? typeConfig.RUN).icon;
-        return (
-          <button
-            key={session.day}
-            type="button"
-            onClick={() => onSelectDay(session.day)}
-            aria-label={`${shortDayLabel(session.day)}: ${session.title}${session.completed ? ", completed" : ""}`}
-            aria-current={today ? "date" : undefined}
-            className={`day-button ${today ? "bg-primary text-primary-foreground" : session.completed ? "bg-accent/10 text-accent hover:bg-accent/20" : "text-muted-foreground hover:bg-secondary"}`}
-          >
-            <span>{shortDayLabel(session.day)}</span>
-            {session.completed ? (
-              <Check className="h-4 w-4" aria-hidden="true" />
-            ) : (
-              <Icon className="h-4 w-4" aria-hidden="true" />
-            )}
-            <span className="hidden text-xs sm:block">
-              {today
-                ? "Today"
-                : session.modality === "REST"
-                  ? "Rest"
-                  : `${session.durationMinutes} min`}
-            </span>
-          </button>
-        );
-      })}
-    </nav>
-  );
-}
-
 function SessionDetails({ session }: { session: WeeklyCoachSession }) {
   return (
     <div className="space-y-4">
@@ -474,18 +425,18 @@ function TodayPendingCard({
 }) {
   const isRest = session.modality === "REST";
   return (
-    <section className="surface overflow-hidden" aria-label="Today's session">
-      <div className="flex items-center justify-between bg-primary px-5 py-3 text-primary-foreground sm:px-7">
-        <h2 className="font-sans text-sm font-semibold">
+    <section className="today-session" aria-label="Today's session">
+      <h2 className="today-title">{session.title}</h2>
+      <div className="today-session-header">
+        <span className="text-sm font-semibold">
           {isRest ? "Today · Recovery" : "Today’s session"}
-        </h2>
+        </span>
         <span className="text-xs">
           {shortDayLabel(session.day)}
           {session.role === "KEY" ? " · Key session" : ""}
         </span>
       </div>
-      <div className="p-5 sm:p-7">
-        <h3 className="font-display text-4xl leading-tight">{session.title}</h3>
+      <div>
         <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
           {!isRest && (
             <span className="flex items-center gap-2 tabular-nums">
@@ -556,16 +507,19 @@ function TodayDoneCard({
 }) {
   return (
     <section
-      className="surface p-5 sm:p-7"
+      className="today-complete p-5 sm:p-7"
       aria-label="Today's completed session"
     >
       <div className="flex items-start justify-between gap-3">
         <div>
-          <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-accent">
+          <h2 className="today-title">{session.title}</h2>
+          <div
+            className="mt-3 flex items-center gap-2 text-sm font-semibold text-accent"
+            role="status"
+          >
             <Check className="h-5 w-5" />
             Today, complete
           </div>
-          <h2 className="section-title">{session.title}</h2>
         </div>
         {canToggleCompletion && (
           <Button variant="ghost" onClick={onUndo}>
@@ -987,7 +941,7 @@ function ScheduleList({
           / {sessions.filter((s) => s.modality !== "REST").length} complete
         </span>
       </div>
-      <div className="surface overflow-hidden">
+      <div className="schedule-list">
         {sessions.length === 0 && (
           <p className="p-6 text-sm text-muted-foreground">
             No sessions are included in this plan yet.
@@ -1291,8 +1245,8 @@ export default function WeeklyPlanScreen({
 
   const header = (
     <motion.div
-      className="space-y-3"
-      initial={{ opacity: 0 }}
+      className="week-header"
+      initial={false}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
     >
@@ -1300,7 +1254,7 @@ export default function WeeklyPlanScreen({
         <div>
           <motion.h1
             className="page-title"
-            initial={{ opacity: 0, y: -8 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35 }}
           >
@@ -1309,7 +1263,7 @@ export default function WeeklyPlanScreen({
           {plan ? (
             <motion.span
               className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground"
-              initial={{ opacity: 0 }}
+              initial={false}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.12 }}
             >
@@ -1371,9 +1325,6 @@ export default function WeeklyPlanScreen({
               <RefreshCcw className="h-4 w-4 animate-pulse" />
             </div>
             <div>
-              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                Weekly plan
-              </p>
               <h2 className="mt-1 font-display text-2xl text-foreground">
                 Preparing your weekly plan
               </h2>
@@ -1411,10 +1362,20 @@ export default function WeeklyPlanScreen({
     return (
       <div className={screenShellClassName}>
         {header}
-        <div className="rounded-2xl border border-divider bg-card p-6 shadow-card">
+        <div className="plan-loading" aria-busy="true">
           <p role="status" className="text-sm text-muted-foreground">
             Loading your weekly plan…
           </p>
+          <div className="loading-rhythm" aria-hidden="true">
+            {Array.from({ length: 7 }, (_, index) => (
+              <span key={index} />
+            ))}
+          </div>
+          <div className="loading-session" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+          </div>
         </div>
       </div>
     );
@@ -1561,13 +1522,11 @@ export default function WeeklyPlanScreen({
     <div className="space-y-7">
       {header}
       <div className="space-y-7">
-        <WeekPulse
+        <WeekRhythm
           sessions={sessions}
           todayDay={todayDay}
-          isCurrentWeek={isCurrentWeek}
-          isPastWeek={isPastWeek}
+          selectedDay={expandedDay}
           onSelectDay={scrollToDay}
-          reduceMotion={Boolean(reduceMotion)}
         />
 
         <div className="week-layout">
@@ -1633,7 +1592,7 @@ export default function WeeklyPlanScreen({
           <aside className="min-w-0 space-y-7" aria-label="Weekly context">
             <motion.div
               className="border-b border-border pb-6"
-              initial={{ opacity: 0, y: 8 }}
+              initial={false}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.35, delay: 0.15 }}
               key={`coach-${screen?.selectedWeekStartDate ?? selectedWeekStartDate}`}

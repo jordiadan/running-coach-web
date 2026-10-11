@@ -369,7 +369,7 @@ export default function ConnectScreen({
         </p>
       ) : null}
 
-      <div className="space-y-3">
+      <div className="space-y-0">
         {trainingSources.map((source) => {
           const providerStatus = statusByProvider[source.id];
           const isActive =
@@ -409,7 +409,7 @@ export default function ConnectScreen({
           return (
             <div
               key={source.id}
-              className={`surface p-5 sm:p-7 ${isActive ? "border-primary/40" : ""}`}
+              className={`connection-source ${isActive ? "is-connected" : ""}`}
             >
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
@@ -428,7 +428,7 @@ export default function ConnectScreen({
                         <Activity className="h-5 w-5 text-primary" />
                       )}
                     </span>
-                    <h2 className="font-display text-2xl text-foreground">
+                    <h2 className="font-sans text-2xl font-bold text-foreground">
                       {source.name}
                     </h2>
                     {isActive && (

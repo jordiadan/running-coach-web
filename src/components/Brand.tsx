@@ -1,16 +1,27 @@
 import { Link } from "react-router-dom";
-import { MoveUpRight } from "lucide-react";
 
 export default function Brand({ inverse = false }: { inverse?: boolean }) {
   return (
-    <Link to="/" className="brand" aria-label="Running Coach home">
-      <span
-        className={inverse ? "brand-mark brand-action" : "brand-mark"}
+    <Link
+      to="/"
+      className={`brand ${inverse ? "brand-inverse" : ""}`}
+      aria-label="Running Coach home"
+    >
+      <svg
+        className="brand-mark"
+        viewBox="0 0 36 32"
+        fill="none"
         aria-hidden="true"
       >
-        <MoveUpRight className="h-5 w-5" strokeWidth={2.5} />
+        <path
+          d="M3 27 13 5M13 27 23 5M23 27 33 5"
+          stroke="currentColor"
+          strokeWidth="5"
+        />
+      </svg>
+      <span>
+        Running<span className="brand-second">Coach</span>
       </span>
-      Running Coach
     </Link>
   );
 }

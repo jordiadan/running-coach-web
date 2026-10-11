@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Brand from "@/components/Brand";
-import heroImage from "@/assets/hero-running.jpg";
+import heroImage from "@/assets/running-track.webp";
 import { ArrowLeft, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -51,13 +51,13 @@ export default function LoginPage() {
 
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
-      <aside className="brand-field relative hidden overflow-hidden lg:flex lg:flex-col lg:justify-between">
+      <aside className="login-campaign relative hidden overflow-hidden lg:flex lg:flex-col lg:justify-between">
         <img
           src={heroImage}
-          alt="Runner on a mountain trail"
-          className="h-[55vh] min-h-80 w-full object-cover"
+          alt="Runner in stride on a sunlit athletics track"
+          className="min-h-80 w-full object-cover"
         />
-        <div className="p-12 xl:p-16">
+        <div className="p-10 xl:p-12">
           <h2 className="font-display text-6xl leading-none">
             Your next run
             <br />

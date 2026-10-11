@@ -34,8 +34,8 @@ export default function WeekNavigator({
 
   return (
     <motion.div
-      className="flex items-center justify-between rounded-xl border border-border bg-card/40 px-1.5 py-1"
-      initial={{ opacity: 0, y: 4 }}
+      className="flex items-center justify-between rounded-md border border-border px-1.5 py-1"
+      initial={false}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.08 }}
     >
@@ -60,7 +60,7 @@ export default function WeekNavigator({
           {weekLabel}
         </span>
         <span
-          className={`inline-flex shrink-0 items-center gap-1 text-xs font-semibold uppercase tracking-widest ${
+          className={`inline-flex shrink-0 items-center gap-1 text-xs font-semibold ${
             isCurrentWeek ? "text-primary" : "text-muted-foreground"
           }`}
         >

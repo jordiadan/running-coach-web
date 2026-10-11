@@ -11,63 +11,59 @@ related_targets:
   ]
 ---
 
-# Running Coach redesign
+# Race Rhythm — replacement identity
 
-Scope: public discovery, sign-in, onboarding, weekly plan, profile and connections.
-Modes: Operate for the portal; Persuade for the landing page; Read for privacy.
-The user explicitly delegates design decisions and direct implementation. This run
-uses a code-led direction contract without persisting a global build preference.
-
-## Findings and priorities
-
-1. Daily use: the narrow desktop column hides the schedule beneath repeated cards;
-   small controls and pointer-only disclosures obstruct workout access.
-2. Activation: onboarding repeats headings, hides step labels on mobile and exposes
-   backend terminology. Connection status doubles as an unexpected disconnect action.
-3. Configuration: the profile is an undifferentiated form, including an unavailable
-   notes feature. Group identity, schedule and race target; retain validation.
-4. Discovery: an oversized photo overlay and unverified average metrics obscure how
-   the product works. Show an explicitly illustrative week and the real setup sequence.
+Scope: landing (Persuade), sign-in/onboarding/portal (Operate), privacy (Read).
+The user explicitly requests three distinct prototypes and delegates recommendation
+and implementation. Three code-led landing and weekly-plan prototypes were rendered
+at 390 and 1440px before implementation; no global build preference is persisted.
 
 ## Direction contract
 
-THESIS: A training companion with the clarity of athletics wayfinding. The next
-workout leads; the entire week stays within reach. Avoid a generic metrics dashboard.
+THESIS: Turn the rhythm of a runner's week into a recognizable athletic identity.
+A race-poster opening earns attention; a working weekly duration chart earns trust.
+Replace the previous SaaS rail/card structure with a horizontal club masthead,
+open schedule, and one clear session surface.
 
-OWN-WORLD: Ink-blue navigation, cool pale ground, white work surfaces, cobalt
-selection and restrained citron in the public brand. Barlow Condensed headings,
-Manrope reading text, legible tabular measures, quiet borders and 12px corners.
-The runner checks a phone outdoors before training, so the default is high-contrast
-light content; existing theme choices remain supported.
+OWN-WORLD: Vermilion campaign fields, aubergine ink, cool pink-white working ground,
+blush active-session surface and evergreen completion. Archivo Black headlines;
+Figtree instructions and tabular data. Original sunlit track photography, a compact
+three-stride brand mark, measured bars, small control corners and generous space.
+The runner checks a phone outdoors, so the default is light and high contrast;
+existing dark, bright and forest preferences remain coherent accessible variants.
 
-STORY: Connect one source, set a realistic schedule and goal, then open the plan.
-Daily: understand today's prescription, inspect the week, mark completion. Actual
-activities remain distinct from planned work. No invented performance analytics.
+STORY: Understand that a personal weekly plan uses existing training, schedule and
+goals. Inspect a clearly illustrative week, sign in, connect one source and run.
+Within the portal, inspect today's prescription, explore the week and record
+completion without conflating recorded activity and planned minutes.
 
-FIRST VIEWPORT: Desktop has a persistent ink-blue left rail, a week heading and
-navigation, then a seven-day strip. Today's workout and the full schedule occupy
-the wide column; weekly context and race goal sit beside it. Mobile uses compact
-top branding and fixed bottom navigation, with today before schedule before context.
-Signature interaction: selecting a day in the week strip opens and focuses its
-workout disclosure. Brief color and disclosure transitions respect reduced motion.
+FIRST VIEWPORT: Landing: vermilion masthead and oversized two-line headline above
+a concise offer/action row; wide runner image and plum session note below. Mobile
+keeps the action above the image. Portal: horizontal navigation, compact week
+heading/date controls, seven proportional duration bars, then today's blush session
+beside weekly context; schedule follows. Mobile compresses bars, keeps bottom nav,
+and puts today's action before supporting context. Signature interaction: selecting
+a bar opens and focuses its workout; the landing demo updates its session note.
+Completion draws a check once. No ambient loop or scroll hijack.
 
-FORM: Athletics wayfinding, candidate 4, seed d733f998. Grounded candidates in order:
-running club identity, race timing sheets, training journal, athletics wayfinding,
-outdoor equipment labeling, race photography contact sheets, event typography.
-Challengers: acetate manual declined (keep disciplined section hierarchy); record
-sleeve declined (keep typographic restraint); orienteering competitive on audience
-identification but weaker on product clarity (keep explicit state legend); streaming
-wall declined (keep focus continuity); warm consumer app competitive on clarity but
-weaker on distinction (keep touch comfort); exposure sheets declined (keep clear
-tonal separation). All controls retain familiar web semantics.
+FORM: Race Rhythm, candidate 3, seed 993f8ceb. Grounded list: running journal,
+training atlas, race-poster typography, photographic contact sheet, training-club
+noticeboard, textile race bib, broadcast split-time graphics. Journal and Atlas were
+full visual alternatives; Race Rhythm wins on human energy plus product clarity.
+Catalog challengers: CD-ROM console declined (audience/clarity; raise state feedback);
+reference-setting declined (audience/clarity; raise reading measure); oscilloscope
+declined (audience/clarity; raise honest chart scales); BBS declined (audience/clarity;
+raise keyboard completeness); brick instructions declined (audience/clarity; raise
+setup sequencing); industrial streetwear competitive on audience, weaker on clarity
+(keep as alternate, do not borrow its hazard stripes or quoted labels).
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
 
 ## States and acceptance
 
-Capture matched mobile/desktop baselines at commit 7dced9f. Cover public routes,
-plan and workout details, completion, profile, connections, onboarding, preparation,
-failure, future empty and request error. Preserve routes, API payloads, backend
-navigation authority and race outcome actions. Check keyboard use, no horizontal
-overflow, contrast, reduced motion, tests, lint and build. Store evidence outside
-all repositories. Review and documentation complete before final handoff.
+Baseline e6d81b9 runs separately from the updated app with identical synthetic data.
+Cover all public routes and portal tabs, workout expansion/completion, onboarding,
+preparation/failure, empty/error/loading. Desktop/mobile evidence stays outside every
+repository. Preserve API contracts, source replacement, profile validation, goal
+outcomes and backend navigation. Verify keyboard, contrast, reduced motion, narrow
+screens, lint, tests and build. Update PR #19 with embedded evidence; do not merge.
