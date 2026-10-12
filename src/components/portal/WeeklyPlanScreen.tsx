@@ -31,6 +31,7 @@ import {
   type GoalOutcomeStatus,
   type GoalTimelineState,
   type WeeklyCoachSession,
+  type WorkoutExecutionEvaluation,
 } from "@/lib/portal-api";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -197,6 +198,84 @@ function SyncedActivityBadge({ session }: { session: WeeklyCoachSession }) {
     <a href={activity.activityUrl} target="_blank" rel="noopener noreferrer" aria-label={`View on ${providerName} (opens in a new tab)`} className={className}>
       {content}
     </a>
+  );
+}
+
+function ExecutionFeedbackDetails({
+  evaluation,
+}: {
+  evaluation?: WorkoutExecutionEvaluation;
+}) {
+  if (!evaluation || evaluation.status === "INSUFFICIENT_EVIDENCE") {
+    return (
+      <p className="mt-3 text-sm text-foreground/70">
+        {evaluation
+          ? "Not enough activity data to evaluate this workout."
+          : "No execution evaluation available."}
+      </p>
+    );
+  }
+  const durationLabels: Record<
+    Extract<
+      WorkoutExecutionEvaluation,
+      { status: "EVALUATED" }
+    >["durationExecution"],
+    string
+  > = {
+    ON_TARGET: "As planned",
+    SHORTER: "Shorter than planned",
+    LONGER: "Longer than planned",
+    UNKNOWN: "Not enough data",
+  };
+  const intensityLabels: Record<
+    Extract<
+      WorkoutExecutionEvaluation,
+      { status: "EVALUATED" }
+    >["intensityExecution"],
+    string
+  > = {
+    ON_TARGET: "As planned",
+    TOO_HIGH: "Higher than planned",
+    TOO_LOW: "Lower than planned",
+    MIXED: "Mixed",
+    UNKNOWN: "Not enough data",
+  };
+  const structureLabels: Record<
+    Extract<
+      WorkoutExecutionEvaluation,
+      { status: "EVALUATED" }
+    >["structureExecution"],
+    string
+  > = {
+    AS_PLANNED: "As planned",
+    PARTIAL: "Partly followed",
+    OFF_PLAN: "Different from plan",
+    NOT_APPLICABLE: "Not applicable",
+    UNKNOWN: "Not enough data",
+  };
+  return (
+    <section
+      className="mt-3 border-t border-border pt-3"
+      aria-label="Compared with plan"
+    >
+      <h3 className="text-sm font-medium text-foreground">
+        Compared with plan
+      </h3>
+      <dl className="mt-2 grid gap-2 text-sm sm:grid-cols-3 sm:gap-4">
+        {[
+          ["Duration", durationLabels[evaluation.durationExecution]],
+          ["Intensity", intensityLabels[evaluation.intensityExecution]],
+          ["Structure", structureLabels[evaluation.structureExecution]],
+        ].map(([label, value]) => (
+          <div key={label} className="flex justify-between gap-3 sm:block">
+            <dt className="text-foreground/70">{label}</dt>
+            <dd className="text-right text-foreground sm:mt-1 sm:text-left">
+              {value}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </section>
   );
 }
 
@@ -1049,6 +1128,16 @@ function ScheduleList({
               const isKey = session.role === "KEY";
               const isToday = isCurrentWeek && session.day === todayDay;
               const expanded = expandedDay === session.day;
+              const showExecutionFeedback =
+                isDone &&
+                session.modality === "RUN" &&
+                ["EASY", "RECOVERY", "LONG_RUN", "TEMPO", "VO2"].includes(
+                  session.type,
+                ) &&
+                Boolean(session.syncedActivity);
+              const evaluation = showExecutionFeedback
+                ? session.executionEvaluation
+                : undefined;
               const config = typeConfig[session.modality] ?? typeConfig.RUN;
               const TypeIcon = config.icon;
               const canToggle = supportsCompletion && isCurrentWeek && !completionPending && !isRest;
@@ -1063,7 +1152,7 @@ function ScheduleList({
                   className={`group relative ${isRest && !isDone ? "opacity-60" : ""}`}
                 >
                   <div
-                    className={`relative flex items-center gap-3 rounded-xl py-2.5 pl-2 pr-3 transition-all ${
+                    className={`relative flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl py-2.5 pl-2 pr-3 transition-all ${
                       !isRest ? "cursor-pointer select-none" : ""
                     } ${
                       isToday
@@ -1074,9 +1163,6 @@ function ScheduleList({
                             ? "bg-primary/[0.03] hover:bg-primary/[0.06]"
                             : "hover:bg-card/80"
                     }`}
-                    onClick={() => {
-                      if (!isRest) onToggleExpanded(session.day);
-                    }}
                   >
                     <motion.button
                       type="button"
@@ -1116,23 +1202,36 @@ function ScheduleList({
                       ) : null}
                     </motion.button>
 
-                    <div className="w-8 shrink-0">
-                      <span className={`text-[11px] font-medium tracking-wide ${isToday ? "text-primary" : "text-muted-foreground"}`}>
+                    <button
+                      type="button"
+                      disabled={isRest}
+                      onClick={() => onToggleExpanded(session.day)}
+                      aria-label={`Details for ${session.title}`}
+                      aria-expanded={isRest ? undefined : expanded}
+                      aria-controls={isRest ? undefined : `session-${session.day}-details`}
+                      aria-describedby={evaluation?.status === "EVALUATED" ? `session-${session.day}-score` : undefined}
+                      className="flex min-h-11 min-w-0 flex-1 items-center gap-3 rounded-md text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    >
+                      <span className={`w-8 shrink-0 text-[11px] font-medium ${isToday ? "text-primary" : "text-muted-foreground"}`}>
                         {shortDayLabel(session.day)}
                       </span>
-                    </div>
-
-                    <div className={`shrink-0 rounded-lg p-1.5 ${config.badgeClass}`}>
-                      <TypeIcon className="h-3.5 w-3.5" />
-                    </div>
-
-                    <div className="min-w-0 flex-1">
-                      <span className={`block min-w-0 max-w-full truncate text-sm ${isDone ? "text-muted-foreground line-through" : "text-foreground"}`}>
-                        {session.title}
+                      <span className={`shrink-0 rounded-lg p-1.5 ${config.badgeClass}`}>
+                        <TypeIcon className="h-3.5 w-3.5" aria-hidden="true" />
                       </span>
-                    </div>
+                      <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1">
+                        <span className={`min-w-0 max-w-full break-words text-sm ${isDone && !evaluation ? "text-muted-foreground line-through" : "text-foreground"}`}>
+                          {session.title}
+                        </span>
+                        {evaluation?.status === "EVALUATED" ? (
+                          <span className="shrink-0 text-xs tabular-nums text-foreground/70" id={`session-${session.day}-score`} aria-label={`Execution score ${evaluation.score} out of 100`}>
+                            {evaluation.score}/100
+                          </span>
+                        ) : null}
+                      </span>
+                      {!isRest ? <ChevronDown aria-hidden="true" className={`h-3.5 w-3.5 shrink-0 text-muted-foreground ${expanded ? "rotate-180" : ""}`} /> : null}
+                    </button>
 
-                    <div className="flex shrink-0 items-center gap-2">
+                    <div className="ml-11 flex w-full min-w-0 items-center gap-2 sm:ml-0 sm:w-auto">
                       <SessionRightSummary session={session} />
                       {isKey && !isDone ? (
                         <Badge
@@ -1143,30 +1242,25 @@ function ScheduleList({
                           Key
                         </Badge>
                       ) : null}
-                      {!isRest ? (
-                        <motion.div
-                          animate={{ rotate: expanded ? 180 : 0 }}
-                          transition={{ duration: 0.2 }}
-                          className="text-muted-foreground/40 transition-colors group-hover:text-muted-foreground"
-                        >
-                          <ChevronDown className="h-3.5 w-3.5" />
-                        </motion.div>
-                      ) : null}
                     </div>
                   </div>
 
                   <AnimatePresence>
-                    {expanded && (session.notes || session.strengthFocus?.length) ? (
+                    {expanded && (session.notes || session.strengthFocus?.length || session.completed) ? (
                       <motion.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: "auto", opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.22, ease: "easeOut" }}
                         className="overflow-hidden"
+                        id={`session-${session.day}-details`}
                       >
-                        <div className="pb-3 pl-[4.5rem] pr-3 pt-1.5">
+                        <div className="pb-3 pl-[2.75rem] pr-3 pt-1.5 sm:pl-[4.5rem]">
+                          {showExecutionFeedback ? (
+                            <ExecutionFeedbackDetails evaluation={evaluation} />
+                          ) : null}
                           {session.notes ? (
-                            <p className="text-[13px] leading-relaxed text-foreground/75">{session.notes}</p>
+                            <p className={`${evaluation ? "mt-3" : ""} text-[13px] leading-relaxed text-foreground/75`}>{session.notes}</p>
                           ) : null}
                           <div className="mt-2.5 flex flex-wrap items-center gap-2">
                             <div className="flex items-center gap-1 rounded-md bg-secondary/60 px-1.5 py-0.5">
@@ -1200,7 +1294,7 @@ function ScheduleList({
 }
 
 export default function WeeklyPlanScreen({
-  athleteId: _athleteId,
+  athleteId,
   targetWeekStartDate,
   isPreparing,
   onRefresh,
@@ -1220,7 +1314,7 @@ export default function WeeklyPlanScreen({
   }, [targetWeekStartDate]);
 
   const screenQuery = useQuery({
-    queryKey: ["portal", "weekly-coach-screen", selectedWeekStartDate],
+    queryKey: ["portal", "weekly-coach-screen", athleteId, selectedWeekStartDate],
     queryFn: () => getCurrentUserWeeklyCoachScreen(selectedWeekStartDate),
     enabled: Boolean(selectedWeekStartDate) && !(isPreparing && selectedWeekStartDate === targetWeekStartDate),
     retry: false,
@@ -1238,17 +1332,18 @@ export default function WeeklyPlanScreen({
     }) => setCurrentUserWeeklyCoachSessionCompletion(weekStartDate, day, completed),
     onMutate: async ({ day, completed }) => {
       await queryClient.cancelQueries({
-        queryKey: ["portal", "weekly-coach-screen", selectedWeekStartDate],
+        queryKey: ["portal", "weekly-coach-screen", athleteId, selectedWeekStartDate],
       });
 
       const previousScreen = queryClient.getQueryData<CurrentUserWeeklyCoachScreen>([
         "portal",
         "weekly-coach-screen",
+        athleteId,
         selectedWeekStartDate,
       ]);
 
       queryClient.setQueryData<CurrentUserWeeklyCoachScreen>(
-        ["portal", "weekly-coach-screen", selectedWeekStartDate],
+        ["portal", "weekly-coach-screen", athleteId, selectedWeekStartDate],
         (current) => {
           if (!current?.plan) return current;
 
@@ -1277,13 +1372,13 @@ export default function WeeklyPlanScreen({
       if (!context?.previousScreen) return;
 
       queryClient.setQueryData(
-        ["portal", "weekly-coach-screen", selectedWeekStartDate],
+        ["portal", "weekly-coach-screen", athleteId, selectedWeekStartDate],
         context.previousScreen,
       );
     },
     onSettled: () => {
       queryClient.invalidateQueries({
-        queryKey: ["portal", "weekly-coach-screen", selectedWeekStartDate],
+        queryKey: ["portal", "weekly-coach-screen", athleteId, selectedWeekStartDate],
       });
     },
   });
@@ -1296,7 +1391,7 @@ export default function WeeklyPlanScreen({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["portal", "weekly-coach-screen", selectedWeekStartDate],
+        queryKey: ["portal", "weekly-coach-screen", athleteId, selectedWeekStartDate],
       });
     },
     onError: (error) => {
