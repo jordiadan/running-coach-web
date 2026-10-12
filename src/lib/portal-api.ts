@@ -66,6 +66,71 @@ export const trainingGoalOptions: { code: TrainingGoalCode; label: string }[] = 
   { code: "improve_running", label: "Improve my running" },
 ];
 
+const durationExecutionValues = [
+  "ON_TARGET",
+  "SHORTER",
+  "LONGER",
+  "UNKNOWN",
+] as const;
+const intensityExecutionValues = [
+  "ON_TARGET",
+  "TOO_HIGH",
+  "TOO_LOW",
+  "MIXED",
+  "UNKNOWN",
+] as const;
+const structureExecutionValues = [
+  "AS_PLANNED",
+  "PARTIAL",
+  "OFF_PLAN",
+  "NOT_APPLICABLE",
+  "UNKNOWN",
+] as const;
+
+export type WorkoutExecutionEvaluation =
+  | {
+      status: "EVALUATED";
+      score: number;
+      durationExecution: (typeof durationExecutionValues)[number];
+      intensityExecution: (typeof intensityExecutionValues)[number];
+      structureExecution: (typeof structureExecutionValues)[number];
+    }
+  | { status: "INSUFFICIENT_EVIDENCE" };
+
+function asExecutionEvaluation(
+  value: unknown,
+): WorkoutExecutionEvaluation | undefined {
+  const evaluation = asRecord(value);
+  if (evaluation.status === "INSUFFICIENT_EVIDENCE")
+    return { status: "INSUFFICIENT_EVIDENCE" };
+  if (
+    evaluation.status !== "EVALUATED" ||
+    typeof evaluation.score !== "number" ||
+    !Number.isInteger(evaluation.score) ||
+    evaluation.score < 0 ||
+    evaluation.score > 100
+  )
+    return undefined;
+  const durationExecution = durationExecutionValues.find(
+    (value) => value === evaluation.durationExecution,
+  );
+  const intensityExecution = intensityExecutionValues.find(
+    (value) => value === evaluation.intensityExecution,
+  );
+  const structureExecution = structureExecutionValues.find(
+    (value) => value === evaluation.structureExecution,
+  );
+  if (!durationExecution || !intensityExecution || !structureExecution)
+    return undefined;
+  return {
+    status: "EVALUATED",
+    score: evaluation.score,
+    durationExecution,
+    intensityExecution,
+    structureExecution,
+  };
+}
+
 export type WeeklyCoachSession = {
   day: string;
   modality: string;
@@ -74,6 +139,7 @@ export type WeeklyCoachSession = {
   durationMinutes: number;
   completed?: boolean;
   completionSource?: "MANUAL" | "SYNCED_ACTIVITY";
+  executionEvaluation?: WorkoutExecutionEvaluation;
   syncedActivity?: {
     activityId: string;
     provider?: string;
@@ -718,6 +784,7 @@ export async function getCurrentUserWeeklyCoachScreen(weekStartDate?: string) {
               completed: typeof session.completed === "boolean" ? session.completed : undefined,
               completionSource: asCompletionSource(session.completionSource),
               syncedActivity: asSyncedActivity(session.syncedActivity),
+              executionEvaluation: asExecutionEvaluation(session.executionEvaluation),
               role: asString(session.role) || undefined,
               intensityCategory: asString(session.intensityCategory),
               placementReason: asString(session.placementReason),

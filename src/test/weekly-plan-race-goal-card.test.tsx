@@ -245,7 +245,7 @@ describe("WeeklyPlanScreen race goal outcome", () => {
     }));
 
     await waitFor(() => {
-      const cached = queryClient.getQueryData<CurrentUserWeeklyCoachScreen>(["portal", "weekly-coach-screen", "2026-04-27"]);
+      const cached = queryClient.getQueryData<CurrentUserWeeklyCoachScreen>(["portal", "weekly-coach-screen", "athlete-1", "2026-04-27"]);
       expect(cached?.plan?.plan.sessions[0]).toMatchObject({
         completed: !completed,
         completionSource: !completed ? "MANUAL" : undefined,
