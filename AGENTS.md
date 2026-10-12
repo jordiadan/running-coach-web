@@ -120,89 +120,27 @@ the same detector from both user/global and project hook sources.
 
 ## Pull requests and visual evidence
 
-Before requesting review of any PR that changes a rendered screen or UI state,
-run the app and use the existing Playwright dependency to capture the **actual
-implemented result**. Capture only what explains the change: each affected
-screen and materially changed UI state, including loading, empty or error states
-when relevant. Include mobile and desktop when both are affected; avoid redundant
-captures of unchanged states. Prefer a focused screenshot over a full-page image
-when it retains enough context. Use a short GIF only when motion or an interaction
-is clearer than stills; do not add a GIF tool or dependency just for a PR.
+For PRs with meaningful visual changes, include a small, representative set of
+screenshots from the actual running application.
 
-For existing screens, show before/after when feasible. Run the base revision and
-the PR revision separately, using the same test data, viewport and UI state.
-Label each capture with route, viewport dimensions, state and before/after;
-identify the baseline commit. Explain any missing baseline or viewport. Never
-invent screenshots or present design mockups as implementation evidence.
+- Existing screens: prefer one before/after comparison (2 screenshots).
+- Larger redesigns: include a second comparison only if it adds meaningful value
+  (usually 2–4 screenshots total).
+- New screens: show the final implementation; no artificial before state is needed.
+- Minor visual tweaks: screenshots are optional when they add little value.
+- Non-visual changes: no screenshots required.
 
-Use test or anonymized data for every capture. Never expose personal
-information, credentials or tokens, including in URLs, browser chrome or
-developer tools. Inspect each image before uploading; redact any sensitive
-content that remains.
+Choose only the most representative screens and viewports. Do not capture every
+route, responsive variant or UI state. Use the existing Playwright tooling when
+appropriate. Before/after screenshots should use comparable data and viewports.
+Never present mockups or fabricated screenshots as implementation evidence.
 
-Store evidence in a temporary directory **outside every repository/worktree**,
-for example `mktemp -d "${TMPDIR:-/tmp}/running-coach-pr-evidence.XXXXXX"`.
-Never commit PR screenshots, GIFs or videos, or a capture archive/manifest.
-Do not create `docs/screenshots/` or use Git blob/raw URLs for new PR evidence.
-This rule concerns review evidence, not product assets.
-
-Capture and upload with the existing tools; no new package, CI job or persistent
-capture script is needed. Example for an affected login screen (adapt the route,
-ready-state selector, ports and viewports to the change):
-
-```sh
-evidence_dir=$(mktemp -d "${TMPDIR:-/tmp}/running-coach-pr-evidence.XXXXXX")
-# Base app on 5173; PR app on 5174. Run both from separate checkouts.
-npx --no-install playwright screenshot --browser chromium \
-  --viewport-size "390,844" --wait-for-selector "h1" \
-  http://localhost:5173/login "$evidence_dir/before-login-mobile.png"
-npx --no-install playwright screenshot --browser chromium \
-  --viewport-size "390,844" --wait-for-selector "h1" \
-  http://localhost:5174/login "$evidence_dir/after-login-mobile.png"
-```
-
-Wait for the intended state, fonts and animations to settle before capture.
-For interactive states or element crops, use Playwright's page/locator screenshot
-API from a temporary script instead of adding repository tooling. Repeat for
-desktop only when affected. Inspect each file before uploading.
-
-Create the PR first (keep it draft until required evidence is present). Check
-`gh pr edit --help` supports `--attach`; if unavailable, report the blocker
-instead of adding an uploader or committing files. Attach inspected files to the
-PR number for the current branch, never a reference PR:
-
-```sh
-pr_number=123 # Replace with this branch's PR number.
-gh pr view "$pr_number" --json body --jq .body > "$evidence_dir/pr-body-before.md"
-gh pr edit "$pr_number" \
-  --attach "$evidence_dir/before-login-mobile.png#Before — /login — 390 × 844 — signed out" \
-  --attach "$evidence_dir/after-login-mobile.png#After — /login — 390 × 844 — signed out"
-gh pr view "$pr_number" --json body --jq .body > "$evidence_dir/pr-body-after.md"
-```
-
-With no `--body` or `--body-file`, `--attach` preserves the current description
-and appends GitHub-hosted embeds. Repeat `--attach` for each selected PNG or GIF.
-Verify the original description and existing evidence remain intact, and the new
-media render directly in the description. Plain file links are not sufficient.
-If an upload partially fails, inspect the body and retry only missing files;
-a non-zero exit can still mean some attachments were published.
-
-To place embeds in a before/after table or update the checklist, fetch the latest
-**complete** body into a temporary file, edit only the relevant section, then use
-`gh pr edit "$pr_number" --body-file "$evidence_dir/pr-body-updated.md"`.
-Preserve all other text, checklists and uploaded asset URLs. Never replace the
-body with an evidence-only fragment. Confirm the resulting description after
-each edit. See the
-[GitHub CLI attachment documentation](https://cli.github.com/manual/gh_pr_edit)
-and [Playwright screenshot API](https://playwright.dev/docs/screenshots).
-
-Evidence must be embedded in the description before requesting review, including
-after updates to an existing PR. Complete the visible checklist in
-`.github/pull_request_template.md`. If capture, upload or rendering is blocked,
-document the blocker explicitly and keep the PR in draft until resolved.
-For changes with no rendered UI impact
-(e.g., docs, tooling, backend contracts), mark the visual evidence section
-`Not applicable — no screens changed`; do not generate irrelevant images.
+Use test or anonymized data and inspect captures for secrets or personal
+information. Keep evidence outside the repository; never commit PR screenshots.
+Embed selected captures in the PR when practical. If capture is genuinely blocked,
+briefly explain why instead of building elaborate workarounds. Do not block review
+solely because screenshots are unavailable. Screenshot collection must not replace
+normal UI verification.
 
 ## Verification and done
 
