@@ -120,32 +120,27 @@ the same detector from both user/global and project hook sources.
 
 ## Pull requests and visual evidence
 
-Screenshots help reviewers see the main visible difference; they are not
-exhaustive test coverage. For PRs with meaningful UI changes, show the actual
-running implementation with **one representative before/after pair by default**
-(two screenshots). For broader redesigns, use a second pair if it demonstrates
-another important flow or layout. Usually **2–4 screenshots total** are enough;
-add more only when strictly necessary to understand the change.
+For PRs with meaningful visual changes, include a small, representative set of
+screenshots from the actual running application.
 
-Choose the most informative screen and viewport. Do not capture every affected
-route, UI state, or mobile/desktop variant by default. Include another viewport,
-or loading/empty/error states, only when those changes are central to the PR.
-Minor copy, spacing or styling tweaks need screenshots only if they materially
-help the review; non-visual changes need none.
+- Existing screens: prefer one before/after comparison (2 screenshots).
+- Larger redesigns: include a second comparison only if it adds meaningful value
+  (usually 2–4 screenshots total).
+- New screens: show the final implementation; no artificial before state is needed.
+- Minor visual tweaks: screenshots are optional when they add little value.
+- Non-visual changes: no screenshots required.
 
-Use the existing Playwright tooling when capturing; do not add dependencies or
-persistent screenshot infrastructure. Before/after captures should use comparable
-data, viewport and state and be labeled clearly. Do not require a separate
-checkout, exact baseline SHA, screenshot matrix or exhaustive attachment manifest
-when a simple comparison is sufficient. A short GIF is optional for changes best
-shown in motion.
+Choose only the most representative screens and viewports. Do not capture every
+route, responsive variant or UI state. Use the existing Playwright tooling when
+appropriate. Before/after screenshots should use comparable data and viewports.
+Never present mockups or fabricated screenshots as implementation evidence.
 
-Use test or anonymized data, inspect images for personal information or secrets,
-and keep review captures outside the repository; never commit them. Embed the
-selected evidence in the PR when practical. If screenshots are unnecessary or
-cannot reasonably be produced, add a one-line explanation; **do not block review
-or keep a PR in draft solely because screenshots are unavailable**. Keep normal
-code verification and responsive/UX checks independent of screenshot count.
+Use test or anonymized data and inspect captures for secrets or personal
+information. Keep evidence outside the repository; never commit PR screenshots.
+Embed selected captures in the PR when practical. If capture is genuinely blocked,
+briefly explain why instead of building elaborate workarounds. Do not block review
+solely because screenshots are unavailable. Screenshot collection must not replace
+normal UI verification.
 
 ## Verification and done
 
