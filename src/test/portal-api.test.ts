@@ -519,6 +519,40 @@ describe("portal-api weekly coach helpers", () => {
     });
   });
 
+  it("reads heart-rate boundaries and source without recalculating them", async () => {
+    const heartRateZones = {
+      status: "AVAILABLE",
+      sourceThresholdBpm: 170,
+      sourceThresholdMeasuredAt: "2026-10-01T08:00:00Z",
+      zones: [
+        { number: 1, minBpmInclusive: null, maxBpmInclusive: 139 },
+        { number: 2, minBpmInclusive: 140, maxBpmInclusive: 149 },
+        { number: 3, minBpmInclusive: 150, maxBpmInclusive: 159 },
+        { number: 4, minBpmInclusive: 160, maxBpmInclusive: 169 },
+        { number: 5, minBpmInclusive: 170, maxBpmInclusive: null },
+      ],
+    };
+    apiRequestMock.mockResolvedValueOnce({ heartRateZones });
+    expect((await getAthleteProfile("athlete-1"))?.heartRateZones).toEqual(heartRateZones);
+  });
+
+  it.each(["CALIBRATION_REQUIRED", "PENDING_CALCULATION"])(
+    "discards any ranges supplied with %s", async (status) => {
+      apiRequestMock.mockResolvedValueOnce({ heartRateZones: { status, zones: [{ number: 1, maxBpmInclusive: 144 }] } });
+      expect((await getAthleteProfile("athlete-1"))?.heartRateZones).toEqual({ status });
+    },
+  );
+
+  it.each([
+    undefined,
+    { status: "FUTURE_STATUS" },
+    { status: "AVAILABLE", zones: [] },
+    { status: "AVAILABLE", sourceThresholdBpm: 170, sourceThresholdMeasuredAt: "invalid", zones: [] },
+  ])("handles older or incomplete zone contracts without guessed data", async (heartRateZones) => {
+    apiRequestMock.mockResolvedValueOnce({ heartRateZones });
+    expect((await getAthleteProfile("athlete-1"))?.heartRateZones).toBeUndefined();
+  });
+
   it("sends only the original target time in race profile updates", async () => {
     apiRequestMock.mockResolvedValueOnce({ athleteId: "athlete-1" });
 

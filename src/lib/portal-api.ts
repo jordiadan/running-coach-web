@@ -53,9 +53,25 @@ export type AthleteProfile = {
   raceTargetType: RaceTargetType;
   targetTimeSeconds: number | "";
   targetPaceSecondsPerKm: number | "";
+  heartRateZones?: AthleteHeartRateZones;
 };
 
-export type AthleteProfileUpdate = Omit<AthleteProfile, "athleteId">;
+export type AthleteProfileUpdate = Omit<AthleteProfile, "athleteId" | "heartRateZones">;
+
+export type AthleteHeartRateZone = {
+  number: number;
+  minBpmInclusive: number | null;
+  maxBpmInclusive: number | null;
+};
+
+export type AthleteHeartRateZones =
+  | {
+      status: "AVAILABLE";
+      zones: AthleteHeartRateZone[];
+      sourceThresholdBpm: number;
+      sourceThresholdMeasuredAt: string;
+    }
+  | { status: "CALIBRATION_REQUIRED" | "PENDING_CALCULATION" };
 
 export type TrainingGoalCode = "prepare_for_race" | "improve_running";
 
@@ -288,6 +304,48 @@ function asOptionalNumber(value: unknown): number | undefined {
   return typeof value === "number" && Number.isFinite(value) ? value : undefined;
 }
 
+function asHeartRateZones(value: unknown): AthleteHeartRateZones | undefined {
+  const record = asRecord(value);
+  if (record.status === "CALIBRATION_REQUIRED" || record.status === "PENDING_CALCULATION") {
+    return { status: record.status };
+  }
+  const isBpm = (bpm: unknown): bpm is number =>
+    typeof bpm === "number" && Number.isInteger(bpm) && bpm > 0;
+  if (
+    record.status !== "AVAILABLE" ||
+    !isBpm(record.sourceThresholdBpm) ||
+    typeof record.sourceThresholdMeasuredAt !== "string" ||
+    !Number.isFinite(Date.parse(record.sourceThresholdMeasuredAt)) ||
+    !Array.isArray(record.zones) ||
+    record.zones.length !== 5
+  ) {
+    return undefined;
+  }
+  const zones: AthleteHeartRateZone[] = [];
+  for (const [index, item] of record.zones.entries()) {
+    const zone = asRecord(item);
+    const { minBpmInclusive, maxBpmInclusive } = zone;
+    if (
+      zone.number !== index + 1 ||
+      !(index === 0 ? minBpmInclusive === null : isBpm(minBpmInclusive)) ||
+      !(index === 4 ? maxBpmInclusive === null : isBpm(maxBpmInclusive))
+    ) {
+      return undefined;
+    }
+    zones.push({
+      number: index + 1,
+      minBpmInclusive: minBpmInclusive as number | null,
+      maxBpmInclusive: maxBpmInclusive as number | null,
+    });
+  }
+  return {
+    status: "AVAILABLE",
+    zones,
+    sourceThresholdBpm: record.sourceThresholdBpm,
+    sourceThresholdMeasuredAt: record.sourceThresholdMeasuredAt,
+  };
+}
+
 function asGoalTimelineState(value: unknown): GoalTimelineState | undefined {
   const state = asString(value);
 
@@ -518,7 +576,7 @@ export async function disconnectTrainingProvider(provider: TrainingProviderId, a
   });
 }
 
-export async function getAthleteProfile(athleteId: string) {
+export async function getAthleteProfile(athleteId: string): Promise<AthleteProfile | undefined> {
   let payload: unknown;
 
   try {
@@ -551,6 +609,7 @@ export async function getAthleteProfile(athleteId: string) {
     raceTargetType: asRaceTargetType(raceTarget.type),
     targetTimeSeconds: asNumberOrBlank(raceTarget.targetTimeSeconds),
     targetPaceSecondsPerKm: asNumberOrBlank(raceTarget.targetPaceSecondsPerKm),
+    heartRateZones: asHeartRateZones(record.heartRateZones),
   } satisfies AthleteProfile;
 }
 

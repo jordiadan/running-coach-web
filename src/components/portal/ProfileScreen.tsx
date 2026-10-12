@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import HeartRateZones from "@/components/portal/HeartRateZones";
 import {
   getAthleteProfile,
   isProfileUpdateComplete,
@@ -651,6 +652,7 @@ export default function ProfileScreen({
           )}
         </Button>
       </form>
+      {!isOnboarding && <HeartRateZones zones={profileQuery.data?.heartRateZones} />}
     </div>
   );
 }

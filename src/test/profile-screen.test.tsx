@@ -64,6 +64,26 @@ describe("ProfileScreen race goal focus", () => {
     });
   });
 
+  it("keeps calculated zones outside profile updates", async () => {
+    getAthleteProfileMock.mockResolvedValue({
+      ...athleteProfile,
+      heartRateZones: { status: "PENDING_CALCULATION" },
+    });
+    renderWithQueryClient(<ProfileScreen athleteId="athlete-1" />);
+    expect(await screen.findByText("Calculation pending")).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByLabelText("Display name")).toHaveValue("Jordi"));
+
+    fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
+    await waitFor(() => expect(updateAthleteProfileMock).toHaveBeenCalledTimes(1));
+    expect(updateAthleteProfileMock.mock.calls[0][1]).not.toHaveProperty("heartRateZones");
+  });
+
+  it("keeps onboarding focused on completing the profile", async () => {
+    renderWithQueryClient(<ProfileScreen athleteId="athlete-1" variant="onboarding" />);
+    await screen.findByDisplayValue("Jordi");
+    expect(screen.queryByRole("heading", { name: "Running heart-rate zones" })).not.toBeInTheDocument();
+  });
+
   it("scrolls, focuses, and highlights the goal race section when requested", async () => {
     const onFocusTargetHandled = vi.fn();
 
