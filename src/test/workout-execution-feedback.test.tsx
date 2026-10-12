@@ -159,11 +159,18 @@ describe("weekly execution feedback screen", () => {
     expect(screen.queryByLabelText(/Execution score/)).not.toBeInTheDocument();
   });
 
-  it.each(["MANUAL", "SYNCED_ACTIVITY"])(
-    "shows one discreet score for %s completion and opens three dimensions",
-    async (source) => {
+  it.each(
+    ["MANUAL", "SYNCED_ACTIVITY"].flatMap((source) =>
+      ["EASY", "RECOVERY", "LONG_RUN", "TEMPO", "VO2"].map((type) => ({
+        source,
+        type,
+      })),
+    ),
+  )(
+    "shows one discreet score for $source/$type and opens three dimensions",
+    async ({ source, type }) => {
       request.mockResolvedValue(
-        weeklyScreen(evaluation, { completionSource: source }),
+        weeklyScreen(evaluation, { completionSource: source, type }),
       );
       renderWeek();
       const disclosure = await screen.findByRole("button", {
@@ -219,21 +226,111 @@ describe("weekly execution feedback screen", () => {
     },
   );
 
-  it.each([
-    [null, "No execution evaluation available."],
+  it.each(
     [
-      { status: "INSUFFICIENT_EVIDENCE" },
-      "Not enough activity data to evaluate this workout.",
-    ],
-  ])(
-    "distinguishes absent and insufficient feedback without a score",
-    async (value, message) => {
-      request.mockResolvedValue(weeklyScreen(value));
+      ["STRENGTH", "STRENGTH"],
+      ["MOBILITY", "MOBILITY"],
+      ["RUN", "THRESHOLD_TEST"],
+      ["CYCLING", "EASY"],
+    ].flatMap(([modality, type]) =>
+      [null, { status: "INSUFFICIENT_EVIDENCE" }, evaluation].map((value) => ({
+        modality,
+        type,
+        value,
+      })),
+    ),
+  )(
+    "hides execution feedback for unsupported $modality/$type sessions %#",
+    async ({ modality, type, value }) => {
+      request.mockResolvedValue(
+        weeklyScreen(value, { modality, type, notes: "Session notes." }),
+      );
+      renderWeek();
+      const disclosure = await screen.findByRole("button", {
+        name: "Details for Easy run",
+      });
+      fireEvent.click(disclosure);
+      expect(screen.getByText("Session notes.")).toBeInTheDocument();
+      expect(disclosure).not.toHaveAttribute("aria-describedby");
+      expect(
+        screen.queryByLabelText(/Execution score/),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/No execution evaluation/),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/Not enough activity data/),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("region", { name: "Compared with plan" }),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: /View on Intervals/ }),
+      ).toHaveAttribute("href", "https://intervals.icu/activities/activity");
+    },
+  );
+
+  it.each([null, { status: "INSUFFICIENT_EVIDENCE" }, evaluation])(
+    "hides execution feedback for manual completion without a linked activity %#",
+    async (value) => {
+      request.mockResolvedValue(
+        weeklyScreen(value, {
+          completionSource: "MANUAL",
+          syncedActivity: null,
+          notes: "Keep a relaxed, conversational effort.",
+        }),
+      );
+      renderWeek();
+      const disclosure = await screen.findByRole("button", {
+        name: "Details for Easy run",
+      });
+      fireEvent.click(disclosure);
+      expect(
+        screen.getByRole("button", { name: "Mark Easy run as incomplete" }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText("Keep a relaxed, conversational effort."),
+      ).toBeInTheDocument();
+      expect(disclosure).not.toHaveAttribute("aria-describedby");
+      expect(
+        screen.queryByLabelText(/Execution score/),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/No execution evaluation/),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/Not enough activity data/),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("region", { name: "Compared with plan" }),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("link", { name: /View on/ }),
+      ).not.toBeInTheDocument();
+    },
+  );
+
+  it.each(
+    ["MANUAL", "SYNCED_ACTIVITY"].flatMap((source) =>
+      [
+        { value: null, message: "No execution evaluation available." },
+        {
+          value: { status: "INSUFFICIENT_EVIDENCE" },
+          message: "Not enough activity data to evaluate this workout.",
+        },
+      ].map((feedback) => ({ source, ...feedback })),
+    ),
+  )(
+    "distinguishes absent and insufficient feedback with a linked activity for $source %#",
+    async ({ source, value, message }) => {
+      request.mockResolvedValue(
+        weeklyScreen(value, { completionSource: source }),
+      );
       renderWeek();
       fireEvent.click(
         await screen.findByRole("button", { name: "Details for Easy run" }),
       );
-      expect(screen.getByText(message as string)).toBeInTheDocument();
+      expect(screen.getByText(message)).toBeInTheDocument();
       expect(
         screen.queryByLabelText(/Execution score/),
       ).not.toBeInTheDocument();
@@ -242,6 +339,29 @@ describe("weekly execution feedback screen", () => {
       ).not.toBeInTheDocument();
     },
   );
+
+  it("keeps absent evaluation feedback for manual completion with a linked activity but no provider URL", async () => {
+    request.mockResolvedValue(
+      weeklyScreen(null, {
+        completionSource: "MANUAL",
+        syncedActivity: {
+          activityId: "activity",
+          provider: "STRAVA",
+          durationMinutes: 35,
+          distanceKm: 6,
+        },
+      }),
+    );
+    renderWeek();
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Details for Easy run" }),
+    );
+    expect(
+      screen.getByText("No execution evaluation available."),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Synced from Strava")).toBeInTheDocument();
+    expect(screen.queryByLabelText(/Execution score/)).not.toBeInTheDocument();
+  });
 
   it("does not turn unknown evidence or inapplicable structure into a conclusion", async () => {
     request.mockResolvedValue(

@@ -202,12 +202,10 @@ function SyncedActivityBadge({ session }: { session: WeeklyCoachSession }) {
 }
 
 function ExecutionFeedbackDetails({
-  session,
+  evaluation,
 }: {
-  session: WeeklyCoachSession;
+  evaluation?: WorkoutExecutionEvaluation;
 }) {
-  if (!session.completed) return null;
-  const evaluation = session.executionEvaluation;
   if (!evaluation || evaluation.status === "INSUFFICIENT_EVIDENCE") {
     return (
       <p className="mt-3 text-sm text-foreground/70">
@@ -1130,7 +1128,16 @@ function ScheduleList({
               const isKey = session.role === "KEY";
               const isToday = isCurrentWeek && session.day === todayDay;
               const expanded = expandedDay === session.day;
-              const evaluation = isDone ? session.executionEvaluation : undefined;
+              const showExecutionFeedback =
+                isDone &&
+                session.modality === "RUN" &&
+                ["EASY", "RECOVERY", "LONG_RUN", "TEMPO", "VO2"].includes(
+                  session.type,
+                ) &&
+                Boolean(session.syncedActivity);
+              const evaluation = showExecutionFeedback
+                ? session.executionEvaluation
+                : undefined;
               const config = typeConfig[session.modality] ?? typeConfig.RUN;
               const TypeIcon = config.icon;
               const canToggle = supportsCompletion && isCurrentWeek && !completionPending && !isRest;
@@ -1249,7 +1256,9 @@ function ScheduleList({
                         id={`session-${session.day}-details`}
                       >
                         <div className="pb-3 pl-[2.75rem] pr-3 pt-1.5 sm:pl-[4.5rem]">
-                          <ExecutionFeedbackDetails session={session} />
+                          {showExecutionFeedback ? (
+                            <ExecutionFeedbackDetails evaluation={evaluation} />
+                          ) : null}
                           {session.notes ? (
                             <p className={`${evaluation ? "mt-3" : ""} text-[13px] leading-relaxed text-foreground/75`}>{session.notes}</p>
                           ) : null}
