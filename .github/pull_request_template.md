@@ -6,15 +6,11 @@
 
 <!-- Commands/tests run and outcomes. -->
 
-## Visual evidence (for meaningful UI changes)
+## Visual evidence
 
-<!-- Focus on the main difference, not every screen or state.
-Default: one before/after pair (2 screenshots).
-For a broad redesign: optionally a second pair (usually 4 screenshots total).
-Use additional captures only when necessary to explain a distinct important change.
-A second viewport or loading/empty/error state is not mandatory unless central.
-Use real app captures with test/anonymized data and keep them out of the repo.
-Label the before/after pair and embed images here when practical.
-For minor or non-visual changes, or if capture is impractical,
-write "Not applicable" or a short explanation; do not block review. -->
+<!-- Include representative screenshots of meaningful visual changes
+(typically one before/after pair). For new screens, show the final result.
+Omit screenshots when they add no review value, and briefly explain genuine
+capture blockers. Use real, anonymized captures; never include mockups as
+implementation evidence. No screenshots needed for non-visual changes. -->
 
