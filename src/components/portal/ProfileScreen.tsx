@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import HeartRateZones from "@/components/portal/HeartRateZones";
 import {
   getAthleteProfile,
   isProfileUpdateComplete,
@@ -83,6 +84,14 @@ export default function ProfileScreen({
     queryKey: ["portal", "athlete", athleteId],
     queryFn: () => getAthleteProfile(athleteId),
     enabled: Boolean(athleteId),
+    // Zone calculation is asynchronous. Poll briefly only while a newer threshold is pending.
+    refetchInterval: (query) =>
+      variant !== "onboarding" &&
+      query.state.data?.heartRateZones?.status === "PENDING_CALCULATION" &&
+      query.state.dataUpdateCount < 8 &&
+      query.state.fetchFailureCount === 0
+        ? 15_000
+        : false,
   });
 
   const [form, setForm] = useState<AthleteProfileUpdate>(emptyForm);
@@ -651,6 +660,7 @@ export default function ProfileScreen({
           )}
         </Button>
       </form>
+      {!isOnboarding && <HeartRateZones zones={profileQuery.data?.heartRateZones} />}
     </div>
   );
 }
