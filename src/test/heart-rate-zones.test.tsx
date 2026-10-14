@@ -1,8 +1,22 @@
 import { render, screen, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import HeartRateZones from "@/components/portal/HeartRateZones";
 
 describe("HeartRateZones", () => {
+  beforeAll(() => {
+    // JSDOM has no viewport; real visibility and motion are checked in Playwright.
+    vi.stubGlobal(
+      "IntersectionObserver",
+      class {
+        observe() {}
+        unobserve() {}
+        disconnect() {}
+      },
+    );
+  });
+
+  afterAll(() => vi.unstubAllGlobals());
+
   it("shows exact inclusive ranges and threshold provenance", () => {
     render(
       <HeartRateZones
@@ -21,15 +35,20 @@ describe("HeartRateZones", () => {
       />,
     );
 
-    const table = screen.getByRole("table", {
+    const list = screen.getByRole("list", {
       name: "Running heart-rate zones",
     });
-    expect(within(table).getByText("≤ 144")).toBeInTheDocument();
-    expect(within(table).getByText("145–152")).toBeInTheDocument();
-    expect(within(table).getByText("153–161")).toBeInTheDocument();
-    expect(within(table).getByText("162–169")).toBeInTheDocument();
-    expect(within(table).getByText("≥ 170")).toBeInTheDocument();
-    expect(screen.getByText("170 bpm")).toBeInTheDocument();
+    const rows = within(list).getAllByRole("listitem");
+    expect(rows).toHaveLength(5);
+    ["≤ 144", "145–152", "153–161", "162–169", "≥ 170"].forEach(
+      (range, index) => {
+        expect(
+          within(rows[index]).getByText(`Z${index + 1}`),
+        ).toBeInTheDocument();
+        expect(rows[index]).toHaveTextContent(`${range} bpm`);
+      },
+    );
+    expect(screen.getAllByRole("definition")[0]).toHaveTextContent("170 bpm");
     expect(screen.getByText("1 Oct 2026")).toHaveAttribute(
       "dateTime",
       "2026-10-01T23:30:00Z",
@@ -46,7 +65,7 @@ describe("HeartRateZones", () => {
     (zones, message) => {
       render(<HeartRateZones zones={zones} />);
       expect(screen.getByText(message)).toBeInTheDocument();
-      expect(screen.queryByRole("table")).not.toBeInTheDocument();
+      expect(screen.queryByRole("list")).not.toBeInTheDocument();
       expect(screen.queryByText(/bpm/)).not.toBeInTheDocument();
     },
   );
