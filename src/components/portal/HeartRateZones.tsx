@@ -1,3 +1,4 @@
+import { motion, useReducedMotion } from "framer-motion";
 import type {
   AthleteHeartRateZone,
   AthleteHeartRateZones,
@@ -14,6 +15,7 @@ export default function HeartRateZones({
 }: {
   zones: AthleteHeartRateZones | undefined;
 }) {
+  const reduceMotion = useReducedMotion();
   const available = zones?.status === "AVAILABLE";
   const message =
     zones?.status === "CALIBRATION_REQUIRED"
@@ -34,11 +36,11 @@ export default function HeartRateZones({
   return (
     <section
       aria-labelledby="heart-rate-zones-heading"
-      className="mt-10 border-t border-divider pt-8"
+      className="heart-rate-zones mt-10 border-t border-divider pt-8"
     >
       <h3
         id="heart-rate-zones-heading"
-        className="font-serif text-xl text-foreground"
+        className="font-sans text-xl font-medium tracking-tight text-foreground"
       >
         Running heart-rate zones
       </h3>
@@ -47,18 +49,60 @@ export default function HeartRateZones({
       </p>
       {available ? (
         <>
-          <dl className="mt-5 flex flex-wrap gap-x-8 gap-y-3 text-sm">
-            <div>
-              <dt className="text-foreground/75">
-                Lactate-threshold heart rate (LTHR)
+          <dl className="mt-6">
+            <div className="flex items-center justify-between gap-4">
+              <dt className="text-sm leading-relaxed text-foreground/75">
+                <span className="block font-medium text-foreground">LTHR</span>
+                Lactate-threshold heart rate
               </dt>
-              <dd className="mt-1 font-medium tabular-nums text-foreground">
-                {zones.sourceThresholdBpm} bpm
+              <dd className="shrink-0 text-3xl font-medium tracking-tight tabular-nums text-foreground">
+                {zones.sourceThresholdBpm}{" "}
+                <span className="text-sm font-normal tracking-normal text-foreground/75">
+                  bpm
+                </span>
               </dd>
             </div>
-            <div>
-              <dt className="text-foreground/75">Measured</dt>
-              <dd className="mt-1 text-foreground">
+          </dl>
+          <ol aria-label="Running heart-rate zones" className="mt-8 space-y-5">
+            {zones.zones.map((zone, index) => (
+              <li key={zone.number}>
+                <div className="flex items-baseline justify-between gap-4">
+                  <span className="text-base font-medium text-foreground">
+                    Z{zone.number}
+                  </span>
+                  <span className="text-lg font-medium tabular-nums text-foreground">
+                    {rangeLabel(zone)}{" "}
+                    <span className="text-sm font-normal text-foreground/75">
+                      bpm
+                    </span>
+                  </span>
+                </div>
+                <motion.div
+                  aria-hidden="true"
+                  className="heart-rate-zone-band mt-2 h-1.5 rounded-sm"
+                  style={{
+                    backgroundColor: `hsl(var(--heart-rate-zone-${zone.number}))`,
+                  }}
+                  initial={
+                    reduceMotion ? false : { clipPath: "inset(0 25% 0 0)" }
+                  }
+                  whileInView={
+                    reduceMotion ? undefined : { clipPath: "inset(0 0% 0 0)" }
+                  }
+                  viewport={{ once: true, amount: 0.5 }}
+                  transition={{
+                    duration: reduceMotion ? 0 : 0.5,
+                    delay: reduceMotion ? 0 : index * 0.03,
+                    ease: [0.16, 1, 0.3, 1],
+                  }}
+                />
+              </li>
+            ))}
+          </ol>
+          <dl className="mt-6 text-sm text-foreground/75">
+            <div className="flex flex-wrap gap-x-2 gap-y-1">
+              <dt>Measured</dt>
+              <dd>
                 <time dateTime={zones.sourceThresholdMeasuredAt}>
                   {new Intl.DateTimeFormat("en-GB", {
                     day: "numeric",
@@ -66,42 +110,12 @@ export default function HeartRateZones({
                     year: "numeric",
                     timeZone: "UTC",
                   }).format(new Date(zones.sourceThresholdMeasuredAt))}
-                </time>
-                <span className="ml-1 text-xs text-foreground/75">(UTC)</span>
+                </time>{" "}
+                <span>(UTC)</span>
               </dd>
             </div>
           </dl>
-          <table
-            aria-label="Running heart-rate zones"
-            className="mt-6 w-full text-sm"
-          >
-            <thead>
-              <tr className="border-b border-divider text-foreground/75">
-                <th scope="col" className="pb-3 text-left font-normal">
-                  Zone
-                </th>
-                <th scope="col" className="pb-3 text-right font-normal">
-                  Heart rate · bpm
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-divider">
-              {zones.zones.map((zone) => (
-                <tr key={zone.number}>
-                  <th
-                    scope="row"
-                    className="py-3 text-left font-medium text-foreground"
-                  >
-                    Z{zone.number}
-                  </th>
-                  <td className="py-3 text-right tabular-nums text-foreground">
-                    {rangeLabel(zone)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <p className="mt-3 text-xs leading-relaxed text-foreground/75">
+          <p className="mt-2 text-xs leading-relaxed text-foreground/75">
             Range limits are included. These are your Running Coach zones for
             running.
           </p>

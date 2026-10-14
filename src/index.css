@@ -162,6 +162,17 @@
   }
 }
 
+@layer components {
+  .heart-rate-zones {
+    /* Intensity colors belong to the bands; labels retain the theme's contrast. */
+    --heart-rate-zone-1: 187 38% 43%;
+    --heart-rate-zone-2: 149 30% 45%;
+    --heart-rate-zone-3: 40 57% 50%;
+    --heart-rate-zone-4: 20 65% 54%;
+    --heart-rate-zone-5: 2 55% 53%;
+  }
+}
+
 @layer utilities {
   .text-subtle {
     color: hsl(var(--text-subtle));
