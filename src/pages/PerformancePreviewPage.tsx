@@ -59,7 +59,6 @@ export default function PerformancePreviewPage() {
             <h1>
               Performance<span>.</span>
             </h1>
-            <p>Small efforts. A bigger picture.</p>
           </div>
           <div className="scenario-control">
             <label htmlFor="sample-scenario">
@@ -133,7 +132,6 @@ export default function PerformancePreviewPage() {
           />
         )}
         <footer className="performance-footer">
-          <span>Built from weeks. Understood at a glance.</span>
           <Link to="/portal">
             <ArrowLeft size={14} aria-hidden="true" />
             Back to weekly plan

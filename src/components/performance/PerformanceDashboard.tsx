@@ -1,15 +1,16 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import { format } from "date-fns";
+import { motion, useReducedMotion } from "framer-motion";
 import {
   Activity,
-  ArrowDown,
+  ArrowDownRight,
   ArrowRight,
   ArrowUpRight,
   Check,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
-  Info,
+  Clock3,
   Minus,
 } from "lucide-react";
 import {
@@ -29,12 +30,18 @@ import {
 } from "./performance-data";
 
 type Props = { weeks: PerformanceWeek[]; onExplore: () => void };
+type WeekSelection = {
+  weeks: PerformanceWeek[];
+  selectedIndex: number;
+  onSelect: (index: number) => void;
+};
 
 const metrics: { id: VolumeMetric; label: string; unit: string }[] = [
   { id: "distanceKm", label: "Distance", unit: "km" },
   { id: "durationMinutes", label: "Duration", unit: "min" },
   { id: "runCount", label: "Runs", unit: "runs" },
 ];
+const ease = [0.16, 1, 0.3, 1] as const;
 
 function WeekDetailLink({ week }: { week: PerformanceWeek }) {
   return (
@@ -47,95 +54,164 @@ function WeekDetailLink({ week }: { week: PerformanceWeek }) {
           ?.focus({ preventScroll: true })
       }
     >
-      View {weekRange(week.weekStartDate)} details{" "}
+      View {weekRange(week.weekStartDate)} details
       <ArrowRight size={15} aria-hidden="true" />
     </a>
   );
 }
 
-function CompletionSummary({ weeks }: { weeks: PerformanceWeek[] }) {
+function sessionState(
+  plan: NonNullable<PerformanceWeek["plan"]>,
+  index: number,
+) {
+  return index < plan.matched
+    ? "matched"
+    : index < plan.completed
+      ? "manual"
+      : "remaining";
+}
+
+function CompletionSummary({ weeks, selectedIndex, onSelect }: WeekSelection) {
   const summary = summarizeHistory(weeks);
+  const maxSessions = Math.max(
+    1,
+    ...weeks.map((week) => week.plan?.planned ?? 0),
+  );
   return (
     <section
       className="completion-summary"
       aria-labelledby="consistency-heading"
     >
-      <div className="section-heading">
-        <h2 id="consistency-heading">Showing up adds up.</h2>
-        <Activity size={19} aria-hidden="true" />
+      <div className="consistency-overview">
+        <h2 id="consistency-heading">Consistency</h2>
+        {summary.completionPercent === null ? (
+          <p className="completion-empty">No plans to compare yet.</p>
+        ) : (
+          <>
+            <p className="completion-percent">
+              <strong>
+                {summary.completionPercent}
+                <span>%</span>
+              </strong>{" "}
+              <span>completion</span>
+            </p>
+            <p className="completion-count">
+              <strong>
+                {summary.completed} / {summary.planned}
+              </strong>{" "}
+              planned runs
+            </p>
+          </>
+        )}
       </div>
-      {summary.completionPercent === null ? (
-        <div className="completion-empty">
-          <p>No plans to compare yet.</p>
-          <p>
-            Your planned and completed runs will appear here when a weekly plan
-            is available.
-          </p>
+      <div className="week-rhythm">
+        <div className="rhythm-heading">
+          <h3>Week by week</h3>
+          <span>{summary.plannedWeeks} weeks with a plan</span>
         </div>
-      ) : (
-        <>
-          <p className="completion-sentence">
-            <strong>
-              {summary.completed}
-              <span> / {summary.planned}</span>
-            </strong>
-            <br />
-            planned runs marked completed
-          </p>
-          <div
-            className="completion-track"
-            role="img"
-            aria-label={`${summary.matched} activity-matched, ${summary.manualOnly} manual only, ${summary.planned - summary.completed} not completed out of ${summary.planned} planned runs`}
-          >
-            <span
-              className="matched-fill"
-              style={{ width: `${(summary.matched / summary.planned) * 100}%` }}
-            />
-            <span
-              className="manual-fill"
-              style={{
-                width: `${(summary.manualOnly / summary.planned) * 100}%`,
-              }}
-            />
+        <div
+          className="rhythm-weeks"
+          role="group"
+          aria-label="Weekly plan completion; select a week for details"
+        >
+          {weeks.map((week, index) => {
+            const plan = week.plan;
+            return (
+              <button
+                key={week.weekStartDate}
+                type="button"
+                className={cn(
+                  "rhythm-week",
+                  selectedIndex === index && "is-selected",
+                )}
+                aria-pressed={selectedIndex === index}
+                aria-controls="selected-week-detail"
+                aria-label={`Explore week of ${format(weekDate(week.weekStartDate), "d MMM")}: ${plan ? `${plan.completed} of ${plan.planned} completed, ${plan.matched} activity-matched, ${plan.completed - plan.matched} manual only` : "no plan"}`}
+                onClick={() => onSelect(index)}
+              >
+                <span
+                  className={cn("rhythm-stack", !plan && "no-plan-stack")}
+                  aria-hidden="true"
+                >
+                  {plan ? (
+                    Array.from({ length: maxSessions }, (_, slot) => {
+                      const sessionIndex = slot - (maxSessions - plan.planned);
+                      return (
+                        <span
+                          key={slot}
+                          className={
+                            sessionIndex < 0
+                              ? "rhythm-spacer"
+                              : `rhythm-cell session-${sessionState(plan, sessionIndex)}`
+                          }
+                        >
+                          {sessionIndex >= 0 &&
+                            sessionState(plan, sessionIndex) === "manual" && (
+                              <Check size={11} />
+                            )}
+                          {sessionIndex >= 0 &&
+                            sessionState(plan, sessionIndex) ===
+                              "remaining" && <Minus size={10} />}
+                        </span>
+                      );
+                    })
+                  ) : (
+                    <Minus size={16} />
+                  )}
+                </span>
+                <span className="rhythm-count" aria-hidden="true">
+                  {plan ? (
+                    <>
+                      {plan.completed}
+                      <span>/{plan.planned}</span>
+                    </>
+                  ) : (
+                    "No plan"
+                  )}
+                </span>
+                <span className="rhythm-date" aria-hidden="true">
+                  {format(weekDate(week.weekStartDate), "d MMM")}
+                </span>
+                <span className="rhythm-selection" aria-hidden="true" />
+              </button>
+            );
+          })}
+        </div>
+      </div>
+      <div className="consistency-footer">
+        <dl className="completion-legend">
+          <div>
+            <dt>
+              <span className="legend-dot matched-dot" />
+              Activity-matched
+            </dt>
+            <dd>{summary.matched}</dd>
           </div>
-          <dl className="completion-breakdown">
-            <div>
-              <dt>
-                <span className="legend-dot matched-dot" />
-                Activity-matched
-              </dt>
-              <dd>{summary.matched}</dd>
-            </div>
-            <div>
-              <dt>
-                <span className="legend-dot manual-dot" />
-                Manual only
-              </dt>
-              <dd>{summary.manualOnly}</dd>
-            </div>
-            <div>
-              <dt>
-                <span className="legend-dot remaining-dot" />
-                Not completed
-              </dt>
-              <dd>{summary.planned - summary.completed}</dd>
-            </div>
-          </dl>
-          <p className="completion-footnote">
-            <strong>{summary.completionPercent}% completion</strong> across{" "}
-            {summary.plannedWeeks} weeks with a plan.{" "}
-            {8 - summary.plannedWeeks > 0 &&
-              `${8 - summary.plannedWeeks} week without a plan excluded.`}
+          <div>
+            <dt>
+              <span className="legend-dot manual-dot">
+                <Check size={7} aria-hidden="true" />
+              </span>
+              Manual only
+            </dt>
+            <dd>{summary.manualOnly}</dd>
+          </div>
+          <div>
+            <dt>
+              <span className="legend-dot remaining-dot" />
+              Not completed
+            </dt>
+            <dd>{summary.planned - summary.completed}</dd>
+          </div>
+        </dl>
+        {weeks.length > summary.plannedWeeks && (
+          <p>
+            {weeks.length - summary.plannedWeeks}{" "}
+            {weeks.length - summary.plannedWeeks === 1 ? "week" : "weeks"}{" "}
+            without a plan excluded
           </p>
-        </>
-      )}
-      <p className="evidence-note">
-        <Info size={15} aria-hidden="true" />
-        <span>
-          A manual check-in records completion. It doesn’t add distance or
-          create an activity.
-        </span>
-      </p>
+        )}
+      </div>
     </section>
   );
 }
@@ -145,12 +221,9 @@ function VolumeChart({
   metric,
   selectedIndex,
   onSelect,
-}: {
-  weeks: PerformanceWeek[];
-  metric: VolumeMetric;
-  selectedIndex: number;
-  onSelect: (index: number) => void;
-}) {
+}: WeekSelection & { metric: VolumeMetric }) {
+  const reducedMotion = useReducedMotion();
+  const selectionId = useId();
   const maximum = Math.max(
     ...weeks.map((week) =>
       week.recorded.availability === "available" ? week.recorded[metric] : 0,
@@ -173,12 +246,15 @@ function VolumeChart({
       </div>
       <div className="chart-columns">
         {weeks.map((week, index) => {
-          const recorded = week.recorded;
-          const available = recorded.availability === "available";
-          const value = available ? recorded[metric] : null;
+          const available = week.recorded.availability === "available";
+          const value =
+            week.recorded.availability === "available"
+              ? week.recorded[metric]
+              : null;
           const selected = selectedIndex === index;
+          const scale = value === 0 ? 0.007 : (value ?? 0) / ceiling;
           return (
-            <Tooltip key={week.weekStartDate} delayDuration={100}>
+            <Tooltip key={week.weekStartDate} delayDuration={180}>
               <TooltipTrigger asChild>
                 <button
                   type="button"
@@ -188,33 +264,58 @@ function VolumeChart({
                     !available && "is-unavailable",
                   )}
                   aria-pressed={selected}
+                  aria-controls="selected-week-detail"
                   aria-label={`${weekRange(week.weekStartDate)}: ${available ? metricValue(value, metric) : "recorded data unavailable"}. Show week details.`}
                   onClick={() => onSelect(index)}
                 >
-                  <span className="column-plot">
+                  {selected && (
+                    <motion.span
+                      className="column-highlight"
+                      layoutId={reducedMotion ? undefined : selectionId}
+                      transition={{ duration: reducedMotion ? 0 : 0.3, ease }}
+                      aria-hidden="true"
+                    />
+                  )}
+                  <span className="column-plot" aria-hidden="true">
                     {available ? (
-                      <span
-                        className={cn("volume-bar", value === 0 && "zero-bar")}
-                        style={{
-                          height:
-                            value === 0 ? "2px" : `${(value / ceiling) * 100}%`,
-                        }}
-                      >
-                        <span className="bar-value">
-                          {metric === "distanceKm"
-                            ? value.toFixed(1)
-                            : metric === "durationMinutes"
-                              ? formatDuration(value)
-                              : value}
-                        </span>
-                      </span>
+                      <>
+                        <motion.span
+                          className={cn(
+                            "volume-bar",
+                            value === 0 && "zero-bar",
+                          )}
+                          initial={false}
+                          animate={{ scaleY: scale }}
+                          transition={{
+                            duration: reducedMotion ? 0 : 0.45,
+                            ease,
+                          }}
+                        />
+                        <motion.span
+                          className="bar-value-position"
+                          initial={false}
+                          animate={{ y: `${(1 - scale) * 100}%` }}
+                          transition={{
+                            duration: reducedMotion ? 0 : 0.45,
+                            ease,
+                          }}
+                        >
+                          <span className="bar-value">
+                            {metric === "distanceKm"
+                              ? value.toFixed(1)
+                              : metric === "durationMinutes"
+                                ? formatDuration(value)
+                                : value}
+                          </span>
+                        </motion.span>
+                      </>
                     ) : (
                       <span className="unavailable-bar">
                         <Minus size={16} />
                       </span>
                     )}
                   </span>
-                  <span className="column-date">
+                  <span className="column-date" aria-hidden="true">
                     <span>{format(weekDate(week.weekStartDate), "d")}</span>
                     <span>{format(weekDate(week.weekStartDate), "MMM")}</span>
                   </span>
@@ -228,7 +329,6 @@ function VolumeChart({
                     ? metricValue(value, metric)
                     : "Recorded data unavailable"}
                 </span>
-                <span>Select to explore this week</span>
               </TooltipContent>
             </Tooltip>
           );
@@ -240,18 +340,15 @@ function VolumeChart({
 
 function WeekDetail({
   weeks,
+  metric,
   selectedIndex,
   onSelect,
-}: {
-  weeks: PerformanceWeek[];
-  selectedIndex: number;
-  onSelect: (index: number) => void;
-}) {
+}: WeekSelection & { metric: VolumeMetric }) {
+  const reducedMotion = useReducedMotion();
   const week = weeks[selectedIndex];
-  const previous = weeks[selectedIndex - 1];
   const recorded = week.recorded;
   const plan = week.plan;
-  const previousRecorded = previous?.recorded;
+  const previousRecorded = weeks[selectedIndex - 1]?.recorded;
   const change =
     recorded.availability === "available" &&
     previousRecorded?.availability === "available" &&
@@ -261,7 +358,11 @@ function WeekDetail({
         100
       : null;
   return (
-    <section className="week-detail" aria-labelledby="detail-heading">
+    <section
+      id="selected-week-detail"
+      className="week-detail"
+      aria-labelledby="detail-heading"
+    >
       <div className="section-heading">
         <h2 id="detail-heading" tabIndex={-1}>
           A closer look
@@ -285,101 +386,150 @@ function WeekDetail({
           </button>
         </div>
       </div>
-      <div
-        className="week-detail-content"
-        aria-live="polite"
-        aria-atomic="true"
-      >
-        <p className="detail-date">
-          {weekRange(week.weekStartDate)}
-          <span>Completed week</span>
-        </p>
-        {recorded.availability === "available" ? (
-          <>
-            <div className="detail-distance">
-              <strong>{recorded.distanceKm.toFixed(1)}</strong>
-              <span>km recorded</span>
-            </div>
-            {change !== null && (
-              <p className="volume-change">
-                {change >= 0 ? (
-                  <ArrowUpRight size={16} />
-                ) : (
-                  <ArrowDown size={16} />
-                )}{" "}
-                {Math.abs(change).toFixed(1)}% {change >= 0 ? "more" : "less"}{" "}
-                distance than the previous week
-              </p>
-            )}
-            <dl className="detail-recorded">
-              <div>
-                <dt>Running time</dt>
-                <dd>{formatDuration(recorded.durationMinutes)}</dd>
-              </div>
-              <div>
-                <dt>Recorded runs</dt>
-                <dd>{recorded.runCount}</dd>
-              </div>
-            </dl>
-            {recorded.runCount === 0 && (
-              <p className="detail-note">
-                Activity coverage is available. No runs were recorded this week.
-              </p>
-            )}
-          </>
-        ) : (
-          <div className="detail-unavailable">
-            <Minus size={22} />
-            <h3>Recorded volume unavailable</h3>
-            <p>{recorded.reason}</p>
-          </div>
-        )}
-        <div className="detail-plan">
-          {plan ? (
+      <div className="week-detail-live" aria-live="polite" aria-atomic="true">
+        <motion.div
+          key={`${week.weekStartDate}-${metric}-${recorded.availability}-${plan?.completed}`}
+          className="week-detail-content"
+          initial={reducedMotion ? false : { opacity: 0.45, y: 5 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: reducedMotion ? 0 : 0.25, ease }}
+        >
+          <p className="detail-date">
+            <span className="detail-date-mark" aria-hidden="true" />
+            {weekRange(week.weekStartDate)}
+          </p>
+          {recorded.availability === "available" ? (
             <>
-              <div className="detail-plan-heading">
-                <h3>Planned runs</h3>
+              <div
+                className={cn(
+                  "detail-distance",
+                  metric === "durationMinutes" && "detail-duration",
+                )}
+              >
+                <strong>
+                  {metric === "durationMinutes"
+                    ? formatDuration(recorded.durationMinutes)
+                    : metric === "distanceKm"
+                      ? recorded.distanceKm.toFixed(1)
+                      : recorded.runCount}
+                </strong>
                 <span>
-                  {plan.completed} of {plan.planned} completed
+                  {metric === "distanceKm"
+                    ? "km"
+                    : metric === "runCount"
+                      ? recorded.runCount === 1
+                        ? "run"
+                        : "runs"
+                      : null}
+                  <span>recorded</span>
                 </span>
               </div>
-              <div className="session-marks" aria-hidden="true">
-                {Array.from({ length: plan.planned }, (_, index) => (
-                  <span
-                    key={index}
-                    className={
-                      index < plan.matched
-                        ? "session-matched"
-                        : index < plan.completed
-                          ? "session-manual"
-                          : "session-remaining"
-                    }
-                  >
-                    {index < plan.matched ? (
-                      <Activity size={16} />
-                    ) : index < plan.completed ? (
-                      <Check size={16} />
+              <div className="detail-change-slot">
+                {change !== null && metric === "distanceKm" && (
+                  <p className="volume-change">
+                    {change >= 0 ? (
+                      <ArrowUpRight size={15} aria-hidden="true" />
                     ) : (
-                      <Minus size={16} />
+                      <ArrowDownRight size={15} aria-hidden="true" />
                     )}
-                  </span>
-                ))}
+                    <strong>
+                      {change >= 0 ? "+" : "−"}
+                      {Math.abs(change).toFixed(1)}%
+                    </strong>
+                    <span>vs previous week</span>
+                  </p>
+                )}
               </div>
-              <p className="session-caption">
-                {plan.matched} activity-matched <span>·</span>{" "}
-                {plan.completed - plan.matched} manual only
-              </p>
+              <dl className="detail-recorded">
+                {metric !== "durationMinutes" && (
+                  <div>
+                    <dt>
+                      <Clock3 size={13} aria-hidden="true" />
+                      Running time
+                    </dt>
+                    <dd>{formatDuration(recorded.durationMinutes)}</dd>
+                  </div>
+                )}
+                {metric !== "runCount" && (
+                  <div>
+                    <dt>
+                      <Activity size={13} aria-hidden="true" />
+                      Recorded runs
+                    </dt>
+                    <dd>{recorded.runCount}</dd>
+                  </div>
+                )}
+                {metric !== "distanceKm" && (
+                  <div>
+                    <dt>Distance</dt>
+                    <dd>{recorded.distanceKm.toFixed(1)} km</dd>
+                  </div>
+                )}
+              </dl>
+              {recorded.runCount === 0 && (
+                <p className="detail-note">
+                  Activity coverage is available. No runs were recorded this
+                  week.
+                </p>
+              )}
             </>
           ) : (
-            <>
-              <h3>No plan for this week</h3>
-              <p className="detail-note">
-                Recorded runs still count toward volume. Plan completion isn’t
-                calculated without a plan.
-              </p>
-            </>
+            <div className="detail-unavailable">
+              <Minus size={24} aria-hidden="true" />
+              <h3>Recorded volume unavailable</h3>
+              <p>{recorded.reason}</p>
+            </div>
           )}
-        </div>
+          <div className="detail-plan">
+            {plan ? (
+              <>
+                <div className="detail-plan-heading">
+                  <h3>Planned runs</h3>
+                  <span>
+                    <strong>{plan.completed}</strong> / {plan.planned} completed
+                  </span>
+                </div>
+                <div
+                  className="session-marks"
+                  role="img"
+                  aria-label={`${plan.matched} activity-matched, ${plan.completed - plan.matched} manual only, ${plan.planned - plan.completed} not completed`}
+                >
+                  {Array.from({ length: plan.planned }, (_, index) => (
+                    <span
+                      key={index}
+                      className={`session-${sessionState(plan, index)}`}
+                    >
+                      {index < plan.matched ? (
+                        <Activity size={17} />
+                      ) : index < plan.completed ? (
+                        <Check size={17} />
+                      ) : (
+                        <Minus size={17} />
+                      )}
+                    </span>
+                  ))}
+                </div>
+                <p className="session-caption">
+                  <span>
+                    <span className="legend-dot matched-dot" />
+                    {plan.matched} matched
+                  </span>
+                  <span>
+                    <span className="legend-dot manual-dot" />
+                    {plan.completed - plan.matched} manual only
+                  </span>
+                </p>
+              </>
+            ) : (
+              <>
+                <h3>No plan for this week</h3>
+                <p className="detail-note">
+                  Recorded runs count toward volume. No completion calculated.
+                </p>
+              </>
+            )}
+          </div>
+        </motion.div>
       </div>
       <p className="detail-source">
         <span className="source-mark" aria-hidden="true">
@@ -387,122 +537,8 @@ function WeekDetail({
         </span>
         {recorded.availability === "available"
           ? "Synthetic Intervals.icu sample"
-          : "Synthetic sample · recorded totals unavailable"}
+          : "Synthetic sample · totals unavailable"}
       </p>
-    </section>
-  );
-}
-
-function WeekLedger({
-  weeks,
-  selectedIndex,
-  onSelect,
-}: {
-  weeks: PerformanceWeek[];
-  selectedIndex: number;
-  onSelect: (index: number) => void;
-}) {
-  return (
-    <section className="week-ledger" aria-labelledby="ledger-heading">
-      <div className="ledger-heading">
-        <h2 id="ledger-heading">Week by week</h2>
-        <span>
-          Select a week to explore <ArrowRight size={14} aria-hidden="true" />
-        </span>
-      </div>
-      <table>
-        <caption className="sr-only">
-          Eight completed weeks, oldest to newest. Completed includes
-          activity-matched and manual-only sessions.
-        </caption>
-        <thead>
-          <tr>
-            <th scope="col">Week of</th>
-            <th scope="col">Recorded km</th>
-            <th scope="col" className="ledger-duration">
-              Time
-            </th>
-            <th scope="col" className="ledger-runs">
-              Runs
-            </th>
-            <th scope="col">Completed</th>
-            <th scope="col" className="ledger-matched">
-              Matched
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {weeks.map((week, index) => (
-            <tr
-              key={week.weekStartDate}
-              className={cn(selectedIndex === index && "selected-row")}
-            >
-              <th scope="row">
-                <button
-                  type="button"
-                  aria-pressed={selectedIndex === index}
-                  aria-label={`Explore week of ${format(weekDate(week.weekStartDate), "d MMM")}`}
-                  onClick={() => onSelect(index)}
-                >
-                  <span>{format(weekDate(week.weekStartDate), "d MMM")}</span>
-                  <ChevronRight size={13} aria-hidden="true" />
-                </button>
-              </th>
-              <td>
-                {week.recorded.availability === "available" ? (
-                  week.recorded.distanceKm.toFixed(1)
-                ) : (
-                  <span
-                    className="missing-value"
-                    aria-label="Recorded distance unavailable"
-                  >
-                    —
-                  </span>
-                )}
-              </td>
-              <td className="ledger-duration">
-                {week.recorded.availability === "available" ? (
-                  formatDuration(week.recorded.durationMinutes)
-                ) : (
-                  <span aria-label="Recorded duration unavailable">—</span>
-                )}
-              </td>
-              <td className="ledger-runs">
-                {week.recorded.availability === "available" ? (
-                  week.recorded.runCount
-                ) : (
-                  <span aria-label="Recorded run count unavailable">—</span>
-                )}
-              </td>
-              <td>
-                {week.plan ? (
-                  <span className="table-completion">
-                    {week.plan.completed}
-                    <span> / {week.plan.planned}</span>
-                  </span>
-                ) : (
-                  <span className="no-plan">No plan</span>
-                )}
-              </td>
-              <td className="ledger-matched">
-                {week.plan ? (
-                  <span className="table-matched">
-                    <Activity size={12} aria-hidden="true" />
-                    {week.plan.matched}
-                  </span>
-                ) : (
-                  <span aria-label="No plan">—</span>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <p className="ledger-note">
-        Completed includes manual check-ins. Matched means a recorded activity
-        is linked to a completed planned run.
-      </p>
-      <WeekDetailLink week={weeks[selectedIndex]} />
     </section>
   );
 }
@@ -510,18 +546,22 @@ function WeekLedger({
 export default function PerformanceDashboard({ weeks, onExplore }: Props) {
   const [metric, setMetric] = useState<VolumeMetric>("distanceKm");
   const [selectedIndex, setSelectedIndex] = useState(weeks.length - 1);
+  const reducedMotion = useReducedMotion();
+  const switchId = useId();
   const summary = summarizeHistory(weeks);
   const hasHistory = summary.coveredWeeks > 0 || summary.plannedWeeks > 0;
-
+  const total = weeks.reduce(
+    (sum, week) =>
+      sum +
+      (week.recorded.availability === "available" ? week.recorded[metric] : 0),
+    0,
+  );
   return (
     <>
-      <div className="performance-grid">
+      <div className="performance-stage">
         <section className="volume-section" aria-labelledby="volume-heading">
           <div className="volume-heading">
-            <div>
-              <h2 id="volume-heading">Your running, over time.</h2>
-              <p>Recorded activities. Every run counts.</p>
-            </div>
+            <h2 id="volume-heading">Your running, over time.</h2>
             <div
               className="metric-switch"
               role="group"
@@ -534,7 +574,15 @@ export default function PerformanceDashboard({ weeks, onExplore }: Props) {
                   aria-pressed={metric === item.id}
                   onClick={() => setMetric(item.id)}
                 >
-                  {item.label}
+                  {metric === item.id && (
+                    <motion.span
+                      className="metric-switch-active"
+                      layoutId={reducedMotion ? undefined : switchId}
+                      transition={{ duration: reducedMotion ? 0 : 0.22, ease }}
+                      aria-hidden="true"
+                    />
+                  )}
+                  <span>{item.label}</span>
                 </button>
               ))}
             </div>
@@ -547,7 +595,8 @@ export default function PerformanceDashboard({ weeks, onExplore }: Props) {
                 </span>
                 <span>
                   <span className="legend-dot matched-dot" />
-                  Recorded <span className="legend-dot unavailable-dot" />
+                  Recorded
+                  <span className="legend-dot unavailable-dot" />
                   Unavailable
                 </span>
               </div>
@@ -559,13 +608,13 @@ export default function PerformanceDashboard({ weeks, onExplore }: Props) {
               />
               <div className="volume-total">
                 <p>
-                  <strong>{summary.distanceKm.toFixed(1)} km</strong> across{" "}
-                  {summary.coveredWeeks} available weeks
+                  <strong>{metricValue(total, metric)}</strong>
+                  <span> / {summary.coveredWeeks} recorded weeks</span>
                 </p>
                 <span>
-                  {summary.coveredWeeks < 8
-                    ? `${8 - summary.coveredWeeks} week unavailable · excluded from total`
-                    : "All 8 weeks available"}
+                  {summary.coveredWeeks < weeks.length
+                    ? `${weeks.length - summary.coveredWeeks} unavailable · excluded`
+                    : "All weeks available"}
                 </span>
               </div>
               <WeekDetailLink week={weeks[selectedIndex]} />
@@ -580,8 +629,8 @@ export default function PerformanceDashboard({ weeks, onExplore }: Props) {
               </h3>
               <p>
                 {hasHistory
-                  ? "Recorded volume isn’t available for this sample source. You can still review your planned and completed sessions."
-                  : "As completed weeks build up, your running volume and plan history will appear here. Missing history is never counted as zero."}
+                  ? "Recorded volume unavailable. Your plan history is still here."
+                  : "Your running and plan history will appear after your first completed weeks."}
               </p>
               {!hasHistory && (
                 <button
@@ -589,24 +638,25 @@ export default function PerformanceDashboard({ weeks, onExplore }: Props) {
                   type="button"
                   onClick={onExplore}
                 >
-                  Explore sample history <ArrowRight size={16} />
+                  Explore sample history{" "}
+                  <ArrowRight size={16} aria-hidden="true" />
                 </button>
               )}
             </div>
           )}
         </section>
-        <CompletionSummary weeks={weeks} />
-        <WeekLedger
-          weeks={weeks}
-          selectedIndex={selectedIndex}
-          onSelect={setSelectedIndex}
-        />
         <WeekDetail
           weeks={weeks}
+          metric={metric}
           selectedIndex={selectedIndex}
           onSelect={setSelectedIndex}
         />
       </div>
+      <CompletionSummary
+        weeks={weeks}
+        selectedIndex={selectedIndex}
+        onSelect={setSelectedIndex}
+      />
       <details className="performance-methodology">
         <summary>
           How to read this history <ChevronDown size={16} aria-hidden="true" />
