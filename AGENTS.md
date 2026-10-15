@@ -118,6 +118,24 @@ overrides, consent and runtime artifacts stay gitignored. Codex hook trust is
 machine-local and separate from Impeccable consent; see README.md. Avoid running
 the same detector from both user/global and project hook sources.
 
+## Experimental design tooling
+
+The `experiment/ui-design-skills` branch adds four project skills under
+`.agents/skills/`. Installation is setup only; it does not authorize an audit,
+image generation, redesign, new visual system or changes to product copy.
+Use them only for a later, explicitly scoped design task. Product facts,
+existing stack, accessibility and the requested scope take precedence over
+third-party aesthetic defaults, placeholder suggestions and dependency advice.
+
+See [the experiment guide](docs/ui-design-experiment.md) for provenance,
+compatibility, local Playwright commands, verification and full rollback.
+Reuse the existing `@playwright/test` CLI and browser; do not install globally
+or use commands that implicitly download missing packages. Browser temporary
+files and captures belong in the ignored `.design-experiment/` directory.
+For Taste scripts, set `TASTE_SKILL_HISTORY` to a path inside that directory,
+set `TMPDIR` there and pass project-local output paths. Never run its default
+user-history write. Keep Impeccable global files and project hooks unchanged.
+
 ## Pull requests and visual evidence
 
 For PRs with meaningful visual changes, include a small, representative set of

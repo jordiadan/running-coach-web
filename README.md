@@ -12,6 +12,10 @@ npm test
 npm run build
 ```
 
+Experimental project skills, local browser verification and rollback are documented
+in [the UI design experiment guide](docs/ui-design-experiment.md). Setup does not
+change the interface or choose a new visual system.
+
 ## Caveman Ultra in Codex
 
 `AGENTS.md` instructs Codex to read and apply `ultracave` at session start,

@@ -24,6 +24,9 @@ dist-ssr
 *.sw?
 .vercel
 
+# Reversible UI design experiment: captures, caches and browser runtime.
+/.design-experiment/
+
 # impeccable-ignore-start
 # Ephemeral output, runtime state, and per-dev overrides.
 # The **/ prefix covers .impeccable at the repo root or in a nested workspace.
