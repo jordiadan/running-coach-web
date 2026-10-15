@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { differenceInCalendarWeeks, format, parseISO } from "date-fns";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { addDays, differenceInCalendarWeeks, format, parseISO } from "date-fns";
+import { useReducedMotion } from "framer-motion";
 import {
-  Activity,
   ArrowRight,
   ExternalLink,
   Flag,
@@ -15,10 +14,8 @@ import {
   MessageCircle,
   Moon,
   RefreshCcw,
-  Sparkles,
   Star,
   StretchHorizontal,
-  TrendingUp,
   Zap,
 } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -33,9 +30,9 @@ import {
   type WeeklyCoachSession,
   type WorkoutExecutionEvaluation,
 } from "@/lib/portal-api";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import WeekNavigator from "@/components/portal/WeekNavigator";
+import "./weekly-plan.css";
 
 type WeeklyPlanScreenProps = {
   athleteId: string;
@@ -64,51 +61,11 @@ const intensityLabels: Record<string, string> = {
   REST: "Rest",
 };
 
-const intensityDot: Record<string, string> = {
-  REST: "bg-muted-foreground/30",
-  LOW: "bg-primary/60",
-  MODERATE: "bg-accent",
-  HIGH: "bg-destructive",
-};
-
-const typeConfig: Record<
-  string,
-  {
-    icon: typeof Zap;
-    label: string;
-    gradient: string;
-    tileClass: string;
-    badgeClass: string;
-  }
-> = {
-  RUN: {
-    icon: Zap,
-    label: "Run",
-    gradient: "from-primary/20 to-primary/5",
-    tileClass: "border-primary/20 text-primary",
-    badgeClass: "bg-primary/10 text-primary border-primary/20",
-  },
-  STRENGTH: {
-    icon: Dumbbell,
-    label: "Strength",
-    gradient: "from-accent/20 to-accent/5",
-    tileClass: "border-accent/20 text-accent",
-    badgeClass: "bg-accent/10 text-accent border-accent/20",
-  },
-  MOBILITY: {
-    icon: StretchHorizontal,
-    label: "Mobility",
-    gradient: "from-secondary to-secondary/50",
-    tileClass: "border-border text-muted-foreground",
-    badgeClass: "bg-secondary text-foreground border-border",
-  },
-  REST: {
-    icon: Moon,
-    label: "Rest",
-    gradient: "from-muted to-muted/50",
-    tileClass: "border-border text-muted-foreground",
-    badgeClass: "bg-muted text-muted-foreground border-border",
-  },
+const typeConfig: Record<string, { icon: typeof Zap; label: string }> = {
+  RUN: { icon: Zap, label: "Run" },
+  STRENGTH: { icon: Dumbbell, label: "Strength" },
+  MOBILITY: { icon: StretchHorizontal, label: "Mobility" },
+  REST: { icon: Moon, label: "Rest" },
 };
 
 const raceProgressPhases = [
@@ -133,7 +90,7 @@ type GoalTimelineDisplay = {
 
 type GoalOutcomeAction = Exclude<GoalOutcomeStatus, "UNKNOWN">;
 
-const screenShellClassName = "mx-auto max-w-2xl space-y-4";
+const screenShellClassName = "weekly-plan weekly-plan--state";
 
 function formatWeekType(weekType: string) {
   if (!weekType) return "Planned week";
@@ -165,38 +122,44 @@ function formatDecimal(value: number | undefined) {
 function SyncedActivityBadge({ session }: { session: WeeklyCoachSession }) {
   const activity = session.syncedActivity;
   if (!activity) return null;
-  const provider = activity.provider;
-  if (provider !== "STRAVA" && provider !== "INTERVALS") {
-    return <span className="text-[11px] text-muted-foreground">Synced activity{provider ? ` · ${provider}` : ""}</span>;
-  }
-  const isStrava = provider === "STRAVA";
-  const providerName = isStrava ? "Strava" : "Intervals";
-
-  const content = (
-    <>
-      <span className={isStrava
-        ? "flex h-4 w-4 items-center justify-center rounded-full bg-[#FC5200]"
-        : "flex h-4 w-4 items-center justify-center rounded-full bg-sky-600 text-white"}>
-        {isStrava
-          ? <img src="/strava-echelon-white.svg" alt="" className="h-2.5 w-auto" />
-          : <Activity className="h-2.5 w-2.5" aria-hidden="true" />}
+  if (activity.provider !== "STRAVA" && activity.provider !== "INTERVALS") {
+    return (
+      <span className="weekly-provider">
+        Synced activity{activity.provider ? ` · ${activity.provider}` : ""}
       </span>
-      <span className="hidden sm:inline">View on {providerName}</span>
-      {activity.activityUrl ? <ExternalLink className="hidden h-2.5 w-2.5 sm:inline" aria-hidden="true" /> : null}
-    </>
-  );
-
-  const className = isStrava
-    ? "inline-flex shrink-0 items-center gap-1 rounded-full border border-orange-500/25 bg-orange-500/10 p-0.5 text-[11px] font-medium text-orange-800 transition-colors hover:bg-orange-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 sm:pr-2 dark:text-orange-200"
-    : "inline-flex shrink-0 items-center gap-1 rounded-full border border-sky-500/25 bg-sky-500/10 p-0.5 text-[11px] font-medium text-sky-800 transition-colors hover:bg-sky-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 sm:pr-2 dark:text-sky-200";
-
-  if (!activity.activityUrl) {
-    return <span aria-label={`Synced from ${providerName}`} title={`Synced from ${providerName}`} className={className}>{content}</span>;
+    );
   }
-
+  const providerName =
+    activity.provider === "STRAVA"
+      ? "Strava"
+      : activity.provider === "INTERVALS"
+        ? "Intervals"
+        : activity.provider;
+  if (!activity.activityUrl) {
+    return (
+      <span
+        className="weekly-provider"
+        aria-label={`Synced from ${providerName ?? "activity source"}`}
+      >
+        Synced{providerName ? ` from ${providerName}` : " activity"}
+      </span>
+    );
+  }
   return (
-    <a href={activity.activityUrl} target="_blank" rel="noopener noreferrer" aria-label={`View on ${providerName} (opens in a new tab)`} className={className}>
-      {content}
+    <a
+      href={activity.activityUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="weekly-provider"
+      aria-label={`View on ${providerName ?? "activity source"} (opens in a new tab)`}
+    >
+      {activity.provider === "STRAVA" ? (
+        <span className="weekly-provider-logo">
+          <img src="/strava-echelon-white.svg" alt="" width={10} height={12} />
+        </span>
+      ) : null}
+      View on {providerName}
+      <ExternalLink size={13} aria-hidden="true" />
     </a>
   );
 }
@@ -279,15 +242,15 @@ function ExecutionFeedbackDetails({
   );
 }
 
-function SessionRightSummary({ session }: { session: WeeklyCoachSession }) {
-  if (session.durationMinutes <= 0 && !session.syncedActivity) return null;
-
+function RecordedActivity({ session }: { session: WeeklyCoachSession }) {
+  if (!session.syncedActivity) return null;
   return (
-    <div className="inline-flex items-center gap-2 whitespace-nowrap">
-      <SyncedActivityBadge session={session} />
-      {session.durationMinutes > 0 ? (
-        <span className="text-[11px] tabular-nums text-muted-foreground" title="Planned duration">{session.durationMinutes} min</span>
-      ) : null}
+    <div className="weekly-recorded">
+      <span>Recorded activity</span>
+      <strong>
+        {formatDecimal(session.syncedActivity.distanceKm)} km <span>·</span>{" "}
+        {formatDecimal(session.syncedActivity.durationMinutes)} min
+      </strong>
     </div>
   );
 }
@@ -312,15 +275,30 @@ function boundedPercent(value: number, max: number) {
   return Math.max(0, Math.min(100, (value / max) * 100));
 }
 
-function deriveGoalTimelineDisplay(goal: CurrentUserWeeklyCoachScreen["goal"]): GoalTimelineDisplay | undefined {
+function deriveGoalTimelineDisplay(
+  goal: CurrentUserWeeklyCoachScreen["goal"],
+): GoalTimelineDisplay | undefined {
   if (!goal) return undefined;
 
-  const legacyDaysToGoal = Number.isFinite(goal.daysToGoal) ? goal.daysToGoal : undefined;
+  const legacyDaysToGoal = Number.isFinite(goal.daysToGoal)
+    ? goal.daysToGoal
+    : undefined;
   const state: GoalTimelineDisplayState =
-    goal.goalTimelineState ?? (typeof legacyDaysToGoal === "number" && legacyDaysToGoal < 0 ? "LEGACY_PAST" : "UPCOMING");
+    goal.goalTimelineState ??
+    (typeof legacyDaysToGoal === "number" && legacyDaysToGoal < 0
+      ? "LEGACY_PAST"
+      : "UPCOMING");
 
-  const futureDays = goal.daysUntilGoal ?? (typeof legacyDaysToGoal === "number" ? Math.max(0, legacyDaysToGoal) : undefined);
-  const pastDays = goal.daysSinceGoal ?? (typeof legacyDaysToGoal === "number" && legacyDaysToGoal < 0 ? Math.abs(legacyDaysToGoal) : undefined);
+  const futureDays =
+    goal.daysUntilGoal ??
+    (typeof legacyDaysToGoal === "number"
+      ? Math.max(0, legacyDaysToGoal)
+      : undefined);
+  const pastDays =
+    goal.daysSinceGoal ??
+    (typeof legacyDaysToGoal === "number" && legacyDaysToGoal < 0
+      ? Math.abs(legacyDaysToGoal)
+      : undefined);
 
   const badgeClassNames: Record<GoalTimelineDisplayState, string> = {
     UPCOMING: "border-border bg-muted/40 text-muted-foreground",
@@ -331,7 +309,10 @@ function deriveGoalTimelineDisplay(goal: CurrentUserWeeklyCoachScreen["goal"]): 
     LEGACY_PAST: "border-accent/20 bg-accent/10 text-accent",
   };
 
-  const meta: Record<GoalTimelineDisplayState, Pick<GoalTimelineDisplay, "sectionLabel" | "badgeLabel">> = {
+  const meta: Record<
+    GoalTimelineDisplayState,
+    Pick<GoalTimelineDisplay, "sectionLabel" | "badgeLabel">
+  > = {
     UPCOMING: { sectionLabel: "Road to race", badgeLabel: "Upcoming" },
     RACE_WEEK: { sectionLabel: "Road to race", badgeLabel: "Race week" },
     RACE_DAY: { sectionLabel: "Today is the day", badgeLabel: "Race day" },
@@ -342,11 +323,19 @@ function deriveGoalTimelineDisplay(goal: CurrentUserWeeklyCoachScreen["goal"]): 
 
   const dayLabel = (() => {
     if (state === "RACE_DAY") return { value: "Today" };
-    if (state === "POST_GOAL" || state === "EXPIRED" || state === "LEGACY_PAST") {
-      return typeof pastDays === "number" ? { value: `${pastDays}d`, unit: "ago" } : undefined;
+    if (
+      state === "POST_GOAL" ||
+      state === "EXPIRED" ||
+      state === "LEGACY_PAST"
+    ) {
+      return typeof pastDays === "number"
+        ? { value: `${pastDays}d`, unit: "ago" }
+        : undefined;
     }
 
-    return typeof futureDays === "number" ? { value: `${futureDays}`, unit: "d to go" } : undefined;
+    return typeof futureDays === "number"
+      ? { value: `${futureDays}`, unit: "d to go" }
+      : undefined;
   })();
 
   return {
@@ -358,7 +347,10 @@ function deriveGoalTimelineDisplay(goal: CurrentUserWeeklyCoachScreen["goal"]): 
   };
 }
 
-function canSetGoalOutcome(goal: CurrentUserWeeklyCoachScreen["goal"], timeline: GoalTimelineDisplay) {
+function canSetGoalOutcome(
+  goal: CurrentUserWeeklyCoachScreen["goal"],
+  timeline: GoalTimelineDisplay,
+) {
   if (!goal) return false;
 
   const outcomeStatus = goal.goalOutcomeStatus ?? "UNKNOWN";
@@ -368,7 +360,10 @@ function canSetGoalOutcome(goal: CurrentUserWeeklyCoachScreen["goal"], timeline:
   );
 }
 
-function nextGoalCtaLabel(goal: CurrentUserWeeklyCoachScreen["goal"], timeline: GoalTimelineDisplay) {
+function nextGoalCtaLabel(
+  goal: CurrentUserWeeklyCoachScreen["goal"],
+  timeline: GoalTimelineDisplay,
+) {
   if (!goal) return undefined;
 
   const outcomeStatus = goal.goalOutcomeStatus ?? "UNKNOWN";
@@ -388,455 +383,215 @@ function goalOutcomeErrorMessage(error: unknown) {
   return "Could not update race outcome. Try again.";
 }
 
-function deriveSleepStatus(sleepHours: number | undefined) {
-  if (typeof sleepHours !== "number" || !Number.isFinite(sleepHours)) {
-    return {
-      label: "—",
-      valueToneClass: "text-foreground",
-      iconToneClass: "text-muted-foreground",
-    };
-  }
-
-  if (sleepHours < 6) {
-    return {
-      label: "Poor",
-      valueToneClass: "text-destructive",
-      iconToneClass: "text-destructive",
-    };
-  }
-
-  if (sleepHours < 7) {
-    return {
-      label: "Fair",
-      valueToneClass: "text-accent",
-      iconToneClass: "text-accent",
-    };
-  }
-
-  if (sleepHours < 8) {
-    return {
-      label: "Good",
-      valueToneClass: "text-primary",
-      iconToneClass: "text-primary",
-    };
-  }
-
-  return {
-    label: "Great",
-    valueToneClass: "text-emerald-600",
-    iconToneClass: "text-emerald-600",
-  };
-}
-
 function WeekPulse({
   sessions,
   todayDay,
   isCurrentWeek,
-  isPastWeek,
+  selectedDay,
+  weekStartDate,
   onSelectDay,
-  reduceMotion,
 }: {
   sessions: WeeklyCoachSession[];
   todayDay: string | undefined;
   isCurrentWeek: boolean;
-  isPastWeek: boolean;
+  selectedDay: string | null;
+  weekStartDate: string;
   onSelectDay: (day: string) => void;
-  reduceMotion: boolean;
 }) {
-  const todayIndex = todayDay ? sessions.findIndex((session) => session.day === todayDay) : -1;
-
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ delay: 0.05 }}
-      className="grid grid-cols-7 gap-1.5"
-    >
-      {sessions.map((session, index) => {
-        const isDone = session.completed === true;
-        const isToday = isCurrentWeek && session.day === todayDay;
-        const isPastCell = isCurrentWeek ? todayIndex >= 0 && index < todayIndex : isPastWeek;
-        const isRest = session.modality === "REST";
-        const config = typeConfig[session.modality] ?? typeConfig.RUN;
-        const TypeIcon = config.icon;
-
+    <nav className="weekly-days" aria-label="Sessions by day">
+      {weekDayOrder.map((day, index) => {
+        const session = sessions.find((item) => item.day === day);
+        const date = addDays(parseISO(weekStartDate), index);
+        const isToday = isCurrentWeek && day === todayDay;
+        const isSelected = day === (selectedDay ?? todayDay);
+        const config = session
+          ? (typeConfig[session.modality] ?? typeConfig.RUN)
+          : undefined;
+        const Icon = session?.completed ? Check : (config?.icon ?? CalendarOff);
         return (
-          <motion.button
-            key={session.day}
+          <button
+            key={day}
             type="button"
-            onClick={() => onSelectDay(session.day)}
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.08 + index * 0.03 }}
-            whileHover={reduceMotion ? undefined : { y: -2 }}
-            className="group flex min-w-0 flex-col items-center gap-1.5 rounded-lg p-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            title={`${shortDayLabel(session.day)} - ${session.title}`}
+            className="weekly-day"
+            aria-pressed={isSelected}
+            aria-current={isToday ? "date" : undefined}
+            disabled={!session}
+            aria-label={`${format(date, "EEEE, MMMM d")}${isToday ? ", today" : ""}: ${session?.title ?? "No session"}${session?.completed ? ", completed" : ""}`}
+            onClick={() => onSelectDay(day)}
           >
-            <span
-              className={`text-[10px] font-medium uppercase tracking-wide transition-colors ${
-                isToday ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
-              }`}
-            >
-              {shortDayLabel(session.day).slice(0, 1)}
+            <span className="weekly-day-name">{shortDayLabel(day)}</span>
+            <span className="weekly-day-date">{format(date, "d")}</span>
+            <span className="weekly-day-kind">
+              <Icon size={14} aria-hidden="true" />
+              <span>
+                {session?.completed ? "Done" : (config?.label ?? "No session")}
+              </span>
             </span>
-            <span
-              className={`relative flex aspect-square w-full max-w-11 items-center justify-center rounded-lg transition-all ${
-                isDone
-                  ? "bg-primary text-primary-foreground"
-                  : isToday
-                    ? "bg-primary/10 text-primary ring-2 ring-primary/40 ring-offset-2 ring-offset-background"
-                    : isRest
-                      ? "bg-muted/40 text-muted-foreground/50"
-                      : isPastCell
-                        ? "border border-destructive/15 bg-destructive/10 text-destructive/60"
-                        : "bg-secondary/60 text-muted-foreground group-hover:bg-secondary group-hover:text-foreground"
-              }`}
-            >
-              {isDone ? <Check className="h-4 w-4" strokeWidth={2.5} /> : <TypeIcon className="h-3.5 w-3.5" />}
-              {session.role === "KEY" && !isDone ? (
-                <Star className="absolute -right-1 -top-1 h-2.5 w-2.5 fill-accent text-accent" />
-              ) : null}
-              {isToday && !reduceMotion ? (
-                <motion.span
-                  className="absolute inset-0 rounded-lg ring-2 ring-primary/40"
-                  initial={{ opacity: 0.6, scale: 1 }}
-                  animate={{ opacity: 0, scale: 1.25 }}
-                  transition={{ duration: 1.6, repeat: Infinity, ease: "easeOut" }}
-                />
-              ) : null}
-            </span>
-          </motion.button>
+            {isToday ? (
+              <span className="weekly-today-dot" aria-hidden="true" />
+            ) : null}
+          </button>
         );
       })}
-    </motion.div>
+    </nav>
   );
 }
 
-function TodayPendingCard({
-  session,
-  expanded,
-  canComplete,
-  isPending,
-  onToggleExpanded,
-  onComplete,
-}: {
-  session: WeeklyCoachSession;
-  expanded: boolean;
-  canComplete: boolean;
-  isPending: boolean;
-  onToggleExpanded: () => void;
-  onComplete: () => void;
-}) {
-  const reduceMotion = useReducedMotion();
-  const config = typeConfig[session.modality] ?? typeConfig.RUN;
-  const TypeIcon = config.icon;
-
-  return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, y: 12, scale: 0.98 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.98 }}
-      transition={{ type: "spring", bounce: 0.22, duration: 0.55 }}
-      className="group relative overflow-hidden rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/[0.07] via-card to-card shadow-card"
-    >
-      {!reduceMotion ? (
-        <motion.div
-          aria-hidden
-          className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-primary/10 blur-3xl"
-          initial={{ opacity: 0.4 }}
-          animate={{ opacity: [0.35, 0.55, 0.35] }}
-          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-        />
-      ) : null}
-
-      <div className="relative p-5">
-        <div className="mb-4 inline-flex items-center gap-2">
-          <span className="relative flex h-2 w-2">
-            {!reduceMotion ? (
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-60" />
-            ) : null}
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
-          </span>
-          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-primary">Today</span>
-          <span className="text-xs text-muted-foreground/40">-</span>
-          <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-            {config.label}
-          </span>
-          {session.role === "KEY" ? (
-            <span className="ml-1 inline-flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wider text-accent">
-              <Star className="h-2.5 w-2.5 fill-accent" />
-              Key
-            </span>
-          ) : null}
-        </div>
-
-        <div className="flex items-start gap-4">
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.08, type: "spring", bounce: 0.4 }}
-            className={`shrink-0 rounded-2xl border bg-gradient-to-br p-3.5 ${config.gradient} ${config.tileClass}`}
-          >
-            <TypeIcon className="h-6 w-6" strokeWidth={2} />
-          </motion.div>
-          <div className="min-w-0 flex-1 pt-0.5">
-            <h3 className="font-serif text-lg leading-tight tracking-tight text-foreground sm:text-xl">
-              {session.title}
-            </h3>
-            <div className="mt-2 flex flex-wrap items-center gap-3">
-              <span className="inline-flex items-center gap-1.5 text-xs font-medium tabular-nums text-foreground/70">
-                <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-                {session.durationMinutes} min
-              </span>
-              <SyncedActivityBadge session={session} />
-              <span className="inline-flex items-center gap-1.5 text-xs text-foreground/70">
-                <span
-                  className={`h-1.5 w-1.5 rounded-full ${
-                    intensityDot[session.intensityCategory] ?? "bg-muted-foreground/30"
-                  }`}
-                />
-                {intensityLabels[session.intensityCategory] ?? session.intensityCategory}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {(session.notes || session.strengthFocus?.length) ? (
-          <div className="mt-4 pl-16">
-            {session.notes ? <p className="text-[13px] leading-relaxed text-foreground/75">{session.notes}</p> : null}
-            <AnimatePresence initial={false}>
-              {expanded && session.strengthFocus?.length ? (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.25, ease: "easeOut" }}
-                  className="overflow-hidden"
-                >
-                  <div className="mt-3 flex flex-wrap gap-1.5">
-                    {session.strengthFocus.map((focus) => (
-                      <Badge
-                        key={focus}
-                        variant="outline"
-                        className="h-5 bg-background/70 px-2 py-0 text-[10px] font-normal"
-                      >
-                        {focus}
-                      </Badge>
-                    ))}
-                  </div>
-                </motion.div>
-              ) : null}
-            </AnimatePresence>
-            {session.strengthFocus?.length ? (
-              <button
-                type="button"
-                onClick={onToggleExpanded}
-                className="mt-2 inline-flex items-center gap-1 text-[11px] text-muted-foreground transition-colors hover:text-foreground"
-                aria-expanded={expanded}
-              >
-                {expanded ? "Show less" : "Show focus"}
-                <motion.span animate={{ rotate: expanded ? 180 : 0 }} transition={{ duration: 0.2 }}>
-                  <ChevronDown className="h-3 w-3" />
-                </motion.span>
-              </button>
-            ) : null}
-          </div>
-        ) : null}
-
-        {canComplete ? (
-          <motion.button
-            type="button"
-            whileHover={reduceMotion ? undefined : { scale: 1.005 }}
-            whileTap={reduceMotion ? undefined : { scale: 0.985 }}
-            onClick={onComplete}
-            disabled={isPending}
-            className="group/btn relative mt-5 inline-flex h-12 w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-primary text-sm font-semibold tracking-wide text-primary-foreground shadow-sm transition-shadow hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {!reduceMotion ? (
-              <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 ease-out group-hover/btn:translate-x-full" />
-            ) : null}
-            <Check className="relative h-4 w-4" strokeWidth={2.75} />
-            <span className="relative">{isPending ? "Saving" : "Mark as complete"}</span>
-            <ArrowRight className="relative h-3.5 w-3.5 opacity-70 transition-transform group-hover/btn:translate-x-0.5" />
-          </motion.button>
-        ) : null}
-      </div>
-    </motion.div>
-  );
-}
-
-function TodayDoneCard({
+function TodaySession({
   session,
   upNext,
-  canToggleCompletion,
-  onUndo,
+  canComplete,
+  isPending,
+  onComplete,
   onJumpNext,
+  onDetails,
 }: {
   session: WeeklyCoachSession;
-  upNext: WeeklyCoachSession | undefined;
-  canToggleCompletion: boolean;
-  onUndo: () => void;
+  upNext?: WeeklyCoachSession;
+  canComplete: boolean;
+  isPending: boolean;
+  onComplete: () => void;
   onJumpNext: (day: string) => void;
+  onDetails: () => void;
 }) {
+  const isDone = session.completed === true;
+  const isRest = session.modality === "REST";
+  const config = typeConfig[session.modality] ?? typeConfig.RUN;
+  const Icon = isDone ? Check : config.icon;
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, y: 10, scale: 0.98 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.98 }}
-      transition={{ type: "spring", bounce: 0.25, duration: 0.5 }}
-      className="relative overflow-hidden rounded-2xl border border-border bg-card"
+    <section
+      className={`weekly-today${isDone ? " is-done" : ""}`}
+      aria-label="Today's session"
     >
-      <div className="p-4">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-3">
-            <motion.div
-              initial={{ scale: 0, rotate: -90 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ type: "spring", bounce: 0.5, delay: 0.1 }}
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground"
-            >
-              <Check className="h-4 w-4" strokeWidth={3} />
-            </motion.div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5">
-                <Sparkles className="h-3 w-3 text-primary" />
-                <span className="text-[10px] font-semibold uppercase tracking-widest text-primary">Today done</span>
-              </div>
-              <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
-                <p className="min-w-0 max-w-full truncate text-sm font-medium text-foreground/90 line-through decoration-muted-foreground/40">
-                  {session.title}
-                </p>
-              </div>
-            </div>
-            <SessionRightSummary session={session} />
-          </div>
-          {canToggleCompletion ? (
-            <button
-              type="button"
-              onClick={onUndo}
-              className="rounded-md px-2 py-1 text-[11px] text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-            >
-              Undo
-            </button>
-          ) : null}
-        </div>
-
-        {upNext ? (
-          <motion.button
-            type="button"
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25 }}
-            onClick={() => onJumpNext(upNext.day)}
-            whileHover={{ x: 2 }}
-            className="group mt-4 flex w-full items-center gap-3 border-t border-border pt-3 text-left"
-          >
-            <div
-              className={`shrink-0 rounded-lg border bg-gradient-to-br p-2 ${
-                (typeConfig[upNext.modality] ?? typeConfig.RUN).gradient
-              } ${(typeConfig[upNext.modality] ?? typeConfig.RUN).tileClass}`}
-            >
-              {(() => {
-                const UpNextIcon = (typeConfig[upNext.modality] ?? typeConfig.RUN).icon;
-                return <UpNextIcon className="h-3.5 w-3.5" />;
-              })()}
-            </div>
-            <div className="min-w-0 flex-1">
-              <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-                Up next - {shortDayLabel(upNext.day)}
-              </span>
-              <p className="truncate text-[13px] text-foreground transition-colors group-hover:text-primary">
-                {upNext.title}
-              </p>
-            </div>
-            <div className="flex shrink-0 items-center gap-1.5 text-[11px] tabular-nums text-muted-foreground">
-              <Clock className="h-3 w-3" />
-              <span>{upNext.durationMinutes} min</span>
-              <ArrowRight className="ml-1 h-3.5 w-3.5 text-muted-foreground/40 transition-all group-hover:translate-x-0.5 group-hover:text-primary" />
-            </div>
-          </motion.button>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.25 }}
-            className="mt-4 flex items-center gap-2 border-t border-border pt-3 text-[12px] text-muted-foreground"
-          >
-            <TrendingUp className="h-3.5 w-3.5 text-primary" />
-            <span>All planned sessions are complete for this week.</span>
-          </motion.div>
-        )}
+      <div className="weekly-today-top">
+        <span className="weekly-today-label">
+          <Icon size={18} aria-hidden="true" />
+          {isDone
+            ? "Today, completed"
+            : isRest
+              ? "Today, take a breather"
+              : "Today's session"}
+        </span>
+        {session.role === "KEY" ? (
+          <span className="weekly-key">
+            <Star size={12} aria-hidden="true" />
+            Key session
+          </span>
+        ) : null}
       </div>
-    </motion.div>
+      <h2>{session.title}</h2>
+      <div className="weekly-prescription">
+        {session.durationMinutes > 0 ? (
+          <span>
+            <Clock size={15} aria-hidden="true" />
+            <strong>{session.durationMinutes} min</strong> planned
+          </span>
+        ) : null}
+        <span>
+          {config.label}
+          {!isRest
+            ? ` · ${intensityLabels[session.intensityCategory] ?? session.intensityCategory} intensity`
+            : ""}
+        </span>
+      </div>
+      {session.syncedActivity ? (
+        <div className="weekly-today-provenance">
+          <SyncedActivityBadge session={session} />
+        </div>
+      ) : null}
+      {session.notes ? (
+        <p className="weekly-today-notes">{session.notes}</p>
+      ) : null}
+      <div className="weekly-today-actions">
+        {canComplete ? (
+          <button
+            type="button"
+            className="weekly-primary"
+            disabled={isPending}
+            onClick={onComplete}
+          >
+            {isDone ? (
+              <RefreshCcw size={16} aria-hidden="true" />
+            ) : (
+              <Check size={17} aria-hidden="true" />
+            )}
+            {isPending
+              ? "Saving…"
+              : isDone
+                ? "Undo completion"
+                : "Mark as complete"}
+          </button>
+        ) : null}
+        <button
+          type="button"
+          className="weekly-today-details"
+          onClick={onDetails}
+        >
+          Details
+          <ArrowRight size={15} aria-hidden="true" />
+        </button>
+      </div>
+      {isDone && upNext ? (
+        <button
+          type="button"
+          className="weekly-up-next"
+          onClick={() => onJumpNext(upNext.day)}
+        >
+          <span>
+            Up next · {shortDayLabel(upNext.day)}
+            <strong>{upNext.title}</strong>
+          </span>
+          <ArrowRight size={18} aria-hidden="true" />
+        </button>
+      ) : null}
+      {isDone && !upNext ? (
+        <p className="weekly-up-next">No upcoming sessions this week.</p>
+      ) : null}
+    </section>
   );
 }
 
 function WeekMetrics({
   completedWeekDistanceKm,
+  distanceLabel,
   longRunMinutes,
   sleepHours,
 }: {
-  completedWeekDistanceKm: number | undefined;
-  longRunMinutes: number | undefined;
-  sleepHours: number | undefined;
+  completedWeekDistanceKm?: number;
+  distanceLabel: string;
+  longRunMinutes?: number;
+  sleepHours?: number;
 }) {
-  const sleepStatus = deriveSleepStatus(sleepHours);
-  const metrics = [
-    {
-      label: "Done",
-      value: formatDecimal(completedWeekDistanceKm),
-      unit: typeof completedWeekDistanceKm === "number" ? "km" : "",
-      valueClassName: "text-foreground",
-    },
-    {
-      label: "Long run",
-      value: typeof longRunMinutes === "number" ? String(longRunMinutes) : "—",
-      unit: typeof longRunMinutes === "number" ? "min" : "",
-      valueClassName: "text-foreground",
-    },
-    {
-      label: "Sleep avg",
-      value: formatDecimal(sleepHours),
-      unit: typeof sleepHours === "number" ? "h" : "",
-      valueClassName: sleepStatus.valueToneClass,
-    },
-  ];
-
   return (
-    <motion.section
-      className="space-y-2"
-      initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.2 }}
-      aria-label="This week metrics"
-    >
-      <div className="px-1">
-        <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">This week</span>
-      </div>
-      <div className="overflow-hidden rounded-xl border border-border bg-card">
-        <div className="grid grid-cols-3 divide-x divide-border">
-          {metrics.map((metric, index) => (
-            <motion.div
-              key={metric.label}
-              className="flex min-w-0 flex-col items-center justify-center px-2 py-3 text-center"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.22 + index * 0.04 }}
-            >
-              <div className="flex max-w-full items-baseline gap-0.5">
-                <span className={`truncate text-lg font-bold leading-none tabular-nums ${metric.valueClassName}`}>
-                  {metric.value}
-                </span>
-                {metric.unit ? <span className="text-[10px] text-muted-foreground">{metric.unit}</span> : null}
-              </div>
-              <span className="mt-1 text-[10px] text-muted-foreground">{metric.label}</span>
-            </motion.div>
-          ))}
+    <section className="weekly-metrics" aria-label="This week metrics">
+      <h2>Training snapshot</h2>
+      <dl>
+        <div>
+          <dt>{distanceLabel}</dt>
+          <dd>
+            {formatDecimal(completedWeekDistanceKm)}
+            {typeof completedWeekDistanceKm === "number" ? (
+              <span> km</span>
+            ) : null}
+          </dd>
         </div>
-      </div>
-    </motion.section>
+        <div>
+          <dt>Long run planned</dt>
+          <dd>
+            {formatDecimal(longRunMinutes)}
+            {typeof longRunMinutes === "number" ? <span> min</span> : null}
+          </dd>
+        </div>
+        <div>
+          <dt>Average sleep</dt>
+          <dd>
+            {formatDecimal(sleepHours)}
+            {typeof sleepHours === "number" ? <span> h</span> : null}
+          </dd>
+        </div>
+      </dl>
+    </section>
   );
 }
 
@@ -863,9 +618,12 @@ function RaceGoalCard({
   if (!timeline) return null;
 
   const activePhase = (goal.phase || "BASE").toUpperCase();
-  const activePhaseIndex = raceProgressPhases.findIndex((phase) => phase.name === activePhase);
+  const activePhaseIndex = raceProgressPhases.findIndex(
+    (phase) => phase.name === activePhase,
+  );
   const normalizedPhaseIndex = activePhaseIndex === -1 ? 0 : activePhaseIndex;
-  const showPhaseTimeline = timeline.state === "UPCOMING" || timeline.state === "RACE_WEEK";
+  const showPhaseTimeline =
+    timeline.state === "UPCOMING" || timeline.state === "RACE_WEEK";
   const outcomeStatus = goal.goalOutcomeStatus ?? "UNKNOWN";
   const showRecoveryWindow =
     timeline.state === "POST_GOAL" &&
@@ -874,15 +632,23 @@ function RaceGoalCard({
     typeof goal.postGoalWindowDays === "number" &&
     goal.postGoalWindowDays > 0;
   const recoveryPercent = showRecoveryWindow
-    ? boundedPercent(goal.postGoalRecoveryDay ?? 0, goal.postGoalWindowDays ?? 0)
+    ? boundedPercent(
+        goal.postGoalRecoveryDay ?? 0,
+        goal.postGoalWindowDays ?? 0,
+      )
     : 0;
   const isPostGoal = timeline.state === "POST_GOAL";
   const isRaceDay = timeline.state === "RACE_DAY";
-  const isPastGoal = timeline.state === "EXPIRED" || timeline.state === "LEGACY_PAST";
+  const isPastGoal =
+    timeline.state === "EXPIRED" || timeline.state === "LEGACY_PAST";
   const GoalIcon = isPostGoal ? Heart : Flag;
   const canSetOutcome = canSetGoalOutcome(goal, timeline);
   const badgeLabel =
-    outcomeStatus === "COMPLETED" ? "Completed" : outcomeStatus === "SKIPPED" ? "Skipped" : timeline.badgeLabel;
+    outcomeStatus === "COMPLETED"
+      ? "Completed"
+      : outcomeStatus === "SKIPPED"
+        ? "Skipped"
+        : timeline.badgeLabel;
   const outcomeCopy =
     outcomeStatus === "COMPLETED"
       ? "Race completed. Recovery-first training can continue."
@@ -892,404 +658,319 @@ function RaceGoalCard({
   const ctaLabel = nextGoalCtaLabel(goal, timeline);
 
   return (
-    <motion.section
-      className="space-y-2"
-      initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.28 }}
-      aria-label={timeline.sectionLabel}
-    >
-      <div className="flex items-center justify-between px-1">
-        <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-          {timeline.sectionLabel}
-        </span>
-        <span className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${timeline.badgeClassName}`}>
-          {badgeLabel}
-        </span>
+    <section className="weekly-goal" aria-label={timeline.sectionLabel}>
+      <div className="weekly-section-heading">
+        <h2>{timeline.sectionLabel}</h2>
+        <span className="weekly-tag">{badgeLabel}</span>
       </div>
-
-      <div className="overflow-hidden rounded-xl border border-border bg-card">
-        <div className="flex items-start gap-2.5 px-4 pb-3 pt-3.5">
-          <div
-            className={`shrink-0 rounded-lg border p-1.5 ${
-              isPostGoal || isRaceDay
-                ? "border-primary/20 bg-primary/10"
-                : isPastGoal
-                  ? "border-border bg-muted/40"
-                  : "border-accent/15 bg-accent/10"
-            }`}
+      <div className="weekly-goal-name">
+        <GoalIcon size={19} aria-hidden="true" />
+        <h3>{goal.primaryGoal.name}</h3>
+      </div>
+      <div className="weekly-goal-date">
+        {raceGoalDateLabel ? <span>{raceGoalDateLabel}</span> : null}
+        {timeline.dayLabel ? (
+          <strong>
+            {timeline.dayLabel.value} <span>{timeline.dayLabel.unit}</span>
+          </strong>
+        ) : null}
+      </div>
+      {showPhaseTimeline ? (
+        <ol className="weekly-phases" aria-label="Training phases">
+          {raceProgressPhases.map((phase, index) => (
+            <li
+              key={phase.name}
+              aria-current={index === normalizedPhaseIndex ? "step" : undefined}
+              className={index < normalizedPhaseIndex ? "is-past" : ""}
+            >
+              <span aria-hidden="true" />
+              <span>{formatWeekType(phase.name)}</span>
+            </li>
+          ))}
+        </ol>
+      ) : null}
+      {showRecoveryWindow ? (
+        <div className="weekly-recovery">
+          <p>
+            Recovery window{" "}
+            <strong>
+              day {goal.postGoalRecoveryDay} of {goal.postGoalWindowDays}
+            </strong>
+          </p>
+          <progress
+            max={100}
+            value={recoveryPercent}
+            aria-label="Recovery window"
+          />
+          <p>
+            Easy efforts and short runs only while the coach rebuilds training
+            around recovery.
+          </p>
+        </div>
+      ) : null}
+      <p className="weekly-goal-context">
+        {outcomeCopy ??
+          (isRaceDay
+            ? "Trust your training. Run smart."
+            : isPostGoal
+              ? "Recovery-first training this week."
+              : isPastGoal
+                ? "Recovery window closed"
+                : goal.goalSummary)}
+      </p>
+      {canSetOutcome ? (
+        <div className="weekly-goal-actions">
+          <Button
+            type="button"
+            size="sm"
+            onClick={() => onSetOutcome("COMPLETED")}
+            disabled={outcomePending}
           >
-            <GoalIcon className={`h-3.5 w-3.5 ${isPostGoal || isRaceDay ? "text-primary" : isPastGoal ? "text-muted-foreground" : "text-accent"}`} />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold leading-tight text-foreground">{goal.primaryGoal.name}</p>
-            {raceGoalDateLabel ? <p className="mt-0.5 text-[11px] text-muted-foreground">{raceGoalDateLabel}</p> : null}
-          </div>
-          {timeline.dayLabel ? (
-            <div className="shrink-0 text-right">
-              <p className="text-base font-bold leading-none tabular-nums text-foreground">
-                {timeline.dayLabel.value}
-              </p>
-              {timeline.dayLabel.unit ? (
-                <p className="mt-1 text-[10px] text-muted-foreground">{timeline.dayLabel.unit}</p>
-              ) : null}
-            </div>
-          ) : null}
+            {outcomePending && outcomePendingAction === "COMPLETED"
+              ? "Saving…"
+              : "Mark completed"}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => onSetOutcome("SKIPPED")}
+            disabled={outcomePending}
+          >
+            {outcomePending && outcomePendingAction === "SKIPPED"
+              ? "Saving…"
+              : "Skip goal"}
+          </Button>
         </div>
-
-        {showPhaseTimeline ? (
-          <div className="px-4 pb-3">
-            <div className="mb-1.5 flex gap-1">
-              {raceProgressPhases.map((phase, index) => {
-                const isActive = index === normalizedPhaseIndex;
-                const isPast = index < normalizedPhaseIndex;
-                return (
-                  <motion.div
-                    key={phase.name}
-                    initial={{ scaleX: 0.3, opacity: 0 }}
-                    animate={{ scaleX: 1, opacity: 1 }}
-                    transition={{ delay: 0.35 + index * 0.05, duration: 0.35 }}
-                    style={{ transformOrigin: "left" }}
-                    className={`h-1.5 flex-1 rounded-full ${
-                      isActive ? "bg-primary" : isPast ? "bg-primary/30" : "bg-border"
-                    }`}
-                  />
-                );
-              })}
-            </div>
-            <div className="grid grid-cols-4 gap-1">
-              {raceProgressPhases.map((phase, index) => (
-                <span
-                  key={phase.name}
-                  className={`text-[9px] font-medium tracking-wider ${
-                    index === normalizedPhaseIndex ? "text-primary" : "text-muted-foreground/60"
-                  }`}
-                >
-                  {phase.name}
-                </span>
-              ))}
-            </div>
-          </div>
-        ) : null}
-
-        {showRecoveryWindow ? (
-          <div className="px-4 pb-3">
-            <div className="mb-1.5 flex items-center justify-between">
-              <span className="text-[11px] text-muted-foreground">Recovery window</span>
-              <span className="text-[11px] tabular-nums text-muted-foreground">
-                day <span className="font-medium text-foreground">{goal.postGoalRecoveryDay}</span> of{" "}
-                {goal.postGoalWindowDays}
-              </span>
-            </div>
-            <div className="h-1.5 overflow-hidden rounded-full bg-border">
-              <motion.div
-                className="h-full bg-primary"
-                initial={{ width: 0 }}
-                animate={{ width: `${recoveryPercent}%` }}
-                transition={{ duration: 0.6, ease: "easeOut" }}
-              />
-            </div>
-            <p className="mt-2 text-[10.5px] leading-relaxed text-muted-foreground/80">
-              Easy efforts and short runs only while the coach rebuilds training around recovery.
-            </p>
-          </div>
-        ) : null}
-
-        <div className="flex items-center gap-2 border-t border-border bg-muted/20 px-4 py-2.5">
-          {outcomeCopy ? (
-            <>
-              {outcomeStatus === "COMPLETED" ? (
-                <Check className="h-3 w-3 shrink-0 text-primary" />
-              ) : (
-                <CalendarOff className="h-3 w-3 shrink-0 text-muted-foreground" />
-              )}
-              <span className="text-[11px] text-muted-foreground">{outcomeCopy}</span>
-            </>
-          ) : timeline.state === "UPCOMING" || timeline.state === "RACE_WEEK" ? (
-            <>
-              <TrendingUp className="h-3 w-3 shrink-0 text-primary" />
-              <span className="text-[11px] text-muted-foreground">
-                <span className="font-medium text-foreground">{goal.phase}</span> phase
-              </span>
-              <span className="ml-auto truncate text-[11px] text-muted-foreground">{goal.goalSummary}</span>
-            </>
-          ) : isRaceDay ? (
-            <>
-              <Sparkles className="h-3 w-3 shrink-0 text-primary" />
-              <span className="text-[11px] font-medium text-foreground">Trust your training. Run smart.</span>
-            </>
-          ) : isPostGoal ? (
-            <>
-              <Heart className="h-3 w-3 shrink-0 text-primary" />
-              <span className="text-[11px] text-muted-foreground">Recovery-first training this week.</span>
-            </>
-          ) : (
-            <>
-              <CalendarOff className="h-3 w-3 shrink-0 text-muted-foreground" />
-              <span className="text-[11px] text-muted-foreground">Recovery window closed</span>
-            </>
-          )}
-          {ctaLabel && onSetNextGoal ? (
-            <button
-              type="button"
-              onClick={onSetNextGoal}
-              className="ml-auto inline-flex shrink-0 items-center gap-1 rounded-md bg-primary px-2.5 py-1 text-[11px] font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            >
-              {ctaLabel}
-              <ArrowRight className="h-3 w-3" />
-            </button>
-          ) : null}
-        </div>
-
-        {canSetOutcome ? (
-          <div className="flex flex-wrap items-center gap-2 border-t border-border px-4 py-2.5">
-            <Button
-              type="button"
-              size="sm"
-              className="h-8 px-3 text-xs"
-              onClick={() => onSetOutcome("COMPLETED")}
-              disabled={outcomePending}
-            >
-              {outcomePending && outcomePendingAction === "COMPLETED" ? (
-                <RefreshCcw className="mr-1.5 h-3 w-3 animate-spin" />
-              ) : null}
-              Mark completed
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="h-8 px-3 text-xs"
-              onClick={() => onSetOutcome("SKIPPED")}
-              disabled={outcomePending}
-            >
-              {outcomePending && outcomePendingAction === "SKIPPED" ? (
-                <RefreshCcw className="mr-1.5 h-3 w-3 animate-spin" />
-              ) : null}
-              Skip goal
-            </Button>
-            {outcomeError ? <p className="basis-full text-[11px] text-destructive">{outcomeError}</p> : null}
-          </div>
-        ) : outcomeError ? (
-          <div className="border-t border-border px-4 py-2.5">
-            <p className="text-[11px] text-destructive">{outcomeError}</p>
-          </div>
-        ) : null}
-      </div>
-    </motion.section>
+      ) : null}
+      {ctaLabel && onSetNextGoal ? (
+        <Button
+          type="button"
+          className="weekly-next-goal"
+          onClick={onSetNextGoal}
+        >
+          {ctaLabel}
+          <ArrowRight size={15} aria-hidden="true" />
+        </Button>
+      ) : null}
+      {outcomeError ? (
+        <p className="weekly-error" role="alert">
+          {outcomeError}
+        </p>
+      ) : null}
+    </section>
   );
 }
 
 function ScheduleList({
   sessions,
   todayDay,
+  weekStartDate,
   isCurrentWeek,
-  supportsCompletion,
   completionPending,
   expandedDay,
-  justCompletedDay,
-  reduceMotion,
   onToggleComplete,
   onToggleExpanded,
   setSessionRef,
 }: {
   sessions: WeeklyCoachSession[];
-  todayDay: string | undefined;
+  todayDay?: string;
+  weekStartDate: string;
   isCurrentWeek: boolean;
-  supportsCompletion: boolean;
   completionPending: boolean;
   expandedDay: string | null;
-  justCompletedDay: string | null;
-  reduceMotion: boolean;
   onToggleComplete: (day: string) => void;
   onToggleExpanded: (day: string) => void;
   setSessionRef: (day: string, element: HTMLDivElement | null) => void;
 }) {
+  const completed = sessions.filter(
+    (s) => s.modality !== "REST" && s.completed === true,
+  ).length;
+  const total = sessions.filter((s) => s.modality !== "REST").length;
+  const hasCompletion = sessions.some((s) => typeof s.completed === "boolean");
   return (
-    <div className="space-y-2">
-      <div className="px-1">
-        <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Schedule</span>
+    <section
+      className="weekly-schedule"
+      aria-labelledby="weekly-schedule-title"
+    >
+      <div className="weekly-section-heading">
+        <h2 id="weekly-schedule-title" tabIndex={-1}>
+          Your schedule
+        </h2>
+        {hasCompletion ? (
+          <span className="weekly-schedule-count">
+            {completed} of {total} complete
+          </span>
+        ) : (
+          <span className="weekly-schedule-count">{total} sessions</span>
+        )}
       </div>
-
-      <div className="relative">
-        <div className="absolute bottom-2 left-[1.05rem] top-2 w-px bg-border" aria-hidden />
-
-        <AnimatePresence mode="wait">
-          <motion.div
-            className="relative space-y-1"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            {sessions.map((session, index) => {
-              const isDone = session.completed === true;
-              const isRest = session.modality === "REST";
-              const isKey = session.role === "KEY";
-              const isToday = isCurrentWeek && session.day === todayDay;
-              const expanded = expandedDay === session.day;
-              const showExecutionFeedback =
-                isDone &&
-                session.modality === "RUN" &&
-                ["EASY", "RECOVERY", "LONG_RUN", "TEMPO", "VO2"].includes(
-                  session.type,
-                ) &&
-                Boolean(session.syncedActivity);
-              const evaluation = showExecutionFeedback
-                ? session.executionEvaluation
-                : undefined;
-              const config = typeConfig[session.modality] ?? typeConfig.RUN;
-              const TypeIcon = config.icon;
-              const canToggle = supportsCompletion && isCurrentWeek && !completionPending && !isRest;
-
-              return (
-                <motion.div
-                  key={session.day}
-                  ref={(element) => setSessionRef(session.day, element)}
-                  initial={{ opacity: 0, x: -6 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.04, duration: 0.3 }}
-                  className={`group relative ${isRest && !isDone ? "opacity-60" : ""}`}
+      {sessions.length === 0 ? (
+        <div className="weekly-empty">
+          <CalendarOff size={24} aria-hidden="true" />
+          <h3>No sessions in this plan</h3>
+          <p>
+            Your weekly plan has no sessions to display. Check another week or
+            refresh the plan.
+          </p>
+        </div>
+      ) : null}
+      <div className="weekly-agenda">
+        {sessions.map((session) => {
+          const isDone = session.completed === true;
+          const isRest = session.modality === "REST";
+          const isToday = isCurrentWeek && session.day === todayDay;
+          const expanded = expandedDay === session.day;
+          const showExecutionFeedback =
+            isDone &&
+            session.modality === "RUN" &&
+            ["EASY", "RECOVERY", "LONG_RUN", "TEMPO", "VO2"].includes(
+              session.type,
+            ) &&
+            Boolean(session.syncedActivity);
+          const evaluation = showExecutionFeedback
+            ? session.executionEvaluation
+            : undefined;
+          const config = typeConfig[session.modality] ?? typeConfig.RUN;
+          const Icon = config.icon;
+          const date = addDays(
+            parseISO(weekStartDate),
+            Math.max(0, dayOrderIndex(session.day)),
+          );
+          const canToggle =
+            typeof session.completed === "boolean" &&
+            isCurrentWeek &&
+            !completionPending &&
+            !isRest;
+          return (
+            <div
+              key={session.day}
+              className={`weekly-session${isToday ? " is-today" : ""}${expanded ? " is-expanded" : ""}${isRest ? " is-rest" : ""}`}
+              ref={(element) => setSessionRef(session.day, element)}
+            >
+              <div className="weekly-session-row">
+                <div className="weekly-session-date">
+                  <span>{shortDayLabel(session.day)}</span>
+                  <time dateTime={format(date, "yyyy-MM-dd")}>
+                    {format(date, "d")}
+                  </time>
+                </div>
+                <button
+                  type="button"
+                  id={`session-${session.day}-trigger`}
+                  onClick={() => onToggleExpanded(session.day)}
+                  aria-label={`Details for ${session.title}`}
+                  aria-expanded={expanded}
+                  aria-controls={`session-${session.day}-details`}
+                  aria-describedby={
+                    evaluation?.status === "EVALUATED"
+                      ? `session-${session.day}-score`
+                      : undefined
+                  }
+                  className="weekly-session-trigger"
                 >
-                  <div
-                    className={`relative flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl py-2.5 pl-2 pr-3 transition-all ${
-                      !isRest ? "cursor-pointer select-none" : ""
-                    } ${
-                      isToday
-                        ? "bg-primary/[0.06] ring-1 ring-primary/20"
-                        : expanded
-                          ? "bg-card shadow-sm ring-1 ring-border"
-                          : isDone
-                            ? "bg-primary/[0.03] hover:bg-primary/[0.06]"
-                            : "hover:bg-card/80"
-                    }`}
-                  >
-                    <motion.button
-                      type="button"
-                      className={`relative z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-all ${
-                        isDone
-                          ? "border-primary bg-primary text-primary-foreground"
-                          : isToday
-                            ? "border-primary/60 bg-background hover:bg-primary/10"
-                            : isRest
-                              ? "border-border bg-background"
-                              : "border-border bg-background hover:border-primary/40"
-                      }`}
-                      whileTap={canToggle && !reduceMotion ? { scale: 0.85 } : undefined}
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        if (canToggle) onToggleComplete(session.day);
-                      }}
-                      disabled={!canToggle}
-                      aria-label={isDone ? `Mark ${session.title} as incomplete` : `Mark ${session.title} as complete`}
-                    >
-                      {isDone ? (
-                        <>
-                          {justCompletedDay === session.day && !reduceMotion ? (
-                            <motion.span
-                              className="absolute inset-0 rounded-full bg-primary"
-                              initial={{ opacity: 0.4, scale: 1 }}
-                              animate={{ opacity: 0, scale: 2.2 }}
-                              transition={{ duration: 0.7, ease: "easeOut" }}
-                            />
-                          ) : null}
-                          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", bounce: 0.5 }}>
-                            <Check className="h-3 w-3" strokeWidth={3} />
-                          </motion.div>
-                        </>
-                      ) : isRest ? (
-                        <Moon className="h-2.5 w-2.5 text-muted-foreground/40" />
-                      ) : null}
-                    </motion.button>
-
-                    <button
-                      type="button"
-                      disabled={isRest}
-                      onClick={() => onToggleExpanded(session.day)}
-                      aria-label={`Details for ${session.title}`}
-                      aria-expanded={isRest ? undefined : expanded}
-                      aria-controls={isRest ? undefined : `session-${session.day}-details`}
-                      aria-describedby={evaluation?.status === "EVALUATED" ? `session-${session.day}-score` : undefined}
-                      className="flex min-h-11 min-w-0 flex-1 items-center gap-3 rounded-md text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    >
-                      <span className={`w-8 shrink-0 text-[11px] font-medium ${isToday ? "text-primary" : "text-muted-foreground"}`}>
-                        {shortDayLabel(session.day)}
-                      </span>
-                      <span className={`shrink-0 rounded-lg p-1.5 ${config.badgeClass}`}>
-                        <TypeIcon className="h-3.5 w-3.5" aria-hidden="true" />
-                      </span>
-                      <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1">
-                        <span className={`min-w-0 max-w-full break-words text-sm ${isDone && !evaluation ? "text-muted-foreground line-through" : "text-foreground"}`}>
-                          {session.title}
-                        </span>
-                        {evaluation?.status === "EVALUATED" ? (
-                          <span className="shrink-0 text-xs tabular-nums text-foreground/70" id={`session-${session.day}-score`} aria-label={`Execution score ${evaluation.score} out of 100`}>
-                            {evaluation.score}/100
-                          </span>
-                        ) : null}
-                      </span>
-                      {!isRest ? <ChevronDown aria-hidden="true" className={`h-3.5 w-3.5 shrink-0 text-muted-foreground ${expanded ? "rotate-180" : ""}`} /> : null}
-                    </button>
-
-                    <div className="ml-11 flex w-full min-w-0 items-center gap-2 sm:ml-0 sm:w-auto">
-                      <SessionRightSummary session={session} />
-                      {isKey && !isDone ? (
-                        <Badge
-                          variant="outline"
-                          className="h-4 gap-0.5 border-accent/40 px-1.5 py-0 text-[9px] font-bold uppercase tracking-wider text-accent"
-                        >
-                          <Star className="h-2.5 w-2.5 fill-accent" />
-                          Key
-                        </Badge>
-                      ) : null}
-                    </div>
-                  </div>
-
-                  <AnimatePresence>
-                    {expanded && (session.notes || session.strengthFocus?.length || session.completed) ? (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.22, ease: "easeOut" }}
-                        className="overflow-hidden"
-                        id={`session-${session.day}-details`}
-                      >
-                        <div className="pb-3 pl-[2.75rem] pr-3 pt-1.5 sm:pl-[4.5rem]">
-                          {showExecutionFeedback ? (
-                            <ExecutionFeedbackDetails evaluation={evaluation} />
-                          ) : null}
-                          {session.notes ? (
-                            <p className={`${evaluation ? "mt-3" : ""} text-[13px] leading-relaxed text-foreground/75`}>{session.notes}</p>
-                          ) : null}
-                          <div className="mt-2.5 flex flex-wrap items-center gap-2">
-                            <div className="flex items-center gap-1 rounded-md bg-secondary/60 px-1.5 py-0.5">
-                              <div
-                                className={`h-1.5 w-1.5 rounded-full ${
-                                  intensityDot[session.intensityCategory] ?? "bg-muted-foreground/30"
-                                }`}
-                              />
-                              <span className="text-[10px] text-muted-foreground">
-                                {intensityLabels[session.intensityCategory] ?? session.intensityCategory}
-                              </span>
-                            </div>
-                            {session.strengthFocus?.map((focus) => (
-                              <span key={focus} className="rounded-full bg-secondary px-2 py-0.5 text-[10px] text-muted-foreground">
-                                {focus}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      </motion.div>
+                  <span className="weekly-session-title">
+                    {session.title}
+                    {isToday ? (
+                      <span className="weekly-today-tag">Today</span>
                     ) : null}
-                  </AnimatePresence>
-                </motion.div>
-              );
-            })}
-          </motion.div>
-        </AnimatePresence>
+                  </span>
+                  <span className="weekly-session-meta">
+                    <Icon size={14} aria-hidden="true" />
+                    {config.label}
+                    {!isRest ? (
+                      <>
+                        {" "}
+                        ·{" "}
+                        {intensityLabels[session.intensityCategory] ??
+                          session.intensityCategory}{" "}
+                        · <span>{session.durationMinutes} min</span> planned
+                      </>
+                    ) : null}
+                  </span>
+                  <span className="weekly-session-status">
+                    {isDone ? "Completed" : isRest ? "Recovery" : "Planned"}
+                    {session.role === "KEY" ? (
+                      <span className="weekly-key-inline">
+                        <Star size={11} aria-hidden="true" />
+                        Key
+                      </span>
+                    ) : null}
+                  </span>
+                  <ChevronDown
+                    className="weekly-session-chevron"
+                    size={17}
+                    aria-hidden="true"
+                  />
+                </button>
+                {!isRest && typeof session.completed === "boolean" ? (
+                  <button
+                    type="button"
+                    className={`weekly-complete${isDone ? " is-complete" : ""}`}
+                    onClick={() => onToggleComplete(session.day)}
+                    disabled={!canToggle}
+                    aria-label={`Mark ${session.title} as ${isDone ? "incomplete" : "complete"}`}
+                    aria-pressed={isDone}
+                  >
+                    {isDone ? (
+                      <Check size={18} aria-hidden="true" />
+                    ) : (
+                      <span aria-hidden="true" />
+                    )}
+                  </button>
+                ) : null}
+              </div>
+              {session.syncedActivity || evaluation?.status === "EVALUATED" ? (
+                <div className="weekly-session-evidence">
+                  <SyncedActivityBadge session={session} />
+                  {evaluation?.status === "EVALUATED" ? (
+                    <span
+                      className="weekly-score"
+                      id={`session-${session.day}-score`}
+                      aria-label={`Execution score ${evaluation.score} out of 100`}
+                    >
+                      {evaluation.score}/100 <span>execution</span>
+                    </span>
+                  ) : null}
+                </div>
+              ) : null}
+              <div
+                id={`session-${session.day}-details`}
+                className="weekly-session-details"
+                hidden={!expanded}
+              >
+                {expanded ? (
+                  <div className="weekly-session-detail-content">
+                    {session.notes ? <p>{session.notes}</p> : null}
+                    {session.strengthFocus?.length ? (
+                      <ul
+                        className="weekly-strength-focus"
+                        aria-label="Strength focus"
+                      >
+                        {session.strengthFocus.map((focus) => (
+                          <li key={focus}>{focus}</li>
+                        ))}
+                      </ul>
+                    ) : null}
+                    {!session.notes && !session.strengthFocus?.length ? (
+                      <p>
+                        {isRest
+                          ? "No training session planned for this day."
+                          : `${session.durationMinutes} minutes planned at ${(intensityLabels[session.intensityCategory] ?? session.intensityCategory).toLowerCase()} intensity.`}
+                      </p>
+                    ) : null}
+                    <RecordedActivity session={session} />
+                    {showExecutionFeedback ? (
+                      <ExecutionFeedbackDetails evaluation={evaluation} />
+                    ) : null}
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          );
+        })}
       </div>
-    </div>
+    </section>
   );
 }
 
@@ -1300,11 +981,14 @@ export default function WeeklyPlanScreen({
   onRefresh,
   onSetNextGoal,
 }: WeeklyPlanScreenProps) {
-  const [selectedWeekStartDate, setSelectedWeekStartDate] = useState(targetWeekStartDate);
+  const [selectedWeekStartDate, setSelectedWeekStartDate] =
+    useState(targetWeekStartDate);
   const [expandedDay, setExpandedDay] = useState<string | null>(null);
-  const [justCompletedDay, setJustCompletedDay] = useState<string | null>(null);
-  const [outcomePendingAction, setOutcomePendingAction] = useState<GoalOutcomeAction | null>(null);
-  const [outcomeError, setOutcomeError] = useState<string | undefined>(undefined);
+  const [outcomePendingAction, setOutcomePendingAction] =
+    useState<GoalOutcomeAction | null>(null);
+  const [outcomeError, setOutcomeError] = useState<string | undefined>(
+    undefined,
+  );
   const sessionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const reduceMotion = useReducedMotion();
   const queryClient = useQueryClient();
@@ -1314,9 +998,16 @@ export default function WeeklyPlanScreen({
   }, [targetWeekStartDate]);
 
   const screenQuery = useQuery({
-    queryKey: ["portal", "weekly-coach-screen", athleteId, selectedWeekStartDate],
+    queryKey: [
+      "portal",
+      "weekly-coach-screen",
+      athleteId,
+      selectedWeekStartDate,
+    ],
     queryFn: () => getCurrentUserWeeklyCoachScreen(selectedWeekStartDate),
-    enabled: Boolean(selectedWeekStartDate) && !(isPreparing && selectedWeekStartDate === targetWeekStartDate),
+    enabled:
+      Boolean(selectedWeekStartDate) &&
+      !(isPreparing && selectedWeekStartDate === targetWeekStartDate),
     retry: false,
   });
 
@@ -1329,18 +1020,25 @@ export default function WeeklyPlanScreen({
       weekStartDate: string;
       day: string;
       completed: boolean;
-    }) => setCurrentUserWeeklyCoachSessionCompletion(weekStartDate, day, completed),
+    }) =>
+      setCurrentUserWeeklyCoachSessionCompletion(weekStartDate, day, completed),
     onMutate: async ({ day, completed }) => {
       await queryClient.cancelQueries({
-        queryKey: ["portal", "weekly-coach-screen", athleteId, selectedWeekStartDate],
+        queryKey: [
+          "portal",
+          "weekly-coach-screen",
+          athleteId,
+          selectedWeekStartDate,
+        ],
       });
 
-      const previousScreen = queryClient.getQueryData<CurrentUserWeeklyCoachScreen>([
-        "portal",
-        "weekly-coach-screen",
-        athleteId,
-        selectedWeekStartDate,
-      ]);
+      const previousScreen =
+        queryClient.getQueryData<CurrentUserWeeklyCoachScreen>([
+          "portal",
+          "weekly-coach-screen",
+          athleteId,
+          selectedWeekStartDate,
+        ]);
 
       queryClient.setQueryData<CurrentUserWeeklyCoachScreen>(
         ["portal", "weekly-coach-screen", athleteId, selectedWeekStartDate],
@@ -1354,11 +1052,15 @@ export default function WeeklyPlanScreen({
               plan: {
                 ...current.plan.plan,
                 sessions: current.plan.plan.sessions.map((session) =>
-                  session.day === day ? {
-                    ...session,
-                    completed,
-                    completionSource: completed ? "MANUAL" as const : undefined,
-                  } : session,
+                  session.day === day
+                    ? {
+                        ...session,
+                        completed,
+                        completionSource: completed
+                          ? ("MANUAL" as const)
+                          : undefined,
+                      }
+                    : session,
                 ),
               },
             },
@@ -1378,20 +1080,31 @@ export default function WeeklyPlanScreen({
     },
     onSettled: () => {
       queryClient.invalidateQueries({
-        queryKey: ["portal", "weekly-coach-screen", athleteId, selectedWeekStartDate],
+        queryKey: [
+          "portal",
+          "weekly-coach-screen",
+          athleteId,
+          selectedWeekStartDate,
+        ],
       });
     },
   });
 
   const raceGoalOutcomeMutation = useMutation({
-    mutationFn: (outcome: GoalOutcomeAction) => setCurrentUserRaceGoalOutcome(outcome),
+    mutationFn: (outcome: GoalOutcomeAction) =>
+      setCurrentUserRaceGoalOutcome(outcome),
     onMutate: (outcome) => {
       setOutcomePendingAction(outcome);
       setOutcomeError(undefined);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["portal", "weekly-coach-screen", athleteId, selectedWeekStartDate],
+        queryKey: [
+          "portal",
+          "weekly-coach-screen",
+          athleteId,
+          selectedWeekStartDate,
+        ],
       });
     },
     onError: (error) => {
@@ -1436,14 +1149,14 @@ export default function WeeklyPlanScreen({
   const toggleComplete = (day: string) => {
     if (!isCurrentWeek) return;
     const currentScreen = screenQuery.data;
-    const session = currentScreen?.plan?.plan.sessions.find((item) => item.day === day);
-    const weekStartDate = currentScreen?.plan?.weekStartDate ?? currentScreen?.selectedWeekStartDate;
-    if (!session || !weekStartDate || typeof session.completed !== "boolean") return;
-
-    if (!session.completed) {
-      setJustCompletedDay(day);
-      window.setTimeout(() => setJustCompletedDay(null), 900);
-    }
+    const session = currentScreen?.plan?.plan.sessions.find(
+      (item) => item.day === day,
+    );
+    const weekStartDate =
+      currentScreen?.plan?.weekStartDate ??
+      currentScreen?.selectedWeekStartDate;
+    if (!session || !weekStartDate || typeof session.completed !== "boolean")
+      return;
 
     completionMutation.mutate({
       weekStartDate,
@@ -1455,35 +1168,36 @@ export default function WeeklyPlanScreen({
   const scrollToDay = (day: string) => {
     setExpandedDay(day);
     window.requestAnimationFrame(() => {
-      sessionRefs.current[day]?.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "center" });
+      const target = sessionRefs.current[day];
+      const trigger = target?.querySelector<HTMLButtonElement>(
+        ".weekly-session-trigger",
+      );
+      trigger?.focus({ preventScroll: true });
+      trigger?.scrollIntoView({
+        behavior: reduceMotion ? "auto" : "smooth",
+        block: "center",
+      });
     });
   };
 
   const header = (
-    <motion.div className="space-y-3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
-      <div className="flex items-end justify-between gap-4">
-        <div>
-          <motion.h2
-            className="font-serif text-3xl text-foreground"
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35 }}
-          >
-            Your Week
-          </motion.h2>
-          {plan ? (
-            <motion.span
-              className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.12 }}
-            >
-              <span>{formatWeekType(plan.plan.weekType)} week</span>
-              <span>·</span>
-              <span>{plan.summary.phase ?? screen?.goal?.phase ?? "Training"} phase</span>
-            </motion.span>
-          ) : null}
-        </div>
+    <header className="weekly-header">
+      <div>
+        <h1>
+          Your week<span className="weekly-heading-dot">.</span>
+        </h1>
+        {plan ? (
+          <p>
+            {formatWeekType(plan.plan.weekType)} week{" "}
+            <span aria-hidden="true">/</span>{" "}
+            {formatWeekType(
+              plan.summary.phase ?? screen?.goal?.phase ?? "Training",
+            )}{" "}
+            phase
+          </p>
+        ) : (
+          <p>Your training, one week at a time.</p>
+        )}
       </div>
       <WeekNavigator
         currentWeekOffsetLabel={
@@ -1501,168 +1215,133 @@ export default function WeeklyPlanScreen({
             : "Current"
         }
         onPrevious={() => {
-          if (screen?.previousWeekStartDate) setSelectedWeekStartDate(screen.previousWeekStartDate);
+          if (screen?.previousWeekStartDate)
+            setSelectedWeekStartDate(screen.previousWeekStartDate);
         }}
         onNext={() => {
-          if (screen?.nextWeekStartDate) setSelectedWeekStartDate(screen.nextWeekStartDate);
+          if (screen?.nextWeekStartDate)
+            setSelectedWeekStartDate(screen.nextWeekStartDate);
         }}
-        onCurrent={() => setSelectedWeekStartDate(screen?.todayWeekStartDate ?? targetWeekStartDate)}
+        onCurrent={() =>
+          setSelectedWeekStartDate(
+            screen?.todayWeekStartDate ?? targetWeekStartDate,
+          )
+        }
         weekLabel={weekRangeLabel ?? ""}
-        canGoPrevious={screen?.canGoPrevious ?? false}
-        canGoNext={screen?.canGoNext ?? false}
-        showReturnToCurrent={selectedWeekStartDate !== (screen?.todayWeekStartDate ?? targetWeekStartDate)}
+        canGoPrevious={
+          Boolean(screen?.canGoPrevious) &&
+          !completionMutation.isPending &&
+          !raceGoalOutcomeMutation.isPending
+        }
+        canGoNext={
+          Boolean(screen?.canGoNext) &&
+          !completionMutation.isPending &&
+          !raceGoalOutcomeMutation.isPending
+        }
+        showReturnToCurrent={
+          selectedWeekStartDate !==
+          (screen?.todayWeekStartDate ?? targetWeekStartDate)
+        }
       />
-    </motion.div>
+    </header>
   );
 
-  if (isPreparing && isCurrentWeek) {
+  if (
+    (isPreparing && isCurrentWeek) ||
+    screenQuery.isLoading ||
+    screenQuery.isError ||
+    !plan
+  ) {
+    const preparing = isPreparing && isCurrentWeek;
+    const loading = screenQuery.isLoading && !preparing;
+    const error = screenQuery.isError;
+    const title = preparing
+      ? "Preparing your weekly plan"
+      : loading
+        ? "Loading your weekly plan…"
+        : error
+          ? "We couldn't load your weekly plan"
+          : isFutureWeek
+            ? "No plan yet"
+            : isPastWeek
+              ? "No data for this week"
+              : "We're syncing your weekly plan";
+    const description = preparing
+      ? `We're preparing your plan for ${weekRangeLabel}. First plans are generated automatically once onboarding is complete, and future plans are refreshed on Sunday night.`
+      : error
+        ? "Your plan may still be syncing. Try again in a moment."
+        : isFutureWeek
+          ? "Future plans are generated automatically at the end of each week based on your recent training context."
+          : isPastWeek
+            ? "Historical weekly plan data is not available here yet."
+            : "Your plan is not readable yet. Refresh in a moment and we'll check again.";
     return (
-      <div className={screenShellClassName}>
+      <main className={screenShellClassName} aria-label="Weekly training plan">
         {header}
-        <div className="rounded-2xl border border-divider bg-card p-6 shadow-card">
-          <div className="flex items-start gap-3">
-            <div className="rounded-lg bg-secondary p-2 text-muted-foreground">
-              <RefreshCcw className="h-4 w-4 animate-pulse" />
-            </div>
-            <div>
-              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Weekly plan</p>
-              <h2 className="mt-1 font-serif text-2xl text-foreground">Preparing your weekly plan</h2>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                We&apos;re preparing your plan for {weekRangeLabel}. First plans are generated automatically once
-                onboarding is complete, and future plans are refreshed on Sunday night.
-              </p>
-            </div>
-          </div>
-
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="mt-5"
-            onClick={() => onRefresh()}
-            disabled={screenQuery.isFetching}
-          >
-            {screenQuery.isFetching ? (
-              <>
-                <RefreshCcw className="mr-2 h-3.5 w-3.5 animate-spin" />
-                Refreshing
-              </>
-            ) : (
-              "Refresh"
-            )}
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  if (screenQuery.isLoading) {
-    return (
-      <div className={screenShellClassName}>
-        {header}
-        <div className="rounded-2xl border border-divider bg-card p-6 shadow-card">
-          <p className="text-sm text-muted-foreground">Loading your weekly plan…</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (screenQuery.isError) {
-    return (
-      <div className={screenShellClassName}>
-        {header}
-        <div className="rounded-2xl border border-divider bg-card p-6 shadow-card">
-          <h2 className="font-serif text-2xl text-foreground">We couldn't load your weekly plan</h2>
-          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-            Refresh the portal in a moment. Your weekly plan is served from the coach backend and may still be syncing.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!plan) {
-    return (
-      <div className={screenShellClassName}>
-        {header}
-        {isFutureWeek ? (
-          <motion.div
-            className="rounded-2xl border border-dashed border-border bg-muted/20 p-10 text-center"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.4 }}
-          >
-            <CalendarOff className="mx-auto mb-3 h-10 w-10 text-muted-foreground/40" />
-            <p className="text-sm font-medium text-muted-foreground">No plan yet</p>
-            <p className="mx-auto mt-1 max-w-xs text-xs text-muted-foreground/60">
-              Future plans are generated automatically at the end of each week based on your recent training context.
-            </p>
-          </motion.div>
-        ) : isPastWeek ? (
-          <motion.div
-            className="rounded-2xl border border-dashed border-border bg-muted/20 p-10 text-center"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.4 }}
-          >
-            <CalendarOff className="mx-auto mb-3 h-10 w-10 text-muted-foreground/40" />
-            <p className="text-sm font-medium text-muted-foreground">No data for this week</p>
-            <p className="mt-1 text-xs text-muted-foreground/60">
-              Historical weekly plan data is not available here yet.
-            </p>
-          </motion.div>
-        ) : (
-          <div className="rounded-2xl border border-divider bg-card p-6 shadow-card">
-            <div className="flex items-start gap-3">
-              <div className="rounded-lg bg-secondary p-2 text-muted-foreground">
-                <RefreshCcw className="h-4 w-4 animate-pulse" />
-              </div>
-              <div>
-                <h2 className="font-serif text-2xl text-foreground">We&apos;re syncing your weekly plan</h2>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                  The portal knows which week to show, but the plan is not readable yet. Refresh in a moment and
-                  we&apos;ll check again.
-                </p>
-              </div>
-            </div>
-
+        <section
+          className="weekly-empty"
+          aria-busy={loading || preparing}
+          aria-live="polite"
+        >
+          {!loading ? (
+            <CalendarOff size={28} aria-hidden="true" />
+          ) : (
+            <div className="weekly-skeleton" aria-hidden="true" />
+          )}
+          <h2>{title}</h2>
+          {!loading ? <p>{description}</p> : null}
+          {!loading && (error || (!isFutureWeek && !isPastWeek)) ? (
             <Button
               type="button"
               variant="outline"
-              size="sm"
-            className="mt-5"
-            onClick={() => onRefresh()}
-            disabled={screenQuery.isFetching}
-          >
-              {screenQuery.isFetching ? (
-                <>
-                  <RefreshCcw className="mr-2 h-3.5 w-3.5 animate-spin" />
-                  Refreshing
-                </>
-              ) : (
-                "Refresh"
-              )}
+              disabled={screenQuery.isFetching}
+              onClick={() => {
+                if (!preparing) void screenQuery.refetch();
+                void onRefresh();
+              }}
+            >
+              {screenQuery.isFetching
+                ? "Refreshing…"
+                : error
+                  ? "Try again"
+                  : "Refresh"}
             </Button>
-          </div>
-        )}
-      </div>
+          ) : null}
+        </section>
+      </main>
     );
   }
 
-  const sessions = [...plan.plan.sessions].sort((a, b) => dayOrderIndex(a.day) - dayOrderIndex(b.day));
-  const supportsCompletion = sessions.some((session) => typeof session.completed === "boolean");
-  const derivedTodayDay = isCurrentWeek ? dayCodeForDate(new Date()) : undefined;
-  const todayDay = isCurrentWeek ? screen?.todaySessionDay ?? derivedTodayDay : undefined;
-  const todayIndex = todayDay ? sessions.findIndex((session) => session.day === todayDay) : -1;
+  const sessions = [...plan.plan.sessions].sort(
+    (a, b) => dayOrderIndex(a.day) - dayOrderIndex(b.day),
+  );
+  const derivedTodayDay = isCurrentWeek
+    ? dayCodeForDate(new Date())
+    : undefined;
+  const todayDay = isCurrentWeek
+    ? (screen?.todaySessionDay ?? derivedTodayDay)
+    : undefined;
+  const todayIndex = todayDay
+    ? sessions.findIndex((session) => session.day === todayDay)
+    : -1;
   const derivedUpNextDay =
     isCurrentWeek && todayIndex >= 0
       ? sessions
           .slice(todayIndex + 1)
-          .find((session) => session.modality !== "REST" && session.completed !== true)?.day
+          .find(
+            (session) =>
+              session.modality !== "REST" && session.completed !== true,
+          )?.day
       : undefined;
-  const upNextDay = isCurrentWeek ? screen?.upNextSessionDay ?? derivedUpNextDay : undefined;
-  const todaySession = todayDay ? sessions.find((session) => session.day === todayDay) : undefined;
-  const upNextSession = upNextDay ? sessions.find((session) => session.day === upNextDay) : undefined;
+  const upNextDay = isCurrentWeek
+    ? (screen?.upNextSessionDay ?? derivedUpNextDay)
+    : undefined;
+  const todaySession = todayDay
+    ? sessions.find((session) => session.day === todayDay)
+    : undefined;
+  const upNextSession = upNextDay
+    ? sessions.find((session) => session.day === upNextDay)
+    : undefined;
   const showTodayHero = Boolean(isCurrentWeek && todaySession);
   const goal = screen?.goal;
   const raceGoalDateLabel = goal?.primaryGoal.eventDate
@@ -1670,88 +1349,101 @@ export default function WeeklyPlanScreen({
     : undefined;
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
+    <main className="weekly-plan" aria-label="Weekly training plan">
+      <a className="weekly-skip" href="#weekly-schedule-title">
+        Skip to schedule
+      </a>
       {header}
-      <div className="space-y-4">
+      {sessions.length ? (
         <WeekPulse
           sessions={sessions}
           todayDay={todayDay}
           isCurrentWeek={isCurrentWeek}
-          isPastWeek={isPastWeek}
+          selectedDay={expandedDay}
+          weekStartDate={selectedWeekStartDate}
           onSelectDay={scrollToDay}
-          reduceMotion={Boolean(reduceMotion)}
         />
-
-        {showTodayHero && todaySession ? (
-          <AnimatePresence mode="wait">
-            {supportsCompletion && todaySession.completed === true ? (
-              <TodayDoneCard
-                key="today-done"
-                session={todaySession}
-                upNext={upNextSession}
-                canToggleCompletion={supportsCompletion}
-                onUndo={() => toggleComplete(todaySession.day)}
-                onJumpNext={scrollToDay}
-              />
-            ) : (
-              <TodayPendingCard
-                key="today-pending"
-                session={todaySession}
-                expanded={expandedDay === todaySession.day}
-                canComplete={supportsCompletion}
-                isPending={completionMutation.isPending}
-                onToggleExpanded={() => setExpandedDay(expandedDay === todaySession.day ? null : todaySession.day)}
-                onComplete={() => toggleComplete(todaySession.day)}
-              />
-            )}
-          </AnimatePresence>
-        ) : null}
-
-        <motion.div
-          className="relative rounded-xl border border-primary/10 bg-primary/4 px-4 py-3.5"
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35, delay: 0.15 }}
-          key={`coach-${screen?.selectedWeekStartDate ?? selectedWeekStartDate}`}
-        >
-          <div className="flex gap-2.5">
-            <MessageCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
-            <p className="text-[12px] leading-relaxed text-foreground/80">{plan.plan.weekObjective}</p>
+      ) : null}
+      <div className="weekly-workspace">
+        <div className="weekly-training">
+          {showTodayHero && todaySession ? (
+            <TodaySession
+              session={todaySession}
+              upNext={upNextSession}
+              canComplete={
+                todaySession.modality !== "REST" &&
+                typeof todaySession.completed === "boolean"
+              }
+              isPending={completionMutation.isPending}
+              onComplete={() => toggleComplete(todaySession.day)}
+              onJumpNext={scrollToDay}
+              onDetails={() => scrollToDay(todaySession.day)}
+            />
+          ) : null}
+          <div className="weekly-save-status" role="status" aria-live="polite">
+            {completionMutation.isPending
+              ? "Saving completion…"
+              : completionMutation.isError
+                ? "Could not save completion. Please try again."
+                : completionMutation.isSuccess
+                  ? "Completion saved."
+                  : ""}
           </div>
-        </motion.div>
-
-        <WeekMetrics
-          completedWeekDistanceKm={plan.summary.completedWeekDistanceKm ?? plan.summary.last7dDistanceKm}
-          longRunMinutes={screen?.highlights.longRun?.durationMinutes}
-          sleepHours={plan.summary.sleepHours}
-        />
-
-        <RaceGoalCard
-          goal={goal}
-          raceGoalDateLabel={raceGoalDateLabel}
-          outcomePending={raceGoalOutcomeMutation.isPending}
-          outcomeError={outcomeError}
-          outcomePendingAction={outcomePendingAction}
-          onSetOutcome={(outcome) => raceGoalOutcomeMutation.mutate(outcome)}
-          onSetNextGoal={onSetNextGoal}
-        />
-
-        <ScheduleList
-          sessions={sessions}
-          todayDay={todayDay}
-          isCurrentWeek={isCurrentWeek}
-          supportsCompletion={supportsCompletion}
-          completionPending={completionMutation.isPending}
-          expandedDay={expandedDay}
-          justCompletedDay={justCompletedDay}
-          reduceMotion={Boolean(reduceMotion)}
-          onToggleComplete={toggleComplete}
-          onToggleExpanded={(day) => setExpandedDay(expandedDay === day ? null : day)}
-          setSessionRef={(day, element) => {
-            sessionRefs.current[day] = element;
-          }}
-        />
+          <ScheduleList
+            sessions={sessions}
+            todayDay={todayDay}
+            weekStartDate={selectedWeekStartDate}
+            isCurrentWeek={isCurrentWeek}
+            completionPending={completionMutation.isPending}
+            expandedDay={expandedDay}
+            onToggleComplete={toggleComplete}
+            onToggleExpanded={(day) =>
+              setExpandedDay(expandedDay === day ? null : day)
+            }
+            setSessionRef={(day, element) => {
+              sessionRefs.current[day] = element;
+            }}
+          />
+        </div>
+        <aside className="weekly-context" aria-label="Weekly training context">
+          {plan.plan.weekObjective ? (
+            <section className="weekly-coach">
+              <div className="weekly-section-heading">
+                <h2>The week's focus</h2>
+                <MessageCircle size={18} aria-hidden="true" />
+              </div>
+              <p>{plan.plan.weekObjective}</p>
+              {plan.plan.progressionNote ? (
+                <p className="weekly-progression">
+                  {plan.plan.progressionNote}
+                </p>
+              ) : null}
+            </section>
+          ) : null}
+          <WeekMetrics
+            completedWeekDistanceKm={
+              plan.summary.completedWeekDistanceKm ??
+              plan.summary.last7dDistanceKm
+            }
+            distanceLabel={
+              typeof plan.summary.completedWeekDistanceKm === "number"
+                ? "Distance completed"
+                : "Last 7 days"
+            }
+            longRunMinutes={screen?.highlights.longRun?.durationMinutes}
+            sleepHours={plan.summary.sleepHours}
+          />
+          <RaceGoalCard
+            goal={goal}
+            raceGoalDateLabel={raceGoalDateLabel}
+            outcomePending={raceGoalOutcomeMutation.isPending}
+            outcomeError={outcomeError}
+            outcomePendingAction={outcomePendingAction}
+            onSetOutcome={(outcome) => raceGoalOutcomeMutation.mutate(outcome)}
+            onSetNextGoal={onSetNextGoal}
+          />
+        </aside>
       </div>
-    </div>
+    </main>
   );
 }

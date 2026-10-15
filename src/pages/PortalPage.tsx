@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Calendar, User, Link2, LogOut } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
@@ -28,6 +28,7 @@ export default function PortalPage() {
   const [hasSession, setHasSession] = useState<boolean | null>(null);
   const [showReadyTransition, setShowReadyTransition] = useState(false);
   const previousNextStepRef = useRef<string | null>(null);
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     let mounted = true;
@@ -58,6 +59,7 @@ export default function PortalPage() {
       query.state.data?.nextStep === "prepare_weekly_plan" ? 5000 : false,
   });
   const athleteId = bootstrapQuery.data?.athleteId;
+  const isWeeklyView = activeTab === "plan" && bootstrapQuery.data?.nextStep === "view_weekly_plan" && !showReadyTransition;
 
   useEffect(() => {
     if (!bootstrapQuery.data) return;
@@ -158,7 +160,7 @@ export default function PortalPage() {
   return (
     <div className="min-h-screen bg-background">
       <nav className="border-b border-divider bg-background/80 backdrop-blur-md sticky top-0 z-40">
-        <div className="max-w-2xl mx-auto flex items-center justify-between px-6 h-16">
+        <div className={`${isWeeklyView ? "max-w-6xl" : "max-w-2xl"} mx-auto flex items-center justify-between px-6 h-16`}>
           <Link to="/" className="font-serif text-xl tracking-tight text-foreground">
             Running Coach
           </Link>
@@ -175,22 +177,22 @@ export default function PortalPage() {
         </div>
       </nav>
 
-      <div className="max-w-2xl mx-auto px-6 py-8">
+      <div className={`${isWeeklyView ? "max-w-6xl" : "max-w-2xl"} mx-auto px-6 py-8`}>
         <AnimatePresence mode="wait">
           {bootstrapQuery.data.nextStep === "view_weekly_plan" && !showReadyTransition ? (
             <motion.div
               key="portal-shell"
-              initial={{ opacity: 0, y: 12 }}
+              initial={reduceMotion && isWeeklyView ? false : { opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
-              transition={{ duration: 0.25 }}
+              transition={{ duration: reduceMotion && isWeeklyView ? 0 : 0.25 }}
             >
-            <div className="flex gap-1 mb-10 bg-secondary/60 rounded-lg p-1 w-fit">
+            <div className={`flex gap-1 ${isWeeklyView ? "mb-6 sm:mb-10" : "mb-10"} bg-secondary/60 rounded-lg p-1 w-fit`}>
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`relative flex items-center gap-2 px-4 py-2 text-sm rounded-md transition-colors ${
+                  className={`relative flex items-center gap-2 ${isWeeklyView ? "px-2 sm:px-4" : "px-4"} py-2 text-sm rounded-md transition-colors ${
                     activeTab === tab.id
                       ? "text-foreground"
                       : "text-muted-foreground hover:text-foreground"
@@ -200,7 +202,7 @@ export default function PortalPage() {
                     <motion.div
                       layoutId="active-tab"
                       className="absolute inset-0 bg-background rounded-md shadow-sm"
-                      transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
+                      transition={{ type: "spring", bounce: 0.15, duration: reduceMotion && isWeeklyView ? 0 : 0.5 }}
                     />
                   )}
                   <span className="relative z-10 flex items-center gap-2">
@@ -214,10 +216,10 @@ export default function PortalPage() {
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}
-                initial={{ opacity: 0, y: 8 }}
+                initial={reduceMotion && isWeeklyView ? false : { opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.25 }}
+                transition={{ duration: reduceMotion && isWeeklyView ? 0 : 0.25 }}
               >
                 {activeTab === "plan" && (
                   <WeeklyPlanScreen
