@@ -9,6 +9,11 @@ import PrivacyPage from "./pages/PrivacyPage";
 import LoginPage from "./pages/LoginPage";
 import PortalPage from "./pages/PortalPage";
 import NotFound from "./pages/NotFound";
+import { lazy, Suspense } from "react";
+
+const PerformancePreviewPage = lazy(
+  () => import("./pages/PerformancePreviewPage"),
+);
 
 const queryClient = new QueryClient();
 
@@ -24,6 +29,20 @@ const App = () => (
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/portal" element={<PortalPage />} />
+            <Route
+              path="/preview/performance"
+              element={
+                <Suspense
+                  fallback={
+                    <p className="p-6 text-sm" role="status">
+                      Loading performance preview…
+                    </p>
+                  }
+                >
+                  <PerformancePreviewPage />
+                </Suspense>
+              }
+            />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
