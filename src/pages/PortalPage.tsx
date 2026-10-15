@@ -185,30 +185,42 @@ export default function PortalPage() {
               exit={{ opacity: 0, y: -12 }}
               transition={{ duration: 0.25 }}
             >
-            <div className="flex gap-1 mb-10 bg-secondary/60 rounded-lg p-1 w-fit">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`relative flex items-center gap-2 px-4 py-2 text-sm rounded-md transition-colors ${
-                    activeTab === tab.id
-                      ? "text-foreground"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {activeTab === tab.id && (
-                    <motion.div
-                      layoutId="active-tab"
-                      className="absolute inset-0 bg-background rounded-md shadow-sm"
-                      transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
-                    />
-                  )}
-                  <span className="relative z-10 flex items-center gap-2">
-                    <tab.icon className="w-4 h-4" />
-                    {tab.label}
-                  </span>
-                </button>
-              ))}
+            <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+              <div className="flex gap-1 bg-secondary/60 rounded-lg p-1 w-fit">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`relative flex items-center gap-2 px-4 py-2 text-sm rounded-md transition-colors ${
+                      activeTab === tab.id
+                        ? "text-foreground"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {activeTab === tab.id && (
+                      <motion.div
+                        layoutId="active-tab"
+                        className="absolute inset-0 bg-background rounded-md shadow-sm"
+                        transition={{
+                          type: "spring",
+                          bounce: 0.15,
+                          duration: 0.5,
+                        }}
+                      />
+                    )}
+                    <span className="relative z-10 flex items-center gap-2">
+                      <tab.icon className="w-4 h-4" />
+                      {tab.label}
+                    </span>
+                  </button>
+                ))}
+              </div>
+              <Link
+                to="/preview/performance"
+                className="text-xs text-primary underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-4"
+              >
+                Performance preview
+              </Link>
             </div>
 
             <AnimatePresence mode="wait">
