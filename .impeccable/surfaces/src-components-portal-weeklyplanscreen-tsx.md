@@ -14,7 +14,13 @@ related_targets:
 Scope: the authenticated weekly plan. Mode: Operate. Replace this surface's
 composition within the incumbent system; preserve public pages, onboarding,
 Connect, Profile, API contracts and backend-owned training/completion rules.
-The portal shell widens only while the weekly view is active.
+The shared portal shell follows the composition merged in PR #25.
+
+The subsequent component-only alignment follows the user's preference for the
+production Landing/Login, as recorded in `docs/portal-component-alignment.md`.
+It preserves the merged weekly composition and behavior; the component values
+and first-viewport treatment below describe the aligned implementation. The
+original experiment's finish verdict remains historical.
 
 Runner's task: understand this week, read today's prescription, mark completion
 when supported, or inspect another session. Keep planned work, recorded activity
@@ -28,14 +34,16 @@ save/undo, activity provenance, execution feedback and goal-outcome states.
 
 **OWN-WORLD:** Inherit the theme's canvas, primary, foreground and borders, plus DM
 Serif Display headings and DM Sans data. Local flat tonal panels, 16px panel and
-12px control radii, 4/8px spacing rhythm and readable supporting text belong only
-to the weekly surface. Preserve the global theme and recorded system.
+the public controls' md radius (`calc(var(--radius) - 2px)`), 4/8px spacing rhythm
+and readable supporting text. Card grounds and fine divider borders follow the
+production public plan preview. Preserve the global theme and recorded system.
 
 **STORY:** Understand the week, read today's prescription, complete it or inspect
 another session. Supporting context follows the agenda on mobile.
 
 **FIRST VIEWPORT:** Left-aligned 40/48px title, named week navigation and seven dated
-day buttons. Today's primary-color session leads the agenda; desktop adds a quiet
+day buttons. Today's bordered session panel and solid primary completion action
+lead the agenda; desktop adds a quiet
 context column. One primary completion action when supported, with saving/undo
 states. Historical and future views do not pretend to contain today's session.
 

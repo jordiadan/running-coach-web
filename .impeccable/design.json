@@ -18,11 +18,6 @@
         "name": "shadow-sm",
         "value": "0 1px 2px 0 rgb(0 0 0 / 0.05)",
         "purpose": "Tailwind's base card shadow."
-      },
-      {
-        "name": "portal-elevation",
-        "value": "0 8px 24px -16px hsl(var(--foreground) / 0.22)",
-        "purpose": "Scoped Connect provider and Profile editor surfaces; preserves unrelated global elevation."
       }
     ],
     "motion": [
@@ -81,13 +76,13 @@
       "name": "Portal Profile Field",
       "kind": "input",
       "refersTo": "portal-input",
-      "description": "Scoped Profile field: 48px minimum height, 12px corners and foreground-derived control border. The portal-local override leaves the base Input unchanged.",
+      "description": "Scoped Profile field: 48px minimum height, the public Input's md radius and a foreground-derived control border retained for editing visibility. The portal-local override leaves the base Input unchanged.",
       "html": "<input class=\"ds-portal-input\" aria-label=\"Display name\" placeholder=\"Display name\" />",
-      "css": ".ds-portal-input { min-height:48px; width:100%; padding:8px 12px; border:1px solid hsl(var(--foreground) / 0.45); border-radius:12px; background:hsl(var(--background)); color:hsl(var(--foreground)); font-family:\"DM Sans\",system-ui,sans-serif; font-size:16px; transition:background-color 160ms,border-color 160ms,color 160ms,box-shadow 160ms; } .ds-portal-input::placeholder { color:hsl(var(--foreground) / 0.7); opacity:1; } .ds-portal-input:hover:not(:disabled) { border-color:hsl(var(--foreground)); } .ds-portal-input:focus-visible { outline:2px solid var(--portal-primary, hsl(var(--primary))); outline-offset:4px; } .ds-portal-input:disabled { cursor:not-allowed; opacity:0.5; } @media (prefers-reduced-motion:reduce) { .ds-portal-input { transition:none; } }"
+      "css": ".ds-portal-input { min-height:48px; width:100%; padding:8px 12px; border:1px solid hsl(var(--foreground) / 0.45); border-radius:calc(var(--radius) - 2px); background:hsl(var(--background)); color:hsl(var(--foreground)); font-family:\"DM Sans\",system-ui,sans-serif; font-size:16px; transition:background-color 160ms,border-color 160ms,color 160ms,box-shadow 160ms; } .ds-portal-input::placeholder { color:hsl(var(--foreground) / 0.7); opacity:1; } .ds-portal-input:hover:not(:disabled) { border-color:hsl(var(--foreground)); } .ds-portal-input:focus-visible { outline:2px solid var(--portal-primary, hsl(var(--primary))); outline-offset:4px; } .ds-portal-input:disabled { cursor:not-allowed; opacity:0.5; } @media (prefers-reduced-motion:reduce) { .ds-portal-input { transition:none; } }"
     }
   ],
   "narrative": {
-    "overview": "Descriptive record of the existing React/Tailwind system. No new visual direction; code remains the visual authority under AGENTS.md.",
+    "overview": "Descriptive record of the React/Tailwind system. Portal and onboarding retain their merged composition while adopting the production Landing/Login component styling, per docs/portal-component-alignment.md. Public pages and global theme tokens remain unchanged; code remains the visual authority under AGENTS.md.",
     "keyCharacteristics": [
       "Serif headings and sans-serif body text",
       "Tonal surfaces and rounded controls",
