@@ -22,6 +22,16 @@ It preserves the merged weekly composition and behavior; the component values
 and first-viewport treatment below describe the aligned implementation. The
 original experiment's finish verdict remains historical.
 
+The following schedule-only iteration is scoped by
+`docs/weekly-schedule-visual-rhythm.md`, starting from merged PR #28 (`8b15548`).
+It retains the approved public-derived components, shell, Today panel, dates and
+sidebar. The agenda becomes a chronological ordered list with a date rail,
+serif session titles, a truthful shared-scale comparison of prescribed minutes,
+shorter rest rows and an in-place detail reveal. Completion, recorded activity
+and execution feedback remain independent. The original finish verdict does not
+approve this subsequent iteration; its browser and regression evidence is
+recorded separately in that document.
+
 Runner's task: understand this week, read today's prescription, mark completion
 when supported, or inspect another session. Keep planned work, recorded activity
 and manual completion distinct. Preserve current/history/future, loading,

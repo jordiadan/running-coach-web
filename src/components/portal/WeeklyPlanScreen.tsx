@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { addDays, differenceInCalendarWeeks, format, parseISO } from "date-fns";
-import { useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   ArrowRight,
   ExternalLink,
@@ -782,13 +782,26 @@ function ScheduleList({
   expandedDay: string | null;
   onToggleComplete: (day: string) => void;
   onToggleExpanded: (day: string) => void;
-  setSessionRef: (day: string, element: HTMLDivElement | null) => void;
+  setSessionRef: (day: string, element: HTMLLIElement | null) => void;
 }) {
-  const completed = sessions.filter(
-    (s) => s.modality !== "REST" && s.completed === true,
+  const reduceMotion = useReducedMotion();
+  const training = sessions.filter((session) => session.modality !== "REST");
+  const completed = training.filter(
+    (session) => session.completed === true,
   ).length;
-  const total = sessions.filter((s) => s.modality !== "REST").length;
-  const hasCompletion = sessions.some((s) => typeof s.completed === "boolean");
+  const total = training.length;
+  const hasCompletion = training.some(
+    (session) => typeof session.completed === "boolean",
+  );
+  const minutes = (session: WeeklyCoachSession) =>
+    Number.isFinite(session.durationMinutes)
+      ? Math.max(0, session.durationMinutes)
+      : 0;
+  const plannedMinutes = training.reduce(
+    (sum, session) => sum + minutes(session),
+    0,
+  );
+  const longestSession = Math.max(0, ...training.map(minutes));
   return (
     <section
       className="weekly-schedule"
@@ -803,9 +816,22 @@ function ScheduleList({
             {completed} of {total} complete
           </span>
         ) : (
-          <span className="weekly-schedule-count">{total} sessions</span>
+          <span className="weekly-schedule-count">
+            {total === 0 && sessions.length > 0
+              ? `${sessions.length} rest ${sessions.length === 1 ? "day" : "days"}`
+              : `${total} sessions`}
+          </span>
         )}
       </div>
+      {plannedMinutes > 0 ? (
+        <div className="weekly-schedule-guide">
+          <p>
+            <Clock size={14} aria-hidden="true" />
+            <strong>{plannedMinutes} min</strong> planned
+          </p>
+          <p id="weekly-duration-guide">Bars compare planned minutes.</p>
+        </div>
+      ) : null}
       {sessions.length === 0 ? (
         <div className="weekly-empty">
           <CalendarOff size={24} aria-hidden="true" />
@@ -816,161 +842,261 @@ function ScheduleList({
           </p>
         </div>
       ) : null}
-      <div className="weekly-agenda">
-        {sessions.map((session) => {
-          const isDone = session.completed === true;
-          const isRest = session.modality === "REST";
-          const isToday = isCurrentWeek && session.day === todayDay;
-          const expanded = expandedDay === session.day;
-          const showExecutionFeedback =
-            isDone &&
-            session.modality === "RUN" &&
-            ["EASY", "RECOVERY", "LONG_RUN", "TEMPO", "VO2"].includes(
-              session.type,
-            ) &&
-            Boolean(session.syncedActivity);
-          const evaluation = showExecutionFeedback
-            ? session.executionEvaluation
-            : undefined;
-          const config = typeConfig[session.modality] ?? typeConfig.RUN;
-          const Icon = config.icon;
-          const date = addDays(
-            parseISO(weekStartDate),
-            Math.max(0, dayOrderIndex(session.day)),
-          );
-          const canToggle =
-            typeof session.completed === "boolean" &&
-            isCurrentWeek &&
-            !completionPending &&
-            !isRest;
-          return (
-            <div
-              key={session.day}
-              className={`weekly-session${isToday ? " is-today" : ""}${expanded ? " is-expanded" : ""}${isRest ? " is-rest" : ""}`}
-              ref={(element) => setSessionRef(session.day, element)}
-            >
-              <div className="weekly-session-row">
-                <div className="weekly-session-date">
-                  <span>{shortDayLabel(session.day)}</span>
-                  <time dateTime={format(date, "yyyy-MM-dd")}>
-                    {format(date, "d")}
-                  </time>
-                </div>
-                <button
-                  type="button"
-                  id={`session-${session.day}-trigger`}
-                  onClick={() => onToggleExpanded(session.day)}
-                  aria-label={`Details for ${session.title}`}
-                  aria-expanded={expanded}
-                  aria-controls={`session-${session.day}-details`}
-                  aria-describedby={
-                    evaluation?.status === "EVALUATED"
-                      ? `session-${session.day}-score`
-                      : undefined
-                  }
-                  className="weekly-session-trigger"
-                >
-                  <span className="weekly-session-title">
-                    {session.title}
-                    {isToday ? (
-                      <span className="weekly-today-tag">Today</span>
-                    ) : null}
-                  </span>
-                  <span className="weekly-session-meta">
-                    <Icon size={14} aria-hidden="true" />
-                    {config.label}
-                    {!isRest ? (
-                      <>
-                        {" "}
-                        ·{" "}
-                        {intensityLabels[session.intensityCategory] ??
-                          session.intensityCategory}{" "}
-                        · <span>{session.durationMinutes} min</span> planned
-                      </>
-                    ) : null}
-                  </span>
-                  <span className="weekly-session-status">
-                    {isDone ? "Completed" : isRest ? "Recovery" : "Planned"}
-                    {session.role === "KEY" ? (
-                      <span className="weekly-key-inline">
-                        <Star size={11} aria-hidden="true" />
-                        Key
-                      </span>
-                    ) : null}
-                  </span>
-                  <ChevronDown
-                    className="weekly-session-chevron"
-                    size={17}
-                    aria-hidden="true"
-                  />
-                </button>
-                {!isRest && typeof session.completed === "boolean" ? (
+      {sessions.length > 0 ? (
+        <ol className="weekly-agenda" aria-label="Weekly schedule">
+          {sessions.map((session) => {
+            const isDone = session.completed === true;
+            const isRest = session.modality === "REST";
+            const isToday = isCurrentWeek && session.day === todayDay;
+            const expanded = expandedDay === session.day;
+            const showExecutionFeedback =
+              isDone &&
+              session.modality === "RUN" &&
+              ["EASY", "RECOVERY", "LONG_RUN", "TEMPO", "VO2"].includes(
+                session.type,
+              ) &&
+              Boolean(session.syncedActivity);
+            const evaluation = showExecutionFeedback
+              ? session.executionEvaluation
+              : undefined;
+            const config = typeConfig[session.modality] ?? typeConfig.RUN;
+            const Icon = config.icon;
+            const date = addDays(
+              parseISO(weekStartDate),
+              Math.max(0, dayOrderIndex(session.day)),
+            );
+            const canToggle =
+              typeof session.completed === "boolean" &&
+              isCurrentWeek &&
+              !completionPending &&
+              !isRest;
+            const duration = minutes(session);
+            return (
+              <li
+                key={session.day}
+                className={`weekly-session${isToday ? " is-today" : ""}${expanded ? " is-expanded" : ""}${isRest ? " is-rest" : ""}`}
+                ref={(element) => setSessionRef(session.day, element)}
+              >
+                <div className="weekly-session-row">
+                  <div className="weekly-session-date">
+                    <span>{shortDayLabel(session.day)}</span>
+                    <time dateTime={format(date, "yyyy-MM-dd")}>
+                      {format(date, "d")}
+                    </time>
+                  </div>
                   <button
                     type="button"
-                    className={`weekly-complete${isDone ? " is-complete" : ""}`}
-                    onClick={() => onToggleComplete(session.day)}
-                    disabled={!canToggle}
-                    aria-label={`Mark ${session.title} as ${isDone ? "incomplete" : "complete"}`}
-                    aria-pressed={isDone}
+                    id={`session-${session.day}-trigger`}
+                    onClick={() => onToggleExpanded(session.day)}
+                    aria-label={`Details for ${session.title}`}
+                    aria-expanded={expanded}
+                    aria-controls={`session-${session.day}-details`}
+                    aria-describedby={[
+                      `session-${session.day}-meta`,
+                      !isRest && `session-${session.day}-duration`,
+                      `session-${session.day}-status`,
+                      evaluation?.status === "EVALUATED" &&
+                        `session-${session.day}-score`,
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                    className="weekly-session-trigger"
                   >
-                    {isDone ? (
-                      <Check size={18} aria-hidden="true" />
-                    ) : (
-                      <span aria-hidden="true" />
-                    )}
-                  </button>
-                ) : null}
-              </div>
-              {session.syncedActivity || evaluation?.status === "EVALUATED" ? (
-                <div className="weekly-session-evidence">
-                  <SyncedActivityBadge session={session} />
-                  {evaluation?.status === "EVALUATED" ? (
-                    <span
-                      className="weekly-score"
-                      id={`session-${session.day}-score`}
-                      aria-label={`Execution score ${evaluation.score} out of 100`}
-                    >
-                      {evaluation.score}/100 <span>execution</span>
+                    <span className="weekly-session-title">
+                      {session.title}
+                      {isToday ? (
+                        <span className="weekly-today-tag">Today</span>
+                      ) : null}
                     </span>
-                  ) : null}
-                </div>
-              ) : null}
-              <div
-                id={`session-${session.day}-details`}
-                className="weekly-session-details"
-                hidden={!expanded}
-              >
-                {expanded ? (
-                  <div className="weekly-session-detail-content">
-                    {session.notes ? <p>{session.notes}</p> : null}
-                    {session.strengthFocus?.length ? (
-                      <ul
-                        className="weekly-strength-focus"
-                        aria-label="Strength focus"
+                    <span
+                      className="weekly-session-meta"
+                      id={`session-${session.day}-meta`}
+                    >
+                      <span className="weekly-session-modality">
+                        <Icon size={14} aria-hidden="true" />
+                        {config.label}
+                      </span>
+                      {!isRest ? (
+                        <>
+                          {" "}
+                          ·{" "}
+                          {intensityLabels[session.intensityCategory] ??
+                            session.intensityCategory}{" "}
+                          intensity
+                        </>
+                      ) : null}
+                    </span>
+                    {!isRest ? (
+                      <span className="weekly-session-duration">
+                        {longestSession > 0 ? (
+                          <span
+                            className="weekly-duration-track"
+                            aria-hidden="true"
+                          >
+                            <motion.span
+                              className="weekly-duration-bar"
+                              initial={false}
+                              animate={{ scaleX: duration / longestSession }}
+                              transition={{
+                                duration: reduceMotion ? 0 : 0.24,
+                                ease: [0.16, 1, 0.3, 1],
+                              }}
+                            />
+                          </span>
+                        ) : null}
+                        <span
+                          className="weekly-duration-value"
+                          id={`session-${session.day}-duration`}
+                        >
+                          {duration} min
+                          <span className="sr-only"> planned</span>
+                        </span>
+                      </span>
+                    ) : null}
+                    <span
+                      className="weekly-session-status"
+                      id={`session-${session.day}-status`}
+                    >
+                      {isDone ? "Completed" : isRest ? "Recovery" : "Planned"}
+                      {session.role === "KEY" ? (
+                        <span className="weekly-key-inline">
+                          <Star size={11} aria-hidden="true" />
+                          Key
+                        </span>
+                      ) : null}
+                    </span>
+                    <ChevronDown
+                      className="weekly-session-chevron"
+                      size={17}
+                      aria-hidden="true"
+                    />
+                  </button>
+                  {!isRest && typeof session.completed === "boolean" ? (
+                    <button
+                      type="button"
+                      className={`weekly-complete${isDone ? " is-complete" : ""}`}
+                      onClick={() => onToggleComplete(session.day)}
+                      disabled={!canToggle}
+                      aria-label={`Mark ${session.title} as ${isDone ? "incomplete" : "complete"}`}
+                      aria-pressed={isDone}
+                    >
+                      <svg
+                        width="22"
+                        height="22"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        aria-hidden="true"
                       >
-                        {session.strengthFocus.map((focus) => (
-                          <li key={focus}>{focus}</li>
-                        ))}
-                      </ul>
-                    ) : null}
-                    {!session.notes && !session.strengthFocus?.length ? (
-                      <p>
-                        {isRest
-                          ? "No training session planned for this day."
-                          : `${session.durationMinutes} minutes planned at ${(intensityLabels[session.intensityCategory] ?? session.intensityCategory).toLowerCase()} intensity.`}
-                      </p>
-                    ) : null}
-                    <RecordedActivity session={session} />
-                    {showExecutionFeedback ? (
-                      <ExecutionFeedbackDetails evaluation={evaluation} />
+                        <motion.circle
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="var(--week-muted)"
+                          initial={false}
+                          animate={{ opacity: isDone ? 0 : 1 }}
+                          transition={{ duration: reduceMotion ? 0 : 0.12 }}
+                        />
+                        <motion.path
+                          d="m5 12 4 4L19 6"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          initial={false}
+                          animate={{
+                            pathLength: isDone ? 1 : 0,
+                            opacity: isDone ? 1 : 0,
+                          }}
+                          transition={{ duration: reduceMotion ? 0 : 0.18 }}
+                        />
+                      </svg>
+                    </button>
+                  ) : (
+                    <span
+                      className="weekly-complete-space"
+                      aria-hidden="true"
+                    />
+                  )}
+                </div>
+                {session.syncedActivity ||
+                evaluation?.status === "EVALUATED" ? (
+                  <div className="weekly-session-evidence">
+                    <SyncedActivityBadge session={session} />
+                    {evaluation?.status === "EVALUATED" ? (
+                      <span
+                        className="weekly-score"
+                        id={`session-${session.day}-score`}
+                        aria-label={`Execution score ${evaluation.score} out of 100`}
+                      >
+                        {evaluation.score}/100 <span>execution</span>
+                      </span>
                     ) : null}
                   </div>
                 ) : null}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+                <div
+                  id={`session-${session.day}-details`}
+                  className="weekly-session-details"
+                  aria-hidden={!expanded}
+                >
+                  <AnimatePresence initial={false}>
+                    {expanded ? (
+                      <motion.div
+                        key={`${weekStartDate}-${session.day}`}
+                        className="weekly-session-detail-reveal"
+                        initial={
+                          reduceMotion ? false : { gridTemplateRows: "0fr" }
+                        }
+                        animate={{ gridTemplateRows: "1fr" }}
+                        exit={{
+                          gridTemplateRows: "0fr",
+                          transition: {
+                            duration: reduceMotion ? 0 : 0.16,
+                            ease: [0.16, 1, 0.3, 1],
+                          },
+                        }}
+                        transition={{
+                          duration: reduceMotion ? 0 : 0.24,
+                          ease: [0.16, 1, 0.3, 1],
+                        }}
+                      >
+                        <div className="weekly-session-detail-mask">
+                          <div className="weekly-session-detail-content">
+                            {session.notes ? <p>{session.notes}</p> : null}
+                            {session.strengthFocus?.length ? (
+                              <ul
+                                className="weekly-strength-focus"
+                                aria-label="Strength focus"
+                              >
+                                {session.strengthFocus.map((focus) => (
+                                  <li key={focus}>{focus}</li>
+                                ))}
+                              </ul>
+                            ) : null}
+                            {!session.notes &&
+                            !session.strengthFocus?.length ? (
+                              <p>
+                                {isRest
+                                  ? "No training session planned for this day."
+                                  : `${session.durationMinutes} minutes planned at ${(intensityLabels[session.intensityCategory] ?? session.intensityCategory).toLowerCase()} intensity.`}
+                              </p>
+                            ) : null}
+                            <RecordedActivity session={session} />
+                            {showExecutionFeedback ? (
+                              <ExecutionFeedbackDetails
+                                evaluation={evaluation}
+                              />
+                            ) : null}
+                          </div>
+                        </div>
+                      </motion.div>
+                    ) : null}
+                  </AnimatePresence>
+                </div>
+              </li>
+            );
+          })}
+        </ol>
+      ) : null}
     </section>
   );
 }
@@ -990,7 +1116,7 @@ export default function WeeklyPlanScreen({
   const [outcomeError, setOutcomeError] = useState<string | undefined>(
     undefined,
   );
-  const sessionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const sessionRefs = useRef<Record<string, HTMLLIElement | null>>({});
   const reduceMotion = useReducedMotion();
   const queryClient = useQueryClient();
 
@@ -1277,7 +1403,10 @@ export default function WeeklyPlanScreen({
             ? "Historical weekly plan data is not available here yet."
             : "Your plan is not readable yet. Refresh in a moment and we'll check again.";
     return (
-      <section className={screenShellClassName} aria-label="Weekly training plan">
+      <section
+        className={screenShellClassName}
+        aria-label="Weekly training plan"
+      >
         {header}
         <section
           className="weekly-empty"

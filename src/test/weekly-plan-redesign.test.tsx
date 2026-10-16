@@ -275,6 +275,183 @@ describe("weekly training redesign regressions", () => {
     expect(screen.queryByText("Distance completed")).not.toBeInTheDocument();
   });
 
+  it("shows prescribed time separately from recorded activity and excludes rest from the total", async () => {
+    open(
+      payload([
+        {
+          ...run,
+          durationMinutes: 45,
+          syncedActivity: {
+            activityId: "activity",
+            provider: "INTERVALS",
+            durationMinutes: 63,
+            distanceKm: 8.2,
+          },
+        },
+        {
+          ...run,
+          day: "TUE",
+          title: "Strength",
+          modality: "STRENGTH",
+          durationMinutes: 30,
+        },
+        {
+          ...run,
+          day: "WED",
+          title: "Rest",
+          modality: "REST",
+          durationMinutes: 999,
+        },
+      ]),
+    );
+    const schedule = await screen.findByRole("region", {
+      name: "Your schedule",
+    });
+    expect(within(schedule).getByText("75 min")).toBeInTheDocument();
+    expect(
+      within(schedule).getByText("Bars compare planned minutes."),
+    ).toBeInTheDocument();
+    expect(
+      within(schedule).getByRole("button", { name: "Details for Easy run" }),
+    ).toHaveAccessibleDescription(/45 min planned/);
+    expect(
+      within(schedule).getByRole("button", { name: "Details for Strength" }),
+    ).toHaveAccessibleDescription(/30 min planned/);
+    fireEvent.click(
+      within(schedule).getByRole("button", { name: "Details for Easy run" }),
+    );
+    expect(within(schedule).getByText(/8.2 km/)).toHaveTextContent(
+      "8.2 km · 63 min",
+    );
+    expect(within(schedule).getByText("75 min")).toBeInTheDocument();
+  });
+
+  it("keeps a partial plan in chronological order without inventing the missing days", async () => {
+    open(payload([{ ...run, day: "SUN", title: "Long run" }, run]));
+    const schedule = await screen.findByRole("list", {
+      name: "Weekly schedule",
+    });
+    const days = within(schedule).getAllByRole("listitem");
+    expect(days).toHaveLength(2);
+    expect(
+      within(days[0]).getByRole("button", { name: "Details for Easy run" }),
+    ).toBeInTheDocument();
+    expect(
+      within(days[1]).getByRole("button", { name: "Details for Long run" }),
+    ).toBeInTheDocument();
+    expect(within(schedule).queryByText("Rest day")).not.toBeInTheDocument();
+  });
+
+  it("describes an all-rest plan without a zero-of-zero completion target or prescribed training time", async () => {
+    open(
+      payload([
+        {
+          ...run,
+          modality: "REST",
+          title: "Rest day",
+          completed: true,
+          durationMinutes: 0,
+        },
+      ]),
+    );
+    const schedule = await screen.findByRole("region", {
+      name: "Your schedule",
+    });
+    expect(within(schedule).getByText("1 rest day")).toBeInTheDocument();
+    expect(within(schedule).queryByText(/complete$/)).not.toBeInTheDocument();
+    expect(
+      within(schedule).queryByText("Bars compare planned minutes."),
+    ).not.toBeInTheDocument();
+    expect(
+      within(schedule).queryByRole("button", { name: /Mark/ }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps zero-duration sessions inspectable without an invalid comparison scale", async () => {
+    open(payload([{ ...run, durationMinutes: 0 }]));
+    const schedule = await screen.findByRole("region", {
+      name: "Your schedule",
+    });
+    const detail = within(schedule).getByRole("button", {
+      name: "Details for Easy run",
+    });
+    expect(detail).toHaveAccessibleDescription(/0 min planned/);
+    expect(
+      within(schedule).queryByText("Bars compare planned minutes."),
+    ).not.toBeInTheDocument();
+    fireEvent.click(detail);
+    expect(
+      within(schedule).getByText("0 minutes planned at low intensity."),
+    ).toBeInTheDocument();
+    expect(schedule).not.toHaveTextContent(/NaN|Infinity/);
+  });
+
+  it("exposes only the selected day's detail to assistive technology during a change", async () => {
+    open(
+      payload([
+        run,
+        {
+          ...run,
+          day: "TUE",
+          title: "Strength",
+          modality: "STRENGTH",
+          notes: "Work with control.",
+        },
+      ]),
+    );
+    const first = await screen.findByRole("button", {
+      name: "Details for Easy run",
+    });
+    const second = screen.getByRole("button", { name: "Details for Strength" });
+    fireEvent.click(first);
+    expect(
+      document.getElementById(first.getAttribute("aria-controls")!),
+    ).toHaveAttribute("aria-hidden", "false");
+    fireEvent.click(second);
+    expect(first).toHaveAttribute("aria-expanded", "false");
+    expect(
+      document.getElementById(first.getAttribute("aria-controls")!),
+    ).toHaveAttribute("aria-hidden", "true");
+    expect(
+      document.getElementById(second.getAttribute("aria-controls")!),
+    ).toHaveAttribute("aria-hidden", "false");
+    fireEvent.click(second);
+    expect(second).toHaveAttribute("aria-expanded", "false");
+    expect(
+      document.getElementById(second.getAttribute("aria-controls")!),
+    ).toHaveAttribute("aria-hidden", "true");
+  });
+
+  it("updates the weekly time and resets details when navigating to a historical plan", async () => {
+    const data = payload();
+    data.previousWeekStartDate = "2026-10-05";
+    data.canGoPrevious = true;
+    const past = payload([{ ...run, durationMinutes: 25 }]);
+    past.todayWeekStartDate = data.todayWeekStartDate;
+    past.selectedWeekStartDate = "2026-10-05";
+    past.plan!.weekStartDate = "2026-10-05";
+    open(data);
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Details for Easy run" }),
+    );
+    api.getScreen.mockResolvedValue(past);
+    fireEvent.click(screen.getByRole("button", { name: "Previous week" }));
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: "Details for Easy run" }),
+      ).toHaveAccessibleDescription(/25 min planned/),
+    );
+    const schedule = screen.getByRole("region", { name: "Your schedule" });
+    expect(
+      within(schedule).getByRole("button", { name: "Details for Easy run" }),
+    ).toHaveAttribute("aria-expanded", "false");
+    expect(
+      within(schedule).getByRole("button", {
+        name: "Mark Easy run as complete",
+      }),
+    ).toBeDisabled();
+  });
+
   it.each(["2026-10-05", "2026-10-19"])(
     "allows retry when week %s fails to load",
     async (week) => {
