@@ -170,11 +170,11 @@ components:
   portal-input:
     backgroundColor: "{colors.background}"
     textColor: "{colors.foreground}"
-    rounded: "{rounded.xl}"
+    rounded: "{rounded.md}"
     padding: "8px 12px"
     height: "48px"
   portal-surface:
-    backgroundColor: "{colors.surface-elevated}"
+    backgroundColor: "{colors.card}"
     textColor: "{colors.foreground}"
     rounded: "{rounded.2xl}"
 ---
@@ -211,6 +211,13 @@ the same portal roles, typography and shared Connect/Profile controls. Its
 compact setup path, source selection and disclosed setup facts are scoped to
 first-run tasks; they introduce no new theme, tokens, dependencies or raster assets.
 
+The component alignment in `docs/portal-component-alignment.md` follows the user's
+preference for the production Landing and Login. It preserves the merged portal
+and onboarding composition while aligning component radii, section typography,
+bordered surfaces, primary actions and restrained selection tints. Public pages,
+global tokens, behavior and existing motion remain unchanged. The current values
+below supersede the earlier portal-only geometry and elevated surface treatment.
+
 ## Colors
 
 ### Primary
@@ -243,11 +250,14 @@ defect with literal theme class names in `useTheme.tsx`, allowing Tailwind to
 retain all four declared themes without changing their palettes. The historical
 capture does not establish current theme rendering or contrast compliance.
 
-The portal inherits foreground, background, surface-elevated, secondary, border,
+The portal inherits foreground, background, card, secondary, divider,
 primary and primary-foreground roles. Supporting text uses foreground at 70%
-opacity; field borders use foreground at 45%. Its action pair follows the theme:
-the warm theme supplies the forest-green active-source surface, rather than a
-new fixed palette. Scoped contrast adjustments darken the dark theme's action
+opacity; field borders retain foreground at 45% for visible editing boundaries.
+Secondary action borders follow Login's foreground at 20%. Selected days and
+the active source use primary at 10% with primary text, checks/radios and fine
+primary borders. Solid primary is reserved for primary actions. Its action pair
+follows the theme rather than a new fixed palette. Scoped contrast adjustments
+darken the dark theme's action
 fill with 40% black. Bright mixes its primary text/focus role with 15% black and
 its action fill with 30% black. Error text mixes destructive with 10% black on
 light themes; dark and forest use `hsl(0 85% 75%)`. These overrides live in
@@ -273,11 +283,14 @@ Weekly Plan, Connect, Profile and onboarding task headings use the portal-headin
 role, switching to portal-heading-wide from 640px (40px / 48px). Connect and Profile
 supporting copy commonly uses 13–15px; editable fields use 16px. Portal loading
 and authentication states retain their local heading sizes. Onboarding uses the
-same 40px / 48px task headings, 18px / 20px source labels, 20px section headings,
+same 40px / 48px task headings, 18px / 20px serif source labels, 20px serif section headings,
 and 13–15px supporting text. Its heading focus outline
 retains the incumbent 4px corner radius. These scoped values supplement the
 abbreviated frontmatter ramp. The landing also uses `text-lg`/`text-xl`.
 Session metrics use tabular numbers.
+Provider titles and Profile section headings use 24px DM Serif Display at regular
+weight, matching the public feature headings. The supporting heart-rate-zone
+heading uses a 20px serif. Labels, actions and numerical data remain sans-serif.
 There is no global body-text width limit in ch; do not impose one by default.
 
 ## Layout
@@ -332,8 +345,9 @@ transitions, springs and expansions; some screens consult `useReducedMotion`.
 The landing uses staggered entrance motion and parallax. This record does not
 claim application-wide reduced-motion coverage.
 
-Portal provider/editor surfaces use a restrained shadow
-(`0 8px 24px -16px hsl(var(--foreground) / 0.22)`). Settings controls and navigation
+Portal provider/editor surfaces use the theme's card ground and a fine divider
+border, following the production plan preview. They have no custom elevation.
+Settings controls and navigation
 use 160ms state transitions; shell destination changes use 160ms opacity and 4px
 translation. Scoped reduced-motion rules remove portal animations, transitions
 and active-state translation, and the shell consults `useReducedMotion`.
@@ -346,10 +360,11 @@ Bright declares 0.75rem. Portal cards also use Tailwind's `rounded-xl` and
 all depend on the radius variable. Preserve the distinction between semantic
 radii and component-specific radii.
 
-The portal extension repeats 12px control and 16px surface radii, following
-Weekly Plan. Profile day controls use 10px corners; identity monograms and small
-selection indicators remain circular. These scoped values do not change the
-base UI library's radius variable.
+Portal action, field, day and navigation controls now consume the same md radius
+as the public Button/Input: `calc(var(--radius) - 2px)` (8px, or 10px in Bright).
+Surface radii stay 16px like the public plan preview. Provider identity tiles keep
+12px corners, small status badges use pills, and monograms/radio indicators remain
+circular. No base UI library or global theme value changes.
 
 ## Components
 
@@ -384,6 +399,9 @@ use destructive text and operations can disable controls.
 
 The Profile editor overrides base inputs, selects, comboboxes and date controls
 to the portal-input geometry, with ground fill and the scoped control border.
+Its 48px minimum height, 16px field text and stronger editing boundary are
+intentional functional differences from the compact base Input. The md radius
+matches the shared public controls.
 Read-only fields use the soft surface; pending saves disable the editing
 fieldset. Selection, validation and calculated zones remain distinct states.
 
@@ -393,23 +411,25 @@ Serif brand with sans-serif links and controls. The landing has fixed navigation
 with transparency and blur; the portal uses a sticky header and Weekly Plan,
 Connect and Profile destination links, placed as described in Layout. Links
 retain native URL and history behavior through the `view` query parameter.
-The current destination has an underline, stronger weight and tonal fill as well
-as color. A skip link targets main content. The theme selector is a Radix
+The current destination has an underline and stronger weight as well
+as primary color, without a filled capsule. A skip link targets main content. The theme selector is a Radix
 dropdown. Its availability does not establish a new navigation pattern for other
 pages.
 
 ### Connect
 
-The active provider is first and uses the theme's action surface and contrasting
-text. Each provider keeps identity, status and capability before its explicit
+The active provider is first and uses a restrained primary tint, fine primary
+border and labelled status. Provider names use the public serif heading treatment.
+Each provider keeps identity, status and capability before its explicit
 Connect, Reconnect, Replace source or Disconnect action. The inactive source is
 quiet. Disconnect and replacement use confirmation dialogs. Loading, unavailable
 status/retry, pending authorization and operation failures retain visible feedback.
 The provider composition is scoped to this screen, not a generic card template.
 
 Portal confirmation dialogs carry the same scoped roles outside the shell's DOM
-subtree. Their surfaces use 16px corners, buttons use 12px corners and 48px minimum
-height, and confirmation buttons use the theme-adjusted action pair. Supporting
+subtree. Their surfaces use 16px corners, buttons use the shared md radius and 48px
+minimum height, and confirmation buttons use the theme-adjusted action pair. Titles
+use the serif section-heading treatment. Supporting
 and destructive text use the portal's corresponding roles. The dialogs preserve
 the portal focus outline and suppress dialog/overlay animation and transitions
 under reduced motion.
@@ -470,7 +490,10 @@ mobile save bar clears the safe area without reserving a destination bar.
 
 Screen-specific composition in `src/components/portal/WeeklyPlanScreen.tsx`:
 week navigation, metrics, goal state and sessions. Today distinguishes today's
-session and completion. Matched activities show provenance and Strava or
+session with its label, serif title and solid primary completion action on a
+bordered card surface. The selected date uses primary tint and border rather
+than a solid fill. Workspace grids, session order and responsive behavior remain
+as merged. Matched activities show provenance and Strava or
 Intervals links when the contract supplies them. The matched activity remains
 visible when manual completion changes; evidence and the checkbox are independent
 states. Do not extract modality colors, intensities or the entire composition
