@@ -499,6 +499,27 @@ visible when manual completion changes; evidence and the checkbox are independen
 states. Do not extract modality colors, intensities or the entire composition
 into shared components without actual repetition.
 
+The scoped schedule refinement follows `docs/weekly-schedule-visual-rhythm.md`.
+“Your schedule” is an ordered chronological list with a fine date rail, 20px serif
+session titles (22px from 640px), sans-serif modality/intensity/status, and explicit
+minute labels. Four-pixel bars use the same primary color and a shared scale:
+each non-rest session's prescribed minutes divided by the longest prescribed
+non-rest session in the displayed week. Bars are decorative to assistive
+technology; each detail control describes its modality, planned time and state,
+plus execution score only when supported. A short legend explains the comparison.
+The heading sums planned non-rest minutes independently of completion/activity
+data. Rest rows have no time bar and a shorter minimum height; missing days are
+not invented as rest. Completion targets retain 44px geometry.
+
+Details unfold in place through a bounded grid-row transition: 240ms opening,
+160ms closing with `cubic-bezier(0.16,1,0.3,1)`. Closing content is immediately
+hidden from assistive technology and removed after its exit. Persistent SVG
+completion marks interpolate circle/check state over 120/180ms without drawing
+already-completed checks on load. Duration bars render at their correct initial
+scale and interpolate only data changes over 240ms. Reduced motion renders the
+final state immediately. Today, the context sidebar, dates and week navigation
+retain the approved component treatment and composition.
+
 ## Do's and Don'ts
 
 - **Do** reuse existing CSS roles and variants before adding values.

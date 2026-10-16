@@ -3,6 +3,13 @@
   "generatedAt": "2026-10-16T07:19:32Z",
   "title": "Design System: Running Coach",
   "extensions": {
+    "weeklySchedule": {
+      "reference": "docs/weekly-schedule-visual-rhythm.md",
+      "layout": "Ordered chronological agenda; date rail; 20px serif session titles, 22px from 640px; shorter rest rows; separate 44px completion controls.",
+      "dataEncoding": "4px primary bars compare prescribed non-rest minutes against the longest prescribed non-rest session in the displayed week. Explicit minute labels and a legend remain visible. Planned total excludes rest and does not change with manual completion or recorded metrics.",
+      "semantics": "Native ordered list. Detail controls describe modality, planned time and status, with an execution score only when supported. Closing content becomes aria-hidden immediately. Missing days are not fabricated as rest.",
+      "motion": "In-place grid-row reveal: 240ms opening, 160ms closing, cubic-bezier(0.16,1,0.3,1). Persistent completion circle/check: 120/180ms. Duration data changes: scaleX over 240ms with correct initial values. Reduced motion renders final states immediately."
+    },
     "typographyMeta": {
       "portal-heading": {
         "displayName": "Portal page heading",

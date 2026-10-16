@@ -251,7 +251,10 @@ describe("weekly execution feedback screen", () => {
       });
       fireEvent.click(disclosure);
       expect(screen.getByText("Session notes.")).toBeInTheDocument();
-      expect(disclosure).not.toHaveAttribute("aria-describedby");
+      expect(disclosure).toHaveAccessibleDescription(/50 min planned/);
+      expect(disclosure.getAttribute("aria-describedby")).not.toContain(
+        "score",
+      );
       expect(
         screen.queryByLabelText(/Execution score/),
       ).not.toBeInTheDocument();
@@ -291,7 +294,10 @@ describe("weekly execution feedback screen", () => {
       expect(
         screen.getByText("Keep a relaxed, conversational effort."),
       ).toBeInTheDocument();
-      expect(disclosure).not.toHaveAttribute("aria-describedby");
+      expect(disclosure).toHaveAccessibleDescription(/50 min planned/);
+      expect(disclosure.getAttribute("aria-describedby")).not.toContain(
+        "score",
+      );
       expect(
         screen.queryByLabelText(/Execution score/),
       ).not.toBeInTheDocument();
