@@ -2,7 +2,8 @@
 
 .portal-app,
 .portal-settings,
-.portal-dialog {
+.portal-dialog,
+.weekly-plan {
   --portal-ink: hsl(var(--foreground));
   --portal-muted: hsl(var(--foreground) / 0.7);
   --portal-ground: hsl(var(--background));
@@ -16,21 +17,21 @@
   --portal-radius: 1rem;
   --portal-control-radius: 0.75rem;
   --portal-elevation: 0 8px 24px -16px hsl(var(--foreground) / 0.22);
-  --portal-danger: hsl(var(--destructive));
+  --portal-danger: color-mix(in srgb, hsl(var(--destructive)), black 10%);
   color: var(--portal-ink);
 }
 
-.theme-bright :is(.portal-app, .portal-settings, .portal-dialog) {
+.theme-bright :is(.portal-app, .portal-settings, .portal-dialog, .weekly-plan) {
   --portal-primary: color-mix(in srgb, hsl(var(--primary)), black 15%);
   --portal-action: color-mix(in srgb, hsl(var(--primary)), black 30%);
 }
 
-.theme-dark :is(.portal-app, .portal-settings, .portal-dialog) {
+.theme-dark :is(.portal-app, .portal-settings, .portal-dialog, .weekly-plan) {
   --portal-action: color-mix(in srgb, hsl(var(--primary)), black 40%);
 }
 
-.theme-dark :is(.portal-app, .portal-settings, .portal-dialog),
-.theme-forest :is(.portal-app, .portal-settings, .portal-dialog) {
+.theme-dark :is(.portal-app, .portal-settings, .portal-dialog, .weekly-plan),
+.theme-forest :is(.portal-app, .portal-settings, .portal-dialog, .weekly-plan) {
   --portal-danger: hsl(0 85% 75%);
 }
 

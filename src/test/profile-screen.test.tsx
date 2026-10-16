@@ -240,4 +240,58 @@ describe("ProfileScreen race goal focus", () => {
     expect(screen.getByText("Unsaved changes")).toBeInTheDocument();
   });
 
+  it.each([
+    { type: "TIME", time: 6300, pace: "", label: "Target time", changed: "1:45:01", original: "1:45:00" },
+    { type: "PACE", time: "", pace: 300, label: "Target pace / km", changed: "5:01", original: "5:00" },
+  ] as const)("ignores the derived equivalent when reverting a $type target and saving", async ({ type, time, pace, label, changed, original }) => {
+    getAthleteProfileMock.mockResolvedValue({
+      ...athleteProfile,
+      raceTargetType: type,
+      targetTimeSeconds: time,
+      targetPaceSecondsPerKm: pace,
+    });
+    const onDirtyChange = vi.fn();
+    const onDraftChange = vi.fn();
+    renderWithQueryClient(<ProfileScreen athleteId="athlete-1" onDirtyChange={onDirtyChange} onDraftChange={onDraftChange} />);
+    const target = await screen.findByRole("textbox", { name: label });
+    await waitFor(() => expect(target).toHaveValue(original));
+    fireEvent.change(target, { target: { value: changed } });
+    expect(screen.getByText("Unsaved changes")).toBeInTheDocument();
+    fireEvent.change(target, { target: { value: original } });
+    expect(screen.queryByText("Unsaved changes")).not.toBeInTheDocument();
+    expect(onDirtyChange).toHaveBeenLastCalledWith(false);
+    expect(onDraftChange).toHaveBeenLastCalledWith(null);
+
+    fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
+    expect(await screen.findByText("Profile saved.")).toBeInTheDocument();
+    expect(getAthleteProfileMock).toHaveBeenCalledTimes(2);
+    expect(screen.queryByText("Unsaved changes")).not.toBeInTheDocument();
+  });
+
+  it("acknowledges a successful save even when the profile refetch returns the previous snapshot", async () => {
+    const onDraftChange = vi.fn();
+    renderWithQueryClient(<ProfileScreen athleteId="athlete-1" onDraftChange={onDraftChange} />);
+    await screen.findByDisplayValue("Jordi");
+    fireEvent.change(screen.getByLabelText("Display name"), { target: { value: "Saved athlete" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
+
+    expect(await screen.findByText("Profile saved.")).toBeInTheDocument();
+    expect(screen.getByLabelText("Display name")).toHaveValue("Saved athlete");
+    expect(screen.queryByText("Unsaved changes")).not.toBeInTheDocument();
+    expect(onDraftChange).toHaveBeenLastCalledWith(null);
+  });
+
+  it("retains the dirty draft after a failed save", async () => {
+    updateAthleteProfileMock.mockRejectedValueOnce(new Error("Unavailable"));
+    const onDraftChange = vi.fn();
+    renderWithQueryClient(<ProfileScreen athleteId="athlete-1" onDraftChange={onDraftChange} />);
+    await screen.findByDisplayValue("Jordi");
+    fireEvent.change(screen.getByLabelText("Display name"), { target: { value: "Unsaved athlete" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("We couldn't save your profile.");
+    expect(screen.getByLabelText("Display name")).toHaveValue("Unsaved athlete");
+    expect(onDraftChange).toHaveBeenLastCalledWith(expect.objectContaining({ form: expect.objectContaining({ displayName: "Unsaved athlete" }) }));
+  });
+
 });

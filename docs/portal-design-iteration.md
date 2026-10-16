@@ -4,6 +4,42 @@ Scope: Connect, Profile and the authenticated application shell on
 `experiment/ui-design-skills` (PR #25). Public pages, backend contracts and Weekly
 Plan behavior remain outside this iteration. Mode: Operate.
 
+## PR #25 review corrections
+
+The follow-up fixes preserve this direction and address the four review findings:
+
+- Weekly Plan now uses the portal's shared primary, action and error roles.
+  Dark action surfaces and Bright primary labels inherit the existing contrast
+  adjustments. Light-theme error text is darkened slightly so race-outcome errors
+  remain readable on the weekly context surface. Goal actions use the same roles.
+- Profile compares persisted fields and the selected race target, excluding its
+  display-only equivalent. A successful write updates the saved baseline even
+  when the next read returns an unchanged snapshot. Failed writes retain drafts;
+  calculated-zone refreshes still preserve edits.
+- Weekly Plan uses a labelled section inside the shell's single main landmark,
+  including loading and error states.
+- The dated day navigator uses four columns below 400px and seven above, keeping
+  every target at least 44px wide at the checked widths. This small responsive
+  deviation follows the existing Profile day-control pattern.
+
+Seven added regression cases cover time/pace reversion, save acknowledgement,
+failure preservation, real shell/Profile history and discard, navigation after
+save, and the single main landmark. Validation: 145 tests across 12 files pass;
+lint has zero errors and nine existing warnings; build passes; app typecheck has
+the same eight baseline errors and the Node/config typecheck passes.
+
+The actual app was checked in Chromium with synthetic auth/API fixtures at
+320–1440px. Twenty theme/state text-contrast scans have no failures, with a
+minimum measured ratio of 4.85:1. Checks include race-outcome errors and next-goal
+actions, completion/undo, keyboard focus, reduced motion, save failure/retry,
+persisted reload, history restoration and provider-dialog cancellation. These
+checks do not establish live OAuth/backend or Firefox/WebKit compatibility.
+
+Follow-up evidence stays ignored under `.design-experiment/pr25-fixes/`:
+`verification.json`, `after-weekly-dark-desktop.png` and `after-weekly-mobile.png`.
+Comparable before captures are in `.design-experiment/pr25-review/`. No mockup,
+production athlete data or screenshot is committed.
+
 ## Direction and acceptance brief
 
 Extend the existing Weekly Plan identity: warm ivory, theme-aware primary color,

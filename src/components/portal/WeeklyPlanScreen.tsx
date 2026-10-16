@@ -32,6 +32,7 @@ import {
 } from "@/lib/portal-api";
 import { Button } from "@/components/ui/button";
 import WeekNavigator from "@/components/portal/WeekNavigator";
+import "./portal.css";
 import "./weekly-plan.css";
 
 type WeeklyPlanScreenProps = {
@@ -1276,7 +1277,7 @@ export default function WeeklyPlanScreen({
             ? "Historical weekly plan data is not available here yet."
             : "Your plan is not readable yet. Refresh in a moment and we'll check again.";
     return (
-      <main className={screenShellClassName} aria-label="Weekly training plan">
+      <section className={screenShellClassName} aria-label="Weekly training plan">
         {header}
         <section
           className="weekly-empty"
@@ -1308,7 +1309,7 @@ export default function WeeklyPlanScreen({
             </Button>
           ) : null}
         </section>
-      </main>
+      </section>
     );
   }
 
@@ -1349,7 +1350,7 @@ export default function WeeklyPlanScreen({
     : undefined;
 
   return (
-    <main className="weekly-plan" aria-label="Weekly training plan">
+    <section className="weekly-plan" aria-label="Weekly training plan">
       <a className="weekly-skip" href="#weekly-schedule-title">
         Skip to schedule
       </a>
@@ -1444,6 +1445,6 @@ export default function WeeklyPlanScreen({
           />
         </aside>
       </div>
-    </main>
+    </section>
   );
 }

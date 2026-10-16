@@ -244,9 +244,12 @@ opacity; field borders use foreground at 45%. Its action pair follows the theme:
 the warm theme supplies the forest-green active-source surface, rather than a
 new fixed palette. Scoped contrast adjustments darken the dark theme's action
 fill with 40% black. Bright mixes its primary text/focus role with 15% black and
-its action fill with 30% black; dark and forest use `hsl(0 85% 75%)` for error
-text. These overrides live in `portal.css` and do not replace the global theme
-tokens. Their presence alone is not a contrast-compliance verification.
+its action fill with 30% black. Error text mixes destructive with 10% black on
+light themes; dark and forest use `hsl(0 85% 75%)`. These overrides live in
+`portal.css` and do not replace the global theme tokens. Weekly Plan consumes
+these same primary, action and error roles, keeping
+colored surfaces separate from primary text and focus. Their presence alone is
+not a contrast-compliance verification.
 
 ## Typography
 
@@ -293,8 +296,9 @@ from 640px, and adds a 16rem guidance column from 900px. Profile is one column
 below 900px, with compact identity above the editor; from 900px the editor leads
 beside a 17.5rem identity/zones aside. Profile running-day controls use four
 columns below 640px (56px minimum height; at least 44px wide at a 320px viewport),
-then seven columns with 80px minimum height. This is separate from Weekly Plan's
-seven-column date navigator. Weekly Plan retains its 1024px workspace breakpoint.
+then seven columns with 80px minimum height. Weekly Plan's date navigator uses
+four columns below 400px to retain 44px-wide targets, then seven columns. Weekly
+Plan retains its 1024px workspace breakpoint.
 
 ## Elevation & Depth
 
@@ -400,6 +404,10 @@ becomes sticky only while dirty, saving or failed; its resting/success state sta
 in flow. On mobile it clears the bottom navigation, and on desktop it sits 16px
 above the viewport bottom. Saving, unsaved, error and success feedback share the
 same region.
+
+Dirty state compares the persisted profile fields and selected race target;
+display-only time/pace equivalents do not count as edits. Successful saves update
+the saved baseline even when the following read returns an unchanged snapshot.
 
 Unsaved edits live in shell memory, including time/pace drafts, so Back/Forward
 between portal destinations can restore them. Explicit navigation away and

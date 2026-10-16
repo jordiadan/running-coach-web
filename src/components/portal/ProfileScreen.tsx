@@ -81,6 +81,20 @@ const emptyForm: AthleteProfileUpdate = {
   targetPaceSecondsPerKm: "",
 };
 
+function profileSnapshot(values: AthleteProfileUpdate) {
+  const isRaceGoal = values.trainingGoal === "prepare_for_race";
+  return JSON.stringify({
+    ...values,
+    goalRaceEventName: isRaceGoal ? values.goalRaceEventName : "",
+    goalRaceEventDate: isRaceGoal ? values.goalRaceEventDate : "",
+    goalRaceEventDistanceKm: isRaceGoal ? values.goalRaceEventDistanceKm : "",
+    raceTargetType: isRaceGoal ? values.raceTargetType : "FINISH_ONLY",
+    // Only the selected target is persisted; its equivalent is display-only.
+    targetTimeSeconds: isRaceGoal && values.raceTargetType === "TIME" ? values.targetTimeSeconds : "",
+    targetPaceSecondsPerKm: isRaceGoal && values.raceTargetType === "PACE" ? values.targetPaceSecondsPerKm : "",
+  });
+}
+
 export default function ProfileScreen({
   athleteId,
   variant = "page",
@@ -138,7 +152,7 @@ export default function ProfileScreen({
       targetTimeSeconds: profileQuery.data.targetTimeSeconds,
       targetPaceSecondsPerKm: profileQuery.data.targetPaceSecondsPerKm,
     };
-    const snapshot = JSON.stringify(loadedForm);
+    const snapshot = profileSnapshot(loadedForm);
     if (loadedProfileRef.current === snapshot) return;
     loadedProfileRef.current = snapshot;
     const restoredDraft = initialDraftRef.current;
@@ -151,7 +165,8 @@ export default function ProfileScreen({
 
   const saveMutation = useMutation({
     mutationFn: (values: AthleteProfileUpdate) => updateAthleteProfile(athleteId, values),
-    onSuccess: async () => {
+    onSuccess: async (_result, values) => {
+      setSavedForm(values);
       await queryClient.invalidateQueries({ queryKey: ["portal", "bootstrap"] });
       await queryClient.invalidateQueries({ queryKey: ["portal", "athlete", athleteId] });
       await queryClient.invalidateQueries({ queryKey: ["portal", "weekly-coach-screen"] });
@@ -341,7 +356,7 @@ export default function ProfileScreen({
   };
 
   const isOnboarding = variant === "onboarding";
-  const isDirty = JSON.stringify(form) !== JSON.stringify(savedForm);
+  const isDirty = profileSnapshot(form) !== profileSnapshot(savedForm);
   useEffect(() => {
     onDirtyChange?.(isDirty);
     return () => onDirtyChange?.(false);

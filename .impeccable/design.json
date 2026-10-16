@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-16T06:36:45Z",
+  "generatedAt": "2026-10-16T07:19:32Z",
   "title": "Design System: Running Coach",
   "extensions": {
     "typographyMeta": {
@@ -38,6 +38,10 @@
       }
     ],
     "breakpoints": [
+      {
+        "name": "weekly-days-inline",
+        "value": "400px"
+      },
       {
         "name": "sm",
         "value": "640px"
