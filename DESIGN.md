@@ -92,34 +92,45 @@ colors:
   forest-divider: "hsl(150 8% 18%)"
   public-action-dark: "color-mix(in srgb, hsl(var(--primary)), black 40%)"
   public-action-bright: "color-mix(in srgb, hsl(var(--primary)), black 30%)"
-  public-muted: "hsl(var(--foreground) / 0.72)"
+  public-muted: "hsl(var(--foreground) / 0.75)"
   public-error: "color-mix(in srgb, hsl(var(--destructive)), black 10%)"
   public-error-on-dark: "hsl(0 85% 75%)"
 typography:
   public-display:
-    fontFamily: "DM Serif Display, Georgia, serif"
-    fontSize: "clamp(3.25rem, 9.6vw, 8.5rem)"
-    fontWeight: 400
-    lineHeight: 0.99
-    letterSpacing: "-0.04em"
+    fontFamily: "RC Display, Arial Narrow, sans-serif"
+    fontSize: "clamp(4rem, 7.5vw, 6rem)"
+    fontWeight: 600
+    lineHeight: 0.98
+    letterSpacing: "-0.02em"
+  public-display-compact:
+    fontFamily: "RC Display, Arial Narrow, sans-serif"
+    fontSize: "clamp(3.5rem, 8vw, 5rem)"
+    fontWeight: 600
+    lineHeight: 0.98
+    letterSpacing: "-0.02em"
   public-display-mobile:
-    fontFamily: "DM Serif Display, Georgia, serif"
-    fontSize: "clamp(2.9rem, 13.7vw, 4.7rem)"
-    fontWeight: 400
-    lineHeight: 0.99
-    letterSpacing: "-0.04em"
+    fontFamily: "RC Display, Arial Narrow, sans-serif"
+    fontSize: "clamp(3.5rem, 11.5vw, 5rem)"
+    fontWeight: 600
+    lineHeight: 0.98
+    letterSpacing: "-0.02em"
   public-section-heading:
-    fontFamily: "DM Serif Display, Georgia, serif"
-    fontSize: "clamp(2.75rem, 5.2vw, 5rem)"
-    fontWeight: 400
-    lineHeight: 1.04
-    letterSpacing: "-0.035em"
+    fontFamily: "RC Display, Arial Narrow, sans-serif"
+    fontSize: "clamp(3rem, 5vw, 4.5rem)"
+    fontWeight: 600
+    lineHeight: 0.98
+    letterSpacing: "-0.02em"
   public-login-heading:
-    fontFamily: "DM Serif Display, Georgia, serif"
-    fontSize: "clamp(4rem, 7.5vw, 7rem)"
-    fontWeight: 400
-    lineHeight: 1.02
-    letterSpacing: "-0.04em"
+    fontFamily: "RC Display, Arial Narrow, sans-serif"
+    fontSize: "clamp(3rem, 4.5vw, 4.5rem)"
+    fontWeight: 600
+    lineHeight: 0.98
+    letterSpacing: "-0.02em"
+  public-brand:
+    fontFamily: "RC Display, Arial Narrow, sans-serif"
+    fontSize: "1.625rem"
+    fontWeight: 600
+    letterSpacing: "-0.02em"
   public-action-label:
     fontFamily: "DM Sans, system-ui, sans-serif"
     fontSize: "1rem"
@@ -161,7 +172,7 @@ rounded:
   xl: "12px"
   2xl: "16px"
   full: "9999px"
-  public-pill: "999px"
+  public-square: "0px"
 spacing:
   1: "4px"
   2: "8px"
@@ -170,13 +181,13 @@ spacing:
   5: "20px"
   6: "24px"
   8: "32px"
-  public-gutter: "clamp(1.25rem, 4.5vw, 5rem)"
+  public-gutter: "clamp(1.25rem, 4.5vw, 4rem)"
 components:
   public-action:
     backgroundColor: "{colors.primary}"
     textColor: "{colors.primary-foreground}"
     typography: "{typography.public-action-label}"
-    rounded: "{rounded.public-pill}"
+    rounded: "{rounded.public-square}"
     padding: "0.875rem 1.5rem"
   public-action-dark:
     backgroundColor: "{colors.public-action-dark}"
@@ -184,10 +195,12 @@ components:
   public-action-bright:
     backgroundColor: "{colors.public-action-bright}"
     textColor: "{colors.bright-primary-foreground}"
-  public-week-surface:
-    backgroundColor: "{colors.secondary}"
-    textColor: "{colors.foreground}"
-    padding: "2rem"
+  public-action-inverse:
+    backgroundColor: "{colors.primary-foreground}"
+    textColor: "{colors.primary}"
+    typography: "{typography.public-action-label}"
+    rounded: "{rounded.public-square}"
+    padding: "0.875rem 1.5rem"
   button-primary:
     backgroundColor: "{colors.primary}"
     textColor: "{colors.primary-foreground}"
@@ -235,11 +248,11 @@ in PRODUCT.md. No canonical Pencil frame is tracked; this record does not claim
 a comparison with Pencil. Observable sources are `src/index.css`,
 `tailwind.config.ts`, `src/components/ui/` and their consuming screens.
 
-The implementation combines serif headings, sans-serif text, tonal surfaces,
-soft borders and rounded controls. The public pages use photographic windows,
-large editorial type and flat color fields; the portal uses lists, metrics and
-session cards.
-A screen's composition is not promoted to a global rule.
+The shared foundation combines readable sans-serif text and themed tonal
+surfaces. Portal and onboarding retain serif headings and rounded controls.
+Landing and Login use condensed athletic display type, square photography and
+actions; the portal uses lists, metrics and session cards. A screen's composition
+is not promoted to a global rule.
 
 Frontmatter tokens record existing values, with warm as the base theme and
 prefixes for the other declared variants. They index the source rather than
@@ -259,12 +272,14 @@ first-run tasks; they introduce no new theme, tokens, dependencies or raster ass
 
 The public extension on 2026-10-16 is scoped to `/`, `/login`,
 `src/components/public/public.css` and `PublicLayout.tsx`. Its direction contract
-is `.impeccable/surfaces/src-pages-landingpage-tsx.md`. The observed public
-vocabulary is a running journal: oversized serif sentences, small photographic
-windows, an explorable example week and one broad action-color field. It shares
-the portal's fonts and four palettes; its composition does not replace the
-portal, onboarding or privacy visual system. No global construction preference
-or preferred theme is established.
+is `.impeccable/surfaces/src-pages-landingpage-tsx.md`. The implemented public
+vocabulary is a photographic running publication: real athlete imagery,
+condensed two-line headlines, an explorable example week and a broad action-color
+close. It shares the portal's body font, track mark and four palettes, while its
+public-only display font and square geometry remain separate from portal,
+onboarding and privacy. Concept studies are not approved pixel specifications
+or implementation evidence. No global construction preference or preferred
+theme is established.
 
 ## Colors
 
@@ -313,28 +328,38 @@ not a contrast-compliance verification.
 
 Public pages inherit the same theme ground, foreground, secondary and action
 roles. Supporting copy uses public-muted. The dark and bright action adjustments
-match the portal's 40% and 30% black mixes; public links and focus outlines use
-full foreground rather than the portal's separate primary-text adjustment.
-The action field always carries primary-foreground. Public error roles follow
+match the portal's 40% and 30% black mixes. Public focus outlines use currentColor,
+so controls on action fills retain their contrasting foreground. The action
+field carries primary-foreground; its inverse action reverses that pair.
+The desktop hero uses white copy over a monochrome photograph and a neutral black
+scrim increasing from 5% over the athletes to 56% behind the copy. At 760px and
+below, copy returns to the theme foreground on its ground
+and the scrim is removed. Public error roles follow
 the light/dark division recorded in frontmatter. These are local roles in
 `public.css`, not replacements for the global palette.
 
 ## Typography
 
-DM Serif Display with Georgia/serif is used for headings and the brand; DM Sans
-with system-ui/sans-serif for body text and controls. They load from Google Fonts
-in `src/index.css`; no local proprietary fonts are documented.
+DM Serif Display with Georgia/serif remains the portal/onboarding heading and
+brand family. DM Sans with system-ui/sans-serif remains shared body text and
+controls. These families load from Google Fonts in `src/index.css`.
 
-Frontmatter captures common roles rather than every size. Public display and
-section roles describe the implemented fluid serif ramp, with a tighter line
-height and tracking than task headings. At 640px and below, the landing uses
-public-display-mobile; below 360px it uses 12.4vw. Public section headings use
-`clamp(2.7rem, 11vw, 4rem)` at 640px and below. Login's display changes to
-`clamp(3rem, 13vw, 4.75rem)` there. Its action heading is
-`clamp(2rem, 3vw, 2.75rem)` above 640px and 1.875rem below.
-The example-week caption and first-run helper heading use sans-serif to separate
-utility guidance from editorial headings. Public introductory text is 16–20px;
-notes are 13–14px. These values remain scoped to the public compositions.
+Public Landing and Login use RC Display, the self-hosted Barlow Condensed
+semibold (600), for display headings and their brand wordmark. The font is
+`src/assets/public/fonts/barlow-condensed-semibold.ttf`, declared by the scoped
+public stylesheet with font-display swap and Arial Narrow/sans-serif fallbacks.
+Its OFL license is stored beside the font. This public display addition is
+intentional; it does not replace the portal or privacy type system.
+
+Frontmatter captures the implemented public ramp. The landing display uses
+public-display above 1050px, public-display-compact at 1050px and below, and
+public-display-mobile at 760px and below. Public plan/story headings use
+public-section-heading, changing to `clamp(2.75rem, 10vw, 4rem)` at 760px and
+below. Login's single task heading uses public-login-heading, changing to
+`clamp(3rem, 10vw, 4rem)` at 760px and below. The closing heading uses
+`clamp(2.75rem, 5vw, 4.5rem)` with line-height 1, then the same mobile section
+size. Utility text, day/session labels and the New here heading use DM Sans.
+Public introductory copy is 16–18px; metadata and supporting notes are 13–14px.
 
 Weekly Plan, Connect, Profile and onboarding task headings use the portal-heading
 role, switching to portal-heading-wide from 640px (40px / 48px). Connect and Profile
@@ -351,10 +376,10 @@ There is no global body-text width limit in ch; do not impose one by default.
 
 Mobile-first layout combines Tailwind's responsive utilities with scoped public
 CSS. Privacy retains `max-w-2xl` (42rem) and its existing layout. Public Landing
-and Login share a 1440px maximum including fluid public-gutter padding; the
-gutter becomes 12px below 360px. Their normal-flow masthead is 104px tall,
-84px at 640px and below. Public sections use generous fluid vertical spacing,
-while portal spacing retains the existing Tailwind rhythm.
+and Login share a 1440px maximum including fluid public-gutter padding. Their
+normal-flow masthead is 88px tall, 76px at 760px and below. The hero has its own
+inset width rather than the standard content gutter. Public sections use
+fluid vertical spacing; portal spacing retains the existing Tailwind rhythm.
 
 Default breakpoints are sm (640px), md (768px), lg (1024px), xl (1280px) and
 2xl (1536px). Tailwind's `container` config sets a 1400px width at 2xl; that is
@@ -387,16 +412,22 @@ then seven columns with 80px minimum height. Weekly Plan's date navigator uses
 four columns below 400px to retain 44px-wide targets, then seven columns. Weekly
 Plan retains its 1024px workspace breakpoint.
 
-Public Landing uses two headline lines with an inset photograph, introductory
-copy and action, then an interactive week. The weekday strip has seven columns;
-below 360px it wraps into four columns to retain usable targets. Session details
-use three columns above 900px, two at 900px and below with notes spanning both.
-The short action-color story uses two columns and a sticky heading; at 640px and
-below it becomes one column and the heading returns to normal flow. The closing
-photo and action also stack at 640px. These are surface-specific arrangements.
-Login uses a display/photo column beside a form region capped at 28rem; at 640px
-and below it stacks, and the photo becomes a small inset beside the second
-headline line. Public page navigation remains in normal flow at every width.
+Public Landing places a training-group photograph behind right-hand title,
+copy and action. The hero is inset 24px on each side, capped at 1440px, with
+560px minimum height and a viewport-aware height capped at 720px. At 760px and
+below it is inset 20px; the photograph becomes a 240–370px band above copy.
+The illustrative plan sits beside a companion photograph. Its weekday strip
+has seven columns above 1050px and four at 1050px and below; session names stay
+visible at every width. Editorial session content uses two columns, with notes
+moving below at 1050px. At 760px the plan and photo stack, with a 240px photo.
+
+The setup story pairs a tall track photograph with three short content groups;
+at 760px it stacks and the photo becomes 320px tall. It uses normal scroll flow.
+The closing action field places its heading beside an inverse action, stacking
+at 760px. Login pairs a track photograph with one task/form region capped at
+29rem. At 760px and below, its photograph becomes a 180px band above the task;
+the form cap becomes 34rem. Next-step guidance is unboxed. Public navigation
+stays in normal flow, and the footer includes photo credits and privacy.
 
 ## Elevation & Depth
 
@@ -405,20 +436,30 @@ Base cards use `shadow-sm`; raised or open controls can use larger shadows.
 Screens reference `shadow-card`, but the inspected CSS and config define no
 custom token for it; do not invent a value. Today cards and their states are
 observed behavior rather than a universal recipe.
-Public Landing and Login use flat secondary/action fields and image clipping;
-they add no surface shadow, photograph overlay or blurred navigation.
+Public Landing and Login use flat grounds, an action-color closing field and
+square image clipping without raised cards or blurred navigation. The desktop
+hero's neutral scrim supports white copy; the mobile photo has no scrim.
 
 CSS animates body color changes over 0.3s. The portal uses opacity and translation
 transitions, springs and expansions; some screens consult `useReducedMotion`.
-Public sections settle over 16px in 650ms using the public easing curve;
-photographs settle from scale 1.08 in 1.1s. Reveals begin visible and run once
-when observed. Selected weekday fill uses a shared-layout spring (stiffness 420,
-damping 38), and session detail enters with 6px travel and opacity over 220ms.
-Controls use 180ms feedback, a 0.98 press scale and 2px arrow travel. The login
-pending spinner runs at 1s while waiting. MotionConfig, useReducedMotion and
-public scoped CSS remove travel, scaling, layout animation, transitions and
-spinning under reduced motion; final content and status remain visible.
-This record does not claim application-wide reduced-motion coverage.
+Public photographs reveal with a short clip shutter: inset-left 12% resolves
+to 0 in 850ms using the public easing curve. Images start visible; useInView
+triggers this once at 18% visibility, including below-fold photographs. Hero
+title lines rise through individual masks from 105% over 750ms, delayed 120ms
+and 210ms. Supporting copy/actions resolve from 0.4 opacity over 450ms; Login
+uses a 160ms delay. Selected weekday fill uses a shared-layout spring (stiffness
+420, damping 38), and session detail enters with 6px travel and opacity over
+220ms. Actions use 180ms feedback, a 0.985 press scale and 4px horizontal arrow
+travel. The pending spinner runs at 1s while waiting.
+
+Public links progressively enhance same-document route changes with native view
+transitions: photo 450ms with public easing, brand 300ms and root 200ms. Route
+updates are flushed before the destination image decode and snapshot completes.
+Modified clicks, unsupported browsers and reduced motion retain ordinary links.
+MotionConfig, useReducedMotion and scoped CSS show final states and remove
+shutter/title travel, layout animation, transitions and spinner animation under
+reduced motion. This record does not claim application-wide reduced-motion
+coverage or accessibility certification.
 
 Portal provider/editor surfaces use a restrained shadow
 (`0 8px 24px -16px hsl(var(--foreground) / 0.22)`). Settings controls and navigation
@@ -439,10 +480,10 @@ Weekly Plan. Profile day controls use 10px corners; identity monograms and small
 selection indicators remain circular. These scoped values do not change the
 base UI library's radius variable.
 
-Public photographic windows, weekday cells, session details and the first-run
-helper are square-edged. Primary public actions use public-pill corners, while
-small theme controls remain circular. This intentionally differs from portal
-surface radii without changing shared UI primitives.
+Public photographs, actions, weekday selections and public theme controls use
+square corners. The provider mark's circular white backing remains a local
+exception. Public square geometry does not change portal surface radii or
+shared UI primitives.
 
 ## Components
 
@@ -462,12 +503,12 @@ high; Profile save and editable-field controls are at least 48px high. Portal
 focus uses a 2px primary outline with a 4px offset. These local sizes supplement
 the base Button variants rather than redefining every button as 40px.
 
-Public actions use the public-action tokens, with 56px minimum height and 54px
-at 640px and below. The Google action fills its form region and includes the
-provider mark. Hover moves the trailing arrow; pressed state scales the action.
-Disabled session-check/OAuth states retain a visible label and status and prevent
-duplicate requests. Public keyboard focus uses a 2px foreground outline with 5px
-offset; the broad action-color field uses currentColor for its outline.
+Public actions use public-action tokens with 56px minimum height and square
+corners. The Google action fills its form region and includes the provider mark;
+the closing action reverses the theme-adjusted action pair. Hover moves the
+trailing arrow; pressed state scales the action. Disabled session-check/OAuth
+states retain a visible label and status and prevent duplicate requests. Public
+keyboard focus uses a 2px currentColor outline with 5px offset.
 
 ### Cards / Containers
 
@@ -489,35 +530,40 @@ fieldset. Selection, validation and calculated zones remain distinct states.
 
 ### Navigation
 
-Serif brand with sans-serif links and controls. Public Landing and Login share
-a normal-flow masthead, track-like brand mark, theme selector, contextual link
-and skip link. Landing hides its story anchor at 640px and below; Login retains
-a labelled 44px home control while hiding its text there. Their shared footer
-links to privacy. The portal uses a sticky header and Weekly Plan,
-Connect and Profile destination links, placed as described in Layout. Links
-retain native URL and history behavior through the `view` query parameter.
-The current destination has an underline, stronger weight and tonal fill as well
-as color. A skip link targets main content. The theme selector is a Radix
-dropdown. Its availability does not establish a new navigation pattern for other
-pages.
+Public Landing and Login share a condensed display wordmark, track mark,
+normal-flow masthead, theme selector, contextual link and skip link. Landing
+hides its story anchor at 760px and below; Login hides its home text at 420px
+and below while retaining a labelled 44px control. The shared footer links to
+privacy and the three photographic source pages. Brand/home/login links use the
+progressive native transition described above.
+
+The portal retains its serif brand, sticky header and Weekly Plan, Connect and
+Profile destination links, placed as described in Layout. Links retain native
+URL and history behavior through the `view` query parameter. The current
+destination has an underline, stronger weight and tonal fill as well as color.
+A skip link targets main content. The theme selector is a Radix dropdown. Its
+availability does not establish a new navigation pattern for other pages.
 
 ### Public example week and imagery
 
 Native weekday buttons expose pressed state and control one polite, atomic
 session-detail region. A continuous action-colored selection links the day to
-its prescription; desktop day cells show session names, while narrow screens
-retain day and duration. The selected session heading leads its day metadata,
-duration, effort and notes. The example is explicitly illustrative, not an
-editable or generated personal plan. Login's checking, ready, pending and error
-states keep one Google action, visible status, recoverable error text and
-first-run guidance; authenticated sessions redirect to the portal.
+its prescription. Every width keeps both weekday and session name visible.
+The selected session heading leads day metadata, duration, effort and notes.
+The example is explicitly illustrative, not an editable or generated personal
+plan. Login keeps one task heading and one Google action with checking, ready,
+pending and error states, visible status and recoverable errors. Its unboxed
+first-run guidance and Connect / Your profile / Your week path explain what
+follows; authenticated sessions redirect to the portal.
 
-Responsive 480px and 960px WebP assets derive from the existing running JPEG.
-They are used as atmosphere with descriptive alternative text, not customer
-endorsement or a claim about an identified place. Original image provenance is
-unknown and remains documented in `src/assets/public/README.md`. No generated
-image was introduced. Photo windows use cover crops; the closing photograph
-changes from a near-square to a wider crop on mobile.
+Three real Unsplash photographs support distinct training contexts: Fitsum
+Admasu's road-training group for the monochrome hero, Jakob Owens's runner beside
+the water for the example plan, and Filip Mroz's track stride for setup and
+Login. Source-page links appear in the footer; asset derivation and license
+records live in `src/assets/public/README.md`. The images are atmosphere, not
+customer endorsements. The training photograph has 900w/1800w WebP variants;
+stride and runner use 1000px and 900px assets. Cover crops respond to their
+specific contexts. No design-study image is presented as implementation evidence.
 
 ### Connect
 
@@ -604,7 +650,7 @@ into shared components without actual repetition.
 - **Do** follow AGENTS.md and define a mobile-first hierarchy before implementing
   new screens or structural changes; compare with the agreed design or brief.
 - **Do** keep public composition and action overrides scoped to Landing and Login;
-  preserve shared fonts, theme switching and the separate privacy/portal systems.
+  preserve shared body type, theme switching and the separate privacy/portal systems.
 - **Do** retain visible final content under reduced motion and distinguish an
   illustrative week from an athlete's actual plan.
 - **Don't** treat this capture as an approved rebrand, a UX audit or accessibility

@@ -1,174 +1,131 @@
-# Landing and Login redesign
+# Landing and Login: photographic running publication
 
-Scope: `/`, `/login` and public-only components. Landing is Persuade; Login is
-Operate. The merged portal, onboarding, privacy page and backend stay outside
-the implementation boundary. Product facts come from PRODUCT.md.
+This is the replacement of the public design rejected by the user on 2026-10-16.
+The previous serif headline, mountain windows, pill actions and generic 16px
+entrances are superseded. Its earlier review verdict is historical and does not
+approve this replacement. Scope remains `/`, `/login`, public-only components,
+assets, regression tests and their design records. Portal, onboarding, privacy
+and backend behavior are unchanged.
 
-## Direction contract
+## Direction and evidence
 
-THESIS: The runner's seven-day rhythm becomes the page's working material. A
-short editorial headline opens onto an explorable example week rather than
-feature cards or unsupported performance statistics.
+The runner should recognize training before reading a product explanation.
+Actual athlete photography, condensed athletic typography and a working example
+week establish that connection. Login continues the same identity around one
+task heading and one Google action, rather than a competing marketing slogan.
 
-OWN-WORLD: Existing DM Serif Display and DM Sans connect public pages to
-onboarding. Full-ink type, theme ground, a generous primary-color field, squared
-photography and pill actions form the public vocabulary. Preserve all four
-palettes; contrast-adjust action colors locally, as the portal does.
+The surface contract records the original Impeccable seed `67ef75c1` and the
+photographic publication candidate from its grounded list. This replacement
+follows user rejection of the prior candidate, not a claimed fresh assigned roll.
+Taste informs hierarchy, distinct section compositions and restraint; its image
+and motion quotas do not override the requested experience.
 
-STORY: Understand personalized weekly planning, explore a clearly labelled
-example, learn how one source and a goal/schedule produce the first plan, then
-continue with Google. No price, speed, performance or social-proof claims.
+Three independently generated design studies explored the hero, product section
+and Login before implementation. They are local concept studies, not approved
+pixel specifications or screenshots of the application. Production uses real
+licensed photos. The actual hero photograph determines the right-hand text
+placement; the plan study’s invented mountain backdrop and decorative bars were
+discarded. No image-generation output ships as an app asset.
 
-FIRST VIEWPORT: A quiet masthead precedes two oversized headline lines. A small
-running-image window interrupts the first line. Supporting copy and one filled
-Get started action lead into a seven-day interactive strip and session detail.
-On mobile, the headline window shrinks and the weekdays retain seven thumb
-targets; all reading stays in one column. Login keeps the masthead and image
-window, makes Google the sole primary action and explains the first-run path.
+## Typography, photography and composition
 
-FORM: Running journal, candidate 3; Impeccable seed `67ef75c1`. Grounded list:
-training diary, running publication, weekly journal, race programme, route guide,
-club noticeboard, finish-line print. Taste: sentence-as-layout, seed
-`2084845364`; existing palette and type retained. Ink basin and torn billboard
-challengers lose identification and product clarity. Rhythm machine is
-competitive on rhythm but loses product clarity: retain its disciplined
-relationship between selection and visible state, without instrument styling.
-Raise from ink basin: one continuous composition. Raise from torn billboard:
-confident shifts in scale. No imagery, music or simulation quota overrides scope.
+Self-hosted Barlow Condensed 600, named RC Display in CSS, supplies the public
+display voice. DM Sans remains the shared reading and control face. All four
+existing palettes remain; public action and error contrast adjustments retain the
+portal’s established approach. The track mark and first-run language connect
+public pages to onboarding. Square actions and image edges belong to these
+public pages; authenticated control geometry is unchanged.
 
-FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
+Three real photographs replace the repeated landscape: Fitsum Admasu’s running
+group leads the page, Filip Mroz’s runner accompanies session evidence, and Jakob
+Owens’s track stride connects setup and Login. Sources, licenses, local origin
+sidecars and the font’s OFL are recorded in `src/assets/public/README.md`. Footer
+credits link to source images. These photographs are editorial context, never
+Running Coach customers, endorsements or training results.
 
-## Content and states
+The desktop hero preserves the athletes and puts copy over a neutral contrast
+scrim on the right. Mobile places the photograph above the title and action.
+The illustrative week shows both weekday and session names at every width;
+controls use seven columns on wide screens and four at narrower widths. Selecting
+a day exposes prescribed effort, duration and notes without saving a schedule.
+Four running days, strength and rest illustrate supported plan content. The
+following image/content section explains one source, a race or general goal,
+at least four running days, preferred long-run day and the resulting weekly plan.
+The close repeats the same primary action, “Build my week.”
 
-- Hero: “Your week. Your running.” Personalized weekly running plans built around
-  training, goals and available days. Get started goes to `/login`.
-- Example week: explicitly illustrative, four running days, rest and strength;
-  choosing a day reveals its prescribed duration/intensity and notes. This is an
-  educational example, not a generated personal plan or editable schedule.
-- Setup: connect Strava OR Intervals.icu; configure a race or general running
-  goal, at least four running days and a preferred long-run day; receive a weekly
-  plan with session details and completion. Intervals workout publishing is not
-  attributed to Strava. Provider recovery capabilities are not equated.
-- Login: checking existing session, ready, OAuth pending, session-check error,
-  OAuth rejection/network error, authenticated redirect. Errors offer recovery;
-  pending state has a visible status and prevents duplicate requests. Preserve
-  Google provider and same-origin `/portal` redirect.
-- No form, pricing, empty product feed, testimonials or customer metrics.
+Login uses one heading, one Google action, a real stride image and unboxed
+next-step guidance. On mobile its image becomes a 180px band. Session checking,
+existing-session replacement redirect, OAuth pending, duplicate prevention and
+recoverable errors remain covered. Google’s callback stays `${origin}/portal`.
 
 ## Motion
 
-The image window settles into the headline; type resolves over a short distance.
-The selected weekday's filled field moves with a damped spring, connecting the
-day to the session detail. The setup heading holds while its explanatory entries
-scroll normally. Section content stays visible before observation. Controls give
-brief press/hover feedback. Reduced motion shows final states immediately and
-removes travel, layout animation and image scaling. No looping decoration.
+- The hero headline resolves line by line through a mask while the image opens
+  with a short photographic shutter. Supporting copy settles more quietly.
+- Each below-fold photograph starts its shutter only when reached; it no longer
+  finishes off-screen during initial mount.
+- A damped shared selection surface and brief content transition connect the
+  chosen weekday to its actual illustrative session.
+- Public links optionally use native same-document View Transitions to carry
+  the photo and brand into Login. Route updates are synchronous inside the native
+  callback; the incoming image decodes before its snapshot. Unsupported browsers,
+  modified clicks and reduced motion retain ordinary link behavior.
+- Reduced motion shows final title/photo states immediately, removes transitions
+  and bypasses native route animation. No decorative looping animation is added.
 
-## Imagery and exceptions
+## Browser critique and corrections
 
-Reuse `src/assets/hero-running.jpg` as atmospheric running imagery, not a claim
-about an actual customer or location. Original provenance is not recorded in the
-repository. Public WebP derivatives preserve that source; do not call it a
-verified documentary photograph. Two purposeful uses are preferable to Taste's
-four-picture minimum here. No stock-photo collection or autoplay video is added.
-Sticky storytelling is restricted to the short setup section; there is no scroll
-hijacking. Existing type and palettes intentionally override experimental skill
-aesthetic defaults. User-requested motion quality overrides motion-count quotas.
+The fresh review of the rejected design returned **rebuild**, identifying the
+asset mismatch, generic entrances, disconnected Login, weak mobile session
+meaning and text-only story. The replacement was inspected at desktop, tablet
+and mobile, including actual motion recordings.
 
-## Validation and critique
+The first replacement pass corrected the hero’s head crop and exposure. Its full
+fresh review accepted the new creative direction and recorded motion, then
+requested three fixes: current documentation/seed provenance, low-contrast hero
+microcopy over the sky, and missing whitespace between source sentences on
+mobile. The fixes replace obsolete documentation, add explicit whitespace and
+use a neutral photographic scrim protecting the entire copy region while keeping
+the athletes visible. Photo-pixel contrast is measured independently from token
+contrast; source text must meet 4.5:1 and the large heading 3:1. The corrected copy
+region measures at least 4.95:1 at 768, 1024, 1280 and 1440px. A final review
+verified these three fixes against refreshed captures and returned **ship** for
+that scoped correction batch.
 
-Baseline captures: `.design-experiment/landing-login/before-{landing,login}-{desktop,mobile}.png`.
-All screenshots are actual local application renders, with no personal data.
-Capture scrolls through reveal regions before returning to the top.
+## Validation and limits
 
-Baseline: centered photographic hero, statistics, repeated feature cards, mock
-week, boxed CTA. Login is an unrelated empty split screen. Unsupported averages
-and setup-time claims undermine trust. Motion obscures below-fold content in a
-naive full-page capture. Taste lint: six failures and eight warnings.
+- `npm test`: 169 tests across 14 files pass, including 13 public navigation/auth
+  regressions and native-transition route coverage.
+- Typecheck passes: `tsc --noEmit -p tsconfig.app.json`.
+- Lint passes with nine existing Fast Refresh warnings. Production build passes
+  with existing Browserslist-age and bundle-size warnings. No dependency or
+  lockfile changes; the display font is a licensed local asset.
+- Playwright checks both routes across four themes at 320, 390, 640, 768, 900,
+  1024, 1280 and 1440px: 64 measurements without overflow, clipped headings,
+  undersized weekday targets or sampled token-contrast failures.
+- Google OAuth is intercepted at its network boundary to verify provider and
+  same-origin `/portal` callback. No personal Google login or production training
+  data is used; external account consent is not claimed as locally verified.
+- Actual motion samples show distinct headline progression and photo shutter,
+  with the below-fold image unchanged until reached. The native route transition
+  becomes ready after image decode and completes normally. Reduced motion reports
+  no native transitions and no running animations. Keyboard focus reaches Google
+  with a visible outline.
+- Taste source lint reports no failures or warnings. Narrow source comments
+  explain the neutral photographic contrast scrim and `box-shadow: none`, which
+  removes the shared button’s duplicate focus ring rather than adding a shadow.
+  The font detector’s intentional-addition
+  finding is resolved by normative documentation; no detector rule was suppressed.
+- Four shipped WebPs have origin sidecars; the provenance scan reports zero
+  missing records. Superseded mountain derivatives are deleted.
 
-### First implementation
+Actual rejected-version captures remain under ignored
+`.design-experiment/landing-login/` with `rejected-` names. Replacement desktop,
+mobile, tablet, representative themes and pending captures live under ignored
+`.design-experiment/landing-login-v2/`; motion records and measurements are there
+too. Captures use real app rendering and are not committed. The CLI lacks a
+supported GitHub image attachment path; selected local evidence can be attached
+manually. Concept images are never implementation evidence.
 
-Seen in one second: the runner’s week, expressed as a large two-line statement.
-Idea: the weekly rhythm becomes the usable product demonstration.
-Live thing: select a weekday to inspect the illustrative prescription.
-Layouts: headline with image window / interactive strip / sticky editorial
-story / photographic close.
-
-The desktop, 768px and 390px batch exposed three material corrections: the
-programmatically focused Login title retained a browser-default blue outline;
-the mobile headline needed more presence; the weekday strip hid useful session
-information on mobile. The next pass removes that heading outline while retaining
-focus on interactive controls, increases mobile display size, and shows sample
-session durations. Below 360px the days wrap to four columns to retain 44px
-targets. A React 18 warning from `fetchPriority` was also removed; eager loading,
-explicit dimensions and responsive sources remain.
-
-### Confirmed implementation and fresh review
-
-Seen in one second: “Your week. Your running.” followed by the interactive week.
-Idea and live thing remain visible across desktop, tablet and phone layouts.
-Scores, as a scoped subjective critique: design 7.5 · usability 8 · creativity 7 ·
-content 8 → overall 7.6. This is not an award or a user-research result. Taste’s
-four-picture and motion-count quotas are intentionally superseded by this brief’s
-fewer purposeful visuals and restrained motion. Without those scoped exceptions,
-the skill’s numerical caps would lower the score.
-
-The separate Impeccable finish reviewer accepted the direction, composition,
-Login continuity and actual captures. It requested two fixes: place weekday
-metadata below the session title and replace superseded public observations in
-DESIGN.md. Both were applied; all six core captures were refreshed. The documenter
-merged public tokens and observations into DESIGN.md and `.impeccable/design.json`,
-preserving unrelated authenticated-system documentation.
-
-The reviewer’s verdict pass scored both requested fixes **resolved**, with
-`disposition: ship` for that fix list. All six recaptures were accepted as valid;
-this is a bounded review verdict, not an accessibility certification.
-
-### Verification
-
-- `npm test`: **168 passing tests across 14 files**, including 12 new navigation,
-  session-check, existing-session redirect, duplicate-click, OAuth error/retry,
-  late-response and example-week regressions.
-- `node_modules/.bin/tsc --noEmit -p tsconfig.app.json`: passes.
-- `npm run lint`: zero errors; nine pre-existing Fast Refresh warnings.
-- `npm run build`: passes; existing Browserslist age and bundle-size warnings.
-- Changed source and documentation formatted with an already cached Prettier;
-  no dependency or lockfile changes. `git diff --check` passes.
-- Playwright: 64 route/theme/viewport measurements. Both routes, all four themes,
-  widths 320, 390, 640, 768, 900, 1024, 1280 and 1440px. No horizontal overflow,
-  clipped headings/actions or undersized weekday targets. Measured body/action
-  contrast meets 4.5:1; large text meets 3:1, accounting for the selected day’s
-  absolutely positioned fill.
-- Actual keyboard selection updates the example; Login focuses its heading on
-  entry and the next Tab reaches the Google action with visible focus.
-- Real Google OAuth navigation was intercepted at the network boundary:
-  `provider=google`, `redirect_to=http://127.0.0.1:5173/portal`. No personal account
-  or production training data was used. Completing an external Google login was
-  not part of this local verification.
-- Motion recorded in-browser. The selected field travels through x≈71, 162, 260,
-  then 272px and settles. Reduced motion removes travel and image scaling;
-  a settled page reports no running browser animations. Early global body theme
-  transitions are outside the visible public surface.
-- Taste source lint: zero failures, two warnings for the intentionally consistent
-  “Get started” action. Final browser inspector: zero failures with documented
-  exceptions for two image uses and its absolute-layer contrast false positive.
-  Four warnings remain: inherited warm palette, local type sizes, no footage,
-  and 15 moving elements below its warning threshold of 16. These are recorded,
-  not treated as product requirements or reasons to add decoration.
-- Image provenance scan: two responsive WebPs, zero missing origin records.
-  The tool uses `.webp.json` sidecars for this format. Original acquisition
-  provenance remains unknown, as recorded in the asset README.
-
-### Review evidence and limits
-
-Actual before/after desktop (1440×900) and mobile (390×844) captures of both pages,
-plus final tablet, representative themes, 320px and OAuth-pending captures, remain
-in ignored `.design-experiment/landing-login/`. Motion recordings are in its
-`video/` directory. Evidence is never committed. The CLI has no supported GitHub
-image-attachment upload; selected local captures are available for manual PR
-attachment. This does not block code review.
-
-No new photo, generated image, video, customer quote, pricing, adoption metric or
-performance claim was introduced. The displayed sessions are illustrative
-prescriptions, not generated for the visitor and not saved. No global default
-theme, construction workflow or audience positioning was persisted.
+The replacement review is scoped creative/UX verification, not user-research
+validation, an award, approval by the user or accessibility certification.

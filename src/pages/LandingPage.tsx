@@ -1,11 +1,12 @@
 import { useId, useState } from "react";
-import { Link } from "react-router-dom";
-import { ArrowDown, ArrowUpRight } from "lucide-react";
+import { ArrowRight, ArrowDown } from "lucide-react";
 import { LayoutGroup, motion, useReducedMotion } from "framer-motion";
 import {
   PublicLayout,
-  Reveal,
-  RunningImage,
+  PublicLink,
+  PublicPhoto,
+  PublicTitle,
+  PublicEntrance,
 } from "@/components/public/PublicLayout";
 // Illustrative prescriptions, never a visitor's generated plan or recorded activity.
 const exampleWeek = [
@@ -73,14 +74,19 @@ function ExampleWeek() {
   const sessionId = `${groupId}-session`;
   const session = exampleWeek[selected];
   return (
-    <section
-      className="public-week public-width"
-      aria-labelledby="example-heading"
-    >
+    <section className="public-week" aria-labelledby="example-heading">
       <div className="public-week-caption">
-        <h2 id="example-heading">A week with a little more direction.</h2>
+        <h2 id="example-heading">
+          Every run
+          <br />
+          has its place.
+        </h2>
+        <p className="public-week-description">
+          A clear weekly plan, with the effort, duration and purpose of each
+          session.
+        </p>
         <p>
-          Example plan <span aria-hidden="true">·</span> Explore a day
+          Example plan <span aria-hidden="true">·</span> Choose a day
         </p>
       </div>
       <LayoutGroup id={groupId}>
@@ -108,11 +114,6 @@ function ExampleWeek() {
               )}
               <span className="public-day-name">{day.short}</span>
               <span className="public-day-session">{day.name}</span>
-              <span className="public-day-mark" aria-hidden="true">
-                {index === 0 || index === 4
-                  ? "—"
-                  : `${parseInt(day.duration)}′`}
-              </span>
             </button>
           ))}
         </div>
@@ -151,114 +152,106 @@ function ExampleWeek() {
 export default function LandingPage() {
   return (
     <PublicLayout>
-      <main id="main-content">
+      <main id="main-content" tabIndex={-1}>
         <section
-          className="public-hero public-width"
-          aria-labelledby="landing-heading"
+          className="public-hero"
+          aria-label="Personalized weekly running plans"
         >
-          <Reveal>
-            <h1 id="landing-heading" className="public-hero-title">
-              <span className="public-title-line">
-                Your week.
-                <RunningImage priority />
-              </span>
-              <span className="public-title-line">Your running.</span>
-            </h1>
-          </Reveal>
-          <Reveal className="public-hero-intro" delay={0.08}>
-            <p>
-              A personalized weekly running plan.
-              <br className="public-desktop-break" /> Built around your
-              training, your goals and the days you have.
-            </p>
-            <Link to="/login" className="public-action">
-              Get started <ArrowUpRight aria-hidden="true" />
-            </Link>
-          </Reveal>
+          <PublicPhoto
+            variant="training"
+            priority
+            transition
+            className="public-hero-photo"
+          />
+          <div className="public-hero-copy">
+            <PublicTitle
+              lines={["A week", "worth running."]}
+              className="public-hero-title"
+            />
+            <PublicEntrance>
+              <p>
+                Personalized running plans, built around your training, your
+                goals and the days you have.
+              </p>
+              <PublicLink to="/login" className="public-action">
+                Build my week <ArrowRight aria-hidden="true" />
+              </PublicLink>
+              <p className="public-hero-source">
+                Connect Strava or Intervals.icu. <br />
+                One training source, chosen by you.
+              </p>
+            </PublicEntrance>
+          </div>
+          <a href="#example-week" className="public-hero-explore">
+            Explore a week <ArrowDown aria-hidden="true" />
+          </a>
         </section>
-        <Reveal>
-          <ExampleWeek />
-        </Reveal>
+
+        <section
+          id="example-week"
+          className="public-plan-section public-width"
+          aria-label="Explore a weekly running plan"
+        >
+          <div className="public-plan-layout">
+            <ExampleWeek />
+            <PublicPhoto variant="runner" className="public-plan-photo" />
+          </div>
+        </section>
+
         <section
           id="how-it-works"
-          className="public-story"
+          className="public-story public-width"
           aria-labelledby="story-heading"
         >
-          <div className="public-story-grid public-width">
-            <div className="public-story-heading">
-              <Reveal>
-                <h2 id="story-heading">
-                  Built around
-                  <br />
-                  your real life.
-                </h2>
-              </Reveal>
-              <Reveal delay={0.08}>
-                <p>
-                  A race on the calendar. A steadier routine. A long run on
-                  Sunday. Start with what matters to you.
-                </p>
-              </Reveal>
-              <a href="#start-running" className="public-text-link">
-                Find your starting point <ArrowDown aria-hidden="true" />
-              </a>
+          <PublicPhoto variant="stride" className="public-story-photo" />
+          <div className="public-story-copy">
+            <h2 id="story-heading">
+              Your training.
+              <br />
+              Your terms.
+            </h2>
+            <div className="public-story-entry">
+              <h3>Start with the running you do.</h3>
+              <p>
+                Connect Strava or Intervals.icu. Your recent training helps
+                shape your plan, with one active source at a time.
+              </p>
+              <p className="public-provider-names">
+                Strava <span aria-hidden="true">/</span> Intervals.icu
+              </p>
+              <p className="public-story-small">
+                Recovery data depends on your source. Generated running workouts
+                can also be published to Intervals.icu.
+              </p>
             </div>
-            <div className="public-story-entries">
-              <Reveal>
-                <h3>Bring your training.</h3>
-                <p>
-                  Connect Strava or Intervals.icu so your recent training can
-                  inform your plan. One active source, chosen by you.
-                </p>
-                <p className="public-provider-names">
-                  Strava <span aria-hidden="true">/</span> Intervals.icu
-                </p>
-                <p className="public-story-small">
-                  Available recovery data depends on your source. Generated
-                  running workouts can also be published to Intervals.icu.
-                </p>
-              </Reveal>
-              <Reveal>
-                <h3>Make it your week.</h3>
-                <p>
-                  Choose a race goal or focus on improving your running. Set at
-                  least four running days and tell us which one works for your
-                  long run.
-                </p>
-              </Reveal>
-              <Reveal>
-                <h3>Know your next run.</h3>
-                <p>
-                  After setup, open your personalized weekly plan. See the
-                  week’s focus, explore each session’s effort, duration and
-                  notes, and mark sessions complete as you go.
-                </p>
-              </Reveal>
+            <div className="public-story-entry">
+              <h3>A goal. A rhythm. Your week.</h3>
+              <p>
+                Prepare for a race or focus on improving your running. Choose at
+                least four running days and your preferred long-run day.
+              </p>
+            </div>
+            <div className="public-story-entry">
+              <h3>A plan you can put into practice.</h3>
+              <p>
+                After setup, open your personalized weekly plan. See the week’s
+                focus, explore each session’s effort, duration and notes, and
+                mark sessions complete as you go.
+              </p>
             </div>
           </div>
         </section>
-        <section
-          id="start-running"
-          className="public-close public-width"
-          aria-labelledby="close-heading"
-        >
-          <Reveal>
-            <RunningImage
-              className="public-close-image"
-              sizes="(max-width: 640px) calc(100vw - 40px), (max-width: 1440px) 42vw, 600px"
-            />
-          </Reveal>
-          <Reveal className="public-close-copy">
-            <h2 id="close-heading">
-              A clear week.
-              <br />
-              An open road.
-            </h2>
-            <p>Sign in. Connect your training. Find your rhythm.</p>
-            <Link to="/login" className="public-action">
-              Get started <ArrowUpRight aria-hidden="true" />
-            </Link>
-          </Reveal>
+
+        <section className="public-close" aria-labelledby="close-heading">
+          <div className="public-width public-close-inner">
+            <h2 id="close-heading">Make the week yours.</h2>
+            <PublicLink
+              to="/login"
+              className="public-action public-action-inverse"
+            >
+              Build my week <ArrowRight aria-hidden="true" />
+            </PublicLink>
+          </div>
         </section>
       </main>
     </PublicLayout>

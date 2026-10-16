@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-16T16:48:31Z",
+  "generatedAt": "2026-10-16T17:12:34Z",
   "title": "Design System: Running Coach",
   "extensions": {
     "typographyMeta": {
@@ -13,24 +13,32 @@
         "purpose": "Weekly Plan, Connect and Profile page titles from 640px."
       },
       "public-display": {
-        "displayName": "Public editorial display",
-        "purpose": "Landing headline above 640px; the two-line composition and image inset are scoped to the public landing."
+        "displayName": "Public athletic display",
+        "purpose": "Two masked hero title lines above 1050px, in self-hosted Barlow Condensed semibold, declared as RC Display."
+      },
+      "public-display-compact": {
+        "displayName": "Public athletic display through 1050px",
+        "purpose": "Landing title at 1050px and below, overridden by the mobile ramp at 760px."
       },
       "public-display-mobile": {
-        "displayName": "Public editorial display through 640px",
-        "purpose": "Landing headline at 640px and below, with a further 12.4vw adjustment below 360px."
+        "displayName": "Public athletic display through 760px",
+        "purpose": "Landing title on the theme ground below its photographic band."
       },
       "public-section-heading": {
-        "displayName": "Public section heading",
-        "purpose": "The short story and closing action sections; mobile uses clamp(2.7rem, 11vw, 4rem)."
+        "displayName": "Public editorial section heading",
+        "purpose": "Example plan and setup story headings; mobile uses clamp(2.75rem, 10vw, 4rem)."
       },
       "public-login-heading": {
-        "displayName": "Public sign-in display",
-        "purpose": "Login display/photo column; at 640px and below it uses clamp(3rem, 13vw, 4.75rem)."
+        "displayName": "Public sign-in task heading",
+        "purpose": "One task heading beside the track photograph; mobile uses clamp(3rem, 10vw, 4rem)."
+      },
+      "public-brand": {
+        "displayName": "Public condensed wordmark",
+        "purpose": "RC Display wordmark beside the shared track mark, with scoped small-screen/footer sizes."
       },
       "public-action-label": {
         "displayName": "Public action label",
-        "purpose": "Shared pill actions, including the single Google sign-in action."
+        "purpose": "DM Sans labels on square actions, including Google sign-in."
       }
     },
     "shadows": [
@@ -59,22 +67,27 @@
       {
         "name": "public-ease",
         "value": "cubic-bezier(0.22, 1, 0.36, 1)",
-        "purpose": "Public reveal, photo settle and action feedback easing; no global easing change."
+        "purpose": "Scoped photo shutter, title, action and native photo-route transition easing."
       },
       {
-        "name": "public-section-reveal",
-        "value": "translateY(16px) to translateY(0); 650ms cubic-bezier(0.22, 1, 0.36, 1)",
-        "purpose": "Visible section content settles once at viewport amount 0.12; delayed paired elements use 80ms. Reduced motion starts at the final state."
+        "name": "public-photo-shutter",
+        "value": "clip-path:inset(0 0 0 12%) to inset(0 0 0 0%); 850ms cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "Visible photographs animate once on 18% viewport intersection, including below-fold images. Reduced motion retains the final state."
       },
       {
-        "name": "public-photo-settle",
-        "value": "scale(1.08) to scale(1); 1.1s cubic-bezier(0.22, 1, 0.36, 1)",
-        "purpose": "Atmospheric running windows; reduced motion removes scaling."
+        "name": "public-title-mask",
+        "value": "translateY(105%) to 0; 750ms cubic-bezier(0.22, 1, 0.36, 1); delays:120ms,210ms",
+        "purpose": "Two landing title lines rise through separate masks. Reduced motion starts at the final state."
+      },
+      {
+        "name": "public-content-entrance",
+        "value": "opacity:0.4 to 1; 450ms; default delay:300ms; login delay:160ms",
+        "purpose": "Quieter supporting copy/action entrance; reduced motion starts fully visible."
       },
       {
         "name": "public-week-selection",
         "value": "spring(stiffness:420, damping:38)",
-        "purpose": "Shared-layout selected-day fill. Reduced motion removes the layoutId and layout travel."
+        "purpose": "Shared-layout selected-day fill. Reduced motion removes layoutId and layout travel."
       },
       {
         "name": "public-session-change",
@@ -83,13 +96,18 @@
       },
       {
         "name": "public-control-feedback",
-        "value": "180ms cubic-bezier(0.22, 1, 0.36, 1); pressed scale(0.98); arrow translate(2px, -2px)",
-        "purpose": "Public action feedback. Opacity and day color use 180ms ease; reduced-motion CSS removes transitions."
+        "value": "180ms cubic-bezier(0.22, 1, 0.36, 1); pressed scale(0.985); arrow translateX(4px)",
+        "purpose": "Square public action feedback. Opacity uses 180ms ease; weekday color uses 160ms ease. Reduced-motion CSS removes transitions."
+      },
+      {
+        "name": "public-native-route-transition",
+        "value": "public-photo:450ms cubic-bezier(0.22,1,0.36,1); public-brand:300ms; root:200ms",
+        "purpose": "Progressive native same-document route transition after flushed navigation and destination-photo decode. Modified clicks, unsupported browsers and reduced motion retain ordinary link behavior."
       },
       {
         "name": "public-pending-spinner",
         "value": "rotate(360deg); 1s linear infinite",
-        "purpose": "OAuth/session-check pending feedback only. Reduced-motion CSS disables spinning while labels and status stay visible."
+        "purpose": "OAuth/session-check pending only. Reduced-motion CSS disables spinning while labels and status stay visible."
       }
     ],
     "breakpoints": [
@@ -123,33 +141,44 @@
       },
       {
         "name": "public-narrow",
-        "value": "359px",
-        "purpose": "Maximum width: 12px gutter, 12.4vw hero and four-column weekday strip."
+        "value": "420px",
+        "purpose": "Maximum width: compact wordmark/nav, textless labelled home control, smaller day padding and next-step spacing."
       },
       {
         "name": "public-mobile",
-        "value": "640px",
-        "purpose": "Maximum width: 84px masthead; stack public intro, story, closing section and login; compact image inset, weekday strip and session detail."
+        "value": "760px",
+        "purpose": "Maximum width: 76px masthead, separate hero photo band, stacked plan/story/login, 180px Login photo and wrapped footer credits."
       },
       {
         "name": "public-compact",
-        "value": "900px",
-        "purpose": "Maximum width: session details use two columns with full-width note; story/login column gaps tighten."
+        "value": "1050px",
+        "purpose": "Maximum width: four-column weekday strip with session names, session note below, compact hero ramp and tighter photo/content gaps."
       }
     ],
     "publicGeometry": {
       "scope": ["/", "/login"],
-      "container": "width:min(100%, 1440px); padding-inline:var(--public-gutter)",
-      "masthead": "normal flow; min-height:104px; 84px at max-width:640px",
-      "landingImage": "2.9em by 0.72em; 1.7em by 0.7em at max-width:640px",
-      "weekdayStrip": "7 equal columns with 5px gaps; 3px gaps at max-width:640px; 4 columns at max-width:359px",
-      "weekdayTargets": "min-height:128px; 83px at max-width:640px",
-      "sessionDetail": "3 columns:1fr 0.85fr 1.5fr; 2 columns at max-width:900px with note across both",
-      "story": "2 columns:1.1fr 1fr; heading sticky at top:3rem; one column and static heading at max-width:640px",
-      "closingPhoto": "aspect-ratio:1.1; 1.7 at max-width:640px",
-      "login": "2 columns:1.2fr 0.9fr; equal columns at max-width:900px; stacked at max-width:640px; form max-width:28rem above 640px",
-      "focus": "2px solid foreground; outline-offset:5px; currentColor on the action-color field",
-      "photography": "480w/960w WebP derivatives of the existing hero-running.jpg; original provenance unknown; src/assets/public/README.md records derivation"
+      "container": "width:min(100%,1440px); padding-inline:clamp(1.25rem,4.5vw,4rem)",
+      "masthead": "normal flow; height:88px; 76px at max-width:760px",
+      "hero": "width:calc(100% - 48px); max-width:1440px; min-height:560px; height:min(720px,calc(100svh - 130px)); copy width:46%; monochrome photograph with neutral black scrim increasing from 5% over athletes to 56% behind copy",
+      "heroMobile": "at max-width:760px width:calc(100% - 40px); height:auto; photo height:clamp(240px,54vw,370px); full-width copy below; no scrim",
+      "weekdayStrip": "7 columns above 1050px; 4 at max-width:1050px; gap:4px; session names visible at every width",
+      "weekdayTargets": "min-height:92px; 76px at max-width:1050px; 80px at max-width:760px",
+      "plan": "content/photo columns:1.9fr 0.85fr, then 1.6fr 0.8fr at max-width:1050px; stacked at max-width:760px with 240px photo",
+      "sessionDetail": "2 columns:1fr 1fr; note right spanning both rows; at max-width:1050px prescription beside heading and note below",
+      "story": "2 equal columns with track photo and setup content; normal flow; photo height:720px,780px at max-width:1050px,320px at max-width:760px",
+      "close": "action-color field with heading beside inverse action; stack at max-width:760px",
+      "login": "columns:0.95fr 1fr; form max-width:29rem; photo height:min(690px,calc(100svh - 200px)) with min-height:560px; at max-width:760px stacked with 180px photo and 34rem form cap",
+      "focus": "2px solid currentColor; outline-offset:5px",
+      "photography": "Fitsum Admasu training group, Jakob Owens runner by the water, Filip Mroz track stride; local WebP assets, source links in footer and provenance/license in src/assets/public/README.md"
+    },
+    "publicFont": {
+      "family": "RC Display",
+      "sourceFamily": "Barlow Condensed",
+      "weight": 600,
+      "file": "src/assets/public/fonts/barlow-condensed-semibold.ttf",
+      "license": "src/assets/public/fonts/OFL.txt",
+      "display": "swap",
+      "scope": ["/", "/login"]
     }
   },
   "components": [
@@ -173,38 +202,38 @@
       "name": "Public Primary Action",
       "kind": "button",
       "refersTo": "public-action",
-      "description": "Landing and Login pill action, with theme-local contrast fills and visible keyboard focus.",
-      "html": "<button class=\"ds-public-action\">Get started <svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"M7 17 17 7M7 7h10v10\"/></svg></button>",
-      "css": ".ds-public-action { --ds-action:hsl(var(--primary)); display:inline-flex; align-items:center; justify-content:space-between; gap:2.25rem; min-height:56px; padding:0.875rem 1.5rem; border:0; border-radius:999px; background:var(--ds-action); color:hsl(var(--primary-foreground)); font-family:\"DM Sans\",system-ui,sans-serif; font-size:1rem; font-weight:500; text-decoration:none; transition:transform 180ms cubic-bezier(0.22,1,0.36,1),opacity 180ms ease; } :host-context(.theme-dark) .ds-public-action { --ds-action:color-mix(in srgb,hsl(var(--primary)),black 40%); } :host-context(.theme-bright) .ds-public-action { --ds-action:color-mix(in srgb,hsl(var(--primary)),black 30%); } .ds-public-action svg { width:20px; height:20px; transition:transform 180ms cubic-bezier(0.22,1,0.36,1); } .ds-public-action:hover svg { transform:translate(2px,-2px); } .ds-public-action:active { transform:scale(0.98); } .ds-public-action:focus-visible { outline:2px solid hsl(var(--foreground)); outline-offset:5px; } .ds-public-action:disabled { cursor:wait; opacity:0.65; } @media(max-width:640px) { .ds-public-action { min-height:54px; } } @media(prefers-reduced-motion:reduce) { .ds-public-action,.ds-public-action svg { transition:none; } }"
+      "description": "Landing and Login square action, with theme-local contrast fills and currentColor keyboard focus.",
+      "html": "<button class=\"ds-public-action\">Build my week <svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"M5 12h14m-6-6 6 6-6 6\"/></svg></button>",
+      "css": ".ds-public-action { --ds-action:hsl(var(--primary)); display:inline-flex; align-items:center; justify-content:space-between; gap:2.5rem; min-height:56px; padding:0.875rem 1.5rem; border:0; border-radius:0; background:var(--ds-action); color:hsl(var(--primary-foreground)); font-family:\"DM Sans\",system-ui,sans-serif; font-size:1rem; font-weight:500; text-decoration:none; transition:transform 180ms cubic-bezier(0.22,1,0.36,1),opacity 180ms ease; } :host-context(.theme-dark) .ds-public-action { --ds-action:color-mix(in srgb,hsl(var(--primary)),black 40%); } :host-context(.theme-bright) .ds-public-action { --ds-action:color-mix(in srgb,hsl(var(--primary)),black 30%); } .ds-public-action svg { width:20px; height:20px; transition:transform 180ms cubic-bezier(0.22,1,0.36,1); } .ds-public-action:hover svg { transform:translateX(4px); } .ds-public-action:active { transform:scale(0.985); } .ds-public-action:focus-visible { outline:2px solid currentColor; outline-offset:5px; } .ds-public-action:disabled { cursor:wait; opacity:0.7; } @media(prefers-reduced-motion:reduce) { .ds-public-action,.ds-public-action svg { transition:none; } }"
     },
     {
       "name": "Public Example Day",
       "kind": "custom",
-      "description": "Pressed weekday in the illustrative seven-day plan; the full page links this selection to live session details.",
-      "html": "<button class=\"ds-public-day\" aria-pressed=\"true\"><span class=\"ds-public-day-name\">Tue</span><span class=\"ds-public-day-session\">Easy run</span><span class=\"ds-public-day-mark\">35′</span></button>",
-      "css": ".ds-public-day { --ds-action:hsl(var(--primary)); position:relative; text-align:left; padding:1.125rem 1rem 0.75rem; min-height:128px; border:0; border-radius:0; background:hsl(var(--secondary)); color:hsl(var(--foreground)); font-family:\"DM Sans\",system-ui,sans-serif; transition:color 180ms ease; } :host-context(.theme-dark) .ds-public-day { --ds-action:color-mix(in srgb,hsl(var(--primary)),black 40%); } :host-context(.theme-bright) .ds-public-day { --ds-action:color-mix(in srgb,hsl(var(--primary)),black 30%); } .ds-public-day[aria-pressed=\"true\"] { background:var(--ds-action); color:hsl(var(--primary-foreground)); } .ds-public-day:not([aria-pressed=\"true\"]):hover { color:var(--ds-action); } .ds-public-day:focus-visible { outline:2px solid hsl(var(--foreground)); outline-offset:5px; } .ds-public-day-name { display:block; font-size:0.875rem; } .ds-public-day-session { display:block; font-family:\"DM Serif Display\",Georgia,serif; font-size:clamp(1.125rem,1.8vw,1.625rem); margin-top:0.35rem; } .ds-public-day-mark { display:block; font-size:0.875rem; line-height:1; margin-top:0.75rem; font-variant-numeric:tabular-nums; } @media(max-width:640px) { .ds-public-day { min-height:83px; padding:0.75rem 0.125rem; text-align:center; } .ds-public-day-session { display:none; } .ds-public-day-name { font-size:0.8125rem; } .ds-public-day-mark { margin-top:0.875rem; font-size:0.9375rem; } } @media(prefers-reduced-motion:reduce) { .ds-public-day { transition:none; } }"
+      "description": "Pressed weekday in the illustrative plan; weekday and session name remain visible at every width.",
+      "html": "<button class=\"ds-public-day\" aria-pressed=\"true\"><span class=\"ds-public-day-name\">Tue</span><span class=\"ds-public-day-session\">Easy run</span></button>",
+      "css": ".ds-public-day { --ds-action:hsl(var(--primary)); position:relative; text-align:left; padding:0.875rem 0.5rem; min-height:92px; border:0; border-radius:0; background:transparent; color:hsl(var(--foreground)); font-family:\"DM Sans\",system-ui,sans-serif; transition:color 160ms ease; } :host-context(.theme-dark) .ds-public-day { --ds-action:color-mix(in srgb,hsl(var(--primary)),black 40%); } :host-context(.theme-bright) .ds-public-day { --ds-action:color-mix(in srgb,hsl(var(--primary)),black 30%); } .ds-public-day[aria-pressed=\"true\"] { background:var(--ds-action); color:hsl(var(--primary-foreground)); } .ds-public-day:not([aria-pressed=\"true\"]):hover { background:hsl(var(--secondary)); } .ds-public-day:focus-visible { outline:2px solid currentColor; outline-offset:5px; } .ds-public-day-name { display:block; font-size:0.8125rem; } .ds-public-day-session { display:block; font-size:0.9375rem; font-weight:500; margin-top:0.5rem; line-height:1.3; } @media(max-width:1050px) { .ds-public-day { min-height:76px; } } @media(max-width:760px) { .ds-public-day { min-height:80px; padding:0.75rem; } .ds-public-day-session { font-size:0.875rem; } } @media(max-width:420px) { .ds-public-day { padding:0.625rem 0.5rem; } } @media(prefers-reduced-motion:reduce) { .ds-public-day { transition:none; } }"
     },
     {
       "name": "Public Masthead",
       "kind": "nav",
-      "description": "Normal-flow public brand and navigation; full implementation adds the theme selector and contextual home/story links.",
+      "description": "Normal-flow public masthead with the shared track mark and public condensed wordmark. Full page adds theme and contextual links.",
       "html": "<nav class=\"ds-public-nav\" aria-label=\"Main navigation\"><a href=\"/\" class=\"ds-public-brand\"><svg viewBox=\"0 0 32 32\" fill=\"none\" aria-hidden=\"true\"><path d=\"M7 25V14a7 7 0 0 1 14 0v11M12 25V14a2 2 0 0 1 4 0v11M26 25V14A12 12 0 0 0 14 2\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/></svg><span>Running Coach</span></a><a href=\"/login\">Log in</a></nav>",
-      "css": ".ds-public-nav { display:flex; align-items:center; justify-content:space-between; gap:1rem; min-height:104px; color:hsl(var(--foreground)); background:hsl(var(--background)); font-family:\"DM Sans\",system-ui,sans-serif; font-size:0.9375rem; } .ds-public-nav a { display:inline-flex; align-items:center; min-height:44px; color:inherit; text-decoration:none; text-underline-offset:0.25em; } .ds-public-nav a:hover { text-decoration:underline; } .ds-public-nav a:focus-visible { outline:2px solid hsl(var(--foreground)); outline-offset:5px; } .ds-public-brand { font-family:\"DM Serif Display\",Georgia,serif; font-size:1.375rem; letter-spacing:-0.025em; } @media(max-width:640px) { .ds-public-nav { min-height:84px; font-size:0.8125rem; } .ds-public-brand { font-size:1.0625rem; } } .ds-public-brand { gap:0.65rem; } .ds-public-brand svg { width:32px; height:32px; flex:none; color:hsl(var(--primary)); } @media(max-width:640px) { .ds-public-brand { gap:0.375rem; } .ds-public-brand svg { width:26px; height:26px; } } :host-context(.theme-dark) .ds-public-brand svg { color:color-mix(in srgb,hsl(var(--primary)),black 40%); } :host-context(.theme-bright) .ds-public-brand svg { color:color-mix(in srgb,hsl(var(--primary)),black 30%); }"
+      "css": ".ds-public-nav { display:flex; align-items:center; justify-content:space-between; gap:1rem; height:88px; color:hsl(var(--foreground)); background:hsl(var(--background)); font-family:\"DM Sans\",system-ui,sans-serif; font-size:0.9375rem; } .ds-public-nav a { display:inline-flex; align-items:center; min-height:44px; color:inherit; text-decoration:none; text-underline-offset:0.25em; } .ds-public-nav a:hover { text-decoration:underline; } .ds-public-nav a:focus-visible { outline:2px solid currentColor; outline-offset:5px; } .ds-public-brand { gap:0.65rem; font-family:\"RC Display\",\"Arial Narrow\",sans-serif; font-size:1.625rem; font-weight:600; letter-spacing:-0.02em; } .ds-public-brand svg { width:30px; height:30px; flex:none; color:hsl(var(--primary)); } @media(max-width:760px) { .ds-public-nav { height:76px; } } @media(max-width:420px) { .ds-public-brand { gap:0.375rem; font-size:1.375rem; } .ds-public-brand svg { width:26px; height:26px; } .ds-public-nav { font-size:0.875rem; } } :host-context(.theme-dark) .ds-public-brand svg { color:color-mix(in srgb,hsl(var(--primary)),black 40%); } :host-context(.theme-bright) .ds-public-brand svg { color:color-mix(in srgb,hsl(var(--primary)),black 30%); }"
     }
   ],
   "narrative": {
-    "overview": "Descriptive record of the existing React/Tailwind system. Code remains the visual authority under AGENTS.md. The scoped public extension shares the portal fonts and four palettes while introducing large editorial type, photographic windows, an interactive example week and a broad action-color field; it does not replace portal, onboarding or privacy composition.",
+    "overview": "Descriptive record of the existing React/Tailwind system. Code remains the visual authority under AGENTS.md. Public Landing/Login use a photographic running publication vocabulary: real athlete imagery, RC Display condensed headings, square actions and an interactive example week. Shared body type, track mark and four palettes connect public pages to the portal; portal, onboarding and privacy composition remain separate.",
     "keyCharacteristics": [
       "Serif headings and sans-serif body text",
       "Tonal surfaces and rounded controls",
       "Photographic landing page; portal focused on sessions",
-      "Public Landing/Login: flat color fields, square photographic windows and pill actions"
+      "Public Landing/Login: Barlow Condensed semibold, credited athlete photography and square actions"
     ],
     "rules": [],
     "dos": [
       "Reuse existing roles and components.",
       "Follow AGENTS.md and compare structural work with the agreed design or brief.",
-      "Do keep public composition and action overrides scoped to Landing and Login; preserve shared fonts, theme switching and the separate privacy/portal systems.",
+      "Do keep public composition and action overrides scoped to Landing and Login; preserve shared body type, theme switching and the separate privacy/portal systems.",
       "Do retain visible final content under reduced motion and distinguish an illustrative week from an athlete's actual plan."
     ],
     "donts": [

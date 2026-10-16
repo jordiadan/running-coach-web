@@ -5,93 +5,44 @@ primary_target: "src/pages/LandingPage.tsx"
 related_targets: ["src/pages/LoginPage.tsx"]
 ---
 
-# Landing and Login redesign
+# Rebuild after user rejection
 
-Scope: `/`, `/login` and public-only components. Landing is Persuade; Login is
-Operate. The merged portal, onboarding, privacy page and backend stay outside
-the implementation boundary. Product facts come from PRODUCT.md.
+The user rejected the prior assets, motion and both public compositions. The fresh
+review returns `rebuild`; previous approval language is superseded.
 
-## Direction contract
+THESIS: A photographic running publication makes everyday training tangible,
+then reveals how a personalized week gives it structure.
 
-THESIS: The runner's seven-day rhythm becomes the page's working material. A
-short editorial headline opens onto an explorable example week rather than
-feature cards or unsupported performance statistics.
+OWN-WORLD: Athletic Barlow Condensed semibold for public display, shared DM Sans
+for reading and controls; shared theme grounds and action colors, square imagery
+and actions. Three real Unsplash photographs with source/license records replace
+the repeated untraceable mountain crop. Portal identity remains in the track mark,
+body type, palette, focus behavior and first-run language.
 
-OWN-WORLD: Existing DM Serif Display and DM Sans connect public pages to
-onboarding. Full-ink type, theme ground, a generous primary-color field, squared
-photography and pill actions form the public vocabulary. Preserve all four
-palettes; contrast-adjust action colors locally, as the portal does.
+STORY: Recognize running first, understand personalized weekly planning, explore
+an illustrative session, learn one-source/goal/schedule setup, sign in with Google.
 
-STORY: Understand personalized weekly planning, explore a clearly labelled
-example, learn how one source and a goal/schedule produce the first plan, then
-continue with Google. No price, speed, performance or social-proof claims.
+FIRST VIEWPORT: Full-width athlete-led photograph; two-line athletic title,
+short factual copy and one Build my week action. Real image placement determines
+the text side. Mobile gives the photograph its own short band above the title
+and action so the athlete and next step both remain legible.
 
-FIRST VIEWPORT: A quiet masthead precedes two oversized headline lines. A small
-running-image window interrupts the first line. Supporting copy and one filled
-Get started action lead into a seven-day interactive strip and session detail.
-On mobile, the headline window shrinks and the weekdays retain seven thumb
-targets; all reading stays in one column. Login keeps the masthead and image
-window, makes Google the sole primary action and explains the first-run path.
-
-FORM: Running journal, candidate 3; Impeccable seed `67ef75c1`. Grounded list:
-training diary, running publication, weekly journal, race programme, route guide,
-club noticeboard, finish-line print. Taste: sentence-as-layout, seed
-`2084845364`; existing palette and type retained. Ink basin and torn billboard
-challengers lose identification and product clarity. Rhythm machine is
-competitive on rhythm but loses product clarity: retain its disciplined
-relationship between selection and visible state, without instrument styling.
-Raise from ink basin: one continuous composition. Raise from torn billboard:
-confident shifts in scale. No imagery, music or simulation quota overrides scope.
+FORM: Photographic running publication, candidate 2 from the grounded list
+recorded under seed `67ef75c1`. The user rejected candidate 3; this replacement
+follows that feedback rather than claiming a new assigned roll. Concept
+studies are hero-concept.png, plan-concept.png and login-concept.png in ignored
+.design-experiment/landing-login-v2/. These are design studies, not approved pixel
+specifications or implementation evidence. The task delegates creative execution;
+the user's rejection specifically directs replacing the focal assets and motion.
+The hero's real group-running photograph changes subject placement from the study;
+the plan study's invented mountain image and decorative chart bars are discarded.
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
 
-## Content and states
+Motion: an authored photo shutter, staggered headline lines, quieter copy/action;
+native cross-page image/brand transition with ordinary link fallback; selected day
+travels into session evidence. Below-fold images animate only when reached.
+Reduced motion shows immediate final states and avoids native view transitions.
 
-- Hero: “Your week. Your running.” Personalized weekly running plans built around
-  training, goals and available days. Get started goes to `/login`.
-- Example week: explicitly illustrative, four running days, rest and strength;
-  choosing a day reveals its prescribed duration/intensity and notes. This is an
-  educational example, not a generated personal plan or editable schedule.
-- Setup: connect Strava OR Intervals.icu; configure a race or general running
-  goal, at least four running days and a preferred long-run day; receive a weekly
-  plan with session details and completion. Intervals workout publishing is not
-  attributed to Strava. Provider recovery capabilities are not equated.
-- Login: checking existing session, ready, OAuth pending, session-check error,
-  OAuth rejection/network error, authenticated redirect. Errors offer recovery;
-  pending state has a visible status and prevents duplicate requests. Preserve
-  Google provider and same-origin `/portal` redirect.
-- No form, pricing, empty product feed, testimonials or customer metrics.
-
-## Motion
-
-The image window settles into the headline; type resolves over a short distance.
-The selected weekday's filled field moves with a damped spring, connecting the
-day to the session detail. The setup heading holds while its explanatory entries
-scroll normally. Section content stays visible before observation. Controls give
-brief press/hover feedback. Reduced motion shows final states immediately and
-removes travel, layout animation and image scaling. No looping decoration.
-
-## Imagery and exceptions
-
-Reuse `src/assets/hero-running.jpg` as atmospheric running imagery, not a claim
-about an actual customer or location. Original provenance is not recorded in the
-repository. Public WebP derivatives preserve that source; do not call it a
-verified documentary photograph. Two purposeful uses are preferable to Taste's
-four-picture minimum here. No stock-photo collection or autoplay video is added.
-Sticky storytelling is restricted to the short setup section; there is no scroll
-hijacking. Existing type and palettes intentionally override experimental skill
-aesthetic defaults. User-requested motion quality overrides motion-count quotas.
-
-## Validation and critique
-
-Baseline captures: `.design-experiment/landing-login/before-{landing,login}-{desktop,mobile}.png`.
-All screenshots are actual local application renders, with no personal data.
-Capture scrolls through reveal regions before returning to the top.
-
-Baseline: centered photographic hero, statistics, repeated feature cards, mock
-week, boxed CTA. Login is an unrelated empty split screen. Unsupported averages
-and setup-time claims undermine trust. Motion obscures below-fold content in a
-naive full-page capture. Taste lint: six failures and eight warnings.
-
-Final validation, iteration findings and limitations are recorded below after
-inspection.
+Login: one task heading, one Google action, unboxed next-step guidance and a real
+track photograph. Preserve all existing auth/session/error/redirect behavior.

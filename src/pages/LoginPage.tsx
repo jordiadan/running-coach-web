@@ -3,8 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { ArrowUpRight, LoaderCircle } from "lucide-react";
 import {
   PublicLayout,
-  Reveal,
-  RunningImage,
+  PublicPhoto,
+  PublicEntrance,
 } from "@/components/public/PublicLayout";
 import { supabase } from "@/integrations/supabase/client";
 function GoogleMark() {
@@ -90,19 +90,27 @@ export default function LoginPage() {
   };
   return (
     <PublicLayout login>
-      <main id="main-content" className="public-login-main public-width">
-        <Reveal className="public-login-story">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="public-login-main public-width"
+      >
+        <PublicPhoto
+          variant="stride"
+          priority
+          transition
+          className="public-login-photo"
+        />
+        <PublicEntrance className="public-login-form" delay={0.16}>
           <h1 ref={heading} tabIndex={-1}>
-            Your next
+            Your next run
             <br />
-            chapter.
-            <RunningImage priority />
+            starts here.
           </h1>
-          <p>It starts with a week that’s yours.</p>
-        </Reveal>
-        <Reveal className="public-login-form" delay={0.08}>
-          <h2>Let’s get you running.</h2>
-          <p>Sign in to create your plan or pick up where you left off.</p>
+          <p>
+            Sign in to build your weekly running plan or pick up where you left
+            off.
+          </p>
           <button
             type="button"
             className="public-action public-google-action"
@@ -137,19 +145,24 @@ export default function LoginPage() {
             </p>
           </div>
           <div className="public-login-next">
-            <h3>New here?</h3>
+            <h2>New here?</h2>
             <p>
               After sign-in, connect Strava or Intervals.icu, choose your goal
               and running days, then open your first weekly plan.
             </p>
           </div>
+          <ol className="public-login-path" aria-label="After sign-in">
+            <li>Connect</li>
+            <li>Your profile</li>
+            <li>Your week</li>
+          </ol>
           <p className="public-login-privacy">
             Your training connection comes next.
             <br />
             Read how your data is handled in our{" "}
             <Link to="/privacy">Privacy Policy</Link>.
           </p>
-        </Reveal>
+        </PublicEntrance>
       </main>
     </PublicLayout>
   );

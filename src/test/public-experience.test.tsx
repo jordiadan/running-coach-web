@@ -63,9 +63,25 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 describe("public navigation and example", () => {
+  it("keeps native page transition navigation tied to the real login route", async () => {
+    const start = vi.fn((update: () => Promise<void>) => ({
+      finished: update(),
+    }));
+    Object.defineProperty(document, "startViewTransition", {
+      configurable: true,
+      value: start,
+    });
+    mount("/");
+    fireEvent.click(screen.getAllByRole("link", { name: "Build my week" })[0]);
+    expect(
+      await screen.findByRole("button", { name: "Continue with Google" }),
+    ).toBeEnabled();
+    expect(start).toHaveBeenCalledOnce();
+    delete document.startViewTransition;
+  });
   it("takes the primary landing action to Google-only sign-in", async () => {
     mount("/");
-    fireEvent.click(screen.getAllByRole("link", { name: "Get started" })[0]);
+    fireEvent.click(screen.getAllByRole("link", { name: "Build my week" })[0]);
     expect(
       await screen.findByRole("button", { name: "Continue with Google" }),
     ).toBeEnabled();
@@ -112,7 +128,7 @@ describe("public navigation and example", () => {
     await screen.findByRole("button", { name: "Continue with Google" });
     fireEvent.click(screen.getByRole("link", { name: "Back to home" }));
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
-      "Your week.Your running.",
+      "A weekworth running.",
     );
   });
 });
@@ -211,7 +227,7 @@ describe("Google login", () => {
     ).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Browser back" }));
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
-      "Your week.Your running.",
+      "A weekworth running.",
     );
     expect(auth.signInWithOAuth).not.toHaveBeenCalled();
   });
@@ -230,7 +246,7 @@ describe("Google login", () => {
     });
     await waitFor(() =>
       expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
-        "Your week.Your running.",
+        "A weekworth running.",
       ),
     );
   });
