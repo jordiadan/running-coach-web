@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import type React from "react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -62,7 +62,7 @@ vi.mock("@/components/ThemeSwitcher", () => ({
 
 const bootstrapPortalMock = vi.mocked(bootstrapPortal);
 
-function renderWithProviders(ui: React.ReactElement) {
+function renderWithProviders(ui: React.ReactElement, entry = "/portal") {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -71,16 +71,19 @@ function renderWithProviders(ui: React.ReactElement) {
     },
   });
 
-  return render(
-    <QueryClientProvider client={queryClient}>
-      <MemoryRouter>{ui}</MemoryRouter>
-    </QueryClientProvider>,
-  );
+  return {
+    queryClient, ...render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={[entry]}>{ui}</MemoryRouter>
+      </QueryClientProvider>,
+    )
+  };
 }
 
 describe("PortalPage next goal navigation", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.spyOn(window, "scrollTo").mockImplementation(() => { });
     bootstrapPortalMock.mockResolvedValue({
       athleteId: "athlete-1",
       user: {
@@ -111,4 +114,17 @@ describe("PortalPage next goal navigation", () => {
     expect(await screen.findByText("Profile screen")).toBeInTheDocument();
     expect(screen.getByTestId("profile-focus-target")).toHaveTextContent("race-goal");
   });
+
+  it("opens shared destination links and preserves them when bootstrap refreshes", async () => {
+    const { queryClient } = renderWithProviders(<PortalPage />, "/portal?view=connect");
+    expect(await screen.findByText("Connect screen")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Connect" })).toHaveAttribute("aria-current", "page");
+    fireEvent.click(screen.getByRole("link", { name: "Profile" }));
+    expect(await screen.findByText("Profile screen")).toBeInTheDocument();
+    await queryClient.invalidateQueries({ queryKey: ["portal", "bootstrap"] });
+    await waitFor(() => expect(bootstrapPortalMock).toHaveBeenCalledTimes(2));
+    expect(screen.getByRole("link", { name: "Profile" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByText("Profile screen")).toBeInTheDocument();
+  });
+
 });

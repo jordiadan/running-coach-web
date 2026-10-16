@@ -1,13 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Calendar, User, Link2, LogOut } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import ConnectScreen from "@/components/portal/ConnectScreen";
 import OnboardingScreen from "@/components/portal/OnboardingScreen";
-import ProfileScreen from "@/components/portal/ProfileScreen";
+import ProfileScreen, { type ProfileDraft } from "@/components/portal/ProfileScreen";
 import WeeklyPlanScreen from "@/components/portal/WeeklyPlanScreen";
+import "@/components/portal/portal.css";
 import { Button } from "@/components/ui/button";
 import { bootstrapPortal } from "@/lib/portal-api";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,7 +25,16 @@ const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
 
 export default function PortalPage() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<Tab>("plan");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedTab = searchParams.get("view");
+  const activeTab: Tab = requestedTab === "profile" || requestedTab === "connect" ? requestedTab : "plan";
+  const setActiveTab = useCallback((tab: Tab) => {
+    setSearchParams(previous => { const next = new URLSearchParams(previous); next.set("view", tab); return next; });
+  }, [setSearchParams]);
+  const [profileDirty, setProfileDirty] = useState(false);
+  const [profileDraft, setProfileDraft] = useState<ProfileDraft | null>(null);
+  const hasUnsavedProfile = profileDirty || profileDraft !== null;
+  const [pendingNavigation, setPendingNavigation] = useState<Tab | "home" | "logout" | null>(null);
   const [profileFocusTarget, setProfileFocusTarget] = useState<ProfileFocusTarget>(null);
   const [hasSession, setHasSession] = useState<boolean | null>(null);
   const [showReadyTransition, setShowReadyTransition] = useState(false);
@@ -59,47 +70,61 @@ export default function PortalPage() {
       query.state.data?.nextStep === "prepare_weekly_plan" ? 5000 : false,
   });
   const athleteId = bootstrapQuery.data?.athleteId;
-  const isWeeklyView = activeTab === "plan" && bootstrapQuery.data?.nextStep === "view_weekly_plan" && !showReadyTransition;
+  const nextStep = bootstrapQuery.data?.nextStep;
+  const isPortalReady = nextStep === "view_weekly_plan" && !showReadyTransition;
 
   useEffect(() => {
-    if (!bootstrapQuery.data) return;
+    if (!nextStep) return;
 
     const previousNextStep = previousNextStepRef.current;
-    previousNextStepRef.current = bootstrapQuery.data.nextStep;
+    previousNextStepRef.current = nextStep;
 
     if (
       previousNextStep !== null &&
       previousNextStep !== "view_weekly_plan" &&
-      bootstrapQuery.data.nextStep === "view_weekly_plan"
+      nextStep === "view_weekly_plan"
     ) {
       setShowReadyTransition(true);
     }
 
-    switch (bootstrapQuery.data.nextStep) {
-      case "connect_training_source":
-        setActiveTab("connect");
-        break;
-      case "complete_profile":
-        setActiveTab("profile");
-        break;
-      case "prepare_weekly_plan":
-      case "view_weekly_plan":
-      default:
-        setActiveTab("plan");
-        break;
-    }
+  }, [nextStep]);
 
-  }, [bootstrapQuery.data]);
+  useEffect(() => {
+    if (!hasUnsavedProfile) return;
+    const preventDraftLoss = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ""; };
+    window.addEventListener("beforeunload", preventDraftLoss);
+    return () => window.removeEventListener("beforeunload", preventDraftLoss);
+  }, [hasUnsavedProfile]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate("/login", { replace: true });
   };
 
+  const confirmNavigation = () => {
+    const destination = pendingNavigation;
+    setPendingNavigation(null);
+    setProfileDirty(false);
+    setProfileDraft(null);
+    if (destination === "home") navigate("/");
+    else if (destination === "logout") void handleLogout();
+    else if (destination) { setActiveTab(destination); window.scrollTo({ top: 0, behavior: "instant" }); }
+  };
+
+  const guardNavigation = (event: React.MouseEvent<HTMLAnchorElement>, destination: Tab | "home") => {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+    if (hasUnsavedProfile && (destination === "home" || (destination !== activeTab && destination !== "profile"))) {
+      event.preventDefault();
+      setPendingNavigation(destination);
+      return;
+    }
+    window.scrollTo({ top: 0, behavior: "instant" });
+  };
+
   const handleSetNextGoal = useCallback(() => {
     setActiveTab("profile");
     setProfileFocusTarget("race-goal");
-  }, []);
+  }, [setActiveTab]);
 
   const handleProfileFocusTargetHandled = useCallback(() => {
     setProfileFocusTarget(null);
@@ -158,111 +183,120 @@ export default function PortalPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <nav className="border-b border-divider bg-background/80 backdrop-blur-md sticky top-0 z-40">
-        <div className={`${isWeeklyView ? "max-w-6xl" : "max-w-2xl"} mx-auto flex items-center justify-between px-6 h-16`}>
-          <Link to="/" className="font-serif text-xl tracking-tight text-foreground">
-            Running Coach
+    <div className="portal-app min-h-screen bg-background">
+      <a href="#portal-content" className="portal-skip">Skip to content</a>
+      <header className="portal-header">
+        <div className="portal-header-inner">
+          <Link to="/" className="portal-brand" aria-label="Running Coach home" onClick={event => guardNavigation(event, "home")}>
+            <svg className="portal-brand-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+              <path d="M7 25V14a7 7 0 0 1 14 0v11M12 25V14a2 2 0 0 1 4 0v11M26 25V14A12 12 0 0 0 14 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+            <span>Running Coach</span>
           </Link>
-          <div className="flex items-center gap-2">
+          {isPortalReady && (
+            <nav className="portal-navigation" aria-label="Main navigation">
+              {tabs.map((tab) => {
+                const destination = new URLSearchParams(searchParams);
+                destination.set("view", tab.id);
+                return <Link
+                  key={tab.id}
+                  to={{ search: destination.toString() }}
+                  onClick={event => guardNavigation(event, tab.id)}
+                  aria-current={activeTab === tab.id ? "page" : undefined}
+                  aria-controls="portal-content"
+                  className="portal-nav-item"
+                >
+                  <tab.icon aria-hidden="true" strokeWidth={1.75} />
+                  <span>{tab.label}</span>
+                </Link>;
+              })}
+            </nav>
+          )}
+          <div className="portal-account-actions">
             <ThemeSwitcher />
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <LogOut className="w-4 h-4" />
-              Log out
+            <button type="button" onClick={() => hasUnsavedProfile ? setPendingNavigation("logout") : void handleLogout()} className="portal-logout">
+              <LogOut aria-hidden="true" />
+              <span>Log out</span>
             </button>
           </div>
         </div>
-      </nav>
+      </header>
 
-      <div className={`${isWeeklyView ? "max-w-6xl" : "max-w-2xl"} mx-auto px-6 py-8`}>
+      <main id="portal-content" tabIndex={-1} className={`portal-content ${isPortalReady ? "" : "portal-content-onboarding"}`}>
         <AnimatePresence mode="wait">
-          {bootstrapQuery.data.nextStep === "view_weekly_plan" && !showReadyTransition ? (
+          {nextStep === "view_weekly_plan" && !showReadyTransition ? (
             <motion.div
               key="portal-shell"
-              initial={reduceMotion && isWeeklyView ? false : { opacity: 0, y: 12 }}
+              initial={reduceMotion ? false : { opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              transition={{ duration: reduceMotion && isWeeklyView ? 0 : 0.25 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: reduceMotion ? 0 : 0.16 }}
             >
-            <div className={`flex gap-1 ${isWeeklyView ? "mb-6 sm:mb-10" : "mb-10"} bg-secondary/60 rounded-lg p-1 w-fit`}>
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`relative flex items-center gap-2 ${isWeeklyView ? "px-2 sm:px-4" : "px-4"} py-2 text-sm rounded-md transition-colors ${
-                    activeTab === tab.id
-                      ? "text-foreground"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeTab}
+                  initial={reduceMotion ? false : { opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  transition={{ duration: reduceMotion ? 0 : 0.16 }}
                 >
-                  {activeTab === tab.id && (
-                    <motion.div
-                      layoutId="active-tab"
-                      className="absolute inset-0 bg-background rounded-md shadow-sm"
-                      transition={{ type: "spring", bounce: 0.15, duration: reduceMotion && isWeeklyView ? 0 : 0.5 }}
+                  {activeTab === "plan" && (
+                    <WeeklyPlanScreen
+                      athleteId={athleteId}
+                      targetWeekStartDate={bootstrapQuery.data.weeklyPlan.targetWeekStartDate}
+                      isPreparing={false}
+                      onRefresh={() => bootstrapQuery.refetch()}
+                      onSetNextGoal={handleSetNextGoal}
                     />
                   )}
-                  <span className="relative z-10 flex items-center gap-2">
-                    <tab.icon className="w-4 h-4" />
-                    {tab.label}
-                  </span>
-                </button>
-              ))}
-            </div>
-
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeTab}
-                initial={reduceMotion && isWeeklyView ? false : { opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: reduceMotion && isWeeklyView ? 0 : 0.25 }}
-              >
-                {activeTab === "plan" && (
-                  <WeeklyPlanScreen
-                    athleteId={athleteId}
-                    targetWeekStartDate={bootstrapQuery.data.weeklyPlan.targetWeekStartDate}
-                    isPreparing={false}
-                    onRefresh={() => bootstrapQuery.refetch()}
-                    onSetNextGoal={handleSetNextGoal}
-                  />
-                )}
-                {activeTab === "connect" && (
-                  <ConnectScreen
-                    athleteId={athleteId}
-                    trainingProvider={bootstrapQuery.data.trainingProvider}
-                  />
-                )}
-                {activeTab === "profile" && (
-                  <ProfileScreen
-                    athleteId={athleteId}
-                    focusTarget={profileFocusTarget}
-                    onFocusTargetHandled={handleProfileFocusTargetHandled}
-                  />
-                )}
-              </motion.div>
-            </AnimatePresence>
+                  {activeTab === "connect" && (
+                    <ConnectScreen
+                      athleteId={athleteId}
+                      trainingProvider={bootstrapQuery.data.trainingProvider}
+                    />
+                  )}
+                  {activeTab === "profile" && (
+                    <ProfileScreen
+                      athleteId={athleteId}
+                      focusTarget={profileFocusTarget}
+                      onFocusTargetHandled={handleProfileFocusTargetHandled}
+                      onDirtyChange={setProfileDirty}
+                      draft={profileDraft}
+                      onDraftChange={setProfileDraft}
+                    />
+                  )}
+                </motion.div>
+              </AnimatePresence>
             </motion.div>
           ) : (
             <motion.div
               key="onboarding-shell"
-              initial={{ opacity: 0, y: 12 }}
+              initial={reduceMotion ? false : { opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              transition={{ duration: 0.25 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: reduceMotion ? 0 : 0.16 }}
             >
               <OnboardingScreen
                 bootstrap={bootstrapQuery.data}
                 onRefresh={async () => (await bootstrapQuery.refetch()).data}
-                onEnterPortal={() => setShowReadyTransition(false)}
+                onEnterPortal={() => { setActiveTab("plan"); setShowReadyTransition(false); }}
               />
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+      </main>
+      <AlertDialog open={pendingNavigation !== null} onOpenChange={open => { if (!open) setPendingNavigation(null); }}>
+        <AlertDialogContent className="portal-dialog">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Leave without saving?</AlertDialogTitle>
+            <AlertDialogDescription>Your profile has unsaved changes. Stay here to save them, or discard them and continue.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep editing</AlertDialogCancel>
+            <AlertDialogAction className="portal-dialog-confirm" onClick={confirmNavigation}>Discard changes</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

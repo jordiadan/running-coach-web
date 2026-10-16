@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { motion } from "framer-motion";
-import { AlertTriangle, ArrowLeftRight, Check, Link2, Plus, RefreshCcw } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
+import { AlertTriangle, ArrowLeftRight, Check, Link2, RefreshCcw, ArrowUpRight, Unplug } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import "./portal.css";
 import { ApiError } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import {
@@ -163,8 +164,10 @@ export default function ConnectScreen({
   onComplete,
 }: ConnectScreenProps) {
   const queryClient = useQueryClient();
+  const reduceMotion = useReducedMotion();
   const completionTriggeredRef = useRef(false);
   const [awaitingOAuthCompletion, setAwaitingOAuthCompletion] = useState<TrainingProviderId | null>(null);
+  const [disconnectCandidate, setDisconnectCandidate] = useState<TrainingProviderId | null>(null);
   const [replaceCandidate, setReplaceCandidate] = useState<TrainingProviderId | null>(null);
   const [isReplaceDialogOpen, setIsReplaceDialogOpen] = useState(false);
   const [showConnectedTransition, setShowConnectedTransition] = useState(false);
@@ -234,6 +237,7 @@ export default function ConnectScreen({
   const disconnectMutation = useMutation({
     mutationFn: (provider: TrainingProviderId) => disconnectTrainingProvider(provider, athleteId),
     onSuccess: async () => {
+      setDisconnectCandidate(null);
       await invalidateProviderState();
     },
   });
@@ -270,10 +274,10 @@ export default function ConnectScreen({
 
     const timeout = window.setTimeout(() => {
       void onComplete?.();
-    }, 850);
+    }, reduceMotion ? 0 : 850);
 
     return () => window.clearTimeout(timeout);
-  }, [connectedProviderFromStatus, isOnboarding, onComplete]);
+  }, [connectedProviderFromStatus, isOnboarding, onComplete, reduceMotion]);
 
   useEffect(() => {
     if (!awaitingOAuthCompletion) {
@@ -288,137 +292,124 @@ export default function ConnectScreen({
   }, [awaitingOAuthCompletion, statusByProvider]);
 
   return (
-    <div className={isOnboarding ? "space-y-5" : "max-w-2xl mx-auto"}>
-      {!isOnboarding ? (
-        <>
-          <h2 className="mb-2 font-serif text-2xl">Connect your data</h2>
-          <p className="mb-2 text-sm text-muted-foreground">
-            Link your training sources so we can build a plan around your real activity.
-          </p>
-          <p className="mb-8 text-xs text-muted-foreground">
-            Only one activity source (Strava or Intervals.icu) can be active at a time.
-          </p>
-        </>
-      ) : null}
+    <div className={`portal-settings connect-screen ${isOnboarding ? "connect-onboarding" : ""}`}>
+      {!isOnboarding && (
+        <div className="portal-page-heading">
+          <h1>Connect your data<span className="portal-title-dot" aria-hidden="true">.</span>
+          </h1>
+          <p>Your training starts with the activity you already record.</p>
+        </div>
+      )}
+      <div className="connect-layout">
+        <div className="connect-providers" aria-label="Training sources">
+          {[...trainingSources].sort((a, b) => Number(trainingProvider.connected && b.id === activeProvider) - Number(trainingProvider.connected && a.id === activeProvider)).map((source) => {
+            const providerStatus = statusByProvider[source.id];
+            const isActive = trainingProvider.connected && activeProvider === source.id;
+            const isReplaceable = source.id !== activeProvider && trainingProvider.connected && Boolean(activeProvider);
+            const isBusy =
+              (connectMutation.isPending && connectMutation.variables?.provider === source.id) ||
+              (disconnectMutation.isPending && disconnectMutation.variables === source.id);
+            const isMutating = connectMutation.isPending || disconnectMutation.isPending;
+            const query = source.id === "intervals" ? intervalsQuery : stravaQuery;
+            const isLoadingStatus = query.isLoading;
+            const isStatusError = query.isError;
+            const accountRef = isActive
+              ? trainingProvider.activeProviderAccountRef ?? providerStatus?.providerAccountRef
+              : providerStatus?.providerAccountRef;
+            const badge = resolveBadge(source, providerStatus, trainingProvider, isActive);
+            const connectionErrorCode =
+              connectMutation.variables?.provider === source.id ? getApiErrorCode(connectMutation.error) : undefined;
+            const connectionFailed = connectMutation.isError && connectMutation.variables?.provider === source.id;
+            const disconnectionFailed = disconnectMutation.isError && disconnectMutation.variables === source.id;
+            const reconnect = ["auth_failed", "disconnected"].includes(normalizeStatus(providerStatus?.status));
 
-      {isOnboarding ? (
-        <p className="text-xs text-muted-foreground">
-          Only one activity source (Strava or Intervals.icu) can be active at a time.
-        </p>
-      ) : null}
-
-      <div className="space-y-3">
-        {trainingSources.map((source) => {
-          const providerStatus = statusByProvider[source.id];
-          const isActive = trainingProvider.connected && activeProvider === source.id;
-          const isReplaceable = source.id !== activeProvider && trainingProvider.connected && Boolean(activeProvider);
-          const isBusy =
-            (connectMutation.isPending && connectMutation.variables?.provider === source.id) ||
-            (disconnectMutation.isPending && disconnectMutation.variables === source.id);
-          const isLoadingStatus = source.id === "intervals" ? intervalsQuery.isLoading : stravaQuery.isLoading;
-          const isStatusError = source.id === "intervals" ? intervalsQuery.isError : stravaQuery.isError;
-          const accountRef = isActive
-            ? trainingProvider.activeProviderAccountRef ?? providerStatus?.providerAccountRef
-            : providerStatus?.providerAccountRef;
-          const badge = resolveBadge(source, providerStatus, trainingProvider, isActive);
-          const connectionErrorCode =
-            connectMutation.variables?.provider === source.id ? getApiErrorCode(connectMutation.error) : undefined;
-
-          return (
-            <div
-              key={source.id}
-              className="rounded-xl border border-divider bg-card p-5"
-            >
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className="font-medium text-foreground">{source.name}</p>
-                    {badge && (
-                      <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${badge.className}`}>
-                        {badge.label}
-                      </span>
-                    )}
+            return (
+              <section key={source.id} className={`connect-provider ${isActive ? "is-connected" : ""}`} aria-labelledby={`provider-${source.id}`} aria-busy={isLoadingStatus || isBusy}>
+                <div className="connect-provider-top">
+                  <div className={`connect-provider-mark connect-provider-mark-${source.id}`} aria-hidden="true">
+                    {source.id === "strava" ? (
+                      <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="m10 2 6 10h-4l-2-3.5L8 12H4L10 2Zm6 10 4 7h-3l-1-2-1 2h-3l4-7Z" />
+                      </svg>
+                    ) : <span>i<span>.</span>
+                    </span>}
                   </div>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {resolveDescription(source, providerStatus, isActive, accountRef)}
-                  </p>
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    {isActive
-                      ? `Readiness capability: ${trainingProvider.readinessCapability}.`
-                      : source.readiness}
-                  </p>
-                  {isStatusError ? (
-                    <p className="mt-2 text-sm text-destructive">We couldn't load this source status.</p>
-                  ) : null}
-                  {connectionErrorCode === "PROVIDER_CONNECTION_CONFLICT" ? (
-                    <p className="mt-2 text-sm text-destructive">
-                      Another source is already connected. Use replace to switch sources.
-                    </p>
-                  ) : null}
+                  <span className={`connect-status ${badge?.label.toLowerCase().includes("retry") ? "needs-attention" : ""}`} role="status">
+                    {isLoadingStatus ? "Checking status…" : isActive ? <>
+                      <Check size={14} aria-hidden="true" /> Active source</> : isStatusError ? "Status unavailable" : badge?.label || "Not connected"}
+                  </span>
                 </div>
-
-                {isActive ? (
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => disconnectMutation.mutate(source.id)}
-                    className="min-w-[110px] self-start sm:self-center"
-                    disabled={isBusy}
-                  >
-                    {isBusy ? (
-                      <>
-                        <RefreshCcw className="mr-1 h-3.5 w-3.5 animate-spin" /> Disconnecting
-                      </>
-                    ) : (
-                      <>
-                        <Check className="mr-1 h-3.5 w-3.5" /> Connected
-                      </>
-                    )}
-                  </Button>
-                ) : isReplaceable ? (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => openReplaceDialog(source.id)}
-                    className="min-w-[110px] self-start sm:self-center"
-                    disabled={isBusy}
-                  >
-                    <ArrowLeftRight className="mr-1 h-3.5 w-3.5" /> Replace
-                  </Button>
-                ) : (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => connectMutation.mutate({ provider: source.id })}
-                    className="min-w-[110px] self-start sm:self-center"
-                    disabled={isBusy || isLoadingStatus}
-                  >
-                    {isBusy ? (
-                      <>
-                        <RefreshCcw className="mr-1 h-3.5 w-3.5 animate-spin" /> Connecting
-                      </>
-                    ) : (
-                      <>
-                        <Plus className="mr-1 h-3.5 w-3.5" />
-                        {normalizeStatus(providerStatus?.status) === "pending_authorization" ? "Try again" : "Connect"}
-                      </>
-                    )}
-                  </Button>
-                )}
-              </div>
-            </div>
-          );
-        })}
+                <h2 id={`provider-${source.id}`}>{source.name}</h2>
+                <p className="connect-provider-description">{resolveDescription(source, providerStatus, isActive, accountRef)}</p>
+                <div className="connect-capability">
+                  <span aria-hidden="true" />
+                  <p>{isActive
+                    ? trainingProvider.readinessCapability === "full" ? "Full readiness context" : trainingProvider.readinessCapability === "limited" ? "Limited readiness context" : `Readiness capability: ${trainingProvider.readinessCapability}.`
+                    : source.readiness}</p>
+                </div>
+                {isActive && <p className="connect-active-note">New activities for your plan come from this source.</p>}
+                {isStatusError && <div className="portal-inline-error" role="alert">
+                  <p>We couldn't load this source status.</p>
+                  <button type="button" className="portal-text-action" onClick={() => void query.refetch()} disabled={query.isFetching}>Check again</button>
+                </div>}
+                {connectionFailed && <p className="portal-inline-error" role="alert">{connectionErrorCode === "PROVIDER_CONNECTION_CONFLICT" ? "Another source is already connected. Use replace to switch sources." : "We couldn't connect this source. Try again."}</p>}
+                {disconnectionFailed && <p className="portal-inline-error" role="alert">We couldn't disconnect this source. Try again.</p>}
+                <div className="connect-provider-action">
+                  {isActive ? (
+                    <Button type="button" variant="ghost" className="connect-disconnect" onClick={() => setDisconnectCandidate(source.id)} disabled={isMutating}>
+                      {isBusy ? <>
+                        <RefreshCcw className="portal-spin" size={16} aria-hidden="true" /> Disconnecting…</> : <>
+                        <Unplug size={16} aria-hidden="true" /> Disconnect</>}
+                    </Button>
+                  ) : isReplaceable ? (
+                    <Button type="button" variant="outline" onClick={() => openReplaceDialog(source.id)} disabled={isMutating || isLoadingStatus}>
+                      <ArrowLeftRight size={16} aria-hidden="true" /> Replace source
+                    </Button>
+                  ) : (
+                    <Button type="button" variant="default" onClick={() => connectMutation.mutate({ provider: source.id })} disabled={isMutating || isLoadingStatus}>
+                      {isBusy ? <>
+                        <RefreshCcw className="portal-spin" size={16} aria-hidden="true" /> Connecting…</> : <>{reconnect ? "Reconnect" : normalizeStatus(providerStatus?.status) === "pending_authorization" ? "Try again" : "Connect"}<ArrowUpRight size={16} aria-hidden="true" />
+                      </>}
+                    </Button>
+                  )}
+                </div>
+              </section>
+            );
+          })}
+        </div>
+        <aside className="connect-guidance" aria-label="About your connection">
+          <Link2 size={22} strokeWidth={1.5} aria-hidden="true" />
+          <h2>One source.<br />Your full focus.</h2>
+          <p>Only one activity source (Strava or Intervals.icu) can be active at a time.</p>
+          <p>Switch sources whenever you need. Your existing data stays; new activities come from your new source.</p>
+          <div className="connect-authorization-note">
+            <ArrowUpRight size={16} aria-hidden="true" />
+            <p>You'll authorize the connection with your provider. If you finish in another tab, reopen the portal to refresh its status.</p>
+          </div>
+        </aside>
       </div>
 
+      <AlertDialog open={disconnectCandidate !== null} onOpenChange={open => { if (!open && !disconnectMutation.isPending) setDisconnectCandidate(null); }}>
+        <AlertDialogContent className="portal-dialog">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Disconnect {disconnectCandidate ? providerNameById[disconnectCandidate] : "source"}?</AlertDialogTitle>
+            <AlertDialogDescription>New activities will stop syncing from this source. Your existing data stays, and you can reconnect later.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={disconnectMutation.isPending}>Keep connected</AlertDialogCancel>
+            <AlertDialogAction className="portal-dialog-confirm" onClick={event => { event.preventDefault(); if (disconnectCandidate) disconnectMutation.mutate(disconnectCandidate); }} disabled={disconnectMutation.isPending}>{disconnectMutation.isPending ? "Disconnecting…" : "Disconnect source"}</AlertDialogAction>
+          </AlertDialogFooter>
+          {disconnectMutation.isError && <p className="text-sm text-destructive" role="alert">We couldn't disconnect this source. Try again.</p>}
+        </AlertDialogContent>
+      </AlertDialog>
       <AlertDialog
         open={isReplaceDialogOpen}
         onOpenChange={handleReplaceDialogOpenChange}
       >
-        <AlertDialogContent>
+        <AlertDialogContent className="portal-dialog">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-foreground" />
+              <AlertTriangle aria-hidden="true" className="h-4 w-4 text-foreground" />
               Replace active source?
             </AlertDialogTitle>
             <AlertDialogDescription>
@@ -433,39 +424,31 @@ export default function ConnectScreen({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={connectMutation.isPending}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmReplace} disabled={connectMutation.isPending}>
-              {connectMutation.isPending ? "Replacing..." : `Replace with ${pendingSource?.name}`}
+            <AlertDialogAction className="portal-dialog-confirm" onClick={event => { event.preventDefault(); confirmReplace(); }} disabled={connectMutation.isPending}>
+              {connectMutation.isPending ? "Replacing…" : `Replace with ${pendingSource?.name}`}
             </AlertDialogAction>
           </AlertDialogFooter>
+          {connectMutation.isError && <p className="text-sm text-destructive" role="alert">We couldn't replace this source. Try again.</p>}
         </AlertDialogContent>
       </AlertDialog>
 
       {isOnboarding && showConnectedTransition ? (
         <motion.div
-          initial={{ opacity: 0, y: 10, scale: 0.98 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
+          initial={reduceMotion ? false : { opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: reduceMotion ? 0 : 0.16 }}
           className="flex items-center gap-3 rounded-xl border border-primary/20 bg-primary/10 px-4 py-3 text-sm text-primary"
         >
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
-            <Check className="h-4 w-4" />
+            <Check aria-hidden="true" className="h-4 w-4" />
           </div>
           <div className="space-y-0.5">
             <p className="font-medium">Training source connected</p>
-            <p className="text-xs text-primary/80">Moving on to your profile...</p>
+            <p className="text-xs text-primary/80">Moving on to your profile…</p>
           </div>
         </motion.div>
       ) : null}
 
-      {!isOnboarding ? (
-        <div className="mt-6 rounded-xl border border-divider bg-card p-4 text-sm text-muted-foreground">
-          <div className="flex items-start gap-3">
-            <Link2 className="mt-0.5 h-4 w-4 shrink-0" />
-            <p>
-              The portal checks provider status on load. If you finish an OAuth flow in another tab, reopen the portal and the connection state should refresh.
-            </p>
-          </div>
-        </div>
-      ) : null}
     </div>
   );
 }

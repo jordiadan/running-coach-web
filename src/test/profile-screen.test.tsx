@@ -113,7 +113,7 @@ describe("ProfileScreen race goal focus", () => {
   });
 
   it("waits for profile data before focusing the goal race section", async () => {
-    let resolveProfile: (profile: AthleteProfile) => void = () => {};
+    let resolveProfile: (profile: AthleteProfile) => void = () => { };
     getAthleteProfileMock.mockReturnValue(
       new Promise<AthleteProfile>((resolve) => {
         resolveProfile = resolve;
@@ -214,4 +214,30 @@ describe("ProfileScreen race goal focus", () => {
 
     expect(screen.getByLabelText("Equivalent time")).toHaveValue("1:45:30");
   });
+
+  it("exposes the four-day minimum and keeps the long run on a running day", async () => {
+    renderWithQueryClient(<ProfileScreen athleteId="athlete-1" />);
+    const tuesday = await screen.findByRole("button", { name: "Tuesday" });
+    await waitFor(() => expect(tuesday).toHaveAttribute("aria-pressed", "true"));
+    expect(tuesday).toHaveAttribute("aria-disabled", "true");
+    fireEvent.click(tuesday);
+    expect(tuesday).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(screen.getByRole("button", { name: "Monday" }));
+    expect(tuesday).toHaveAttribute("aria-disabled", "false");
+    fireEvent.click(screen.getByRole("button", { name: "Sunday" }));
+    expect(screen.getByLabelText("Preferred long run day")).toHaveValue("MON");
+    expect(screen.queryByRole("option", { name: "Sunday" })).not.toBeInTheDocument();
+    expect(screen.getByText("Unsaved changes")).toBeInTheDocument();
+  });
+
+  it("preserves an edited draft when calculated zones refresh", async () => {
+    const { queryClient } = renderWithQueryClient(<ProfileScreen athleteId="athlete-1" />);
+    await screen.findByDisplayValue("Jordi");
+    fireEvent.change(screen.getByLabelText("Display name"), { target: { value: "Draft athlete" } });
+    getAthleteProfileMock.mockResolvedValue({ ...athleteProfile, heartRateZones: { status: "PENDING_CALCULATION" } });
+    await act(async () => { await queryClient.invalidateQueries({ queryKey: ["portal", "athlete", "athlete-1"] }); });
+    expect(screen.getByLabelText("Display name")).toHaveValue("Draft athlete");
+    expect(screen.getByText("Unsaved changes")).toBeInTheDocument();
+  });
+
 });

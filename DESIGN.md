@@ -112,6 +112,18 @@ typography:
     fontSize: "0.875rem"
     fontWeight: 500
     lineHeight: "1.25rem"
+  portal-heading:
+    fontFamily: "DM Serif Display, Georgia, serif"
+    fontSize: "2.5rem"
+    fontWeight: 400
+    lineHeight: 1.1
+    letterSpacing: "-0.035em"
+  portal-heading-wide:
+    fontFamily: "DM Serif Display, Georgia, serif"
+    fontSize: "3rem"
+    fontWeight: 400
+    lineHeight: 1.1
+    letterSpacing: "-0.035em"
 rounded:
   sm: "6px"
   md: "8px"
@@ -155,14 +167,25 @@ components:
     backgroundColor: "{colors.card}"
     textColor: "{colors.card-foreground}"
     rounded: "{rounded.lg}"
+  portal-input:
+    backgroundColor: "{colors.background}"
+    textColor: "{colors.foreground}"
+    rounded: "{rounded.xl}"
+    padding: "8px 12px"
+    height: "48px"
+  portal-surface:
+    backgroundColor: "{colors.surface-elevated}"
+    textColor: "{colors.foreground}"
+    rounded: "{rounded.2xl}"
 ---
 
 # Design System: Running Coach
 
 ## Overview
 
-Descriptive capture of the code at commit `46c8658`, without a redesign or an
-added visual concept. Working conventions live in AGENTS.md and product context
+Baseline capture of the code at commit `46c8658`, with a scoped authenticated
+portal update from `portal.css`, `weekly-plan.css`, `PortalPage.tsx`, Connect and
+Profile on 2026-10-16. Working conventions live in AGENTS.md and product context
 in PRODUCT.md. No canonical Pencil frame is tracked; this record does not claim
 a comparison with Pencil. Observable sources are `src/index.css`,
 `tailwind.config.ts`, `src/components/ui/` and their consuming screens.
@@ -176,6 +199,12 @@ Frontmatter tokens record existing values, with warm as the base theme and
 prefixes for the other declared variants. They index the source rather than
 authorize changes. Check differences against the code and project instructions
 before updating this record.
+
+The authenticated extension carries Weekly Plan's existing type, theme roles and
+geometry into Connect, Profile and their shared shell. Its brief is
+`docs/portal-design-iteration.md`; it introduces no public-page direction or
+rebrand. Global tokens and unrelated baseline observations remain as recorded;
+this update does not claim to reconcile all pre-existing documentation drift.
 
 ## Colors
 
@@ -204,8 +233,20 @@ Deep. `useTheme.tsx` defaults to warm and stores the selection in `rc-theme`.
 The frontmatter's `dark-`, `bright-` and `forest-` prefixes describe those
 variants, not independent colors to mix on a screen. The initial setup's computed
 style capture confirmed the base theme. Its compiled CSS contained `.theme-warm`
-but not the other three selectors, so those declarations are not described here
-as verified rendering. This setup does not change that behavior.
+but not the other three selectors. The portal iteration fixes that compatibility
+defect with literal theme class names in `useTheme.tsx`, allowing Tailwind to
+retain all four declared themes without changing their palettes. The historical
+capture does not establish current theme rendering or contrast compliance.
+
+The portal inherits foreground, background, surface-elevated, secondary, border,
+primary and primary-foreground roles. Supporting text uses foreground at 70%
+opacity; field borders use foreground at 45%. Its action pair follows the theme:
+the warm theme supplies the forest-green active-source surface, rather than a
+new fixed palette. Scoped contrast adjustments darken the dark theme's action
+fill with 40% black. Bright mixes its primary text/focus role with 15% black and
+its action fill with 30% black; dark and forest use `hsl(0 85% 75%)` for error
+text. These overrides live in `portal.css` and do not replace the global theme
+tokens. Their presence alone is not a contrast-compliance verification.
 
 ## Typography
 
@@ -220,23 +261,40 @@ h1 is 3rem, 4.5rem from sm and 6rem from lg, with tight tracking.
 390px was 48px/50.4px and at 1440px was 96px/96px. Do not translate this combination
 into a new `clamp()` as part of documentation.
 
-Portal headings commonly use `text-2xl`, with `text-sm` or `text-base` body text;
-the landing also uses `text-lg`/`text-xl`. Session metrics use tabular numbers.
+Weekly Plan, Connect and Profile page headings use the portal-heading role,
+switching to portal-heading-wide from 640px (40px / 48px). Connect and Profile
+supporting copy commonly uses 13–15px; editable fields use 16px. Portal loading,
+authentication and onboarding states retain their local heading sizes. The
+landing also uses `text-lg`/`text-xl`. Session metrics use tabular numbers.
 There is no global body-text width limit in ch; do not impose one by default.
 
 ## Layout
 
 Mobile-first layout uses Tailwind's responsive utilities. Landing containers use
-`max-w-6xl` (72rem); portal and privacy use `max-w-2xl` (42rem); sign-in uses
+`max-w-6xl` (72rem); privacy uses `max-w-2xl` (42rem); sign-in uses
 `max-w-sm` (24rem). The most common horizontal padding is `px-6` (24px).
 Spacing follows Tailwind's scale, with frequent steps captured in frontmatter
 and screen-specific values retained in their consumers.
 
 Default breakpoints are sm (640px), md (768px), lg (1024px), xl (1280px) and
 2xl (1536px). Tailwind's `container` config sets a 1400px width at 2xl; that is
-not the breakpoint. Sign-in shows its side panel from lg; portal rows switch
-from columns to rows from sm. Template components in `src/components/ui/`
+not the breakpoint. Sign-in shows its side panel from lg; Profile essentials
+use two columns from sm. Template components in `src/components/ui/`
 do not establish a global sidebar or a multicolumn dashboard.
+
+The authenticated header and main content share a 72rem maximum, with 24px
+horizontal padding. Onboarding remains 42rem. Below 900px, the single set of
+three destination links forms a fixed bottom bar with safe-area padding; from
+900px it sits in the sticky header. Main content leaves room for the bottom bar.
+The header keeps theme and logout controls available at both sizes.
+
+Connect stacks provider surfaces on narrow screens, places them side by side
+from 640px, and adds a 16rem guidance column from 900px. Profile is one column
+below 900px, with compact identity above the editor; from 900px the editor leads
+beside a 17.5rem identity/zones aside. Profile running-day controls use four
+columns below 640px (56px minimum height; at least 44px wide at a 320px viewport),
+then seven columns with 80px minimum height. This is separate from Weekly Plan's
+seven-column date navigator. Weekly Plan retains its 1024px workspace breakpoint.
 
 ## Elevation & Depth
 
@@ -251,6 +309,12 @@ transitions, springs and expansions; some screens consult `useReducedMotion`.
 The landing uses staggered entrance motion and parallax. This record does not
 claim application-wide reduced-motion coverage.
 
+Portal provider/editor surfaces use a restrained shadow
+(`0 8px 24px -16px hsl(var(--foreground) / 0.22)`). Settings controls and navigation
+use 160ms state transitions; shell destination changes use 160ms opacity and 4px
+translation. Scoped reduced-motion rules remove portal animations, transitions
+and active-state translation, and the shell consults `useReducedMotion`.
+
 ## Shapes
 
 The base radius variable is 0.625rem; `lg` uses it and `md`/`sm` subtract 2px/4px.
@@ -258,6 +322,11 @@ Bright declares 0.75rem. Portal cards also use Tailwind's `rounded-xl` and
 `rounded-2xl`; chips and indicators use circular shapes. These classes do not
 all depend on the radius variable. Preserve the distinction between semantic
 radii and component-specific radii.
+
+The portal extension repeats 12px control and 16px surface radii, following
+Weekly Plan. Profile day controls use 10px corners; identity monograms and small
+selection indicators remain circular. These scoped values do not change the
+base UI library's radius variable.
 
 ## Components
 
@@ -272,6 +341,11 @@ Focus uses a 2px ring with a 2px offset. Disabled reduces opacity and blocks
 interaction. `asChild` composes the consumer's element; verify semantics when
 reusing it. Some CTAs have local size overrides.
 
+Portal account controls retain 44px targets. Provider actions are at least 46px
+high; Profile save and editable-field controls are at least 48px high. Portal
+focus uses a 2px primary outline with a 4px offset. These local sizes supplement
+the base Button variants rather than redefining every button as 40px.
+
 ### Cards / Containers
 
 The base Card has lg radius, a border, card background, card-foreground text and
@@ -285,12 +359,53 @@ and md radius. Base text switches to sm from md; focus has a 2px ring and offset
 Profile composes existing labels, selects and calendar/popover controls. Errors
 use destructive text and operations can disable controls.
 
+The Profile editor overrides base inputs, selects, comboboxes and date controls
+to the portal-input geometry, with ground fill and the scoped control border.
+Read-only fields use the soft surface; pending saves disable the editing
+fieldset. Selection, validation and calculated zones remain distinct states.
+
 ### Navigation
 
 Serif brand with sans-serif links and controls. The landing has fixed navigation
-with transparency and blur; the portal uses sticky navigation and Weekly Plan,
-Connect and Profile tabs. The theme selector is a Radix dropdown. Its availability
-does not establish a new navigation pattern for other pages.
+with transparency and blur; the portal uses a sticky header and Weekly Plan,
+Connect and Profile destination links, placed as described in Layout. Links
+retain native URL and history behavior through the `view` query parameter.
+The current destination has an underline, stronger weight and tonal fill as well
+as color. A skip link targets main content. The theme selector is a Radix
+dropdown. Its availability does not establish a new navigation pattern for other
+pages.
+
+### Connect
+
+The active provider is first and uses the theme's action surface and contrasting
+text. Each provider keeps identity, status and capability before its explicit
+Connect, Reconnect, Replace source or Disconnect action. The inactive source is
+quiet. Disconnect and replacement use confirmation dialogs. Loading, unavailable
+status/retry, pending authorization and operation failures retain visible feedback.
+The provider composition is scoped to this screen, not a generic card template.
+
+Portal confirmation dialogs carry the same scoped roles outside the shell's DOM
+subtree. Their surfaces use 16px corners, buttons use 12px corners and 48px minimum
+height, and confirmation buttons use the theme-adjusted action pair. Supporting
+and destructive text use the portal's corresponding roles. The dialogs preserve
+the portal focus outline and suppress dialog/overlay animation and transitions
+under reduced motion.
+
+### Profile
+
+One editor groups essentials, weekly rhythm and race goal, with identity and
+calculated zones as supporting context. Running-day buttons expose pressed state;
+the four-day minimum and long-run select remain visible constraints. The save bar
+becomes sticky only while dirty, saving or failed; its resting/success state stays
+in flow. On mobile it clears the bottom navigation, and on desktop it sits 16px
+above the viewport bottom. Saving, unsaved, error and success feedback share the
+same region.
+
+Unsaved edits live in shell memory, including time/pace drafts, so Back/Forward
+between portal destinations can restore them. Explicit navigation away and
+logout offer discard confirmation; document unload uses the browser warning.
+There is no draft storage persistence. This behavior documents the shipped flow,
+not a new backend contract or a promise of recovery after reload.
 
 ### Weekly Plan
 
