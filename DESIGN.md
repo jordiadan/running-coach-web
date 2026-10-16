@@ -206,6 +206,11 @@ geometry into Connect, Profile and their shared shell. Its brief is
 rebrand. Global tokens and unrelated baseline observations remain as recorded;
 this update does not claim to reconcile all pre-existing documentation drift.
 
+The onboarding extension follows `docs/onboarding-design-iteration.md`, using
+the same portal roles, typography and shared Connect/Profile controls. Its
+setup rail and plan-status receipt are scoped to first-run tasks; they introduce
+no new theme, tokens, dependencies or raster assets.
+
 ## Colors
 
 ### Primary
@@ -264,10 +269,11 @@ h1 is 3rem, 4.5rem from sm and 6rem from lg, with tight tracking.
 390px was 48px/50.4px and at 1440px was 96px/96px. Do not translate this combination
 into a new `clamp()` as part of documentation.
 
-Weekly Plan, Connect and Profile page headings use the portal-heading role,
-switching to portal-heading-wide from 640px (40px / 48px). Connect and Profile
-supporting copy commonly uses 13–15px; editable fields use 16px. Portal loading,
-authentication and onboarding states retain their local heading sizes. The
+Weekly Plan, Connect, Profile and onboarding task headings use the portal-heading
+role, switching to portal-heading-wide from 640px (40px / 48px). Connect and Profile
+supporting copy commonly uses 13–15px; editable fields use 16px. Portal loading
+and authentication states retain their local heading sizes. The onboarding
+desktop rail title and plan-summary heading use 28px serif type. The
 landing also uses `text-lg`/`text-xl`. Session metrics use tabular numbers.
 There is no global body-text width limit in ch; do not impose one by default.
 
@@ -285,11 +291,19 @@ not the breakpoint. Sign-in shows its side panel from lg; Profile essentials
 use two columns from sm. Template components in `src/components/ui/`
 do not establish a global sidebar or a multicolumn dashboard.
 
-The authenticated header and main content share a 72rem maximum, with 24px
-horizontal padding. Onboarding remains 42rem. Below 900px, the single set of
+The authenticated header and main content, including onboarding, share a 72rem
+maximum, with 24px horizontal padding. Below 900px, the single set of
 three destination links forms a fixed bottom bar with safe-area padding; from
 900px it sits in the sticky header. Main content leaves room for the bottom bar.
 The header keeps theme and logout controls available at both sizes.
+
+Onboarding has no destination bar. Below 1024px, a labelled three-step sequence
+sits above one task heading and its controls. From 1024px, a sticky 14rem setup
+rail sits beside the task with a 4rem gap. Shared provider surfaces remain
+compact and stacked below 640px, then use two columns; the onboarding task
+omits Connect's settings guidance column and Profile's identity/zones aside.
+The plan receipt stacks summary and status on mobile; from 1024px, its summary
+and receipt fields share a two-column row above the status region.
 
 Connect stacks provider surfaces on narrow screens, places them side by side
 from 640px, and adds a 16rem guidance column from 900px. Profile is one column
@@ -414,6 +428,32 @@ between portal destinations can restore them. Explicit navigation away and
 logout offer discard confirmation; document unload uses the browser warning.
 There is no draft storage persistence. This behavior documents the shipped flow,
 not a new backend contract or a promise of recovery after reload.
+
+### Onboarding
+
+One task title leads the shared Connect or Profile controls without their
+settings-page headings. The labelled sequence exposes current, completed and
+upcoming steps; desktop adds descriptions beside the numbered/check indicators.
+Compact mobile providers preserve source identity, capability and authorization
+feedback. Profile retains validation, weekly rhythm, conditional race details
+and save feedback, while omitting the future coach-notes placeholder.
+
+The first-plan surface uses a definition-list receipt for the connected training
+source, saved profile and weekly-plan status, derived from bootstrap facts.
+Missing, preparing, failed and ready remain distinct states: missing says the
+first plan is not available yet, preparing reports preparation, failure preserves
+setup and offers retry, and ready offers one explicit Open weekly plan action.
+It does not show simulated generation milestones or percentages. Refresh and
+retry errors stay inline; background bootstrap failure retains the last loaded
+step. Error details are available through a native disclosure when supplied.
+
+An onboarding transition to ready waits for that explicit action before showing
+the actual weekly plan. A first bootstrap that is already ready enters the
+portal directly. Step changes focus the task heading; entry focuses portal main
+content. Brief opacity/translation changes and the checking spinner respect
+reduced motion. Onboarding reuses shell-memory profile drafts and leave/logout
+protection; its active mobile save bar clears the safe area without reserving
+space for a destination bar.
 
 ### Weekly Plan
 

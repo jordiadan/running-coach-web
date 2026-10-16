@@ -146,4 +146,19 @@ describe("ConnectScreen", () => {
     await waitFor(() => expect(screen.getAllByRole("button", { name: "Reconnect" })[0]).toBeEnabled());
   });
 
+  it("finishes onboarding once with the latest callback after a parent rerender", async () => {
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const first = vi.fn(), latest = vi.fn();
+    const tree = (onComplete: () => void) => (
+      <QueryClientProvider client={queryClient}>
+        <ConnectScreen athleteId="athlete-1" trainingProvider={{ connected: false, readinessCapability: "limited" }} variant="onboarding" onComplete={onComplete} />
+      </QueryClientProvider>
+    );
+    const { rerender } = render(tree(first));
+    expect(await screen.findByText("Training source connected")).toBeInTheDocument();
+    rerender(tree(latest));
+    await waitFor(() => expect(latest).toHaveBeenCalledOnce(), { timeout: 1500 });
+    expect(first).not.toHaveBeenCalled();
+  });
+
 });

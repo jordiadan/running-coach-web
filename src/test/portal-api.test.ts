@@ -309,14 +309,6 @@ describe("portal-api weekly coach helpers", () => {
       selectedWeekStartDate: "2026-03-23",
       previousWeekStartDate: "2026-03-16",
       nextWeekStartDate: "2026-03-30",
-      plan: {
-        plan: {
-          sessions: [{
-            completionSource: "SYNCED_ACTIVITY",
-            syncedActivity: { activityId: "12345", provider: "STRAVA", activityUrl: "https://www.strava.com/activities/12345", durationMinutes: 97, distanceKm: 17.2 },
-          }],
-        },
-      },
       canGoPrevious: true,
       canGoNext: true,
       todaySessionDay: "SUN",
@@ -352,7 +344,7 @@ describe("portal-api weekly coach helpers", () => {
         },
         plan: {
           weekType: "BUILD",
-          sessions: [{ day: "SUN", completed: true, role: "KEY" }],
+          sessions: [{ day: "SUN", completed: true, role: "KEY", completionSource: "SYNCED_ACTIVITY", syncedActivity: { activityId: "12345", provider: "STRAVA", activityUrl: "https://www.strava.com/activities/12345", durationMinutes: 97, distanceKm: 17.2 } }],
         },
       },
     });

@@ -1,364 +1,128 @@
-import { useEffect, useMemo, useState } from "react";
-import { motion } from "framer-motion";
-import { ArrowRight, Check, Sparkles, Zap } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import { ArrowRight, Check, CircleAlert, RefreshCcw } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { retryCurrentUserWeeklyPlanGeneration, type PortalBootstrapResponse } from "@/lib/portal-api";
 import { deriveOnboardingState } from "@/lib/portal-onboarding";
 import ConnectScreen from "@/components/portal/ConnectScreen";
-import ProfileScreen from "@/components/portal/ProfileScreen";
+import ProfileScreen, { type ProfileDraft } from "@/components/portal/ProfileScreen";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+import "./onboarding.css";
 
 type OnboardingScreenProps = {
   bootstrap: PortalBootstrapResponse;
   onRefresh: () => Promise<PortalBootstrapResponse | undefined>;
   onEnterPortal?: () => void;
+  refreshFailed?: boolean;
+  profileDraft?: ProfileDraft | null;
+  onProfileDraftChange?: (draft: ProfileDraft | null) => void;
+  onProfileDirtyChange?: (dirty: boolean) => void;
 };
 
-function PreparingPlanStep({
-  status,
-  failureCode,
-  onRefresh,
-  onRetry,
-  isRetrying,
-}: {
-  status: PortalBootstrapResponse["weeklyPlan"]["status"];
-  failureCode?: string;
-  onRefresh: () => void | Promise<unknown>;
-  onRetry: () => void | Promise<unknown>;
-  isRetrying: boolean;
+const stepLabels = { connect: "Connect", profile: "Your profile", ready: "First plan" };
+const stepDescriptions = {
+  connect: "Bring your training history.",
+  profile: "Find your weekly rhythm.",
+  ready: "Start with a plan for you.",
+};
+
+function PlanPreparation({ bootstrap, onRefresh, isRefreshing, onEnterPortal }: {
+  bootstrap: PortalBootstrapResponse;
+  onRefresh: () => Promise<unknown>;
+  isRefreshing: boolean;
+  onEnterPortal?: () => void;
 }) {
-  if (status === "failed") {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -20 }}
-        className="space-y-6 py-4 text-center"
-      >
-        <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-destructive/10 text-destructive shadow-[0_0_0_8px_rgba(220,38,38,0.08)]"
-        >
-          <Zap className="h-8 w-8" />
-        </motion.div>
-        <div className="space-y-2">
-          <h3 className="font-serif text-xl text-foreground">We hit a problem preparing your plan</h3>
-          <p className="text-sm text-muted-foreground">
-            Your onboarding is complete, but the first weekly plan needs another try from the backend.
-          </p>
-          {failureCode ? (
-            <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-              {failureCode.replaceAll("_", " ")}
-            </p>
-          ) : null}
-        </div>
-        <div className="flex flex-col justify-center gap-3 sm:flex-row">
-          <Button onClick={onRetry} className="gap-2" variant="hero" disabled={isRetrying}>
-            {isRetrying ? "Retrying…" : "Retry plan generation"}
-          </Button>
-          <Button onClick={onRefresh} className="gap-2" variant="hero-outline" disabled={isRetrying}>
-            Refresh
-            <ArrowRight className="h-4 w-4" />
-          </Button>
-        </div>
-      </motion.div>
-    );
-  }
-
-  const progressItems = [
-    "Syncing your latest training context",
-    "Balancing fatigue and recovery",
-    "Preparing your next week",
-  ];
-
+  const retry = useMutation({
+    mutationFn: retryCurrentUserWeeklyPlanGeneration,
+    onSuccess: async () => { await onRefresh(); },
+  });
+  const { status, failureCode } = bootstrap.weeklyPlan;
+  const ready = bootstrap.nextStep === "view_weekly_plan";
+  const failed = status === "failed" && !ready;
+  const statusLabel = ready ? "Ready to open" : failed ? "Needs another try" : status === "missing" ? "Waiting for your first plan" : "Preparing your weekly plan…";
+  const provider = bootstrap.trainingProvider.activeProvider === "strava" ? "Strava" : bootstrap.trainingProvider.activeProvider === "intervals" ? "Intervals.icu" : "Connected";
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      className="space-y-6 py-4 text-center"
-    >
-      <motion.div className="space-y-6">
-        <motion.div
-          animate={{ rotate: 360, scale: [1, 1.04, 1] }}
-          transition={{ rotate: { duration: 10, repeat: Infinity, ease: "linear" }, scale: { duration: 2.8, repeat: Infinity, ease: "easeInOut" } }}
-          className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 shadow-[0_0_0_8px_rgba(122,162,116,0.08)]"
-        >
-          <Sparkles className="h-8 w-8 text-primary" />
-        </motion.div>
-        <div>
-          <h3 className="mb-2 font-serif text-xl text-foreground">Preparing your weekly plan…</h3>
-          <p className="text-sm text-muted-foreground">
-            {status === "missing"
-              ? "Your onboarding is complete. We're queuing your first weekly plan now."
-              : "Your onboarding is complete. We're building the first weekly plan in the coach backend now."}
-          </p>
+    <div className={`onboarding-plan ${ready ? "is-ready" : ""}`}>
+      <div className="onboarding-plan-summary">
+        <div className="onboarding-plan-intro">
+          {failed ? <CircleAlert aria-hidden="true" size={28} strokeWidth={1.5} /> : <svg className="onboarding-track" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+            <path d="M10 54V28a18 18 0 0 1 36 0v26M18 54V28a10 10 0 0 1 20 0v26M26 54V28a2 2 0 0 1 4 0v26M54 54V28A26 26 0 0 0 28 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          </svg>}
+          <h2>{ready ? "Time to make it yours." : failed ? "Your setup is saved." : "Your training comes together here."}</h2>
+          <p>{ready ? "See your sessions, explore the details, and know what’s next." : failed ? "Your first plan couldn’t be prepared. Try again to continue from here." : "A personalized week, shaped by your training history, goals and running schedule."}</p>
         </div>
-        <div className="mx-auto max-w-sm space-y-4">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-              <span>Plan preparation</span>
-              <span className="font-medium text-foreground">In progress</span>
-            </div>
-            <div className="relative h-1.5 overflow-hidden rounded-full bg-secondary">
-              <motion.div
-                animate={{ x: ["-120%", "260%"] }}
-                transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute inset-y-0 w-1/3 rounded-full bg-primary"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2 rounded-2xl border border-border/60 bg-secondary/30 p-3 text-left">
-            {progressItems.map((item, index) => (
-              <motion.div
-                key={item}
-                initial={{ opacity: 0, x: -8 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 + index * 0.08 }}
-                className="flex items-center gap-3 text-sm text-muted-foreground"
-              >
-                <motion.span
-                  animate={{ opacity: index === 2 ? [0.45, 1, 0.45] : [0.55, 0.9, 0.55], scale: [1, 1.15, 1] }}
-                  transition={{ duration: 1.8, repeat: Infinity, delay: index * 0.15 }}
-                  className="block h-2 w-2 rounded-full bg-primary"
-                />
-                <span>{item}</span>
-              </motion.div>
-            ))}
-          </div>
-
-          <p className="text-[11px] text-muted-foreground">
-            This page refreshes automatically while the backend prepares your plan.
-          </p>
+        <dl className="onboarding-receipt">
+          <div><dt>Training source</dt><dd>{bootstrap.trainingProvider.connected ? <><Check size={16} aria-hidden="true" />{provider}</> : "Not connected"}</dd></div>
+          <div><dt>Athlete profile</dt><dd>{bootstrap.profile.isComplete ? <><Check size={16} aria-hidden="true" />Saved</> : "Incomplete"}</dd></div>
+          <div><dt>Weekly plan</dt><dd>{ready ? <><Check size={16} aria-hidden="true" />Ready</> : failed ? "Not ready" : status === "missing" ? "Waiting" : "In preparation"}</dd></div>
+        </dl>
+      </div>
+      <div className="onboarding-plan-status">
+        <p role="status" aria-atomic="true" className={failed ? "onboarding-plan-failed" : ""}>
+          {ready ? <Check size={18} aria-hidden="true" /> : failed ? <CircleAlert size={18} aria-hidden="true" /> : <RefreshCcw className="portal-spin" size={18} aria-hidden="true" />}
+          {statusLabel}
+        </p>
+        {!ready && <p className="onboarding-plan-help">{failed ? "Your connection and profile don’t need to be set up again." : "This page checks automatically. You can leave and come back to pick up where you left off."}</p>}
+        {failed && failureCode && <details className="onboarding-error-details"><summary>Error details</summary><p>{failureCode}</p></details>}
+        {retry.isError && <p role="alert" className="portal-inline-error">We couldn’t restart your plan. Try again, or check its status.</p>}
+        <div className="onboarding-plan-actions">
+          {ready ? onEnterPortal && <Button variant="hero" onClick={onEnterPortal}>Open weekly plan <ArrowRight size={18} aria-hidden="true" /></Button> : <>
+            {failed && <Button variant="hero" onClick={() => retry.mutate()} disabled={retry.isPending || isRefreshing}>{retry.isPending ? "Retrying…" : "Retry plan generation"}<RefreshCcw size={16} className={retry.isPending ? "portal-spin" : ""} aria-hidden="true" /></Button>}
+            <Button variant="outline" onClick={() => void onRefresh()} disabled={isRefreshing || retry.isPending}>{isRefreshing ? "Checking…" : "Check status"}</Button>
+          </>}
         </div>
-      </motion.div>
-
-      <Button onClick={onRefresh} className="gap-2" variant="hero-outline">
-        Refresh
-        <ArrowRight className="h-4 w-4" />
-      </Button>
-    </motion.div>
+      </div>
+    </div>
   );
 }
 
-export default function OnboardingScreen({
-  bootstrap,
-  onRefresh,
-  onEnterPortal,
-}: OnboardingScreenProps) {
-  const [optimisticConnected, setOptimisticConnected] = useState(false);
-  const [optimisticReady, setOptimisticReady] = useState(false);
-  const retryMutation = useMutation({
-    mutationFn: retryCurrentUserWeeklyPlanGeneration,
-    onSuccess: async () => {
-      await onRefresh();
-    },
-  });
-
+export default function OnboardingScreen({ bootstrap, onRefresh, onEnterPortal, refreshFailed, profileDraft, onProfileDraftChange, onProfileDirtyChange }: OnboardingScreenProps) {
+  const onboarding = deriveOnboardingState(bootstrap);
+  const reduceMotion = useReducedMotion();
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const previousStep = useRef(bootstrap.nextStep);
+  const refresh = useMutation({ mutationFn: onRefresh });
+  // Refresh errors belong to the journey, not the child component's save/connect operation.
+  const refreshSetup = async () => {
+    try { return await refresh.mutateAsync(); } catch { return undefined; }
+  };
   useEffect(() => {
-    if (bootstrap.nextStep !== "connect_training_source" || bootstrap.trainingProvider.connected) {
-      setOptimisticConnected(false);
-    }
-  }, [bootstrap.nextStep, bootstrap.trainingProvider.connected]);
-
-  useEffect(() => {
-    if (bootstrap.nextStep !== "complete_profile") {
-      setOptimisticReady(false);
+    if (previousStep.current !== bootstrap.nextStep) {
+      previousStep.current = bootstrap.nextStep;
+      headingRef.current?.focus();
+      headingRef.current?.scrollIntoView?.({ block: "start", behavior: "instant" });
     }
   }, [bootstrap.nextStep]);
-
-  const effectiveBootstrap = useMemo(() => {
-    let nextBootstrap = bootstrap;
-
-    if (optimisticConnected && bootstrap.nextStep === "connect_training_source") {
-      nextBootstrap = {
-        ...nextBootstrap,
-        trainingProvider: {
-          ...nextBootstrap.trainingProvider,
-          connected: true,
-        },
-        nextStep: "complete_profile",
-      } satisfies PortalBootstrapResponse;
-    }
-
-    if (!optimisticReady || nextBootstrap.nextStep !== "complete_profile") {
-      return nextBootstrap;
-    }
-
-    return {
-      ...nextBootstrap,
-      profile: {
-        ...nextBootstrap.profile,
-        isComplete: true,
-      },
-      nextStep: "prepare_weekly_plan",
-    } satisfies PortalBootstrapResponse;
-  }, [bootstrap, optimisticConnected, optimisticReady]);
-
-  const onboarding = deriveOnboardingState(effectiveBootstrap);
-  const currentStep = onboarding.steps.find((step) => step.current) ?? onboarding.steps[0];
-
-  const handleProfileComplete = async () => {
-    setOptimisticReady(true);
-    const next = await onRefresh();
-
-    if (next?.nextStep === "complete_profile") {
-      setOptimisticReady(false);
-    }
-  };
-
-  const handleConnectComplete = async () => {
-    setOptimisticConnected(true);
-    const next = await onRefresh();
-
-    if (next?.nextStep === "connect_training_source" && next.trainingProvider.connected !== true) {
-      setOptimisticConnected(false);
-    }
-  };
+  const ready = bootstrap.nextStep === "view_weekly_plan";
+  const failed = bootstrap.nextStep === "prepare_weekly_plan" && bootstrap.weeklyPlan.status === "failed";
+  const missing = bootstrap.nextStep === "prepare_weekly_plan" && bootstrap.weeklyPlan.status === "missing";
+  const title = onboarding.currentStepId === "connect" ? "Every plan starts with you." : onboarding.currentStepId === "profile" ? "Find your running rhythm." : ready ? "Your first week is ready." : failed ? "Let’s get your plan ready." : missing ? "Waiting for your first week." : "Preparing your first week.";
+  const description = onboarding.currentStepId === "connect" ? "Connect your training source. Your activity history gives your plan a starting point." : onboarding.currentStepId === "profile" ? "Tell us what you’re training for, and when running fits into your week." : ready ? "Your personalized weekly plan is ready to explore." : failed ? "Your connection and profile are in place. Your plan needs another try." : missing ? "Your setup is saved. Your first plan isn’t available yet. We’ll keep checking here." : "Your setup is complete. We’ll open your plan here as soon as it’s ready.";
 
   return (
-    <div className="mx-auto max-w-lg">
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-8 text-center"
-      >
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.1, type: "spring", bounce: 0.4 }}
-          className="mb-4 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary"
-        >
-          <Sparkles className="h-4 w-4" />
-          Welcome aboard
+    <div className="onboarding-layout">
+      <aside className="onboarding-journey" aria-label="Your setup">
+        <p className="onboarding-journey-title">Your training starts here.</p>
+        <ol className="onboarding-steps" aria-label="Setup progress">
+          {onboarding.steps.map((step, index) => <li key={step.id} aria-current={step.current ? "step" : undefined} className={step.completed ? "is-complete" : ""}>
+            <span className="onboarding-step-number" aria-hidden="true">{step.completed ? <Check size={16} /> : index + 1}</span>
+            <div><span className="onboarding-step-label">{stepLabels[step.id]}</span><span className="sr-only">{step.completed ? ", complete" : step.current ? ", current step" : ", upcoming"}</span><p>{stepDescriptions[step.id]}</p></div>
+          </li>)}
+        </ol>
+        <p className="onboarding-journey-note">Your history. Your rhythm.<br />A week made for your running.</p>
+      </aside>
+      <section className="onboarding-task" aria-labelledby="onboarding-title">
+        <div className="portal-page-heading">
+          <h1 id="onboarding-title" ref={headingRef} tabIndex={-1}>{title}</h1>
+          <p>{description}</p>
+        </div>
+        {(refreshFailed ?? refresh.isError) && <div className="onboarding-refresh-error" role="alert"><p>We couldn’t check your setup. Your last loaded step is still here.</p><button type="button" className="portal-text-action" disabled={refresh.isPending} onClick={() => void refreshSetup()}>{refresh.isPending ? "Checking…" : "Try again"}</button></div>}
+        <motion.div key={bootstrap.nextStep} initial={reduceMotion ? false : { opacity: 0.6, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: reduceMotion ? 0 : 0.18 }}>
+          {bootstrap.nextStep === "connect_training_source" && <ConnectScreen athleteId={bootstrap.athleteId} trainingProvider={bootstrap.trainingProvider} variant="onboarding" onComplete={refreshSetup} />}
+          {bootstrap.nextStep === "complete_profile" && <ProfileScreen athleteId={bootstrap.athleteId} variant="onboarding" onComplete={refreshSetup} onDirtyChange={onProfileDirtyChange} draft={profileDraft} onDraftChange={onProfileDraftChange} />}
+          {(bootstrap.nextStep === "prepare_weekly_plan" || ready) && <PlanPreparation bootstrap={bootstrap} onRefresh={refreshSetup} isRefreshing={refresh.isPending} onEnterPortal={onEnterPortal} />}
         </motion.div>
-        <h2 className="mb-2 font-serif text-2xl text-foreground sm:text-3xl">
-          Let's get you set up
-        </h2>
-        <p className="mx-auto max-w-sm text-sm text-muted-foreground">
-          Just a couple of quick steps and your personalized training plan will be ready.
-        </p>
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.2 }}
-        className="mb-8"
-      >
-        <div className="relative mb-6">
-          <Progress value={onboarding.progressPercent} className="h-1" />
-        </div>
-
-        <div className="flex items-center justify-between gap-2">
-          {onboarding.steps.map((step, index) => (
-            <motion.div
-              key={step.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25 + index * 0.1 }}
-              className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-medium transition-all duration-200 ${
-                step.current
-                  ? "border-primary/20 bg-primary/10 text-primary"
-                  : step.completed
-                    ? "border-primary/10 bg-primary/5 text-primary/70"
-                    : "border-transparent text-muted-foreground"
-              }`}
-            >
-              <div
-                className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] ${
-                  step.completed
-                    ? "bg-primary text-primary-foreground"
-                    : step.current
-                      ? "border border-primary/30 bg-primary/15 text-primary"
-                      : "bg-muted text-muted-foreground"
-                }`}
-              >
-                {step.completed ? <Check className="h-3 w-3" /> : index + 1}
-              </div>
-              <span className="hidden sm:inline">{step.title}</span>
-            </motion.div>
-          ))}
-        </div>
-      </motion.div>
-
-      <motion.div
-        className="rounded-2xl border border-border bg-card p-6 shadow-card"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-      >
-        <div className="mb-5">
-          <div className="mb-1 flex items-center gap-2">
-            <span className="text-xl">{currentStep.emoji}</span>
-            <h3 className="font-serif text-lg text-foreground">{currentStep.title}</h3>
-          </div>
-          <p className="text-sm text-muted-foreground">{currentStep.subtitle}</p>
-        </div>
-
-        {effectiveBootstrap.nextStep === "connect_training_source" ? (
-          <ConnectScreen
-            athleteId={effectiveBootstrap.athleteId}
-            trainingProvider={effectiveBootstrap.trainingProvider}
-            variant="onboarding"
-            onComplete={handleConnectComplete}
-          />
-        ) : null}
-        {effectiveBootstrap.nextStep === "complete_profile" ? (
-          <ProfileScreen
-            athleteId={effectiveBootstrap.athleteId}
-            variant="onboarding"
-            onComplete={handleProfileComplete}
-          />
-        ) : null}
-        {effectiveBootstrap.nextStep === "prepare_weekly_plan" ? (
-          <PreparingPlanStep
-            status={effectiveBootstrap.weeklyPlan.status}
-            failureCode={effectiveBootstrap.weeklyPlan.failureCode}
-            onRefresh={onRefresh}
-            onRetry={() => retryMutation.mutateAsync()}
-            isRetrying={retryMutation.isPending}
-          />
-        ) : null}
-        {effectiveBootstrap.nextStep === "view_weekly_plan" ? (
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-6 py-4 text-center"
-          >
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ type: "spring", stiffness: 280, damping: 20 }}
-              className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/15 shadow-[0_0_0_10px_rgba(122,162,116,0.08)]"
-            >
-              <Zap className="h-8 w-8 text-primary" />
-            </motion.div>
-            <div className="space-y-3">
-              <h3 className="mb-2 font-serif text-xl text-foreground">Your plan is ready</h3>
-              <p className="text-sm text-muted-foreground">
-                Your onboarding is complete and the weekly plan is available in the portal.
-              </p>
-              <div className="mx-auto max-w-xs space-y-2">
-                <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-                  <span>Ready to open</span>
-                  <span className="font-medium text-foreground">100%</span>
-                </div>
-                <Progress value={100} className="h-1.5" />
-              </div>
-              {onEnterPortal ? (
-                <Button onClick={onEnterPortal} className="mx-auto gap-2" variant="hero">
-                  Open weekly plan
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              ) : null}
-            </div>
-          </motion.div>
-        ) : null}
-      </motion.div>
+      </section>
     </div>
   );
 }

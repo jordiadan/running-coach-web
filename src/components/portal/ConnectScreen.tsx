@@ -166,6 +166,9 @@ export default function ConnectScreen({
   const queryClient = useQueryClient();
   const reduceMotion = useReducedMotion();
   const completionTriggeredRef = useRef(false);
+  const authorizationStatusVersionRef = useRef(0);
+  const onCompleteRef = useRef(onComplete);
+  useEffect(() => { onCompleteRef.current = onComplete; }, [onComplete]);
   const [awaitingOAuthCompletion, setAwaitingOAuthCompletion] = useState<TrainingProviderId | null>(null);
   const [disconnectCandidate, setDisconnectCandidate] = useState<TrainingProviderId | null>(null);
   const [replaceCandidate, setReplaceCandidate] = useState<TrainingProviderId | null>(null);
@@ -214,6 +217,11 @@ export default function ConnectScreen({
 
       if (result.redirectUrl) {
         if (isOnboarding) {
+          // A cached failure belongs to the previous attempt. Only a newer
+          // provider response can end polling for this authorization attempt.
+          authorizationStatusVersionRef.current = variables.provider === "intervals"
+            ? intervalsQuery.dataUpdatedAt
+            : stravaQuery.dataUpdatedAt;
           setAwaitingOAuthCompletion(variables.provider);
           const popup = window.open(result.redirectUrl, "_blank", "noopener,noreferrer");
 
@@ -273,11 +281,11 @@ export default function ConnectScreen({
     setShowConnectedTransition(true);
 
     const timeout = window.setTimeout(() => {
-      void onComplete?.();
+      void onCompleteRef.current?.();
     }, reduceMotion ? 0 : 850);
 
     return () => window.clearTimeout(timeout);
-  }, [connectedProviderFromStatus, isOnboarding, onComplete, reduceMotion]);
+  }, [connectedProviderFromStatus, isOnboarding, reduceMotion]);
 
   useEffect(() => {
     if (!awaitingOAuthCompletion) {
@@ -285,11 +293,12 @@ export default function ConnectScreen({
     }
 
     const status = statusByProvider[awaitingOAuthCompletion];
+    const statusUpdatedAt = awaitingOAuthCompletion === "intervals" ? intervalsQuery.dataUpdatedAt : stravaQuery.dataUpdatedAt;
 
-    if (normalizeStatus(status?.status) === "auth_failed") {
+    if (statusUpdatedAt > authorizationStatusVersionRef.current && normalizeStatus(status?.status) === "auth_failed") {
       setAwaitingOAuthCompletion(null);
     }
-  }, [awaitingOAuthCompletion, statusByProvider]);
+  }, [awaitingOAuthCompletion, statusByProvider, intervalsQuery.dataUpdatedAt, stravaQuery.dataUpdatedAt]);
 
   return (
     <div className={`portal-settings connect-screen ${isOnboarding ? "connect-onboarding" : ""}`}>
@@ -437,15 +446,17 @@ export default function ConnectScreen({
           initial={reduceMotion ? false : { opacity: 0, y: 4 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: reduceMotion ? 0 : 0.16 }}
-          className="flex items-center gap-3 rounded-xl border border-primary/20 bg-primary/10 px-4 py-3 text-sm text-primary"
+          className="connect-onboarding-success"
+          role="status"
         >
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+          <div className="connect-onboarding-check">
             <Check aria-hidden="true" className="h-4 w-4" />
           </div>
           <div className="space-y-0.5">
             <p className="font-medium">Training source connected</p>
-            <p className="text-xs text-primary/80">Moving on to your profile…</p>
+            <p>Checking your next step…</p>
           </div>
+          <button type="button" className="portal-text-action" onClick={() => void onComplete?.()}>Continue</button>
         </motion.div>
       ) : null}
 

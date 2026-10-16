@@ -678,13 +678,13 @@ export default function ProfileScreen({
               </motion.div>
             ) : null}
 
-            <div className="profile-notes">
+            {!isOnboarding && <div className="profile-notes">
               <p>
                 <strong>Notes for your coach</strong>
                 <span>Coming soon</span>
               </p>
               <p>Soon you'll be able to add context for your coach, like race constraints, recovery notes, or travel.</p>
-            </div>
+            </div>}
           </fieldset>
           <div className={`profile-save-bar ${isDirty || saveMutation.isPending || saveMutation.isError ? "is-active" : ""}`}>
             <div className="profile-save-feedback" aria-live="polite" aria-atomic="true">

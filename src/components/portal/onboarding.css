@@ -1,0 +1,419 @@
+/* First-run tasks share the portal's surfaces, controls and typography. */
+.portal-content.portal-content-onboarding {
+  max-width: 72rem;
+  padding-bottom: max(2rem, env(safe-area-inset-bottom));
+}
+
+.onboarding-layout {
+  display: grid;
+  gap: 2.5rem;
+}
+
+.onboarding-journey-title,
+.onboarding-journey-note,
+.onboarding-steps li p {
+  display: none;
+}
+
+.onboarding-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  list-style: none;
+}
+
+.onboarding-steps li {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.625rem;
+  color: var(--portal-muted);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+.onboarding-step-number {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--portal-soft);
+  font-variant-numeric: tabular-nums;
+  transition: background-color 160ms, color 160ms;
+}
+
+.onboarding-steps li[aria-current="step"] {
+  color: var(--portal-ink);
+  font-weight: 500;
+}
+
+.onboarding-steps li[aria-current="step"] .onboarding-step-number {
+  background: var(--portal-action);
+  color: var(--portal-on-action);
+}
+
+.onboarding-steps .is-complete .onboarding-step-number {
+  color: var(--portal-primary);
+}
+
+.onboarding-task .portal-page-heading > p {
+  max-width: 40rem;
+}
+
+.onboarding-task h1 {
+  scroll-margin-top: 7rem;
+}
+
+.onboarding-task h1:focus-visible {
+  outline: 2px solid var(--portal-primary);
+  outline-offset: 8px;
+  border-radius: 0.25rem;
+}
+
+.onboarding-task .connect-layout,
+.onboarding-task .profile-layout {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.onboarding-task .profile-editor {
+  grid-column: auto;
+  grid-row: auto;
+}
+
+.onboarding-task .connect-authorization-note {
+  display: flex;
+  margin-top: 1rem;
+  padding-top: 1rem;
+}
+
+.onboarding-task .connect-guidance {
+  font-size: 0.875rem;
+}
+
+@media (max-width: 639px) {
+  /* Keep both source identities within reach on a phone, using the same cards. */
+  .onboarding-task .connect-provider {
+    display: grid;
+    grid-template-columns: 2.75rem minmax(0, 1fr);
+    column-gap: 0.875rem;
+    padding: 1.25rem;
+  }
+  .onboarding-task .connect-provider-top {
+    display: contents;
+  }
+  .onboarding-task .connect-provider-mark {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+  .onboarding-task .connect-status {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: start;
+    padding: 0;
+    background: transparent;
+  }
+  .onboarding-task .connect-provider h2 {
+    grid-column: 2;
+    grid-row: 1;
+    font-size: 1.375rem;
+    line-height: 1.25;
+  }
+  .onboarding-task .connect-provider > :is(p, .connect-capability, .portal-inline-error, .connect-provider-action) {
+    grid-column: 1 / -1;
+  }
+  .onboarding-task .connect-capability {
+    margin-top: 0.75rem;
+  }
+  .onboarding-task .connect-provider-action {
+    margin-top: 1.25rem;
+  }
+}
+
+.onboarding-task .profile-save-bar.is-active {
+  bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.onboarding-task .profile-save-bar {
+  padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+}
+
+.onboarding-plan {
+  border-radius: var(--portal-radius);
+  background: var(--portal-surface);
+  box-shadow: var(--portal-elevation); /* taste-skill-ignore: task UI inherits portal elevation. */
+}
+
+.onboarding-plan-summary,
+.onboarding-plan-status {
+  padding: 1.5rem;
+}
+
+.onboarding-plan-intro > svg {
+  color: var(--portal-primary);
+  margin-bottom: 1.5rem;
+}
+
+.onboarding-plan-intro > svg.onboarding-track {
+  width: 3.5rem;
+  height: 3.5rem;
+}
+
+.onboarding-plan-intro h2 {
+  font-family: "DM Serif Display", Georgia, serif;
+  font-size: 1.75rem;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+.onboarding-plan-intro p {
+  margin-top: 0.75rem;
+  max-width: 32rem;
+  color: var(--portal-muted);
+  font-size: 0.9375rem;
+  line-height: 1.7;
+}
+
+.onboarding-receipt {
+  display: grid;
+  gap: 1rem;
+  margin-top: 2rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.onboarding-receipt > div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
+.onboarding-receipt dt {
+  color: var(--portal-muted);
+}
+
+.onboarding-receipt dd {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+}
+
+.onboarding-receipt dd svg {
+  color: var(--portal-primary);
+}
+
+.onboarding-plan-status {
+  background: var(--portal-soft);
+  border-radius: 0 0 var(--portal-radius) var(--portal-radius);
+}
+
+.onboarding-plan-status > [role="status"] {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+.onboarding-plan-status > [role="status"] svg {
+  flex-shrink: 0;
+  color: var(--portal-primary);
+}
+
+.onboarding-plan-help {
+  margin-top: 0.75rem;
+  color: var(--portal-muted);
+  font-size: 0.875rem;
+  line-height: 1.7;
+  max-width: 38rem;
+}
+
+.onboarding-error-details {
+  margin-top: 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--portal-muted);
+}
+
+.onboarding-error-details summary {
+  display: list-item;
+  cursor: pointer;
+  padding-block: 0.75rem;
+  width: fit-content;
+  min-height: 2.75rem;
+}
+
+.onboarding-error-details p {
+  overflow-wrap: anywhere;
+}
+
+.onboarding-task .portal-inline-error,
+.onboarding-refresh-error {
+  color: var(--portal-danger);
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+
+.onboarding-plan-status .portal-inline-error {
+  margin-top: 1rem;
+}
+
+.onboarding-refresh-error {
+  margin-bottom: 1.5rem;
+}
+
+.onboarding-plan-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.onboarding-plan-actions > button {
+  min-height: 3rem;
+  border-radius: var(--portal-control-radius);
+  gap: 0.625rem;
+}
+
+.onboarding-plan-actions > .bg-primary {
+  background: var(--portal-action);
+  color: var(--portal-on-action);
+}
+
+.onboarding-plan-actions > button:hover:not(:disabled) {
+  background: var(--portal-line);
+  color: var(--portal-ink);
+}
+
+.onboarding-plan-actions > .bg-primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--portal-action), var(--portal-ink) 12%);
+  color: var(--portal-on-action);
+}
+
+.connect-onboarding-success {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+  padding: 1rem;
+  border-radius: var(--portal-control-radius);
+  color: var(--portal-primary);
+  background: var(--portal-soft);
+  font-size: 0.875rem;
+}
+
+.connect-onboarding-check {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--portal-action);
+  color: var(--portal-on-action);
+}
+
+.connect-onboarding-success > button {
+  margin-left: auto;
+}
+
+.onboarding-task :is(button, summary) {
+  scroll-margin-block: 7rem;
+}
+
+.onboarding-task summary:focus-visible {
+  outline: 2px solid var(--portal-primary);
+  outline-offset: 4px;
+}
+
+@media (min-width: 640px) {
+  .onboarding-task .connect-onboarding .connect-providers {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  .onboarding-task .connect-provider {
+    min-height: 24rem;
+  }
+  .onboarding-plan-summary,
+  .onboarding-plan-status {
+    padding: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .onboarding-layout {
+    grid-template-columns: 14rem minmax(0, 1fr);
+    gap: 4rem;
+  }
+  .onboarding-journey {
+    position: sticky;
+    top: 8rem;
+    align-self: start;
+    padding-top: 0.5rem;
+  }
+  .onboarding-journey-title {
+    display: block;
+    max-width: 11rem;
+    font-family: "DM Serif Display", Georgia, serif;
+    font-size: 1.75rem;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+  }
+  .onboarding-steps {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    margin-top: 2.5rem;
+  }
+  .onboarding-steps li {
+    flex-direction: row;
+    gap: 0.875rem;
+    font-size: 0.9375rem;
+  }
+  .onboarding-step-number {
+    flex-shrink: 0;
+  }
+  .onboarding-step-label {
+    display: block;
+    padding-top: 0.25rem;
+  }
+  .onboarding-steps li p {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.8125rem;
+    font-weight: 400;
+    color: var(--portal-muted);
+    line-height: 1.6;
+  }
+  .onboarding-journey-note {
+    display: block;
+    margin-top: 3rem;
+    font-size: 0.875rem;
+    line-height: 1.7;
+    color: var(--portal-muted);
+  }
+  .onboarding-task .profile-save-bar.is-active {
+    bottom: 1rem;
+  }
+  .onboarding-plan-summary {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.95fr);
+    align-items: center;
+    gap: 2rem;
+  }
+  .onboarding-receipt {
+    margin-top: 0;
+    gap: 1.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .onboarding-layout *, .onboarding-layout *::before, .onboarding-layout *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
