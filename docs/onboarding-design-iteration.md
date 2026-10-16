@@ -1,169 +1,180 @@
 # Onboarding design iteration
 
-Scope: the authenticated onboarding journey on `feat/onboarding-ux-revamp`, based
-on merged PR #25 (`86a3bd1`). Mode: Operate. Public pages and backend contracts
+Scope: authenticated onboarding in PR #26, on `feat/onboarding-ux-revamp`.
+Mode: Operate. Public pages, backend contracts, dependencies and global themes
 are outside this change.
 
 ## Surface brief
 
-The runner's task is to connect one training source, save a valid athlete profile,
-and reach their first real weekly plan. Experience level is not assumed. The
-first useful outcome is the completed Weekly Plan, not a tour or sample plan.
+Help a runner connect one training source, save a valid profile and open their
+first real weekly plan. The useful outcome is the actual Weekly Plan. Experience
+level is not assumed; product facts come from PRODUCT.md and the existing API.
 
-Extend the portal's DM Serif Display titles, DM Sans controls, four themes, flat
-tonal surfaces, 16px panels and 12px controls. On this surface, Running Coach's
-single-source setup and seven-day training rhythm become the working interface.
-The source choice and weekday controls are real shared Connect/Profile controls.
+Retain the portal's DM Serif Display headings, DM Sans controls, theme roles,
+provider identities and control geometry. The runner's source choice and weekly
+rhythm are the interface's distinctive material. Refine that working interface
+rather than introduce decorative imagery, a new theme or a tutorial.
 
-Taste dealt quiet-instrument, product-performs and split-stage. Choose
-product-performs (seed `89199575`): real controls at a readable scale. Retain
-the portal's palette and type. Marketing photographs, hero sizing, density quotas
-and pinned storytelling do not apply to authenticated task UI. No images or new
-dependencies are needed; code-first is task-local, not a saved preference.
+At every width, the hierarchy is a compact three-step path, one task heading,
+necessary controls and one primary action. A 47rem outer maximum includes the
+portal's existing 24px side padding. Desktop and mobile share this calm reading
+axis; the former desktop rail, welcome slogan and step descriptions are removed.
 
-Mobile hierarchy: compact labelled three-step sequence; one task title and one
-supporting sentence; the shared task controls; a clear action and feedback.
-Desktop: a quiet setup rail alongside a generous task surface, aligned with the
-portal shell. No enclosing card around cards, duplicate welcome heading, fake
-percentage, estimated completion time or tutorial ceremony.
+Connect uses two native radio choices and one explicitly named authorization
+button. No provider is preselected. Capability differences stay visible; a
+native disclosure explains the shared data. Authorization, pending status,
+reconnect, request failure and status-query recovery remain available. Existing
+source replacement/disconnection dialogs remain in the shared component.
 
-Connect retains both providers, capability differences, authorization, one-active
-source restrictions and recovery. Profile retains essentials, weekly rhythm,
-conditional race details, validation and saving. Optional future coach notes do
-not belong in the first-run task. Existing settings presentation stays intact.
+Profile puts fields on the page rather than inside another card. Essential
+labels explain themselves; weekly rhythm and conditional race details retain
+short section headings. Four-day minimum, long-run restrictions, target
+conversion, validation, draft protection and save recovery remain intact. Seven
+weekday targets fit from 380px; narrower phones retain four columns. Race-target
+choices share one row. The first-run editor omits future coach notes.
 
-Plan preparation uses only bootstrap facts: connected source, saved profile and
-missing/preparing/failed/ready plan status. No simulated milestones. Missing means
-the first plan is not available yet; preparing means generation is in progress.
-Failure preserves setup and offers retry. Retry and refresh failures remain inline
-and actionable. Polling cannot erase the last usable onboarding state. A ready
-transition offers one action to enter the actual weekly plan; returning users
-whose first bootstrap is already ready enter the portal directly.
+Preparation is one running mark, heading and short explanation. Supporting setup
+facts move behind “View your setup.” Missing, preparing, failed and ready are
+separate backend states. Refresh/retry errors remain inline. The ready state has
+one dominant action, “Open weekly plan.” No percentages, fabricated workouts,
+estimated duration, simulated stages or additional generation requests appear.
 
-Use brief state transitions, focus the task title when the backend step changes,
-and focus the weekly view on entry. Reduced motion removes travel and continuous
-animation. Setup completion remains backend-driven. Protect profile edits when
-leaving or logging out, as the portal already does.
+## Motion thesis
 
-## Baseline weaknesses
+- **Focal moment:** the existing running-track mark gives way to a drawn check
+  only when bootstrap reports the plan ready. Pending generation has no decorative
+  loop. The checking spinner runs only during a real request.
+- **Continuity:** the current-step underline and provider selection surface use
+  shared-element springs. The task heading preserves position through layout
+  changes; incoming controls settle horizontally over a short distance.
+- **Feedback:** provider selection fills its native radio; confirmed connection
+  draws a check; weekday selection draws its check. The connection callback uses
+  the latest parent callback and retains a manual Continue fallback.
+- **Budget:** existing Framer Motion only. Springs are heavily damped
+  (step 380/36, provider surface 420/38). Opacity changes use brief tweens;
+  the ready check draws in 320ms. No timers invent generation progress.
+- **Control:** backend progression replaces old controls immediately. Exit
+  animations cannot hold the next task hostage. Portal entry focuses its mounted
+  workspace. Reduced motion removes layout travel, scale, drawing and CSS motion,
+  retaining the final state, labels and announcements.
 
-- A 42rem shell encloses a second narrow card, squeezing shared components and
-  forcing providers into a long vertical stack even on desktop.
-- Welcome, current-step and component headings compete. Mobile hides step names.
-- Percentages measure setup completion while visually implying generation progress.
-- Rotating sparkles, colored halos and three pulsing task descriptions suggest
-  generation stages the API never supplies.
-- Generation retry rejection has no readable recovery message. A background
-  bootstrap failure replaces the whole journey and can discard profile edits.
+## Actual-browser critique and iteration
 
-## Verification and visual review
+All captures show the running Vite app with synthetic auth/API fixtures, using
+1440×1000 desktop and 390×844 mobile. These are implementation screenshots.
+Scores below are subjective design judgments using Taste's critique structure,
+adapted to an authenticated task rather than a marketing page.
 
-The first actual-app review found mobile provider cards too tall: only the first
-source's identity appeared prominently in the first viewport. The correction
-keeps the existing provider components, with compact identity/status rows on
-mobile. Both source names are now visible at 390×844. Desktop retains the
-side-by-side comparison and capability distinctions. Removing the outer card
-gives Profile usable width, and removes a redundant layer on every state.
+### Before refinement
 
-The preparation review found its setup facts stretched across the whole surface.
-The final desktop summary puts supporting explanation beside the actual receipt;
-mobile stacks them. The track-line mark echoes the existing portal identity.
-Only the indeterminate checking icon moves; no generated workouts, fabricated
-progress, timing or milestones appear. Missing, preparing, failed and ready have
-separate truthful messages. The ready action opens the real Weekly Plan.
+Seen in one second: a setup sidebar competing with two large provider cards.
+Idea: the runner's source and rhythm lead to one real week.
+Live thing: connect a source and configure a real profile.
+Layout: rail / paired cards / boxed profile / summary-and-receipt card.
+Scores: design 6.5 · usability 7 · creativity 6 · content 7 → overall 6.7.
+Caps: marketing imagery and billboard-type requirements do not apply in Operate.
 
-The independent Impeccable finish review requested three corrections: missing
-must say waiting rather than preparing, automatic successful polling must clear
-an earlier manual refresh warning, and DESIGN.md must describe the new geometry.
-The verdict pass scored all three resolved (`ship`, scoped to those fixes).
-Documentation was checked against the actual CSS/components, retaining all
-incumbent tokens and the sidecar. Existing sidecar drift was left untouched;
-the optional `document` workflow can reconcile it separately.
+Top three problems:
 
-Functional corrections also include protecting onboarding profile drafts on
-home/logout/unload, keeping the last usable step after a failed background
-bootstrap, retaining the connected-completion callback across parent rerenders,
-and preventing a cached authorization failure from ending a new reconnect
-attempt's polling. Only a newer provider response can end that attempt. Backend
-bootstrap still selects the next step; optimistic frontend step overrides were
-removed. Initial ready bootstrap continues directly into the portal, while a
-journey that becomes ready waits for the runner's explicit action.
+1. Connect desktop repeats onboarding explanation in the rail and guidance, then
+   presents two equally prominent actions. Replace with a compact path, two source
+   choices and one authorization action.
+2. Preparation mobile repeats the state in a heading, explanation, card heading,
+   receipt and status strip. Remove the enclosing surface and repeated status;
+   disclose setup details only when requested.
+3. Profile mobile spends space explaining ordinary fields and enclosing groups.
+   Flatten the editor, keep meaningful labels/constraints, and compact weekday
+   and race-target choices.
 
-## Validation
+### First refinement pass
 
-- `npm test`: 155 tests across 13 files pass. Ten new regression cases cover
-  authoritative progression, truthful generation state, retry/refresh failures,
-  automatic refresh recovery, ready focus/handoff and callback stability.
-- `npm run lint`: zero errors; nine existing Fast Refresh warnings remain.
-- App and Node/config typechecks pass. The baseline had eight errors; this change
-  removes the unsupported `replaceAll` call, adds explicit existing API response
-  types, supplies a missing fixture status, and merges a duplicate test assertion
-  so activity provenance is actually checked. No runtime API contract changed.
-- E2E test/config typecheck and `npm run build` pass. Existing Browserslist age
-  and bundle-size warnings remain; no dependency or lockfile changes.
-- The actual Vite application passes 11 Playwright cases using intercepted
-  synthetic auth/API fixtures. Cases cover all onboarding states, provider OAuth
-  popup arguments and polling with a lagging provider snapshot, failed
-  authorization/reconnect, profile loading/error/save failure/retry, long-run
-  restrictions and time/pace conversion, generation retry/reload/polling, initial
-  bootstrap failure/retry, profile exit guards, keyboard/date-picker focus,
-  reduced motion, ready handoff and direct entry for returning ready users.
-- Desktop (1440×1000) and mobile (390×844) captures cover connection, profile,
-  missing, preparing, failed and ready. The five ongoing states have captures in
-  all four themes; ready was checked in all four themes as well. Forty measured
-  state/theme/viewport text-contrast cases pass, minimum observed ratio 4.89:1.
-  Theme tokens are asserted and nested color transitions settle before sampling.
-- Widths 320, 390, 640, 768, 900, 1024, 1280 and 1440 have no horizontal overflow.
-  Day controls meet 44×44px. One main landmark, one current setup step, zero fake
-  progress bars and no browser page errors were verified.
-- [Web Interface Guidelines](https://raw.githubusercontent.com/vercel-labs/web-interface-guidelines/main/command.md)
-  informed labels, focus, status announcements, semantic controls, native error
-  details, touch targets, safe-area clearance and reduced motion. This bounded
-  browser check is not a full WCAG certification.
-- Taste source lint passes with one documented incumbent-elevation exception.
-  Its browser probe and judge ran through Playwright inside authenticated fixtures
-  at 1440, 768 and 390px. Raw marketing findings remain in the ignored report:
-  photographs/video, giant focal type, five-size limits, the warm palette, portal
-  elevation/dividers, compact form/help text, and a step label misclassified as an
-  eyebrow. These conventions follow the explicitly requested portal system and
-  Operate mode, so they were retained. No raster or ornamental motion was added.
-- The project Impeccable hook reported no deterministic design issues. It was
-  not duplicated with a separate detector. Changed TypeScript files were formatted
-  using the installed TypeScript formatter; CSS retains the project's style.
+Seen in one second: one task title and a direct action path.
+Idea: the source choice becomes the working interface.
+Live thing: select a source; one button adopts that provider's name.
+Layout: compact path / source rows / unboxed fields / simple state.
+Scores: design 7.5 · usability 8 · creativity 7 · content 8 → overall 7.6.
+Caps: same scoped marketing exceptions.
+
+The paired desktop/mobile inspection found three corrections: restore visible
+radio outlines, tighten source-row spacing, and apply the intended three-column
+race-target layout on mobile. These were fixed together. The radio correction
+also replaced an invalid CSS variable with the existing portal control-line role.
+
+### Final confirmation
+
+Seen in one second: the current task, with a single clear action.
+Idea: the running identity resolves into confirmed readiness.
+Live thing: native source choice, responsive weekday selection and actual plan entry.
+Layout: one axis / selectable rows / open form / readiness statement.
+Scores: design 8 · usability 8.5 · creativity 7 · content 8 → overall 8.0.
+Caps: same scoped marketing exceptions. This is an in-thread review, not an
+independent jury result or user research.
+
+The confirmation keeps both providers and the action comfortably within the
+mobile viewport. Preparation fits in one screen. Profile is shorter without
+hiding required race fields. The ready mark resolves to one check. Browser
+motion recording exposed nested exit waits that could retain stale controls or
+delay portal entry; the final implementation makes progression immediate and
+focuses the mounted workspace. A stale retry error also clears when polling
+reports readiness.
+
+## Verification
+
+- `npm test`: 156 tests across 13 files, including the regression for retry-error
+  recovery on automatic readiness.
+- `npm run lint`: no errors; nine incumbent Fast Refresh warnings.
+- App, Node/config and standalone E2E TypeScript checks; production build.
+  Existing Browserslist age and bundle-size warnings remain.
+- Twelve Chromium Playwright cases exercise the actual app with synthetic data:
+  source selection and keyboard arrows, connection failure/retry, OAuth popup
+  arguments and lagging authorization status, profile loading/save recovery,
+  rhythm constraints, time/pace conversion, retry/reload/polling, background
+  bootstrap recovery, draft exit guards, date-picker focus, reduced motion,
+  initial-ready entry, setup disclosure and explicit ready handoff.
+- Forty theme/state/viewport text-contrast scans pass; minimum observed 5.11:1.
+  Ready is also checked across all four themes. No horizontal overflow at 320,
+  390, 640, 768, 900, 1024, 1280 or 1440px. Day targets meet 44×44px. One main
+  landmark and one current setup step; no fabricated progress bars or page errors.
+- Taste source lint has no failures. Its remaining outlined-box advisory is the
+  native radio affordance. Browser probe ran at 1440, 768 and 390px using the
+  authenticated fixtures. Marketing findings about photography/video, giant
+  focal type, the inherited warm palette/header and compact help text are
+  intentionally inapplicable. The mixed-font warning identifies the incumbent
+  Intervals mark. No new marketing composition or image generation was used.
+- Impeccable's single mechanical scan reports only advisory differences from
+  DESIGN.md's abbreviated frontmatter: existing portal supporting sizes and the
+  heading focus radius, plus scoped 20px section/source labels. These values are
+  recorded in the design narrative; global tokens, hooks and sidecar stay intact.
+- Changed TypeScript and CSS were formatted with existing local tooling.
 
 ## Evidence and reproduction
 
-Captures remain ignored in `.design-experiment/onboarding/`; no screenshot or
-athlete data is committed. `comparison.html` shows a representative Connect
-desktop and preparation mobile before/after set (four screenshots total).
-The remaining local captures support detailed inspection, rather than inflating
-the PR's representative evidence set. All displayed identities are synthetic.
-
-The committed runner is `e2e/onboarding.spec.ts` with its standalone configuration:
+Ignored evidence lives in `.design-experiment/onboarding/`. The four-image
+`refinement-comparison.html` compares Connect desktop and preparation mobile,
+before/after this refinement. Additional captures cover profile, selected source,
+missing, failed and ready states. The same page links a real browser recording
+of the complete journey. No screenshot, video, real identity or token is committed.
 
 ```sh
 mkdir -p .design-experiment/tmp
-env TMPDIR="$PWD/.design-experiment/tmp" CAPTURE_STAGE=final \
-  ./node_modules/.bin/playwright test --config e2e/onboarding.config.ts
+env TMPDIR="$PWD/.design-experiment/tmp" CAPTURE_STAGE=refine-after \
+  RECORD_MOTION=1 ./node_modules/.bin/playwright test --config e2e/onboarding.config.ts
 ```
 
-It reuses the installed browser and starts/reuses Vite at port 5173. Normal local
-Vite environment settings are required to initialize the existing auth client;
-all auth storage and API responses in the tests are synthetic. Screenshots and
-test output stay in the ignored experiment directory.
+`RECORD_MOTION=1` is optional; videos land with ignored Playwright output. The
+runner reuses the local browser and starts/reuses Vite on port 5173. Normal local
+Vite configuration initializes the existing auth client; all auth storage and
+API traffic in these tests are synthetic.
 
-## Limits and intentional deviations
+GitHub's available CLI has no image-attachment upload. The PR identifies the
+local comparison and reproduction command; captures are not published through
+an unrelated service or committed as a substitute for attachments.
 
-Live Google/provider consent, popup-blocker fallback, real provider ingestion and
-production plan generation were not exercised. The existing redirect/fallback
-code and API requests remain in place; controlled tests establish frontend
-behavior, not live backend outcomes. Browser coverage is Chromium, not
-Firefox/WebKit. Drafts remain in memory and are protected from accidental exit;
-they do not survive a deliberately confirmed reload or logout.
+## Limits
 
-No product preferences were inferred or persisted. Future coach notes are omitted
-only in onboarding; settings retain their existing presentation. No unrelated
-public page, backend, global hook or dependency changed. GitHub's available CLI
-does not provide image-attachment upload, so captures remain locally reviewable
-and reproducible rather than being committed or published through an unrelated
-service.
+Live Google/provider consent, popup-blocker fallback, provider ingestion and
+production generation were not exercised. Chromium fixtures establish frontend
+behavior, not live backend outcomes or Firefox/WebKit coverage. Drafts remain in
+memory and do not survive a deliberately confirmed reload/logout. The complete
+race form remains longer than the non-race path because its required fields are
+preserved. No audience, commercial or permanent aesthetic preference was inferred.

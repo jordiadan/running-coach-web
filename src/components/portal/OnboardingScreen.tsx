@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { useEffect, useId, useRef, type ReactNode } from "react";
+import { LayoutGroup, MotionConfig, motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, Check, CircleAlert, RefreshCcw } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { retryCurrentUserWeeklyPlanGeneration, type PortalBootstrapResponse } from "@/lib/portal-api";
@@ -20,11 +20,31 @@ type OnboardingScreenProps = {
 };
 
 const stepLabels = { connect: "Connect", profile: "Your profile", ready: "First plan" };
-const stepDescriptions = {
-  connect: "Bring your training history.",
-  profile: "Find your weekly rhythm.",
-  ready: "Start with a plan for you.",
-};
+const stepSpring = { type: "spring", stiffness: 380, damping: 36 } as const;
+
+// Backend progression replaces controls immediately; motion never gates the next task.
+function StepContent({ children }: { children: ReactNode; }) {
+  const reduceMotion = useReducedMotion();
+  return <motion.div
+    style={{ opacity: 1 }}
+    initial={reduceMotion ? false : { x: 20, opacity: 0 }}
+    animate={{ x: 0, opacity: 1 }}
+    transition={{ ...stepSpring, opacity: { type: "tween", duration: reduceMotion ? 0 : 0.2 } }}
+  >{children}</motion.div>;
+}
+
+function PlanMark({ ready, failed }: { ready: boolean; failed: boolean; }) {
+  const reduceMotion = useReducedMotion();
+  return <div className={`onboarding-plan-mark ${ready ? "is-ready" : ""}`} aria-hidden="true">
+    <motion.svg viewBox="0 0 64 64" fill="none" animate={{ scale: ready ? 0.92 : 1 }} transition={stepSpring}>
+      <motion.g initial={{ opacity: ready || failed ? 0 : 1 }} animate={{ opacity: ready || failed ? 0 : 1 }} transition={{ type: "tween", duration: reduceMotion ? 0 : 0.18 }}>
+        <path d="M10 54V28a18 18 0 0 1 36 0v26M18 54V28a10 10 0 0 1 20 0v26M26 54V28a2 2 0 0 1 4 0v26M54 54V28A26 26 0 0 0 28 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      </motion.g>
+      {ready && <motion.path d="m17 33 10 10 22-24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" initial={reduceMotion ? false : { pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: reduceMotion ? 0 : 0.32, delay: reduceMotion ? 0 : 0.08 }} />}
+    </motion.svg>
+    {failed && <CircleAlert size={36} strokeWidth={1.5} />}
+  </div>;
+}
 
 function PlanPreparation({ bootstrap, onRefresh, isRefreshing, onEnterPortal }: {
   bootstrap: PortalBootstrapResponse;
@@ -39,45 +59,36 @@ function PlanPreparation({ bootstrap, onRefresh, isRefreshing, onEnterPortal }: 
   const { status, failureCode } = bootstrap.weeklyPlan;
   const ready = bootstrap.nextStep === "view_weekly_plan";
   const failed = status === "failed" && !ready;
+  const { reset: resetRetry } = retry;
+  useEffect(() => { resetRetry(); }, [status, ready, resetRetry]);
   const statusLabel = ready ? "Ready to open" : failed ? "Needs another try" : status === "missing" ? "Waiting for your first plan" : "Preparing your weekly plan…";
   const provider = bootstrap.trainingProvider.activeProvider === "strava" ? "Strava" : bootstrap.trainingProvider.activeProvider === "intervals" ? "Intervals.icu" : "Connected";
   return (
     <div className={`onboarding-plan ${ready ? "is-ready" : ""}`}>
-      <div className="onboarding-plan-summary">
-        <div className="onboarding-plan-intro">
-          {failed ? <CircleAlert aria-hidden="true" size={28} strokeWidth={1.5} /> : <svg className="onboarding-track" viewBox="0 0 64 64" fill="none" aria-hidden="true">
-            <path d="M10 54V28a18 18 0 0 1 36 0v26M18 54V28a10 10 0 0 1 20 0v26M26 54V28a2 2 0 0 1 4 0v26M54 54V28A26 26 0 0 0 28 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          </svg>}
-          <h2>{ready ? "Time to make it yours." : failed ? "Your setup is saved." : "Your training comes together here."}</h2>
-          <p>{ready ? "See your sessions, explore the details, and know what’s next." : failed ? "Your first plan couldn’t be prepared. Try again to continue from here." : "A personalized week, shaped by your training history, goals and running schedule."}</p>
-        </div>
+      <p role="status" aria-atomic="true" className="sr-only">{statusLabel}</p>
+      <p className="onboarding-plan-help">{ready ? "See your sessions and find your next run." : failed ? "Your setup is saved. Try preparing your plan again." : status === "missing" ? "Your first plan isn’t available yet. We’ll keep checking automatically." : "We’ll check automatically. You can leave and come back anytime."}</p>
+      {failed && failureCode && <details className="onboarding-error-details"><summary>Error details</summary><p>{failureCode}</p></details>}
+      {retry.isError && <p role="alert" className="portal-inline-error">We couldn’t restart your plan. Try again, or check its status.</p>}
+      <div className="onboarding-plan-actions">
+        {ready ? onEnterPortal && <Button variant="hero" onClick={onEnterPortal}>Open weekly plan <ArrowRight size={18} aria-hidden="true" /></Button> : <>
+          {failed && <Button variant="hero" onClick={() => retry.mutate()} disabled={retry.isPending || isRefreshing}>{retry.isPending ? "Retrying…" : "Retry plan generation"}<RefreshCcw size={16} className={retry.isPending ? "portal-spin" : ""} aria-hidden="true" /></Button>}
+          <Button variant="ghost" onClick={() => void onRefresh()} disabled={isRefreshing || retry.isPending}><RefreshCcw size={16} className={isRefreshing ? "portal-spin" : ""} aria-hidden="true" />{isRefreshing ? "Checking…" : "Check status"}</Button>
+        </>}
+      </div>
+      <details className="onboarding-setup-details">
+        <summary>View your setup</summary>
         <dl className="onboarding-receipt">
           <div><dt>Training source</dt><dd>{bootstrap.trainingProvider.connected ? <><Check size={16} aria-hidden="true" />{provider}</> : "Not connected"}</dd></div>
           <div><dt>Athlete profile</dt><dd>{bootstrap.profile.isComplete ? <><Check size={16} aria-hidden="true" />Saved</> : "Incomplete"}</dd></div>
-          <div><dt>Weekly plan</dt><dd>{ready ? <><Check size={16} aria-hidden="true" />Ready</> : failed ? "Not ready" : status === "missing" ? "Waiting" : "In preparation"}</dd></div>
         </dl>
-      </div>
-      <div className="onboarding-plan-status">
-        <p role="status" aria-atomic="true" className={failed ? "onboarding-plan-failed" : ""}>
-          {ready ? <Check size={18} aria-hidden="true" /> : failed ? <CircleAlert size={18} aria-hidden="true" /> : <RefreshCcw className="portal-spin" size={18} aria-hidden="true" />}
-          {statusLabel}
-        </p>
-        {!ready && <p className="onboarding-plan-help">{failed ? "Your connection and profile don’t need to be set up again." : "This page checks automatically. You can leave and come back to pick up where you left off."}</p>}
-        {failed && failureCode && <details className="onboarding-error-details"><summary>Error details</summary><p>{failureCode}</p></details>}
-        {retry.isError && <p role="alert" className="portal-inline-error">We couldn’t restart your plan. Try again, or check its status.</p>}
-        <div className="onboarding-plan-actions">
-          {ready ? onEnterPortal && <Button variant="hero" onClick={onEnterPortal}>Open weekly plan <ArrowRight size={18} aria-hidden="true" /></Button> : <>
-            {failed && <Button variant="hero" onClick={() => retry.mutate()} disabled={retry.isPending || isRefreshing}>{retry.isPending ? "Retrying…" : "Retry plan generation"}<RefreshCcw size={16} className={retry.isPending ? "portal-spin" : ""} aria-hidden="true" /></Button>}
-            <Button variant="outline" onClick={() => void onRefresh()} disabled={isRefreshing || retry.isPending}>{isRefreshing ? "Checking…" : "Check status"}</Button>
-          </>}
-        </div>
-      </div>
+      </details>
     </div>
   );
 }
 
 export default function OnboardingScreen({ bootstrap, onRefresh, onEnterPortal, refreshFailed, profileDraft, onProfileDraftChange, onProfileDirtyChange }: OnboardingScreenProps) {
   const onboarding = deriveOnboardingState(bootstrap);
+  const journeyId = useId();
   const reduceMotion = useReducedMotion();
   const headingRef = useRef<HTMLHeadingElement>(null);
   const previousStep = useRef(bootstrap.nextStep);
@@ -97,32 +108,37 @@ export default function OnboardingScreen({ bootstrap, onRefresh, onEnterPortal, 
   const failed = bootstrap.nextStep === "prepare_weekly_plan" && bootstrap.weeklyPlan.status === "failed";
   const missing = bootstrap.nextStep === "prepare_weekly_plan" && bootstrap.weeklyPlan.status === "missing";
   const title = onboarding.currentStepId === "connect" ? "Every plan starts with you." : onboarding.currentStepId === "profile" ? "Find your running rhythm." : ready ? "Your first week is ready." : failed ? "Let’s get your plan ready." : missing ? "Waiting for your first week." : "Preparing your first week.";
-  const description = onboarding.currentStepId === "connect" ? "Connect your training source. Your activity history gives your plan a starting point." : onboarding.currentStepId === "profile" ? "Tell us what you’re training for, and when running fits into your week." : ready ? "Your personalized weekly plan is ready to explore." : failed ? "Your connection and profile are in place. Your plan needs another try." : missing ? "Your setup is saved. Your first plan isn’t available yet. We’ll keep checking here." : "Your setup is complete. We’ll open your plan here as soon as it’s ready.";
+  const description = onboarding.currentStepId === "connect" ? "Choose where you record your runs." : onboarding.currentStepId === "profile" ? "Your goal and the days you can run." : undefined;
 
   return (
-    <div className="onboarding-layout">
-      <aside className="onboarding-journey" aria-label="Your setup">
-        <p className="onboarding-journey-title">Your training starts here.</p>
-        <ol className="onboarding-steps" aria-label="Setup progress">
-          {onboarding.steps.map((step, index) => <li key={step.id} aria-current={step.current ? "step" : undefined} className={step.completed ? "is-complete" : ""}>
-            <span className="onboarding-step-number" aria-hidden="true">{step.completed ? <Check size={16} /> : index + 1}</span>
-            <div><span className="onboarding-step-label">{stepLabels[step.id]}</span><span className="sr-only">{step.completed ? ", complete" : step.current ? ", current step" : ", upcoming"}</span><p>{stepDescriptions[step.id]}</p></div>
-          </li>)}
-        </ol>
-        <p className="onboarding-journey-note">Your history. Your rhythm.<br />A week made for your running.</p>
-      </aside>
-      <section className="onboarding-task" aria-labelledby="onboarding-title">
-        <div className="portal-page-heading">
-          <h1 id="onboarding-title" ref={headingRef} tabIndex={-1}>{title}</h1>
-          <p>{description}</p>
+    <MotionConfig reducedMotion={reduceMotion ? "always" : "never"} transition={reduceMotion ? { duration: 0 } : stepSpring}>
+      <LayoutGroup id={journeyId}>
+        <div className={`onboarding-layout ${onboarding.currentStepId === "ready" ? "onboarding-plan-layout" : ""}`}>
+          <nav className="onboarding-journey" aria-label="Your setup">
+            <ol className="onboarding-steps" aria-label="Setup progress">
+              {onboarding.steps.map((step, index) => <li key={step.id} aria-current={step.current ? "step" : undefined} className={step.completed ? "is-complete" : ""}>
+                <span className="onboarding-step-number" aria-hidden="true">{step.completed ? <motion.span initial={reduceMotion ? false : { scale: 0.7 }} animate={{ scale: 1 }}><Check size={14} /></motion.span> : index + 1}</span>
+                <span className="onboarding-step-label">{stepLabels[step.id]}</span>
+                <span className="sr-only">{step.completed ? ", complete" : step.current ? ", current step" : ", upcoming"}</span>
+                {step.current && <motion.span className="onboarding-step-position" layoutId="setup-position" transition={stepSpring} />}
+              </li>)}
+            </ol>
+          </nav>
+          <section className="onboarding-task" aria-labelledby="onboarding-title">
+            <div className="portal-page-heading">
+              {onboarding.currentStepId === "ready" && <PlanMark ready={ready} failed={failed} />}
+              <motion.h1 layout={reduceMotion ? false : "position"} transition={stepSpring} id="onboarding-title" ref={headingRef} tabIndex={-1}>{title}</motion.h1>
+              {description && <p>{description}</p>}
+            </div>
+            {(refreshFailed ?? refresh.isError) && <div className="onboarding-refresh-error" role="alert"><p>We couldn’t check your setup. Your last loaded step is still here.</p><button type="button" className="portal-text-action" disabled={refresh.isPending} onClick={() => void refreshSetup()}>{refresh.isPending ? "Checking…" : "Try again"}</button></div>}
+            <StepContent key={onboarding.currentStepId}>
+              {bootstrap.nextStep === "connect_training_source" && <ConnectScreen athleteId={bootstrap.athleteId} trainingProvider={bootstrap.trainingProvider} variant="onboarding" onComplete={refreshSetup} />}
+              {bootstrap.nextStep === "complete_profile" && <ProfileScreen athleteId={bootstrap.athleteId} variant="onboarding" onComplete={refreshSetup} onDirtyChange={onProfileDirtyChange} draft={profileDraft} onDraftChange={onProfileDraftChange} />}
+              {(bootstrap.nextStep === "prepare_weekly_plan" || ready) && <PlanPreparation bootstrap={bootstrap} onRefresh={refreshSetup} isRefreshing={refresh.isPending} onEnterPortal={onEnterPortal} />}
+            </StepContent>
+          </section>
         </div>
-        {(refreshFailed ?? refresh.isError) && <div className="onboarding-refresh-error" role="alert"><p>We couldn’t check your setup. Your last loaded step is still here.</p><button type="button" className="portal-text-action" disabled={refresh.isPending} onClick={() => void refreshSetup()}>{refresh.isPending ? "Checking…" : "Try again"}</button></div>}
-        <motion.div key={bootstrap.nextStep} initial={reduceMotion ? false : { opacity: 0.6, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: reduceMotion ? 0 : 0.18 }}>
-          {bootstrap.nextStep === "connect_training_source" && <ConnectScreen athleteId={bootstrap.athleteId} trainingProvider={bootstrap.trainingProvider} variant="onboarding" onComplete={refreshSetup} />}
-          {bootstrap.nextStep === "complete_profile" && <ProfileScreen athleteId={bootstrap.athleteId} variant="onboarding" onComplete={refreshSetup} onDirtyChange={onProfileDirtyChange} draft={profileDraft} onDraftChange={onProfileDraftChange} />}
-          {(bootstrap.nextStep === "prepare_weekly_plan" || ready) && <PlanPreparation bootstrap={bootstrap} onRefresh={refreshSetup} isRefreshing={refresh.isPending} onEnterPortal={onEnterPortal} />}
-        </motion.div>
-      </section>
-    </div>
+      </LayoutGroup>
+    </MotionConfig>
   );
 }

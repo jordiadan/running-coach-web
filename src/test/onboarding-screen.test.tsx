@@ -85,6 +85,16 @@ describe("onboarding journey", () => {
     update(data, false);
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
+  it("clears a failed retry when automatic polling reports a ready plan", async () => {
+    vi.mocked(retryCurrentUserWeeklyPlanGeneration).mockRejectedValueOnce(new Error("Offline"));
+    const { update } = mount(bootstrap("prepare_weekly_plan", "failed"));
+    fireEvent.click(screen.getByRole("button", { name: "Retry plan generation" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("We couldn’t restart your plan.");
+    update(bootstrap("view_weekly_plan", "ready"));
+    await waitFor(() => expect(screen.queryByRole("alert")).not.toBeInTheDocument());
+    expect(screen.getByRole("button", { name: "Open weekly plan" })).toBeInTheDocument();
+    expect(screen.getByText("View your setup").closest("details")).not.toHaveAttribute("open");
+  });
   it("announces completion, focuses the ready heading and enters only on request", () => {
     const { update, onEnterPortal } = mount();
     update(bootstrap("view_weekly_plan", "ready"));

@@ -18,7 +18,7 @@ const titles: Record<State, string> = {
 async function fixture(page: Page, initial: State) {
   const model = {
     state: initial, bootstrapError: false, retryError: false, saveError: false,
-    profileError: false, providerError: false, providerStatus: "ABSENT", oauth: false,
+    profileError: false, providerError: false, connectError: false, providerStatus: "ABSENT", oauth: false,
     provider: "intervals", connected: initial !== "connect", profileComplete: !["connect", "profile"].includes(initial),
     calls: [] as { method: string; path: string; body: unknown; }[],
     errors: [] as string[],
@@ -46,6 +46,7 @@ async function fixture(page: Page, initial: State) {
     if (pathname.includes("integrations")) {
       if (req.method() === "DELETE") { model.connected = false; model.state = "connect"; return route.fulfill({ status: 204 }); }
       if (req.method() === "POST") {
+        if (model.connectError) return route.fulfill({ status: 503, json: { message: "Synthetic connection failure" } });
         if (model.oauth) {
           // The provider snapshot may lag the new authorization request.
           model.providerStatus = "ABSENT";
@@ -149,8 +150,17 @@ for (const state of ["connect", "profile", "missing", "preparing", "failed"] as 
 }
 
 test("complete journey, save recovery, focus, and ready handoff", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
   const model = await open(page, "connect");
-  await page.getByRole("region", { name: "Strava", exact: true }).getByRole("button", { name: "Connect", exact: true }).click();
+  await page.getByRole("radio", { name: "Intervals.icu", exact: true }).check();
+  await page.waitForTimeout(200);
+  await page.getByRole("radio", { name: "Strava", exact: true }).check();
+  await page.waitForTimeout(400);
+  await capture(page, "selected-source-desktop");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await capture(page, "selected-source-mobile");
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.getByRole("button", { name: "Connect Strava", exact: true }).click();
   await expect(page.getByRole("heading", { name: titles.profile })).toBeFocused();
   await expect(page.getByLabel("Display name")).toHaveValue("Alex Morgan");
   await page.getByLabel("Display name").fill("Alex Runner");
@@ -176,9 +186,14 @@ test("complete journey, save recovery, focus, and ready handoff", async ({ page 
   model.bootstrapError = false; model.state = "ready";
   await expect(page.getByRole("heading", { name: titles.ready })).toBeFocused({ timeout: 8000 });
   await expect(page.getByRole("alert")).toHaveCount(0);
+  await expect(page.locator(".onboarding-plan-mark g")).toHaveCSS("opacity", "0");
   for (const [size, width, height] of [["desktop", 1440, 1000], ["mobile", 390, 844]] as const) {
-    await page.setViewportSize({ width, height }); await capture(page, `ready-${size}`);
+    await page.setViewportSize({ width, height }); await page.waitForTimeout(400); await capture(page, `ready-${size}`);
   }
+  await page.getByText("View your setup", { exact: true }).click();
+  await expect(page.locator(".onboarding-receipt")).toContainText("Strava");
+  await expect(page.locator(".onboarding-receipt")).toContainText("Saved");
+  await page.getByText("View your setup", { exact: true }).click();
   await page.getByRole("button", { name: "Open weekly plan", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Your schedule", exact: true })).toBeVisible();
   await expect(page.getByRole("main")).toBeFocused();
@@ -196,7 +211,8 @@ test("failed generation retries, interruption recovery, and reduced motion", asy
   model.retryError = false;
   await page.getByRole("button", { name: "Retry plan generation", exact: true }).click();
   await expect(page.getByRole("heading", { name: titles.preparing })).toBeVisible();
-  await expect(page.locator(".onboarding-plan .portal-spin")).toHaveCSS("animation-name", "none");
+  await expect(page.locator(".onboarding-plan-mark")).toHaveCSS("animation-name", "none");
+  expect(await page.locator(".onboarding-layout").evaluate(el => [...el.querySelectorAll("*")].filter(node => getComputedStyle(node).animationName !== "none").length)).toBe(0);
   await page.reload(); await expect(page.getByRole("heading", { name: titles.preparing })).toBeVisible();
   // Polling discovers readiness without requiring the manual status button.
   model.state = "ready";
@@ -249,7 +265,8 @@ test("provider authorization polling and failed authorization recovery", async (
     (window as Window & { oauthRequest?: unknown; }).oauthRequest = null;
     window.open = (...args) => { (window as Window & { oauthRequest?: unknown; }).oauthRequest = args; return {} as Window; };
   });
-  await provider.getByRole("button", { name: "Reconnect", exact: true }).click();
+  await page.getByRole("radio", { name: "Intervals.icu", exact: true }).check();
+  await page.getByRole("button", { name: "Reconnect Intervals.icu", exact: true }).click();
   await expect.poll(() => page.evaluate(() => (window as Window & { oauthRequest?: unknown; }).oauthRequest)).toEqual(["https://provider.example.test/authorize", "_blank", "noopener,noreferrer"]);
   model.providerStatus = "PENDING_AUTHORIZATION";
   await expect(provider.getByText("Waiting", { exact: true })).toBeVisible({ timeout: 5000 });
@@ -276,5 +293,34 @@ test("profile, provider and initial bootstrap errors remain recoverable", async 
   model.providerError = false;
   await page.getByRole("button", { name: "Check again", exact: true }).first().click();
   await expect(page.getByText("Status unavailable")).toHaveCount(1);
+  expect(model.errors).toEqual([]);
+});
+
+
+test("source selection has one action, native keyboard control and reduced-motion continuity", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  const model = await open(page, "connect");
+  const action = page.getByRole("button", { name: "Connect a source", exact: true });
+  await expect(action).toBeDisabled();
+  const strava = page.getByRole("radio", { name: "Strava", exact: true });
+  await strava.focus();
+  await page.keyboard.press("Space");
+  await expect(strava).toBeChecked();
+  await expect(page.getByRole("button", { name: "Connect Strava", exact: true })).toBeEnabled();
+  await page.keyboard.press("ArrowDown");
+  await expect(page.getByRole("radio", { name: "Intervals.icu", exact: true })).toBeChecked();
+  await expect(page.locator(".onboarding-source-selection")).toHaveCount(1);
+  await expect(page.locator(".onboarding-source-selection")).toHaveCSS("transform", "none");
+  await page.getByText("What’s shared?", { exact: true }).click();
+  await expect(page.getByText("Strava shares runs", { exact: false })).toBeVisible();
+  model.connectError = true;
+  await page.getByRole("button", { name: "Connect Intervals.icu", exact: true }).click();
+  await expect(page.getByRole("alert")).toContainText("We couldn't connect this source. Try again.");
+  await expect(page.getByRole("radio", { name: "Intervals.icu", exact: true })).toBeChecked();
+  model.connectError = false;
+  await page.getByRole("button", { name: "Connect Intervals.icu", exact: true }).click();
+  await expect(page.getByRole("heading", { name: titles.profile })).toBeFocused();
+  await expect(page.locator("[inert]")).toHaveCount(0);
+  expect(model.calls.filter(c => c.method === "POST" && c.path.includes("integrations"))).toHaveLength(2);
   expect(model.errors).toEqual([]);
 });
