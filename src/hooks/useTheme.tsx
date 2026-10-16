@@ -10,6 +10,13 @@ export const themes: { id: ThemeId; label: string }[] = [
 ];
 
 const themeIds = themes.map((item) => item.id);
+// Literal classes keep every supported theme in Tailwind's generated CSS.
+const themeClasses: Record<ThemeId, string> = {
+  warm: "theme-warm",
+  dark: "theme-dark",
+  bright: "theme-bright",
+  forest: "theme-forest",
+};
 
 interface ThemeContextType {
   theme: ThemeId;
@@ -33,8 +40,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     const root = document.documentElement;
 
     root.classList.remove("dark");
-    themeIds.forEach((themeId) => root.classList.remove(`theme-${themeId}`));
-    root.classList.add(`theme-${theme}`);
+    themeIds.forEach((themeId) => root.classList.remove(themeClasses[themeId]));
+    root.classList.add(themeClasses[theme]);
 
     if (theme === "dark") {
       root.classList.add("dark");

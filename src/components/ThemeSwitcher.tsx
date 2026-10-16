@@ -23,8 +23,8 @@ export default function ThemeSwitcher() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-9 w-9">
-          <Palette className="h-4 w-4" />
+        <Button variant="ghost" size="icon" className="h-9 w-9" aria-label="Change theme">
+          <Palette aria-hidden="true" className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">

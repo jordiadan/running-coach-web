@@ -122,7 +122,28 @@ describe("ConnectScreen", () => {
     );
 
     expect(await screen.findByText("Connected as account-42.")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: /connected/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^disconnect$/i }));
+    expect(disconnectTrainingProviderMock).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Disconnect source" }));
     await waitFor(() => expect(disconnectTrainingProviderMock).toHaveBeenCalledWith(provider, "athlete-1"));
   });
+
+  it("offers recovery when provider status cannot load", async () => {
+    getTrainingProviderIntegrationStatusMock.mockRejectedValue(new Error("Unavailable"));
+    renderWithQueryClient(<ConnectScreen athleteId="athlete-1" trainingProvider={{ connected: false, readinessCapability: "limited" }} />);
+    const retries = await screen.findAllByRole("button", { name: "Check again" });
+    const callsBeforeRetry = getTrainingProviderIntegrationStatusMock.mock.calls.length;
+    fireEvent.click(retries[0]);
+    await waitFor(() => expect(getTrainingProviderIntegrationStatusMock.mock.calls.length).toBeGreaterThan(callsBeforeRetry));
+  });
+
+  it("makes failed authorization retryable and reports connection failure", async () => {
+    getTrainingProviderIntegrationStatusMock.mockResolvedValue({ provider: "strava", status: "auth_failed", connected: false, providerAccountRef: undefined, authorizationStateExpiresAt: undefined });
+    connectTrainingProviderMock.mockRejectedValue(new Error("Unavailable"));
+    renderWithQueryClient(<ConnectScreen athleteId="athlete-1" trainingProvider={{ connected: false, readinessCapability: "limited" }} />);
+    fireEvent.click((await screen.findAllByRole("button", { name: "Reconnect" }))[0]);
+    expect(await screen.findByRole("alert")).toHaveTextContent("We couldn't connect this source. Try again.");
+    await waitFor(() => expect(screen.getAllByRole("button", { name: "Reconnect" })[0]).toBeEnabled());
+  });
+
 });
