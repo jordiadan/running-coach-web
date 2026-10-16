@@ -446,7 +446,7 @@ export function isWeeklyCoachPlanNotFoundError(error: unknown) {
   );
 }
 
-export async function bootstrapPortal() {
+export async function bootstrapPortal(): Promise<PortalBootstrapResponse> {
   const payload = await apiRequest<unknown>("/api/v1/me/bootstrap", {
     method: "POST",
   });
@@ -727,7 +727,7 @@ export async function getWeeklyCoachPlan(athleteId: string, weekStartDate: strin
   } satisfies WeeklyCoachPlan;
 }
 
-export async function getCurrentUserWeeklyCoachScreen(weekStartDate?: string) {
+export async function getCurrentUserWeeklyCoachScreen(weekStartDate?: string): Promise<CurrentUserWeeklyCoachScreen> {
   const search = weekStartDate ? `?weekStartDate=${encodeURIComponent(weekStartDate)}` : "";
   const payload = await apiRequest<unknown>(`/api/v1/me/weekly-coach/screen${search}`);
   const record = asRecord(payload);

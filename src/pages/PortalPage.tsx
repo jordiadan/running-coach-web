@@ -39,6 +39,7 @@ export default function PortalPage() {
   const [hasSession, setHasSession] = useState<boolean | null>(null);
   const [showReadyTransition, setShowReadyTransition] = useState(false);
   const previousNextStepRef = useRef<string | null>(null);
+  const focusPortalOnMountRef = useRef(false);
   const reduceMotion = useReducedMotion();
 
   useEffect(() => {
@@ -71,13 +72,19 @@ export default function PortalPage() {
   });
   const athleteId = bootstrapQuery.data?.athleteId;
   const nextStep = bootstrapQuery.data?.nextStep;
-  const isPortalReady = nextStep === "view_weekly_plan" && !showReadyTransition;
+  const enteringReady = nextStep === "view_weekly_plan" && previousNextStepRef.current !== null && previousNextStepRef.current !== "view_weekly_plan";
+  const isPortalReady = nextStep === "view_weekly_plan" && !showReadyTransition && !enteringReady;
 
   useEffect(() => {
     if (!nextStep) return;
 
     const previousNextStep = previousNextStepRef.current;
     previousNextStepRef.current = nextStep;
+
+    if (previousNextStep === "complete_profile" && nextStep !== "complete_profile") {
+      setProfileDirty(false);
+      setProfileDraft(null);
+    }
 
     if (
       previousNextStep !== null &&
@@ -166,15 +173,18 @@ export default function PortalPage() {
     );
   }
 
-  if (bootstrapQuery.isError || !athleteId) {
+  if (!bootstrapQuery.data || !athleteId) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center px-6">
         <div className="w-full max-w-md rounded-2xl border border-divider bg-card p-6 shadow-card">
           <h1 className="font-serif text-2xl text-foreground">We couldn't open your portal</h1>
           <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-            Sign in again and we'll retry your portal bootstrap. If the problem persists, the account may still be provisioning in the backend.
+            We couldn't load your setup. Try again to pick up where you left off, or sign out and sign in again.
           </p>
-          <Button className="mt-6" variant="hero" onClick={handleLogout}>
+          <Button className="mt-6 mr-3" variant="hero" disabled={bootstrapQuery.isFetching} onClick={() => void bootstrapQuery.refetch()}>
+            {bootstrapQuery.isFetching ? "Trying again…" : "Try again"}
+          </Button>
+          <Button className="mt-6" variant="hero-outline" onClick={handleLogout}>
             Sign out
           </Button>
         </div>
@@ -223,67 +233,82 @@ export default function PortalPage() {
       </header>
 
       <main id="portal-content" tabIndex={-1} className={`portal-content ${isPortalReady ? "" : "portal-content-onboarding"}`}>
-        <AnimatePresence mode="wait">
-          {nextStep === "view_weekly_plan" && !showReadyTransition ? (
-            <motion.div
-              key="portal-shell"
-              initial={reduceMotion ? false : { opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: reduceMotion ? 0 : 0.16 }}
-            >
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeTab}
-                  initial={reduceMotion ? false : { opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -4 }}
-                  transition={{ duration: reduceMotion ? 0 : 0.16 }}
-                >
-                  {activeTab === "plan" && (
-                    <WeeklyPlanScreen
-                      athleteId={athleteId}
-                      targetWeekStartDate={bootstrapQuery.data.weeklyPlan.targetWeekStartDate}
-                      isPreparing={false}
-                      onRefresh={() => bootstrapQuery.refetch()}
-                      onSetNextGoal={handleSetNextGoal}
-                    />
-                  )}
-                  {activeTab === "connect" && (
-                    <ConnectScreen
-                      athleteId={athleteId}
-                      trainingProvider={bootstrapQuery.data.trainingProvider}
-                    />
-                  )}
-                  {activeTab === "profile" && (
-                    <ProfileScreen
-                      athleteId={athleteId}
-                      focusTarget={profileFocusTarget}
-                      onFocusTargetHandled={handleProfileFocusTargetHandled}
-                      onDirtyChange={setProfileDirty}
-                      draft={profileDraft}
-                      onDraftChange={setProfileDraft}
-                    />
-                  )}
-                </motion.div>
-              </AnimatePresence>
-            </motion.div>
-          ) : (
-            <motion.div
-              key="onboarding-shell"
-              initial={reduceMotion ? false : { opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: reduceMotion ? 0 : 0.16 }}
-            >
-              <OnboardingScreen
-                bootstrap={bootstrapQuery.data}
-                onRefresh={async () => (await bootstrapQuery.refetch()).data}
-                onEnterPortal={() => { setActiveTab("plan"); setShowReadyTransition(false); }}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {isPortalReady ? (
+          <motion.div
+            key="portal-shell"
+            ref={node => {
+              if (node && focusPortalOnMountRef.current) {
+                focusPortalOnMountRef.current = false;
+                document.getElementById("portal-content")?.focus();
+              }
+            }}
+            initial={reduceMotion ? false : { opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: reduceMotion ? 0 : 0.16 }}
+          >
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={reduceMotion ? false : { opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: reduceMotion ? 0 : 0.16 }}
+              >
+                {activeTab === "plan" && (
+                  <WeeklyPlanScreen
+                    athleteId={athleteId}
+                    targetWeekStartDate={bootstrapQuery.data.weeklyPlan.targetWeekStartDate}
+                    isPreparing={false}
+                    onRefresh={() => bootstrapQuery.refetch()}
+                    onSetNextGoal={handleSetNextGoal}
+                  />
+                )}
+                {activeTab === "connect" && (
+                  <ConnectScreen
+                    athleteId={athleteId}
+                    trainingProvider={bootstrapQuery.data.trainingProvider}
+                  />
+                )}
+                {activeTab === "profile" && (
+                  <ProfileScreen
+                    athleteId={athleteId}
+                    focusTarget={profileFocusTarget}
+                    onFocusTargetHandled={handleProfileFocusTargetHandled}
+                    onDirtyChange={setProfileDirty}
+                    draft={profileDraft}
+                    onDraftChange={setProfileDraft}
+                  />
+                )}
+              </motion.div>
+            </AnimatePresence>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="onboarding-shell"
+            initial={reduceMotion ? false : { opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: reduceMotion ? 0 : 0.16 }}
+          >
+            <OnboardingScreen
+              bootstrap={bootstrapQuery.data}
+              onRefresh={async () => {
+                const result = await bootstrapQuery.refetch();
+                if (result.isError) throw result.error;
+                return result.data;
+              }}
+              refreshFailed={bootstrapQuery.isError}
+              profileDraft={profileDraft}
+              onProfileDraftChange={setProfileDraft}
+              onProfileDirtyChange={setProfileDirty}
+              onEnterPortal={() => {
+                focusPortalOnMountRef.current = true;
+                setActiveTab("plan");
+                setShowReadyTransition(false);
+                window.scrollTo({ top: 0, behavior: "instant" });
+              }}
+            />
+          </motion.div>
+        )}
       </main>
       <AlertDialog open={pendingNavigation !== null} onOpenChange={open => { if (!open) setPendingNavigation(null); }}>
         <AlertDialogContent className="portal-dialog">

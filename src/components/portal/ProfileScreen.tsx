@@ -425,9 +425,9 @@ export default function ProfileScreen({
         <form className="profile-editor" onSubmit={handleSubmit}>
           <fieldset disabled={saveMutation.isPending} className="profile-fields">
             <section className="profile-section" aria-labelledby="profile-essentials-heading">
-              <div className="profile-section-heading">
+              <div className={isOnboarding ? "sr-only" : "profile-section-heading"}>
                 <h2 id="profile-essentials-heading">The essentials</h2>
-                <p>Your name and what you're training for.</p>
+                {!isOnboarding && <p>Your name and what you're training for.</p>}
               </div>
               <div className="profile-essentials-grid">
                 <div className="space-y-2">
@@ -467,11 +467,11 @@ export default function ProfileScreen({
             </section>
             <section className="profile-section" aria-labelledby="profile-rhythm-heading">
               <div className="profile-section-heading">
-                <h2 id="profile-rhythm-heading">Your training rhythm</h2>
-                <p>Make room for running, and for everything else.</p>
+                <h2 id="profile-rhythm-heading">{isOnboarding ? "Your week" : "Your training rhythm"}</h2>
+                {!isOnboarding && <p>Make room for running, and for everything else.</p>}
               </div>
               <fieldset className="profile-running-days" aria-describedby="running-days-hint">
-                <legend>Running days <span>(min. 4)</span>
+                <legend>Running days {!isOnboarding && <span>(min. 4)</span>}
                 </legend>
                 <div className="profile-day-grid">
                   {allDays.map(day => {
@@ -479,7 +479,7 @@ export default function ProfileScreen({
                     const locked = active && form.runningDays.length === 4;
                     return <button key={day.value} type="button" aria-label={day.full} aria-pressed={active} aria-disabled={locked} onClick={() => toggleDay(day.value)}>
                       <span>{day.label}</span>
-                      <span className="profile-day-indicator" aria-hidden="true">{active ? <Check size={14} strokeWidth={2} /> : <span />}</span>
+                      <span className="profile-day-indicator" aria-hidden="true">{active ? isOnboarding ? <motion.svg width="14" height="14" viewBox="0 0 24 24" fill="none" initial={reduceMotion ? false : { scale: 0.75 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 500, damping: 32 }}><motion.path d="m5 12 4 4L19 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" initial={reduceMotion ? false : { pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: reduceMotion ? 0 : 0.16 }} /></motion.svg> : <Check size={14} strokeWidth={2} /> : <span />}</span>
                     </button>;
                   })}
                 </div>
@@ -488,7 +488,7 @@ export default function ProfileScreen({
               <div className="profile-long-run">
                 <div>
                   <Label htmlFor="long-run-day">Preferred long run day</Label>
-                  <p className="profile-field-hint">The anchor of your training week.</p>
+                  {!isOnboarding && <p className="profile-field-hint">The anchor of your training week.</p>}
                 </div>
                 <select id="long-run-day" name="longRunPreferredDay" value={form.longRunPreferredDay} onChange={event => setForm(prev => ({ ...prev, longRunPreferredDay: event.target.value }))}>
                   {allDays.filter(day => form.runningDays.includes(day.value)).map(day => <option key={day.value} value={day.value}>{day.full}</option>)}
@@ -503,10 +503,11 @@ export default function ProfileScreen({
                 className={cn(
                   "profile-section profile-race space-y-5 transition-colors duration-200",
                   highlightRaceGoal
-                    ? "bg-primary/5 shadow-sm ring-2 ring-primary/60"
+                    ? "bg-primary/5 shadow-sm ring-2 ring-primary/60" // taste-skill-ignore: existing settings focus highlight, outside onboarding.
                     : "ring-0 ring-transparent",
                 )}
-                animate={
+                initial={isOnboarding && !reduceMotion ? { opacity: 0, y: 10 } : false}
+                animate={isOnboarding ? { opacity: 1, y: 0 } :
                   highlightRaceGoal && !reduceMotion
                     ? { scale: [1, 1.01, 1] }
                     : { scale: 1 }
@@ -515,7 +516,7 @@ export default function ProfileScreen({
               >
                 <div className="profile-section-heading">
                   <h2>Race goal</h2>
-                  <p>Your next start line, and how you want to reach it.</p>
+                  {!isOnboarding && <p>Your next start line, and how you want to reach it.</p>}
                 </div>
                 <div className="space-y-3">
                   <Label htmlFor="goal-race-event-name">Goal race / event</Label>
@@ -591,7 +592,7 @@ export default function ProfileScreen({
                   <legend className="text-sm font-medium leading-none text-foreground">
                     Race target
                   </legend>
-                  <div className="grid gap-2 sm:grid-cols-3">
+                  <div className="profile-race-targets grid gap-2 sm:grid-cols-3">
                     {raceTargetOptions.map((option) => (
                       <label
                         key={option.value}
@@ -678,18 +679,18 @@ export default function ProfileScreen({
               </motion.div>
             ) : null}
 
-            <div className="profile-notes">
+            {!isOnboarding && <div className="profile-notes">
               <p>
                 <strong>Notes for your coach</strong>
                 <span>Coming soon</span>
               </p>
               <p>Soon you'll be able to add context for your coach, like race constraints, recovery notes, or travel.</p>
-            </div>
+            </div>}
           </fieldset>
           <div className={`profile-save-bar ${isDirty || saveMutation.isPending || saveMutation.isError ? "is-active" : ""}`}>
             <div className="profile-save-feedback" aria-live="polite" aria-atomic="true">
               {saveMutation.isPending ? <p>Saving your profile…</p> : saveMutation.isError ? <p className="portal-inline-error" role="alert">We couldn't save your profile. Try again.</p> : isDirty ? <p>Unsaved changes</p> : saveMutation.isSuccess ? <p className="profile-saved">
-                <Check size={16} aria-hidden="true" /> Profile saved.</p> : <p>Your training, your way.</p>}
+                <Check size={16} aria-hidden="true" /> Profile saved.</p> : !isOnboarding ? <p>Your training, your way.</p> : null}
               {!isFormComplete && <p className="profile-validation-hint">Complete the required fields to save.</p>}
             </div>
             <Button variant="hero" disabled={saveMutation.isPending || !isFormComplete}>

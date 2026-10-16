@@ -166,6 +166,10 @@ export default function ConnectScreen({
   const queryClient = useQueryClient();
   const reduceMotion = useReducedMotion();
   const completionTriggeredRef = useRef(false);
+  const authorizationStatusVersionRef = useRef(0);
+  const onCompleteRef = useRef(onComplete);
+  useEffect(() => { onCompleteRef.current = onComplete; }, [onComplete]);
+  const [selectedProvider, setSelectedProvider] = useState<TrainingProviderId | null>(null);
   const [awaitingOAuthCompletion, setAwaitingOAuthCompletion] = useState<TrainingProviderId | null>(null);
   const [disconnectCandidate, setDisconnectCandidate] = useState<TrainingProviderId | null>(null);
   const [replaceCandidate, setReplaceCandidate] = useState<TrainingProviderId | null>(null);
@@ -214,6 +218,11 @@ export default function ConnectScreen({
 
       if (result.redirectUrl) {
         if (isOnboarding) {
+          // A cached failure belongs to the previous attempt. Only a newer
+          // provider response can end polling for this authorization attempt.
+          authorizationStatusVersionRef.current = variables.provider === "intervals"
+            ? intervalsQuery.dataUpdatedAt
+            : stravaQuery.dataUpdatedAt;
           setAwaitingOAuthCompletion(variables.provider);
           const popup = window.open(result.redirectUrl, "_blank", "noopener,noreferrer");
 
@@ -273,11 +282,11 @@ export default function ConnectScreen({
     setShowConnectedTransition(true);
 
     const timeout = window.setTimeout(() => {
-      void onComplete?.();
-    }, reduceMotion ? 0 : 850);
+      void onCompleteRef.current?.();
+    }, reduceMotion ? 0 : 500);
 
     return () => window.clearTimeout(timeout);
-  }, [connectedProviderFromStatus, isOnboarding, onComplete, reduceMotion]);
+  }, [connectedProviderFromStatus, isOnboarding, reduceMotion]);
 
   useEffect(() => {
     if (!awaitingOAuthCompletion) {
@@ -285,11 +294,18 @@ export default function ConnectScreen({
     }
 
     const status = statusByProvider[awaitingOAuthCompletion];
+    const statusUpdatedAt = awaitingOAuthCompletion === "intervals" ? intervalsQuery.dataUpdatedAt : stravaQuery.dataUpdatedAt;
 
-    if (normalizeStatus(status?.status) === "auth_failed") {
+    if (statusUpdatedAt > authorizationStatusVersionRef.current && normalizeStatus(status?.status) === "auth_failed") {
       setAwaitingOAuthCompletion(null);
     }
-  }, [awaitingOAuthCompletion, statusByProvider]);
+  }, [awaitingOAuthCompletion, statusByProvider, intervalsQuery.dataUpdatedAt, stravaQuery.dataUpdatedAt]);
+
+  const choice = connectedProviderFromStatus ?? selectedProvider;
+  const choiceQuery = choice === "intervals" ? intervalsQuery : stravaQuery;
+  const choiceStatus = normalizeStatus(choice ? statusByProvider[choice]?.status : undefined);
+  const choiceNeedsReconnect = ["auth_failed", "disconnected"].includes(choiceStatus);
+  const choosingSource = isOnboarding && !trainingProvider.connected;
 
   return (
     <div className={`portal-settings connect-screen ${isOnboarding ? "connect-onboarding" : ""}`}>
@@ -301,7 +317,7 @@ export default function ConnectScreen({
         </div>
       )}
       <div className="connect-layout">
-        <div className="connect-providers" aria-label="Training sources">
+        <div className="connect-providers" role={choosingSource ? "group" : undefined} aria-label="Training sources">
           {[...trainingSources].sort((a, b) => Number(trainingProvider.connected && b.id === activeProvider) - Number(trainingProvider.connected && a.id === activeProvider)).map((source) => {
             const providerStatus = statusByProvider[source.id];
             const isActive = trainingProvider.connected && activeProvider === source.id;
@@ -322,6 +338,28 @@ export default function ConnectScreen({
             const connectionFailed = connectMutation.isError && connectMutation.variables?.provider === source.id;
             const disconnectionFailed = disconnectMutation.isError && disconnectMutation.variables === source.id;
             const reconnect = ["auth_failed", "disconnected"].includes(normalizeStatus(providerStatus?.status));
+
+            if (choosingSource) {
+              const selected = choice === source.id;
+              return <section key={source.id} className="onboarding-source" aria-labelledby={`provider-${source.id}`} aria-busy={isLoadingStatus || isBusy}>
+                <label className={`onboarding-source-choice ${selected ? "is-selected" : ""}`}>
+                  {selected && <motion.span className="onboarding-source-selection" layoutId="provider-selection" transition={{ type: "spring", stiffness: 420, damping: 38 }} />}
+                  <input type="radio" name="training-source" value={source.id} checked={selected} onChange={() => setSelectedProvider(source.id)} disabled={isMutating || showConnectedTransition} aria-labelledby={`provider-${source.id}`} aria-describedby={`provider-${source.id}-capability`} />
+                  <span className={`connect-provider-mark connect-provider-mark-${source.id}`} aria-hidden="true">
+                    {source.id === "strava" ? <svg viewBox="0 0 24 24" fill="currentColor"><path d="m10 2 6 10h-4l-2-3.5L8 12H4L10 2Zm6 10 4 7h-3l-1-2-1 2h-3l4-7Z" /></svg> : <span>i<span>.</span></span>}
+                  </span>
+                  <span className="onboarding-source-copy">
+                    <span id={`provider-${source.id}`} className="onboarding-source-name">{source.name}</span>
+                    <span id={`provider-${source.id}-capability`} className="onboarding-source-capability">{source.readiness}</span>
+                  </span>
+                  <span className="onboarding-source-radio" aria-hidden="true">{selected && <motion.span initial={reduceMotion ? false : { scale: 0.5 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 500, damping: 35 }} />}</span>
+                </label>
+                {(isLoadingStatus || isStatusError || badge) && <p className="onboarding-source-status" role="status">{isLoadingStatus ? "Checking status…" : isStatusError ? "Status unavailable" : badge?.label}</p>}
+                {isStatusError && <div className="portal-inline-error" role="alert"><p>We couldn't load this source status.</p><button type="button" className="portal-text-action" onClick={() => void query.refetch()} disabled={query.isFetching}>Check again</button></div>}
+                {connectionFailed && <div className="portal-inline-error" role="alert"><p>{connectionErrorCode === "PROVIDER_CONNECTION_CONFLICT" ? "Another source is already connected. Check your setup to continue." : "We couldn't connect this source. Try again."}</p>{connectionErrorCode === "PROVIDER_CONNECTION_CONFLICT" && <button type="button" className="portal-text-action" onClick={() => void onComplete?.()}>Check setup</button>}</div>}
+                {selected && (awaitingOAuthCompletion === source.id || choiceStatus === "auth_failed") && <p className="onboarding-source-status">{resolveDescription(source, providerStatus, false, accountRef)}</p>}
+              </section>;
+            }
 
             return (
               <section key={source.id} className={`connect-provider ${isActive ? "is-connected" : ""}`} aria-labelledby={`provider-${source.id}`} aria-busy={isLoadingStatus || isBusy}>
@@ -377,7 +415,17 @@ export default function ConnectScreen({
             );
           })}
         </div>
-        <aside className="connect-guidance" aria-label="About your connection">
+        {choosingSource ? <div className="onboarding-connect-footer">
+          {showConnectedTransition ? <motion.p className="onboarding-connected" role="status" initial={reduceMotion ? false : { y: 6, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><motion.path d="m5 12 4 4L19 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" initial={reduceMotion ? false : { pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: reduceMotion ? 0 : 0.24 }} /></svg>
+            Training source connected
+          </motion.p> : <p className="onboarding-connection-note">One source at a time. You can switch later.</p>}
+          <Button type="button" variant="hero" disabled={!choice || connectMutation.isPending || (!showConnectedTransition && choiceQuery.isLoading)} onClick={() => { if (showConnectedTransition) void onComplete?.(); else if (choice) connectMutation.mutate({ provider: choice }); }}>
+            {showConnectedTransition ? <>Continue <ArrowUpRight size={16} aria-hidden="true" /></> : connectMutation.isPending ? <><RefreshCcw className="portal-spin" size={16} aria-hidden="true" /> Connecting…</> : <>{choice ? `${choiceNeedsReconnect ? "Reconnect" : choiceStatus === "pending_authorization" ? "Try again with" : "Connect"} ${providerNameById[choice]}` : "Connect a source"}<ArrowUpRight size={16} aria-hidden="true" /></>}
+          </Button>
+          {!showConnectedTransition && <p className="onboarding-authorization-help">You’ll authorize with your provider, then return here.</p>}
+          <details className="onboarding-source-details"><summary>What’s shared?</summary><p>Strava shares runs and activity history, with limited readiness context. Intervals.icu also shares structured workouts, fitness, fatigue and readiness context.</p></details>
+        </div> : <aside className="connect-guidance" aria-label="About your connection">
           <Link2 size={22} strokeWidth={1.5} aria-hidden="true" />
           <h2>One source.<br />Your full focus.</h2>
           <p>Only one activity source (Strava or Intervals.icu) can be active at a time.</p>
@@ -386,7 +434,7 @@ export default function ConnectScreen({
             <ArrowUpRight size={16} aria-hidden="true" />
             <p>You'll authorize the connection with your provider. If you finish in another tab, reopen the portal to refresh its status.</p>
           </div>
-        </aside>
+        </aside>}
       </div>
 
       <AlertDialog open={disconnectCandidate !== null} onOpenChange={open => { if (!open && !disconnectMutation.isPending) setDisconnectCandidate(null); }}>
@@ -432,20 +480,22 @@ export default function ConnectScreen({
         </AlertDialogContent>
       </AlertDialog>
 
-      {isOnboarding && showConnectedTransition ? (
+      {isOnboarding && !choosingSource && showConnectedTransition ? (
         <motion.div
           initial={reduceMotion ? false : { opacity: 0, y: 4 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: reduceMotion ? 0 : 0.16 }}
-          className="flex items-center gap-3 rounded-xl border border-primary/20 bg-primary/10 px-4 py-3 text-sm text-primary"
+          className="connect-onboarding-success"
+          role="status"
         >
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+          <div className="connect-onboarding-check">
             <Check aria-hidden="true" className="h-4 w-4" />
           </div>
           <div className="space-y-0.5">
             <p className="font-medium">Training source connected</p>
-            <p className="text-xs text-primary/80">Moving on to your profile…</p>
+            <p>Checking your next step…</p>
           </div>
+          <button type="button" className="portal-text-action" onClick={() => void onComplete?.()}>Continue</button>
         </motion.div>
       ) : null}
 

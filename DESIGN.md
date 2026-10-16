@@ -206,6 +206,11 @@ geometry into Connect, Profile and their shared shell. Its brief is
 rebrand. Global tokens and unrelated baseline observations remain as recorded;
 this update does not claim to reconcile all pre-existing documentation drift.
 
+The onboarding extension follows `docs/onboarding-design-iteration.md`, using
+the same portal roles, typography and shared Connect/Profile controls. Its
+compact setup path, source selection and disclosed setup facts are scoped to
+first-run tasks; they introduce no new theme, tokens, dependencies or raster assets.
+
 ## Colors
 
 ### Primary
@@ -264,11 +269,15 @@ h1 is 3rem, 4.5rem from sm and 6rem from lg, with tight tracking.
 390px was 48px/50.4px and at 1440px was 96px/96px. Do not translate this combination
 into a new `clamp()` as part of documentation.
 
-Weekly Plan, Connect and Profile page headings use the portal-heading role,
-switching to portal-heading-wide from 640px (40px / 48px). Connect and Profile
-supporting copy commonly uses 13–15px; editable fields use 16px. Portal loading,
-authentication and onboarding states retain their local heading sizes. The
-landing also uses `text-lg`/`text-xl`. Session metrics use tabular numbers.
+Weekly Plan, Connect, Profile and onboarding task headings use the portal-heading
+role, switching to portal-heading-wide from 640px (40px / 48px). Connect and Profile
+supporting copy commonly uses 13–15px; editable fields use 16px. Portal loading
+and authentication states retain their local heading sizes. Onboarding uses the
+same 40px / 48px task headings, 18px / 20px source labels, 20px section headings,
+and 13–15px supporting text. Its heading focus outline
+retains the incumbent 4px corner radius. These scoped values supplement the
+abbreviated frontmatter ramp. The landing also uses `text-lg`/`text-xl`.
+Session metrics use tabular numbers.
 There is no global body-text width limit in ch; do not impose one by default.
 
 ## Layout
@@ -285,11 +294,21 @@ not the breakpoint. Sign-in shows its side panel from lg; Profile essentials
 use two columns from sm. Template components in `src/components/ui/`
 do not establish a global sidebar or a multicolumn dashboard.
 
-The authenticated header and main content share a 72rem maximum, with 24px
-horizontal padding. Onboarding remains 42rem. Below 900px, the single set of
+The authenticated header and standard portal content share a 72rem maximum,
+with 24px horizontal padding. Onboarding uses a 47rem maximum, including that
+same horizontal padding. Below 900px, the single set of
 three destination links forms a fixed bottom bar with safe-area padding; from
 900px it sits in the sticky header. Main content leaves room for the bottom bar.
 The header keeps theme and logout controls available at both sizes.
+
+Onboarding has no destination bar. A compact horizontal three-step path stays
+above the task at every width. Source choices are stacked native radio rows with
+one shared authorization action; capability differences remain visible. Profile
+fields sit directly on the page, with essentials in two columns from 640px.
+Onboarding weekday controls use seven columns from 380px and four below, with
+44px minimum targets. Race-target choices occupy one row. Plan preparation and
+readiness use one heading, short supporting copy, actions and a native disclosure
+for saved setup facts. No desktop setup rail or enclosing plan/profile card remains.
 
 Connect stacks provider surfaces on narrow screens, places them side by side
 from 640px, and adds a 16rem guidance column from 900px. Profile is one column
@@ -414,6 +433,38 @@ between portal destinations can restore them. Explicit navigation away and
 logout offer discard confirmation; document unload uses the browser warning.
 There is no draft storage persistence. This behavior documents the shipped flow,
 not a new backend contract or a promise of recovery after reload.
+
+### Onboarding
+
+A compact labelled path leads one task heading and shared Connect/Profile
+behavior. Native provider radios expose selection and capability differences;
+there is no preselected provider. One button names the selected source and owns
+authorization. A disclosure explains shared data. Status-query failures, pending
+authorization, reconnect and connection errors retain actionable feedback.
+Settings keep their existing provider composition and replacement dialogs.
+
+The first-run profile is unboxed. Field labels replace redundant introductory
+copy; weekly rhythm and conditional race details retain short headings.
+Validation, the four-day minimum, long-run restrictions, target conversion and
+save/draft protection remain. Future coach notes are omitted only in onboarding.
+
+Preparation has one running mark, title and supporting sentence. Saved source
+and profile facts sit behind a native disclosure. Missing, preparing, failed and
+ready remain distinct bootstrap states, without generation percentages or
+simulated milestones. Failure offers retry and native technical error details;
+refresh/retry failures remain inline. Automatic readiness clears a stale retry
+error. Returning users whose initial bootstrap is ready enter directly; an
+ongoing journey waits for the explicit Open weekly plan action.
+
+Provider selection and the current-step underline use shared-element springs;
+heading layout preserves continuity and incoming tasks settle horizontally.
+Confirmed connection and selected weekdays draw checks. The running mark gives
+way to a check only on actual readiness. Backend step changes immediately remove
+previous controls; exit animations cannot gate progression. Task changes focus
+the heading; explicit portal entry focuses the mounted main workspace. Reduced
+motion uses final states without spatial motion or drawing. The existing shell,
+fonts, colors and controls connect setup to Weekly Plan. Onboarding's active
+mobile save bar clears the safe area without reserving a destination bar.
 
 ### Weekly Plan
 

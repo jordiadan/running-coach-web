@@ -112,6 +112,7 @@ describe("deriveOnboardingState", () => {
         weeklyPlan: {
           targetWeekStartDate: "2026-03-23",
           hasPlan: true,
+          status: "ready",
         },
         nextStep: "view_weekly_plan",
       }),
