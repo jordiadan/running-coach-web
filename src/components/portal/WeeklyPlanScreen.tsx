@@ -439,6 +439,35 @@ function WeekPulse({
   );
 }
 
+function SessionGuidance({ session }: { session: WeeklyCoachSession }) {
+  const running = session.modality === "RUN";
+  const notes = !running || session.instructions !== undefined ? session.notes : undefined;
+  return (
+    <div className="weekly-guidance">
+      {running ? (
+        session.instructions ? (
+          <section aria-label="Workout instructions">
+            <h3>Workout instructions</h3>
+            <p className="weekly-workout-instructions">{session.instructions}</p>
+          </section>
+        ) : (
+          <p>Structured workout instructions are unavailable for this session.</p>
+        )
+      ) : null}
+      {notes ? (
+        running ? (
+          <section aria-label="Coaching notes" className="weekly-coaching-notes">
+            <h3>Coaching notes</h3>
+            <p>{notes}</p>
+          </section>
+        ) : (
+          <p>{notes}</p>
+        )
+      ) : null}
+    </div>
+  );
+}
+
 function TodaySession({
   session,
   upNext,
@@ -501,8 +530,8 @@ function TodaySession({
           <SyncedActivityBadge session={session} />
         </div>
       ) : null}
-      {session.notes ? (
-        <p className="weekly-today-notes">{session.notes}</p>
+      {session.modality === "RUN" || session.notes ? (
+        <SessionGuidance session={session} />
       ) : null}
       <div className="weekly-today-actions">
         {canComplete ? (
@@ -942,7 +971,9 @@ function ScheduleList({
               >
                 {expanded ? (
                   <div className="weekly-session-detail-content">
-                    {session.notes ? <p>{session.notes}</p> : null}
+                    {session.modality === "RUN" || session.notes ? (
+                      <SessionGuidance session={session} />
+                    ) : null}
                     {session.strengthFocus?.length ? (
                       <ul
                         className="weekly-strength-focus"
@@ -953,7 +984,7 @@ function ScheduleList({
                         ))}
                       </ul>
                     ) : null}
-                    {!session.notes && !session.strengthFocus?.length ? (
+                    {session.modality !== "RUN" && !session.notes && !session.strengthFocus?.length ? (
                       <p>
                         {isRest
                           ? "No training session planned for this day."
