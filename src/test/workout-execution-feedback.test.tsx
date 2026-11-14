@@ -48,6 +48,7 @@ function weeklyScreen(evaluationValue: unknown, overrides = {}) {
             type: "EASY",
             title: "Easy run",
             durationMinutes: 50,
+            instructions: "- Easy: 50 min\n\nTotal: 50 min",
             completed: true,
             completionSource: "SYNCED_ACTIVITY",
             intensityCategory: "LOW",

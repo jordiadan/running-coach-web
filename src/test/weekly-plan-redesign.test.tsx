@@ -33,6 +33,7 @@ const run: WeeklyCoachSession = {
   completed: false,
   intensityCategory: "LOW",
   placementReason: "Aerobic work",
+  instructions: "- Easy: 45 min\n\nTotal: 45 min",
 };
 
 function payload(sessions = [run]): CurrentUserWeeklyCoachScreen {
@@ -192,8 +193,8 @@ describe("weekly training redesign regressions", () => {
     ).toHaveAttribute("aria-pressed", "false");
   });
 
-  it("opens a real detail panel for a prescription without notes", async () => {
-    open();
+  it("handles missing structured workouts without falling back to legacy running notes", async () => {
+    open(payload([{ ...run, instructions: undefined, notes: "5 × 3 min hard" }]));
     const trigger = await screen.findByRole("button", {
       name: "Details for Easy run",
     });
@@ -203,8 +204,44 @@ describe("weekly training redesign regressions", () => {
     );
     expect(panel).toBeVisible();
     expect(
-      within(panel!).getByText("45 minutes planned at low intensity."),
+      within(panel!).getByText("Structured workout instructions are unavailable for this session."),
     ).toBeInTheDocument();
+    expect(screen.queryByText("5 × 3 min hard")).not.toBeInTheDocument();
+  });
+
+  it("renders canonical intervals and keeps approved coaching notes separate in both session views", async () => {
+    const instructions = [
+      "- Warm-up: 15 min", "", "Repeat 4 times:",
+      "- Work: 3 min at 5:15/km", "- Recovery: 3 min", "",
+      "- Work: 3 min at 5:15/km", "- Cooldown: 10 min", "", "Total: 52 min",
+    ].join("\n");
+    open(payload([{
+      ...run, type: "TEMPO", title: "Tempo run", durationMinutes: 52,
+      instructions, notes: "Run with relaxed shoulders.",
+    }]));
+    const today = await screen.findByRole("region", { name: "Today's session" });
+    const workout = within(today).getByRole("region", { name: "Workout instructions" });
+    expect(workout).toHaveTextContent("Repeat 4 times:");
+    expect(workout).toHaveTextContent("Total: 52 min");
+    expect(within(workout).getByText(instructions, {
+      exact: true, normalizer: (text) => text,
+    })).toBeVisible();
+    expect(within(workout).queryByText("Run with relaxed shoulders.")).not.toBeInTheDocument();
+    expect(within(today).getByRole("region", { name: "Coaching notes" })).toHaveTextContent("Run with relaxed shoulders.");
+    const trigger = screen.getByRole("button", { name: "Details for Tempo run" });
+    fireEvent.click(trigger);
+    const panel = document.getElementById(trigger.getAttribute("aria-controls")!);
+    expect(within(panel!).getByRole("region", { name: "Workout instructions" })).toHaveTextContent("Total: 52 min");
+    expect(within(panel!).getByRole("region", { name: "Coaching notes" })).toHaveTextContent("Run with relaxed shoulders.");
+  });
+
+  it("preserves backend approved coaching when an older session has no structured workout", async () => {
+    open(payload([{ ...run, instructions: null, notes: "Run with relaxed shoulders." }]));
+    const today = await screen.findByRole("region", { name: "Today's session" });
+    expect(within(today).getByText(
+      "Structured workout instructions are unavailable for this session.",
+    )).toBeVisible();
+    expect(within(today).getByRole("region", { name: "Coaching notes" })).toHaveTextContent("Run with relaxed shoulders.");
   });
 
   it("opens and focuses the matching session from the dated day strip", async () => {

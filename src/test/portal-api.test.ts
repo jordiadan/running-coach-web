@@ -71,6 +71,45 @@ describe("portal-api weekly coach helpers", () => {
     apiRequestMock.mockReset();
   });
 
+  it.each(["plan", "screen"] as const)(
+    "preserves canonical guidance in the %s response and safely handles older servers",
+    async (endpoint) => {
+      const sessions = [
+        {
+          day: "MON", modality: "RUN", type: "TEMPO", title: "Tempo run",
+          instructions: "Repeat 4 times:\n- Work: 3 min\n- Recovery: 3 min",
+          notes: "Run with relaxed shoulders.",
+        },
+        { day: "TUE", modality: "RUN", title: "Legacy 5 × 3 min hard", notes: "5 × 3 min hard" },
+        { day: "WED", modality: "RUN", title: "Easy run", instructions: null, notes: null },
+        { day: "THU", modality: "STRENGTH", title: "Strength", notes: "Repeat five times" },
+      ];
+      apiRequestMock.mockResolvedValueOnce(
+        endpoint === "plan"
+          ? { plan: { sessions } }
+          : {
+              viewType: "PLAN",
+              selectedWeekStartDate: "2026-03-23",
+              todayWeekStartDate: "2026-03-23",
+              plan: { plan: { sessions } },
+            },
+      );
+      const response = endpoint === "plan"
+        ? await getWeeklyCoachPlan("athlete-1", "2026-03-23")
+        : (await getCurrentUserWeeklyCoachScreen("2026-03-23")).plan;
+      expect(response?.plan.sessions[0]).toMatchObject({
+        instructions: sessions[0].instructions, notes: sessions[0].notes,
+      });
+      expect(response?.plan.sessions[1]).toMatchObject({
+        title: "Run", instructions: undefined, notes: undefined,
+      });
+      expect(response?.plan.sessions[2]).toMatchObject({
+        title: "Easy run", instructions: null, notes: undefined,
+      });
+      expect(response?.plan.sessions[3].notes).toBe("Repeat five times");
+    },
+  );
+
   it("exposes only the two backend training goals", () => {
     expect(trainingGoalOptions).toEqual([
       { code: "prepare_for_race", label: "Prepare for a race" },

@@ -168,8 +168,25 @@ export type WeeklyCoachSession = {
   intensityCategory: string;
   placementReason: string;
   notes?: string;
+  instructions?: string | null;
   strengthFocus?: string[] | null;
 };
+
+function asSessionGuidance(session: Record<string, unknown>) {
+  // The additive field identifies the backend contract that filters historical
+  // RUN text. Older responses must not turn legacy prose into a prescription.
+  const legacyRun =
+    session.modality === "RUN" &&
+    typeof session.instructions !== "string" &&
+    session.instructions !== null;
+  return {
+    title: legacyRun ? "Run" : asString(session.title),
+    notes: legacyRun ? undefined : asString(session.notes) || undefined,
+    instructions: session.instructions === null
+      ? null
+      : asString(session.instructions) || undefined,
+  };
+}
 
 function asCompletionSource(value: unknown): WeeklyCoachSession["completionSource"] {
   return value === "MANUAL" || value === "SYNCED_ACTIVITY" ? value : undefined;
@@ -704,7 +721,7 @@ export async function getWeeklyCoachPlan(athleteId: string, weekStartDate: strin
         day: asWeekdayCode(session.day),
         modality: asString(session.modality),
         type: asString(session.type),
-        title: asString(session.title),
+        ...asSessionGuidance(session),
         durationMinutes: typeof session.durationMinutes === "number" ? session.durationMinutes : 0,
         completed: typeof session.completed === "boolean" ? session.completed : undefined,
         completionSource: asCompletionSource(session.completionSource),
@@ -712,7 +729,6 @@ export async function getWeeklyCoachPlan(athleteId: string, weekStartDate: strin
         role: asString(session.role) || undefined,
         intensityCategory: asString(session.intensityCategory),
         placementReason: asString(session.placementReason),
-        notes: asString(session.notes) || undefined,
         strengthFocus: Array.isArray(session.strengthFocus)
           ? session.strengthFocus.filter((item): item is string => typeof item === "string")
           : undefined,
@@ -838,7 +854,7 @@ export async function getCurrentUserWeeklyCoachScreen(weekStartDate?: string): P
               day: asWeekdayCode(session.day),
               modality: asString(session.modality),
               type: asString(session.type),
-              title: asString(session.title),
+              ...asSessionGuidance(session),
               durationMinutes: typeof session.durationMinutes === "number" ? session.durationMinutes : 0,
               completed: typeof session.completed === "boolean" ? session.completed : undefined,
               completionSource: asCompletionSource(session.completionSource),
@@ -847,7 +863,6 @@ export async function getCurrentUserWeeklyCoachScreen(weekStartDate?: string): P
               role: asString(session.role) || undefined,
               intensityCategory: asString(session.intensityCategory),
               placementReason: asString(session.placementReason),
-              notes: asString(session.notes) || undefined,
               strengthFocus: Array.isArray(session.strengthFocus)
                 ? session.strengthFocus.filter((item): item is string => typeof item === "string")
                 : undefined,
